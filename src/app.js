@@ -35,9 +35,16 @@ function main() {
 
   // --- MENU ---
   const menuItems = [
-    { hash: '#grafico', icon: 'pie_chart', text: 'Grafico Diagnosi' },
-    { hash: '#inserimento', icon: 'person_add', text: 'Inserimento Paziente' },
-    { hash: '#dimissione', icon: 'event_available', text: 'Dimissione Paziente' },
+    { hash: '#grafico', icon: 'pie_chart', text: 'Crea Grafico Avanzato' },
+    { hash: '#tempo-media-degenza', icon: 'timelapse', text: 'Tempo Medio Degenza' },
+    { hash: '#inserimento', icon: 'person_add', text: 'Nuovo Paziente' },
+    { hash: '#dimissione', icon: 'event_available', text: 'Dimetti Paziente' },
+    { hash: '#importa-csv', icon: 'upload_file', text: 'Avvia Importazione CSV' },
+    { hash: '#crea-foglio-filtrato', icon: 'filter_alt', text: 'Crea Foglio Filtrato' },
+    { hash: '#aggiorna-foglio', icon: 'refresh', text: 'Aggiorna Foglio Attivo' },
+    { hash: '#formatta', icon: 'format_paint', text: 'Applica Formattazione Standard' },
+    { hash: '#colori-alternati', icon: 'palette', text: 'Applica Colori Alternati' },
+    { hash: '#copia-speciale', icon: 'content_copy', text: 'Copia Senza Formattazione' },
   ];
 
   function initHomeView() {
@@ -78,6 +85,20 @@ function main() {
         initInserimentoView();
       } else if (viewName === 'dimissione') {
         initDimissioneView();
+      } else if (viewName === 'tempo-media-degenza') {
+        initTempoMedioDegenzaView();
+      } else if (viewName === 'importa-csv') {
+        initImportaCsvView();
+      } else if (viewName === 'crea-foglio-filtrato') {
+        initCreaFoglioFiltratoView();
+      } else if (viewName === 'aggiorna-foglio') {
+        initAggiornaFoglioView();
+      } else if (viewName === 'formatta') {
+        initFormattaView();
+      } else if (viewName === 'colori-alternati') {
+        initColoriAlternatiView();
+      } else if (viewName === 'copia-speciale') {
+        initCopiaSpecialeView();
       }
     }
   }
@@ -150,14 +171,36 @@ function main() {
       
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
+        const submitButton = form.querySelector('button[type="submit"]');
+        const originalButtonText = submitButton.innerHTML;
+        
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<div class="loading-spinner"></div> Salvataggio...';
+        mostraMessaggio('Salvataggio in corso...', 'loading');
+
         const formData = new FormData(e.target);
         const paziente = Object.fromEntries(formData.entries());
+
+        // Assicura che i campi vuoti non vengano inviati se non sono obbligatori
+        for (const key in paziente) {
+          if (paziente[key] === '') {
+            delete paziente[key];
+          }
+        }
+
         const { error } = await supabase.from('pazienti').insert([paziente]);
+        
+        submitButton.disabled = false;
+        submitButton.innerHTML = originalButtonText;
+
         if (error) {
-          alert(`Errore: ${error.message}`);
+          mostraMessaggio(`Errore: ${error.message}`, 'error');
         } else {
-          alert('Paziente inserito!');
-          window.location.hash = '#home';
+          mostraMessaggio('Paziente inserito con successo!', 'success');
+          form.reset();
+          setTimeout(() => {
+            window.location.hash = '#home';
+          }, 1500);
         }
       });
     } else {
@@ -210,6 +253,50 @@ function main() {
       if (authPrompt) authPrompt.style.display = 'block';
     }
   }
+
+  function mostraMessaggio(testo, tipo = 'info') {
+    const container = document.getElementById('messaggio-container');
+    if (!container) return;
+
+    const alertClasses = {
+      success: 'alert-success',
+      error: 'alert-danger',
+      loading: 'alert-info',
+      info: 'alert-secondary'
+    };
+
+    const alertClass = alertClasses[tipo] || 'alert-secondary';
+    
+    const iconHtml = {
+        success: '<span class="material-icons">check_circle</span>',
+        error: '<span class="material-icons">error</span>',
+        loading: '<div class="loading-spinner-small"></div>',
+        info: '<span class="material-icons">info</span>'
+    }[tipo];
+
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `alert ${alertClass} d-flex align-items-center`;
+    messageDiv.innerHTML = `${iconHtml}<div class="ms-2">${testo}</div>`;
+    
+    container.innerHTML = '';
+    container.appendChild(messageDiv);
+
+    if (tipo === 'success' || tipo === 'error') {
+      setTimeout(() => {
+        messageDiv.style.opacity = '0';
+        setTimeout(() => container.innerHTML = '', 500);
+      }, 5000);
+    }
+  }
+
+  // Placeholder for new views
+  function initTempoMedioDegenzaView() { appContainer.innerHTML = '<h2>Tempo Medio Degenza (da implementare)</h2>'; }
+  function initImportaCsvView() { appContainer.innerHTML = '<h2>Importazione CSV (da implementare)</h2>'; }
+  function initCreaFoglioFiltratoView() { appContainer.innerHTML = '<h2>Crea Foglio Filtrato (da implementare)</h2>'; }
+  function initAggiornaFoglioView() { appContainer.innerHTML = '<h2>Aggiorna Foglio Attivo (da implementare)</h2>'; }
+  function initFormattaView() { appContainer.innerHTML = '<h2>Applica Formattazione (da implementare)</h2>'; }
+  function initColoriAlternatiView() { appContainer.innerHTML = '<h2>Applica Colori Alternati (da implementare)</h2>'; }
+  function initCopiaSpecialeView() { appContainer.innerHTML = '<h2>Copia Senza Formattazione (da implementare)</h2>'; }
 
   // --- APP INITIALIZATION ---
   window.addEventListener('hashchange', handleRouteChange);

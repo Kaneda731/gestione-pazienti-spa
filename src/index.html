@@ -99,26 +99,58 @@
           <p>Per inserire un nuovo paziente, devi prima accedere.</p>
         </div>
         <form id="form-inserimento" style="display:none;">
+          
           <div class="form-group">
             <label for="nome" class="form-label">Nome</label>
-            <input type="text" id="nome" class="form-input" required>
+            <input type="text" id="nome" name="nome" class="form-input" required>
           </div>
           <div class="form-group">
             <label for="cognome" class="form-label">Cognome</label>
-            <input type="text" id="cognome" class="form-input" required>
+            <input type="text" id="cognome" name="cognome" class="form-input" required>
           </div>
           <div class="form-group">
             <label for="dataRicovero" class="form-label">Data di Ricovero</label>
-            <input type="date" id="dataRicovero" class="form-input" required>
+            <input type="date" id="dataRicovero" name="data_ricovero" class="form-input" required>
           </div>
           <div class="form-group">
             <label for="diagnosi" class="form-label">Diagnosi</label>
-            <input type="text" id="diagnosi" class="form-input" required>
+            <input type="text" id="diagnosi" name="diagnosi" class="form-input" required>
           </div>
+          <div class="form-group">
+            <label for="repartoAppartenenza" class="form-label">Reparto Appartenenza</label>
+            <select id="repartoAppartenenza" name="reparto_appartenenza" class="form-select" required>
+              <option value="">Seleziona reparto...</option>
+              <option value="Ortopedia">Ortopedia</option>
+              <option value="Chirurgia Arti">Chirurgia Arti</option>
+              <option value="Plastica">Plastica</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="repartoProvenienza" class="form-label">Reparto Provenienza</label>
+            <select id="repartoProvenienza" name="reparto_provenienza" class="form-select">
+              <option value="">Seleziona provenienza...</option>
+              <option value="AR">AR</option>
+              <option value="PO">PO</option>
+              <option value="CO">CO</option>
+              <option value="CR">CR</option>
+              <option value="PS">PS</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="livelloAssistenza" class="form-label">Livello Assistenza</label>
+            <select id="livelloAssistenza" name="livello_assistenza" class="form-select" required>
+              <option value="">Seleziona livello...</option>
+              <option value="Bassa">Bassa</option>
+              <option value="Media">Media</option>
+              <option value="Alta">Alta</option>
+            </select>
+          </div>
+
           <div class="form-actions">
             <button type="submit" class="btn btn-primary">Salva Paziente</button>
           </div>
         </form>
+        <div id="messaggio-container" class="mt-3"></div>
       </div>
     </div>
   </template>
@@ -145,6 +177,29 @@
         </form>
       </div>
     </div>
+  </template>
+
+  <!-- Nuovi template per le viste mancanti -->
+  <template id="view-tempo-media-degenza">
+    <div class="view card"><h2>Tempo Medio Degenza</h2><p>Funzionalità in costruzione.</p></div>
+  </template>
+  <template id="view-importa-csv">
+    <div class="view card"><h2>Avvia Importazione CSV</h2><p>Funzionalità in costruzione.</p></div>
+  </template>
+  <template id="view-crea-foglio-filtrato">
+    <div class="view card"><h2>Crea Foglio Filtrato</h2><p>Funzionalità in costruzione.</p></div>
+  </template>
+  <template id="view-aggiorna-foglio">
+    <div class="view card"><h2>Aggiorna Foglio Attivo</h2><p>Funzionalità in costruzione.</p></div>
+  </template>
+  <template id="view-formatta">
+    <div class="view card"><h2>Applica Formattazione Standard</h2><p>Funzionalità in costruzione.</p></div>
+  </template>
+  <template id="view-colori-alternati">
+    <div class="view card"><h2>Applica Colori Alternati</h2><p>Funzionalità in costruzione.</p></div>
+  </template>
+  <template id="view-copia-speciale">
+    <div class="view card"><h2>Copia Senza Formattazione</h2><p>Funzionalità in costruzione.</p></div>
   </template>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

@@ -17,14 +17,14 @@ const authContainer = document.getElementById('auth-container');
 const homeButton = document.getElementById('home-button');
 
 // Templates
-const loginTemplate = document.getElementById('auth-template-login').innerHTML;
-const logoutTemplate = document.getElementById('auth-template-logout').innerHTML;
+const loginTemplate = document.getElementById('auth-template-login');
+const logoutTemplate = document.getElementById('auth-template-logout');
 
-const views = {
-  home: document.getElementById('view-home').innerHTML,
-  grafico: document.getElementById('view-grafico').innerHTML,
-  inserimento: document.getElementById('view-inserimento').innerHTML,
-  dimissione: document.getElementById('view-dimissione').innerHTML,
+const viewTemplates = {
+  home: document.getElementById('view-home'),
+  grafico: document.getElementById('view-grafico'),
+  inserimento: document.getElementById('view-inserimento'),
+  dimissione: document.getElementById('view-dimissione'),
 };
 
 // --- ROUTER ---
@@ -32,8 +32,12 @@ function handleRouteChange() {
   const hash = window.location.hash || '#home';
   const viewName = hash.substring(1);
   
-  if (views[viewName]) {
-    appContainer.innerHTML = views[viewName];
+  const template = viewTemplates[viewName] || viewTemplates.home;
+  
+  if (template) {
+    appContainer.innerHTML = ''; // Clear previous view
+    const viewContent = template.content.cloneNode(true);
+    appContainer.appendChild(viewContent);
     
     // After rendering, execute view-specific logic
     if (viewName === 'grafico') {
@@ -43,24 +47,25 @@ function handleRouteChange() {
     } else if (viewName === 'dimissione') {
       initDimissioneView();
     }
-  } else {
-    appContainer.innerHTML = views.home;
   }
 }
 
 // --- AUTHENTICATION ---
 function updateAuthUI(session) {
+  authContainer.innerHTML = ''; // Clear auth container
   if (session) {
-    authContainer.innerHTML = logoutTemplate;
-    document.getElementById('user-email').textContent = session.user.email;
-    document.getElementById('logout-button').addEventListener('click', () => {
+    const logoutContent = logoutTemplate.content.cloneNode(true);
+    logoutContent.getElementById('user-email').textContent = session.user.email;
+    logoutContent.getElementById('logout-button').addEventListener('click', () => {
       supabase.auth.signOut();
     });
+    authContainer.appendChild(logoutContent);
   } else {
-    authContainer.innerHTML = loginTemplate;
-    document.getElementById('login-button').addEventListener('click', () => {
+    const loginContent = loginTemplate.content.cloneNode(true);
+    loginContent.getElementById('login-button').addEventListener('click', () => {
       supabase.auth.signInWithOAuth({ provider: 'google' });
     });
+    authContainer.appendChild(loginContent);
   }
   // Re-render the current view to update its auth-dependent state
   handleRouteChange();
@@ -119,12 +124,12 @@ function initGraficoView() {
 async function initInserimentoView() {
   const form = document.getElementById('form-inserimento');
   if (!form) return;
-  const authPrompt = form.previousElementSibling;
+  const authPrompt = document.querySelector('.auth-prompt'); // More robust selector
   const { data: { session } } = await supabase.auth.getSession();
 
   if (session) {
     form.style.display = 'block';
-    authPrompt.style.display = 'none';
+    if (authPrompt) authPrompt.style.display = 'none';
     
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -142,19 +147,19 @@ async function initInserimentoView() {
     });
   } else {
     form.style.display = 'none';
-    authPrompt.style.display = 'block';
+    if (authPrompt) authPrompt.style.display = 'block';
   }
 }
 
 async function initDimissioneView() {
   const form = document.getElementById('form-dimissione');
   if (!form) return;
-  const authPrompt = form.previousElementSibling;
+  const authPrompt = document.querySelector('.auth-prompt'); // More robust selector
   const { data: { session } } = await supabase.auth.getSession();
 
   if (session) {
     form.style.display = 'block';
-    authPrompt.style.display = 'none';
+    if (authPrompt) authPrompt.style.display = 'none';
     
     const pazienteSelect = document.getElementById('paziente-select');
     pazienteSelect.innerHTML = '<option>Caricamento...</option>';
@@ -197,7 +202,7 @@ async function initDimissioneView() {
 
   } else {
     form.style.display = 'none';
-    authPrompt.style.display = 'block';
+    if (authPrompt) authPrompt.style.display = 'block';
   }
 }
 

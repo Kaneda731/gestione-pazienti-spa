@@ -1,106 +1,228 @@
-console.log('app.js: Script started');
-
 // --- CONFIGURAZIONE ---
 const SUPABASE_URL = 'https://aiguzywadjzyrwandgba.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpZ3V6eXdhZGp6eXJ3YW5kZ2JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEyMDM1MzQsImV4cCI6MjA2Njc3OTUzNH0.pezVt3-xxkHBYK2V6ryHUtj_givF_TA9xwEzuK2essw';
 
-console.log('app.js: Supabase config loaded');
-
 // --- INIZIALIZZAZIONE ---
-let supabase;
-try {
-    if (!window.supabase) {
-        throw new Error('Supabase library not found on window object.');
-    }
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-        auth: {
-            storage: sessionStorage,
-            autoRefreshToken: true,
-            persistSession: true,
-            detectSessionInUrl: true
-        }
-    });
-    console.log('app.js: Supabase client created successfully.');
-} catch (error) {
-    console.error('app.js: FATAL - Supabase client could not be created.', error);
-    document.body.innerHTML = `<div class="alert alert-danger">FATAL: Impossibile inizializzare Supabase. Dettagli: ${error.message}</div>`;
+if (!window.supabase) {
+    alert('Errore critico: Libreria Supabase non trovata.');
 }
-
-
-// --- ELEMENTI DOM E TEMPLATES ---
-let appContainer, authContainer, templates;
-
-function initializeDOMReferences() {
-    console.log('app.js: Initializing DOM references...');
-    appContainer = document.getElementById('app-container');
-    authContainer = document.getElementById('auth-container');
-    templates = {
-        home: document.getElementById('view-home'),
-        login: document.getElementById('auth-login'),
-        logout: document.getElementById('auth-logout'),
-    };
-
-    if (!appContainer || !authContainer || !templates.home || !templates.login || !templates.logout) {
-        console.error('app.js: FATAL - One or more essential DOM elements or templates are missing.');
-        console.log({ appContainer, authContainer, home: templates.home, login: templates.login, logout: templates.logout });
-        return false;
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+    auth: {
+        storage: sessionStorage,
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true
     }
-    console.log('app.js: DOM references initialized successfully.');
-    return true;
-}
+});
 
+// --- ELEMENTI DOM ---
+const appContainer = document.getElementById('app-container');
+const authContainer = document.getElementById('auth-container');
+
+// --- TEMPLATES ---
+const templates = {
+    home: document.getElementById('view-home'),
+    inserimento: document.getElementById('view-inserimento'),
+    dimissione: document.getElementById('view-dimissione'),
+    grafico: document.getElementById('view-grafico'),
+    login: document.getElementById('auth-login'),
+    logout: document.getElementById('auth-logout'),
+};
 
 // --- ROUTER ---
-function renderHome() {
-    console.log('app.js: renderHome() called.');
-    if (!appContainer || !templates.home) {
-        console.error('app.js: Cannot render home, container or template is missing.');
-        return;
+function navigateTo(viewName) {
+    window.location.hash = viewName;
+}
+
+function renderView() {
+    const viewName = window.location.hash.substring(1) || 'home';
+    const template = templates[viewName] || templates.home;
+
+    appContainer.innerHTML = '';
+    const viewContent = template.content.cloneNode(true);
+    
+    // !! LA CORREZIONE CHIAVE È QUI !!
+    // Aggiungo la classe .active al primo elemento del template per renderlo visibile
+    const viewDiv = viewContent.querySelector('.view');
+    if (viewDiv) {
+        viewDiv.classList.add('active');
     }
+    
+    appContainer.appendChild(viewContent);
+
+    if (viewName === 'home') {
+        document.querySelectorAll('.menu-card').forEach(card => {
+            card.addEventListener('click', () => navigateTo(card.dataset.view));
+        });
+    }
+    
+    if (viewName === 'inserimento') initInserimentoView();
+    if (viewName === 'dimissione') initDimissioneView();
+    if (viewName === 'grafico') initGraficoView();
+}
+
+// --- FUNZIONI SPECIFICHE PER VISTA ---
+
+function initInserimentoView() {
+    const form = document.getElementById('form-inserimento');
+    const backButton = form.closest('.card').querySelector('button[data-view="home"]');
+    const today = new Date().toISOString().split('T')[0];
+    form.querySelector('#data_ricovero').value = today;
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!form.checkValidity()) {
+            mostraMessaggio('Per favore, compila tutti i campi obbligatori.', 'error', 'messaggio-container');
+            return;
+        }
+        const submitButton = form.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Salvataggio...';
+        mostraMessaggio('Salvataggio in corso...', 'info', 'messaggio-container');
+        try {
+            const { error } = await supabase.from('pazienti').insert([Object.fromEntries(new FormData(form))]);
+            if (error) throw error;
+            mostraMessaggio('Paziente inserito con successo!', 'success', 'messaggio-container');
+            form.reset();
+            form.querySelector('#data_ricovero').value = today;
+            setTimeout(() => navigateTo('home'), 2000);
+        } catch (error) {
+            mostraMessaggio(`Errore nel salvataggio: ${error.message}`, 'error', 'messaggio-container');
+        } finally {
+            submitButton.disabled = false;
+            submitButton.innerHTML = '<span class="material-icons me-1" style="vertical-align: middle;">save</span>Salva Paziente';
+        }
+    });
+    backButton.addEventListener('click', () => navigateTo('home'));
+}
+
+function initDimissioneView() {
+    const searchInput = document.getElementById('search-paziente');
+    const searchButton = document.getElementById('search-button');
+    const resultsContainer = document.getElementById('search-results');
+    const dimissioneForm = document.getElementById('form-dimissione');
+    const backButton = dimissioneForm.closest('.card').querySelector('button[data-view="home"]');
+    let selectedPazienteId = null;
+
+    const handleSearch = async () => {
+        const searchTerm = searchInput.value.trim();
+        if (searchTerm.length < 2) {
+            mostraMessaggio('Inserisci almeno 2 caratteri.', 'info', 'messaggio-container-dimissione');
+            return;
+        }
+        resultsContainer.innerHTML = '<div class="text-center"><div class="spinner-border"></div></div>';
+        try {
+            const { data, error } = await supabase.from('pazienti').select('id, nome, cognome, data_ricovero').ilike('cognome', `%${searchTerm}%`).is('data_dimissione', null).order('cognome');
+            if (error) throw error;
+            resultsContainer.innerHTML = data.length === 0 ? '<p class="text-center text-muted">Nessun paziente trovato.</p>' : '';
+            data.forEach(p => {
+                const item = document.createElement('button');
+                item.className = 'list-group-item list-group-item-action';
+                item.textContent = `${p.cognome} ${p.nome} (Ricovero: ${new Date(p.data_ricovero).toLocaleDateString()})`;
+                item.onclick = () => {
+                    selectedPazienteId = p.id;
+                    document.getElementById('selected-paziente-nome').textContent = `${p.cognome} ${p.nome}`;
+                    document.getElementById('selected-paziente-ricovero').textContent = new Date(p.data_ricovero).toLocaleDateString();
+                    dimissioneForm.classList.remove('d-none');
+                    resultsContainer.innerHTML = '';
+                    searchInput.value = '';
+                };
+                resultsContainer.appendChild(item);
+            });
+        } catch (error) {
+            mostraMessaggio(`Errore nella ricerca: ${error.message}`, 'error', 'messaggio-container-dimissione');
+        }
+    };
+
+    searchInput.addEventListener('keypress', e => e.key === 'Enter' && (e.preventDefault(), handleSearch()));
+    searchButton.addEventListener('click', handleSearch);
+
+    dimissioneForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data_dimissione = document.getElementById('data_dimissione').value;
+        if (!selectedPazienteId || !data_dimissione) return;
+        try {
+            const { error } = await supabase.from('pazienti').update({ data_dimissione }).eq('id', selectedPazienteId);
+            if (error) throw error;
+            mostraMessaggio('Paziente dimesso!', 'success', 'messaggio-container-dimissione');
+            dimissioneForm.classList.add('d-none');
+            setTimeout(() => navigateTo('home'), 2000);
+        } catch (error) {
+            mostraMessaggio(`Errore nella dimissione: ${error.message}`, 'error', 'messaggio-container-dimissione');
+        }
+    });
+    backButton.addEventListener('click', () => navigateTo('home'));
+}
+
+async function initGraficoView() {
+    const repartoFilter = document.getElementById('filter-reparto');
+    const assistenzaFilter = document.getElementById('filter-assistenza');
+    const applyButton = document.getElementById('apply-filters-btn');
+    const chartContainer = document.getElementById('chart-container');
+    const backButton = chartContainer.closest('.card').querySelector('button[data-view="home"]');
+
+    google.charts.load('current', { 'packages': ['corechart'] });
+
     try {
-        appContainer.innerHTML = '';
-        const homeContent = templates.home.content.cloneNode(true);
-        appContainer.appendChild(homeContent);
-        console.log('app.js: Home view rendered.');
+        const { data, error } = await supabase.from('pazienti').select('reparto_appartenenza');
+        if (error) throw error;
+        const reparti = [...new Set(data.map(item => item.reparto_appartenenza))].sort();
+        repartoFilter.innerHTML = '<option value="">Tutti</option>';
+        reparti.forEach(r => r && (repartoFilter.innerHTML += `<option value="${r}">${r}</option>`));
     } catch (error) {
-        console.error('app.js: Error while rendering home view.', error);
+        mostraMessaggio('Impossibile caricare i filtri dei reparti.', 'error');
     }
+
+    const drawChart = async () => {
+        chartContainer.innerHTML = '<div class="d-flex justify-content-center align-items-center h-100"><div class="spinner-border"></div></div>';
+        try {
+            let query = supabase.from('pazienti').select('diagnosi');
+            if (repartoFilter.value) query = query.eq('reparto_appartenenza', repartoFilter.value);
+            if (assistenzaFilter.value) query = query.eq('livello_assistenza', assistenzaFilter.value);
+            const { data, error } = await query;
+            if (error) throw error;
+            if (data.length === 0) {
+                chartContainer.innerHTML = '<p class="text-muted text-center mt-5">Nessun dato trovato.</p>';
+                return;
+            }
+            const counts = data.reduce((acc, { diagnosi }) => (acc[diagnosi] = (acc[diagnosi] || 0) + 1, acc), {});
+            const dataTable = google.visualization.arrayToDataTable([['Diagnosi', 'Numero'], ...Object.entries(counts)]);
+            new google.visualization.PieChart(chartContainer).draw(dataTable, { title: 'Distribuzione Diagnosi', pieHole: 0.4, legend: { position: 'bottom' } });
+        } catch (error) {
+            chartContainer.innerHTML = `<div class="alert alert-danger">Errore: ${error.message}</div>`;
+        }
+    };
+
+    applyButton.addEventListener('click', drawChart);
+    backButton.addEventListener('click', () => navigateTo('home'));
+}
+
+function mostraMessaggio(message, type = 'info', containerId = 'messaggio-container') {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    const alertType = type === 'error' ? 'danger' : type;
+    container.innerHTML = `<div class="alert alert-${alertType} d-flex align-items-center"><span class="material-icons me-2">${type === 'success' ? 'check_circle' : type}</span><div>${message}</div></div>`;
 }
 
 // --- AUTENTICAZIONE ---
 function updateAuthUI(session) {
-    console.log('app.js: updateAuthUI() called with session:', session);
-    if (!authContainer || !templates.login || !templates.logout) {
-        console.error('app.js: Cannot update auth UI, container or templates are missing.');
-        return;
-    }
     authContainer.innerHTML = '';
+    const template = session ? templates.logout : templates.login;
+    const content = template.content.cloneNode(true);
     if (session) {
-        const logoutContent = templates.logout.content.cloneNode(true);
-        logoutContent.getElementById('user-email').textContent = session.user.email;
-        logoutContent.getElementById('logout-button').addEventListener('click', () => supabase.auth.signOut());
-        authContainer.appendChild(logoutContent);
-        console.log('app.js: Logout UI rendered.');
+        content.getElementById('user-email').textContent = session.user.email;
+        content.getElementById('logout-button').addEventListener('click', () => supabase.auth.signOut());
     } else {
-        const loginContent = templates.login.content.cloneNode(true);
-        loginContent.getElementById('login-button').addEventListener('click', () => supabase.auth.signInWithOAuth({ provider: 'google' }));
-        authContainer.appendChild(loginContent);
-        console.log('app.js: Login UI rendered.');
+        content.getElementById('login-button').addEventListener('click', () => supabase.auth.signInWithOAuth({ provider: 'google' }));
     }
+    authContainer.appendChild(content);
 }
 
-// --- EVENT LISTENER PRINCIPALE ---
+// --- EVENT LISTENERS ---
+window.addEventListener('hashchange', renderView);
 window.addEventListener('load', () => {
-    console.log('app.js: window.load event fired.');
-    
-    if (!initializeDOMReferences()) {
-        return; // Stop execution if essential elements are not found
-    }
-
-    supabase.auth.onAuthStateChange((event, session) => {
-        console.log(`app.js: onAuthStateChange event: ${event}`);
+    supabase.auth.onAuthStateChange((_event, session) => {
         updateAuthUI(session);
-        renderHome(); // Mostra sempre la home per ora
+        renderView();
     });
-    console.log('app.js: onAuthStateChange listener attached.');
 });

@@ -2,37 +2,18 @@
 const SUPABASE_URL = 'https://aiguzywadjzyrwandgba.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpZ3V6eXdhZGp6eXJ3YW5kZ2JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEyMDM1MzQsImV4cCI6MjA2Njc3OTUzNH0.pezVt3-xxkHBYK2V6ryHUtj_givF_TA9xwEzuK2essw';
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-  auth: {
-    storage: sessionStorage,
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true
-  }
-});
-
-// DOM Elements
-const appContainer = document.getElementById('app-container');
-const authContainer = document.getElementById('auth-container');
-const homeButton = document.getElementById('home-button');
-
-// Templates
-const loginTemplate = document.getElementById('auth-template-login').innerHTML;
-const logoutTemplate = document.getElementById('auth-template-logout').innerHTML;
-
-const views = {
-  home: document.getElementById('view-home').innerHTML,
-  grafico: document.getElementById('view-grafico').innerHTML,
-  inserimento: document.getElementById('view-inserimento').innerHTML,
-  dimissione: document.getElementById('view-dimissione').innerHTML,
-};
+// Declare variables in a higher scope
+let supabase;
+let appContainer, authContainer, homeButton;
+let loginTemplate, logoutTemplate;
+let views;
 
 // --- ROUTER ---
 function handleRouteChange() {
   const hash = window.location.hash || '#home';
   const viewName = hash.substring(1);
   
-  if (views[viewName]) {
+  if (views && views[viewName]) {
     appContainer.innerHTML = views[viewName];
     
     // After rendering, execute view-specific logic
@@ -43,7 +24,7 @@ function handleRouteChange() {
     } else if (viewName === 'dimissione') {
       initDimissioneView();
     }
-  } else {
+  } else if (views) {
     appContainer.innerHTML = views.home;
   }
 }
@@ -67,13 +48,19 @@ function updateAuthUI(session) {
 }
 
 // --- VIEW INITIALIZERS ---
-
 function initGraficoView() {
+  if (typeof google === 'undefined' || !google.charts) {
+    console.error("Google Charts library is not loaded yet.");
+    // Optionally, display a message to the user
+    document.getElementById('chart-container').innerHTML = '<p>Grafici in caricamento... Riprova tra un istante.</p>';
+    return;
+  }
   google.charts.load('current', {'packages':['corechart']});
   google.charts.setOnLoadCallback(drawChart);
 
   async function drawChart() {
     const chartContainer = document.getElementById('chart-container');
+    if (!chartContainer) return;
     chartContainer.innerHTML = '<div class="loading-spinner"></div>';
     
     const { data, error } = await supabase.from('pazienti').select('diagnosi');
@@ -112,6 +99,7 @@ function initGraficoView() {
 
 async function initInserimentoView() {
   const form = document.getElementById('form-inserimento');
+  if (!form) return;
   const authPrompt = form.previousElementSibling;
   const { data: { session } } = await supabase.auth.getSession();
 
@@ -141,6 +129,7 @@ async function initInserimentoView() {
 
 async function initDimissioneView() {
   const form = document.getElementById('form-dimissione');
+  if (!form) return;
   const authPrompt = form.previousElementSibling;
   const { data: { session } } = await supabase.auth.getSession();
 
@@ -193,9 +182,34 @@ async function initDimissioneView() {
   }
 }
 
-
 // --- APP INITIALIZATION ---
-document.addEventListener('DOMContentLoaded', () => {
+function main() {
+  // Initialize Supabase client
+  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+    auth: {
+      storage: sessionStorage,
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true
+    }
+  });
+
+  // DOM Elements
+  appContainer = document.getElementById('app-container');
+  authContainer = document.getElementById('auth-container');
+  homeButton = document.getElementById('home-button');
+
+  // Templates
+  loginTemplate = document.getElementById('auth-template-login').innerHTML;
+  logoutTemplate = document.getElementById('auth-template-logout').innerHTML;
+
+  views = {
+    home: document.getElementById('view-home').innerHTML,
+    grafico: document.getElementById('view-grafico').innerHTML,
+    inserimento: document.getElementById('view-inserimento').innerHTML,
+    dimissione: document.getElementById('view-dimissione').innerHTML,
+  };
+
   // Initial route handling
   handleRouteChange();
 
@@ -203,12 +217,16 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('hashchange', handleRouteChange);
   
   // Go to home on title click
-  homeButton.addEventListener('click', () => {
+  homeButton.addEventListener('click', (e) => {
+    e.preventDefault();
     window.location.hash = '#home';
   });
 
   // Handle auth state changes
-  supabase.auth.onAuthStateChange((event, session) => {
+  supabase.auth.onAuthStateChange((_event, session) => {
     updateAuthUI(session);
   });
-});
+}
+
+// Wait for the DOM to be fully loaded before running the app
+document.addEventListener('DOMContentLoaded', main);

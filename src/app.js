@@ -79,14 +79,36 @@ function initInserimentoView() {
         submitButton.disabled = true;
         submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Salvataggio...';
         mostraMessaggio('Salvataggio in corso...', 'info', 'messaggio-container');
+        
         try {
-            const { error } = await supabase.from('pazienti').insert([Object.fromEntries(new FormData(form))]);
-            if (error) throw error;
+            // --- MODIFICA CHIAVE ---
+            // 1. Recupera l'utente corrente
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
+                throw new Error('Utente non autenticato. Impossibile salvare.');
+            }
+
+            // 2. Prepara i dati del paziente dal modulo
+            const paziente = Object.fromEntries(new FormData(form));
+            
+            // 3. Aggiungi esplicitamente l'ID dell'utente ai dati da salvare
+            paziente.user_id = user.id;
+            // --- FINE MODIFICA ---
+
+            const { error } = await supabase.from('pazienti').insert([paziente]);
+            
+            if (error) {
+                // Se c'è un errore, lo lanciamo per essere catturato dal blocco catch
+                throw error;
+            }
+
             mostraMessaggio('Paziente inserito con successo!', 'success', 'messaggio-container');
             form.reset();
             form.querySelector('#data_ricovero').value = today;
             setTimeout(() => navigateTo('home'), 2000);
+
         } catch (error) {
+            console.error('Errore salvataggio paziente:', error);
             mostraMessaggio(`Errore nel salvataggio: ${error.message}`, 'error', 'messaggio-container');
         } finally {
             submitButton.disabled = false;

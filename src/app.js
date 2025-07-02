@@ -84,7 +84,6 @@ function main() {
       const viewContent = template.content.cloneNode(true);
       appContainer.appendChild(viewContent);
       
-      // Inizializza la vista specifica se necessario
       if (viewName === 'home' || !viewTemplates[viewName]) {
         initHomeView();
       } else if (viewName === 'grafico') {
@@ -93,13 +92,21 @@ function main() {
         initInserimentoView();
       } else if (viewName === 'dimissione') {
         initDimissioneView();
+      } else if (viewName === 'tempo-media-degenza') {
+        initTempoMedioDegenzaView();
+      } else if (viewName === 'importa-csv') {
+        initImportaCsvView();
+      } else if (viewName === 'crea-foglio-filtrato') {
+        initCreaFoglioFiltratoView();
+      } else if (viewName === 'aggiorna-foglio') {
+        initAggiornaFoglioView();
+      } else if (viewName === 'formatta') {
+        initFormattaView();
+      } else if (viewName === 'colori-alternati') {
+        initColoriAlternatiView();
+      } else if (viewName === 'copia-speciale') {
+        initCopiaSpecialeView();
       }
-    } else {
-      // Se nessuna vista corrisponde, mostra la home
-      const homeTemplate = viewTemplates.home.content.cloneNode(true);
-      appContainer.innerHTML = '';
-      appContainer.appendChild(homeTemplate);
-      initHomeView();
     }
   }
 
@@ -288,6 +295,15 @@ function main() {
       }, 5000);
     }
   }
+
+  // Placeholder for new views
+  function initTempoMedioDegenzaView() { appContainer.innerHTML = '<h2>Tempo Medio Degenza (da implementare)</h2>'; }
+  function initImportaCsvView() { appContainer.innerHTML = '<h2>Importazione CSV (da implementare)</h2>'; }
+  function initCreaFoglioFiltratoView() { appContainer.innerHTML = '<h2>Crea Foglio Filtrato (da implementare)</h2>'; }
+  function initAggiornaFoglioView() { appContainer.innerHTML = '<h2>Aggiorna Foglio Attivo (da implementare)</h2>'; }
+  function initFormattaView() { appContainer.innerHTML = '<h2>Applica Formattazione (da implementare)</h2>'; }
+  function initColoriAlternatiView() { appContainer.innerHTML = '<h2>Applica Colori Alternati (da implementare)</h2>'; }
+  function initCopiaSpecialeView() { appContainer.innerHTML = '<h2>Copia Senza Formattazione (da implementare)</h2>'; }
 
   // --- APP INITIALIZATION ---
   window.addEventListener('hashchange', handleRouteChange);

@@ -2,7 +2,7 @@
 const SUPABASE_URL = 'https://aiguzywadjzyrwandgba.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpZ3V6eXdhZGp6eXJ3YW5kZ2JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEyMDM1MzQsImV4cCI6MjA2Njc3OTUzNH0.pezVt3-xxkHBYK2V6ryHUtj_givF_TA9xwEzuK2essw';
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
   auth: {
     storage: sessionStorage,
     autoRefreshToken: true,
@@ -17,83 +17,50 @@ const authContainer = document.getElementById('auth-container');
 const homeButton = document.getElementById('home-button');
 
 // Templates
-const loginTemplate = document.getElementById('auth-template-login');
-const logoutTemplate = document.getElementById('auth-template-logout');
+const loginTemplate = document.getElementById('auth-template-login').innerHTML;
+const logoutTemplate = document.getElementById('auth-template-logout').innerHTML;
 
-const viewTemplates = {
-  home: document.getElementById('view-home'),
-  grafico: document.getElementById('view-grafico'),
-  inserimento: document.getElementById('view-inserimento'),
-  dimissione: document.getElementById('view-dimissione'),
+const views = {
+  home: document.getElementById('view-home').innerHTML,
+  grafico: document.getElementById('view-grafico').innerHTML,
+  inserimento: document.getElementById('view-inserimento').innerHTML,
+  dimissione: document.getElementById('view-dimissione').innerHTML,
 };
-
-// --- MENU ---
-const menuItems = [
-  { hash: '#grafico', icon: 'pie_chart', text: 'Grafico Diagnosi' },
-  { hash: '#inserimento', icon: 'person_add', text: 'Inserimento Paziente' },
-  { hash: '#dimissione', icon: 'event_available', text: 'Dimissione Paziente' },
-  // Aggiungi qui altre voci di menu se necessario
-];
-
-function initHomeView() {
-  const menuGrid = document.querySelector('.menu-grid');
-  if (!menuGrid) return;
-
-  menuGrid.innerHTML = ''; // Pulisce il menu esistente
-
-  menuItems.forEach(item => {
-    const button = document.createElement('a');
-    button.href = item.hash;
-    button.className = 'menu-btn';
-    button.innerHTML = `
-      <span class="material-icons">${item.icon}</span>
-      <p>${item.text}</p>
-    `;
-    menuGrid.appendChild(button);
-  });
-}
 
 // --- ROUTER ---
 function handleRouteChange() {
   const hash = window.location.hash || '#home';
   const viewName = hash.substring(1);
   
-  const template = viewTemplates[viewName] || viewTemplates.home;
-  
-  if (template) {
-    appContainer.innerHTML = ''; // Clear previous view
-    const viewContent = template.content.cloneNode(true);
-    appContainer.appendChild(viewContent);
+  if (views[viewName]) {
+    appContainer.innerHTML = views[viewName];
     
     // After rendering, execute view-specific logic
-    if (viewName === 'home') {
-      initHomeView();
-    } else if (viewName === 'grafico') {
+    if (viewName === 'grafico') {
       initGraficoView();
     } else if (viewName === 'inserimento') {
       initInserimentoView();
     } else if (viewName === 'dimissione') {
       initDimissioneView();
     }
+  } else {
+    appContainer.innerHTML = views.home;
   }
 }
 
 // --- AUTHENTICATION ---
 function updateAuthUI(session) {
-  authContainer.innerHTML = ''; // Clear auth container
   if (session) {
-    const logoutContent = logoutTemplate.content.cloneNode(true);
-    logoutContent.getElementById('user-email').textContent = session.user.email;
-    logoutContent.getElementById('logout-button').addEventListener('click', () => {
+    authContainer.innerHTML = logoutTemplate;
+    document.getElementById('user-email').textContent = session.user.email;
+    document.getElementById('logout-button').addEventListener('click', () => {
       supabase.auth.signOut();
     });
-    authContainer.appendChild(logoutContent);
   } else {
-    const loginContent = loginTemplate.content.cloneNode(true);
-    loginContent.getElementById('login-button').addEventListener('click', () => {
+    authContainer.innerHTML = loginTemplate;
+    document.getElementById('login-button').addEventListener('click', () => {
       supabase.auth.signInWithOAuth({ provider: 'google' });
     });
-    authContainer.appendChild(loginContent);
   }
   // Re-render the current view to update its auth-dependent state
   handleRouteChange();
@@ -102,17 +69,11 @@ function updateAuthUI(session) {
 // --- VIEW INITIALIZERS ---
 
 function initGraficoView() {
-  if (typeof google === 'undefined' || !google.charts) {
-    console.error("Google Charts library is not loaded yet.");
-    document.getElementById('chart-container').innerHTML = '<p>Grafici in caricamento... Riprova tra un istante.</p>';
-    return;
-  }
   google.charts.load('current', {'packages':['corechart']});
   google.charts.setOnLoadCallback(drawChart);
 
   async function drawChart() {
     const chartContainer = document.getElementById('chart-container');
-    if (!chartContainer) return;
     chartContainer.innerHTML = '<div class="loading-spinner"></div>';
     
     const { data, error } = await supabase.from('pazienti').select('diagnosi');
@@ -151,13 +112,12 @@ function initGraficoView() {
 
 async function initInserimentoView() {
   const form = document.getElementById('form-inserimento');
-  if (!form) return;
-  const authPrompt = document.querySelector('.auth-prompt'); // More robust selector
+  const authPrompt = form.previousElementSibling;
   const { data: { session } } = await supabase.auth.getSession();
 
   if (session) {
     form.style.display = 'block';
-    if (authPrompt) authPrompt.style.display = 'none';
+    authPrompt.style.display = 'none';
     
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -175,19 +135,18 @@ async function initInserimentoView() {
     });
   } else {
     form.style.display = 'none';
-    if (authPrompt) authPrompt.style.display = 'block';
+    authPrompt.style.display = 'block';
   }
 }
 
 async function initDimissioneView() {
   const form = document.getElementById('form-dimissione');
-  if (!form) return;
-  const authPrompt = document.querySelector('.auth-prompt'); // More robust selector
+  const authPrompt = form.previousElementSibling;
   const { data: { session } } = await supabase.auth.getSession();
 
   if (session) {
     form.style.display = 'block';
-    if (authPrompt) authPrompt.style.display = 'none';
+    authPrompt.style.display = 'none';
     
     const pazienteSelect = document.getElementById('paziente-select');
     pazienteSelect.innerHTML = '<option>Caricamento...</option>';
@@ -230,26 +189,26 @@ async function initDimissioneView() {
 
   } else {
     form.style.display = 'none';
-    if (authPrompt) authPrompt.style.display = 'block';
+    authPrompt.style.display = 'block';
   }
 }
 
 
 // --- APP INITIALIZATION ---
+document.addEventListener('DOMContentLoaded', () => {
+  // Initial route handling
+  handleRouteChange();
 
-// Initial route handling
-handleRouteChange();
+  // Listen for hash changes
+  window.addEventListener('hashchange', handleRouteChange);
+  
+  // Go to home on title click
+  homeButton.addEventListener('click', () => {
+    window.location.hash = '#home';
+  });
 
-// Listen for hash changes
-window.addEventListener('hashchange', handleRouteChange);
-
-// Go to home on title click
-homeButton.addEventListener('click', (e) => {
-  e.preventDefault();
-  window.location.hash = '#home';
-});
-
-// Handle auth state changes
-supabase.auth.onAuthStateChange((_event, session) => {
-  updateAuthUI(session);
+  // Handle auth state changes
+  supabase.auth.onAuthStateChange((event, session) => {
+    updateAuthUI(session);
+  });
 });

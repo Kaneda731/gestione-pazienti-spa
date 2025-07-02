@@ -76,7 +76,9 @@
     <div class="view card">
       <h2>Menu Principale</h2>
       <div class="menu-grid">
-        <!-- Il menu verrà generato dinamicamente da app.js -->
+        <a href="#grafico" class="menu-btn"><span class="material-icons">pie_chart</span><p>Grafico Diagnosi</p></a>
+        <a href="#inserimento" class="menu-btn"><span class="material-icons">person_add</span><p>Inserimento Paziente</p></a>
+        <a href="#dimissione" class="menu-btn"><span class="material-icons">event_available</span><p>Dimissione Paziente</p></a>
       </div>
     </div>
   </template>
@@ -149,7 +151,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-  <script type="module" src="app.js"></script>
+  <script type="module" src="/src/app.js"></script>
 
 </body>
 </html>

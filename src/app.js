@@ -25,6 +25,7 @@ const templates = {
     inserimento: document.getElementById('view-inserimento'),
     dimissione: document.getElementById('view-dimissione'),
     grafico: document.getElementById('view-grafico'),
+    loginRequired: document.getElementById('view-login-required'),
     login: document.getElementById('auth-login'),
     logout: document.getElementById('auth-logout'),
 };
@@ -34,15 +35,22 @@ function navigateTo(viewName) {
     window.location.hash = viewName;
 }
 
-function renderView() {
+async function renderView() {
     const viewName = window.location.hash.substring(1) || 'home';
-    const template = templates[viewName] || templates.home;
+    const protectedViews = ['inserimento', 'dimissione', 'grafico'];
+    
+    const { data: { session } } = await supabase.auth.getSession();
+
+    let template;
+    if (protectedViews.includes(viewName) && !session) {
+        template = templates.loginRequired;
+    } else {
+        template = templates[viewName] || templates.home;
+    }
 
     appContainer.innerHTML = '';
     const viewContent = template.content.cloneNode(true);
     
-    // !! LA CORREZIONE CHIAVE È QUI !!
-    // Aggiungo la classe .active al primo elemento del template per renderlo visibile
     const viewDiv = viewContent.querySelector('.view');
     if (viewDiv) {
         viewDiv.classList.add('active');
@@ -50,15 +58,20 @@ function renderView() {
     
     appContainer.appendChild(viewContent);
 
+    // Inizializza la logica specifica della vista
     if (viewName === 'home') {
         document.querySelectorAll('.menu-card').forEach(card => {
             card.addEventListener('click', () => navigateTo(card.dataset.view));
         });
+    } else if (protectedViews.includes(viewName) && session) {
+        if (viewName === 'inserimento') initInserimentoView();
+        if (viewName === 'dimissione') initDimissioneView();
+        if (viewName === 'grafico') initGraficoView();
+    } else if (viewName === 'loginRequired') {
+        document.getElementById('login-prompt-button').addEventListener('click', () => {
+            supabase.auth.signInWithOAuth({ provider: 'google' });
+        });
     }
-    
-    if (viewName === 'inserimento') initInserimentoView();
-    if (viewName === 'dimissione') initDimissioneView();
-    if (viewName === 'grafico') initGraficoView();
 }
 
 // --- FUNZIONI SPECIFICHE PER VISTA ---

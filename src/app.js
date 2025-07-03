@@ -36,16 +36,22 @@ function navigateTo(viewName) {
 }
 
 async function renderView() {
-    const viewName = window.location.hash.substring(1) || 'home';
+    const requestedViewName = window.location.hash.substring(1) || 'home';
     const protectedViews = ['inserimento', 'dimissione', 'grafico'];
     
     const { data: { session } } = await supabase.auth.getSession();
 
+    let viewToRender = requestedViewName;
     let template;
-    if (protectedViews.includes(viewName) && !session) {
+
+    if (protectedViews.includes(requestedViewName) && !session) {
+        viewToRender = 'loginRequired';
         template = templates.loginRequired;
     } else {
-        template = templates[viewName] || templates.home;
+        template = templates[requestedViewName] || templates.home;
+        if (!templates[requestedViewName]) {
+            viewToRender = 'home';
+        }
     }
 
     appContainer.innerHTML = '';
@@ -58,16 +64,18 @@ async function renderView() {
     
     appContainer.appendChild(viewContent);
 
-    // Inizializza la logica specifica della vista
-    if (viewName === 'home') {
+    // Inizializza la logica specifica della vista in base a `viewToRender`
+    if (viewToRender === 'home') {
         document.querySelectorAll('.menu-card').forEach(card => {
             card.addEventListener('click', () => navigateTo(card.dataset.view));
         });
-    } else if (protectedViews.includes(viewName) && session) {
-        if (viewName === 'inserimento') initInserimentoView();
-        if (viewName === 'dimissione') initDimissioneView();
-        if (viewName === 'grafico') initGraficoView();
-    } else if (viewName === 'loginRequired') {
+    } else if (viewToRender === 'inserimento') {
+        initInserimentoView();
+    } else if (viewToRender === 'dimissione') {
+        initDimissioneView();
+    } else if (viewToRender === 'grafico') {
+        initGraficoView();
+    } else if (viewToRender === 'loginRequired') {
         document.getElementById('login-prompt-button').addEventListener('click', () => {
             supabase.auth.signInWithOAuth({ provider: 'google' });
         });

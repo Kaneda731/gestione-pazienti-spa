@@ -36,12 +36,14 @@ Ora che le fondamenta sono solide, ci concentreremo sull'aggiunta di funzionalit
     -   **Azione:** Implementata la logica per l'ordinamento dinamico dei dati cliccando sulle intestazioni della tabella.
     -   **Risultato:** L'utente può ora ordinare i pazienti per cognome, nome e data di ricovero.
 
-3.  **Persistenza dello Stato dei Filtri:**
+3.  **Persistenza dello Stato dei Filtri: (In Pausa)**
     -   **Obiettivo:** Mantenere i filtri attivi anche dopo un ricaricamento della pagina.
-    -   **Azione:** Salvare i filtri applicati come parametri nell'URL (es. `...#list?stato=attivo`).
+    -   **Stato:** L'implementazione si è rivelata complessa a causa dell'attuale architettura di routing. Messa in pausa per essere rivalutata in futuro.
+
+### Fase 3: Sviluppi Futuri e Consolidamento
 ...
 ...
 ## 3. Prossimi Passi
 
-La Fase 1, la paginazione e l'ordinamento dinamico sono completi. Il prossimo passo della **Fase 2** è l'implementazione della **Persistenza dello Stato dei Filtri**.
+La Fase 1 e le principali funzionalità della Fase 2 (paginazione, ordinamento) sono complete. L'applicazione è ora in uno stato stabile e notevolmente migliorato. Le prossime attività verranno rivalutate.
 

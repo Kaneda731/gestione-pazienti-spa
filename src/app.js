@@ -202,27 +202,22 @@ async function initGraficoView() {
     const provenienzaFilter = document.getElementById('filter-provenienza');
     const diagnosiFilter = document.getElementById('filter-diagnosi');
     const assistenzaFilter = document.getElementById('filter-assistenza');
+    const startDateFilter = document.getElementById('filter-start-date');
+    const endDateFilter = document.getElementById('filter-end-date');
     const applyButton = document.getElementById('apply-filters-btn');
     const chartContainer = document.getElementById('chart-container');
     const backButton = chartContainer.closest('.card').querySelector('button[data-view="home"]');
 
     google.charts.load('current', { 'packages': ['corechart'] });
 
-    // Funzione helper per popolare i filtri
     const populateFilter = async (columnName, selectElement) => {
         try {
             const { data, error } = await supabase.from('pazienti').select(columnName);
             if (error) throw error;
-            
             const uniqueValues = [...new Set(data.map(item => item[columnName]))].sort();
             selectElement.innerHTML = `<option value="">Tutti</option>`;
             uniqueValues.forEach(value => {
-                if(value) {
-                    const option = document.createElement('option');
-                    option.value = value;
-                    option.textContent = value;
-                    selectElement.appendChild(option);
-                }
+                if(value) selectElement.innerHTML += `<option value="${value}">${value}</option>`;
             });
         } catch (error) {
             console.error(`Errore caricamento filtro ${columnName}:`, error);
@@ -230,7 +225,6 @@ async function initGraficoView() {
         }
     };
 
-    // Popola tutti i filtri in parallelo
     await Promise.all([
         populateFilter('reparto_appartenenza', repartoFilter),
         populateFilter('reparto_provenienza', provenienzaFilter),
@@ -242,11 +236,12 @@ async function initGraficoView() {
         try {
             let query = supabase.from('pazienti').select('diagnosi');
 
-            // Applica filtri dinamicamente
             if (repartoFilter.value) query = query.eq('reparto_appartenenza', repartoFilter.value);
             if (provenienzaFilter.value) query = query.eq('reparto_provenienza', provenienzaFilter.value);
             if (diagnosiFilter.value) query = query.eq('diagnosi', diagnosiFilter.value);
             if (assistenzaFilter.value) query = query.eq('livello_assistenza', assistenzaFilter.value);
+            if (startDateFilter.value) query = query.gte('data_ricovero', startDateFilter.value);
+            if (endDateFilter.value) query = query.lte('data_ricovero', endDateFilter.value);
 
             const { data, error } = await query;
             if (error) throw error;
@@ -260,10 +255,7 @@ async function initGraficoView() {
             const dataTable = google.visualization.arrayToDataTable([['Diagnosi', 'Numero'], ...Object.entries(counts)]);
             const options = {
                 pieHole: 0.4,
-                // La posizione 'labeled' disegna la legenda con linee che puntano alle fette.
-                // È un ottimo compromesso tra leggibilità e spazio.
                 legend: { position: 'labeled' },
-                // Ottimizziamo l'area del grafico per dare spazio alla legenda.
                 chartArea: { left: 10, top: 20, width: '90%', height: '85%' }
             };
             new google.visualization.PieChart(chartContainer).draw(dataTable, options);

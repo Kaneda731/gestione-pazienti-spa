@@ -241,19 +241,19 @@
                 <div class="card-body">
                     <!-- Filtri -->
                     <div class="row g-3 mb-3">
-                        <div class="col-md-3">
+                        <div class="col-md-4">
                             <label for="filter-reparto" class="form-label">Reparto Appartenenza</label>
                             <select id="filter-reparto" class="form-select">
                                 <!-- Opzioni caricate dinamicamente -->
                             </select>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-4">
                             <label for="filter-provenienza" class="form-label">Reparto Provenienza</label>
                             <select id="filter-provenienza" class="form-select">
                                 <!-- Opzioni caricate dinamicamente -->
                             </select>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-4">
                             <label for="filter-diagnosi" class="form-label">Diagnosi</label>
                             <select id="filter-diagnosi" class="form-select">
                                 <!-- Opzioni caricate dinamicamente -->
@@ -268,12 +268,20 @@
                                 <option value="Alta">Alta</option>
                             </select>
                         </div>
-                    </div>
-                    <div class="text-center mb-4">
-                        <button id="apply-filters-btn" class="btn btn-primary">
-                            <span class="material-icons me-1" style="vertical-align: middle;">filter_alt</span>
-                            Applica Filtri
-                        </button>
+                        <div class="col-md-3">
+                            <label for="filter-start-date" class="form-label">Ricovero Dal</label>
+                            <input type="date" id="filter-start-date" class="form-control">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="filter-end-date" class="form-label">Ricovero Al</label>
+                            <input type="date" id="filter-end-date" class="form-control">
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button id="apply-filters-btn" class="btn btn-primary w-100">
+                                <span class="material-icons me-1" style="vertical-align: middle;">filter_alt</span>
+                                Applica Filtri
+                            </button>
+                        </div>
                     </div>
                     <!-- Contenitore Grafico -->
                     <div id="chart-container" style="width: 100%; height: 400px;">

@@ -1,7 +1,7 @@
 // src/js/views/list.js
 import { supabase } from '../supabase.js';
 import { navigateTo } from '../router.js';
-import { convertToCSV } from '../utils.js';
+import { convertToCSV, populateFilter } from '../utils.js';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -133,20 +133,7 @@ function updatePaginationControls(totalItems) {
     domElements.nextButton.disabled = state.currentPage >= totalPages - 1;
 }
 
-async function populateFilter(columnName, selectElement) {
-    try {
-        const { data, error } = await supabase.from('pazienti').select(columnName);
-        if (error) throw error;
-        const uniqueValues = [...new Set(data.map(item => item[columnName]).filter(Boolean))].sort();
-        
-        selectElement.innerHTML = `<option value="">Tutti</option>`;
-        uniqueValues.forEach(value => {
-            selectElement.innerHTML += `<option value="${value}">${value}</option>`;
-        });
-    } catch (error) {
-        console.error(`Errore caricamento filtro ${columnName}:`, error);
-    }
-}
+
 
 
 

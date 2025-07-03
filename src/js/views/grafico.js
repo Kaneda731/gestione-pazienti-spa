@@ -1,31 +1,12 @@
 // src/js/views/grafico.js
 import { supabase } from '../supabase.js';
 import { navigateTo } from '../router.js';
+import { populateFilter } from '../utils.js';
 
 // Caching degli elementi del DOM
 const dom = {};
 
-/**
- * Popola un elemento <select> con valori unici da una colonna del database.
- * @param {string} columnName - Il nome della colonna da cui prendere i valori.
- * @param {HTMLSelectElement} selectElement - L'elemento select da popolare.
- */
-async function populateFilter(columnName, selectElement) {
-    try {
-        const { data, error } = await supabase.from('pazienti').select(columnName);
-        if (error) throw error;
-        
-        const uniqueValues = [...new Set(data.map(item => item[columnName]).filter(Boolean))].sort();
-        
-        selectElement.innerHTML = `<option value="">Tutti</option>`;
-        uniqueValues.forEach(value => {
-            selectElement.innerHTML += `<option value="${value}">${value}</option>`;
-        });
-    } catch (error) {
-        console.error(`Errore durante il popolamento del filtro ${columnName}:`, error);
-        selectElement.innerHTML = `<option value="">Errore nel caricamento</option>`;
-    }
-}
+
 
 /**
  * Costruisce la query a Supabase basandosi sui filtri selezionati.

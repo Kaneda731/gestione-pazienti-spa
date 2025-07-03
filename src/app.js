@@ -274,7 +274,7 @@ async function initGraficoView() {
 async function initListView() {
     const tableBody = document.getElementById('pazienti-table-body');
     const searchInput = document.getElementById('list-search');
-    const backButton = document.querySelector('#view-list button[data-view="home"]');
+    const backButton = tableBody.closest('.card').querySelector('button[data-view="home"]');
     
     tableBody.innerHTML = '<tr><td colspan="6" class="text-center"><div class="spinner-border"></div></td></tr>';
 

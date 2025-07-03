@@ -68,7 +68,14 @@ async function renderView() {
     // Inizializza la logica specifica della vista in base a `viewToRender`
     if (viewToRender === 'home') {
         document.querySelectorAll('.menu-card').forEach(card => {
-            card.addEventListener('click', () => navigateTo(card.dataset.view));
+            card.addEventListener('click', () => {
+                const view = card.dataset.view;
+                if (view === 'inserimento') {
+                    // Pulisce lo stato di modifica prima di aprire un nuovo form
+                    sessionStorage.removeItem('editPazienteId');
+                }
+                navigateTo(view);
+            });
         });
     } else if (viewToRender === 'inserimento') {
         initInserimentoView();
@@ -119,6 +126,8 @@ async function initInserimentoView() {
         // Modalità Inserimento
         title.innerHTML = '<span class="material-icons me-2">person_add</span>Inserimento Nuovo Paziente';
         submitButton.innerHTML = '<span class="material-icons me-1" style="vertical-align: middle;">save</span>Salva Paziente';
+        form.reset(); // Assicura che il form sia pulito
+        idInput.value = ''; // Assicura che l'ID sia vuoto
         form.querySelector('#data_ricovero').value = new Date().toISOString().split('T')[0];
     }
 

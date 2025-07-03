@@ -259,14 +259,12 @@ async function initGraficoView() {
             const counts = data.reduce((acc, { diagnosi }) => (acc[diagnosi] = (acc[diagnosi] || 0) + 1, acc), {});
             const dataTable = google.visualization.arrayToDataTable([['Diagnosi', 'Numero'], ...Object.entries(counts)]);
             const options = {
-                // Il titolo è già nell'header della card, quindi lo rimuoviamo da qui.
                 pieHole: 0.4,
-                // Mostra le etichette direttamente sulle fette del grafico.
-                pieSliceText: 'label',
-                // Rimuoviamo la legenda separata per risparmiare spazio.
-                legend: 'none',
-                // Ottimizziamo l'area del grafico per riempire lo spazio.
-                chartArea: { left: 10, top: 20, width: '95%', height: '85%' }
+                // La posizione 'labeled' disegna la legenda con linee che puntano alle fette.
+                // È un ottimo compromesso tra leggibilità e spazio.
+                legend: { position: 'labeled' },
+                // Ottimizziamo l'area del grafico per dare spazio alla legenda.
+                chartArea: { left: 10, top: 20, width: '90%', height: '85%' }
             };
             new google.visualization.PieChart(chartContainer).draw(dataTable, options);
         } catch (error) {

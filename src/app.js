@@ -25,6 +25,7 @@ const templates = {
     inserimento: document.getElementById('view-inserimento'),
     dimissione: document.getElementById('view-dimissione'),
     grafico: document.getElementById('view-grafico'),
+    list: document.getElementById('view-list'),
     loginRequired: document.getElementById('view-login-required'),
     login: document.getElementById('auth-login'),
     logout: document.getElementById('auth-logout'),
@@ -37,7 +38,7 @@ function navigateTo(viewName) {
 
 async function renderView() {
     const requestedViewName = window.location.hash.substring(1) || 'home';
-    const protectedViews = ['inserimento', 'dimissione', 'grafico'];
+    const protectedViews = ['inserimento', 'dimissione', 'grafico', 'list'];
     
     const { data: { session } } = await supabase.auth.getSession();
 
@@ -75,6 +76,8 @@ async function renderView() {
         initDimissioneView();
     } else if (viewToRender === 'grafico') {
         initGraficoView();
+    } else if (viewToRender === 'list') {
+        initListView();
     } else if (viewToRender === 'loginRequired') {
         document.getElementById('login-prompt-button').addEventListener('click', () => {
             supabase.auth.signInWithOAuth({ provider: 'google' });
@@ -268,12 +271,86 @@ async function initGraficoView() {
     backButton.addEventListener('click', () => navigateTo('home'));
 }
 
+async function initListView() {
+    const tableBody = document.getElementById('pazienti-table-body');
+    const searchInput = document.getElementById('list-search');
+    const backButton = document.querySelector('#view-list button[data-view="home"]');
+    
+    tableBody.innerHTML = '<tr><td colspan="6" class="text-center"><div class="spinner-border"></div></td></tr>';
+
+    try {
+        const { data: pazienti, error } = await supabase
+            .from('pazienti')
+            .select('*')
+            .order('cognome', { ascending: true });
+
+        if (error) throw error;
+
+        const renderTable = (pazientiToRender) => {
+            tableBody.innerHTML = '';
+            if (pazientiToRender.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Nessun paziente trovato.</td></tr>';
+                return;
+            }
+            pazientiToRender.forEach(p => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${p.cognome}</td>
+                    <td>${p.nome}</td>
+                    <td>${new Date(p.data_ricovero).toLocaleDateString()}</td>
+                    <td>${p.diagnosi}</td>
+                    <td>${p.reparto_appartenenza}</td>
+                    <td>${p.data_dimissione ? `<span class="badge bg-secondary">Dimesso</span>` : `<span class="badge bg-success">Attivo</span>`}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        };
+
+        renderTable(pazienti);
+
+        searchInput.addEventListener('input', () => {
+            const searchTerm = searchInput.value.toLowerCase();
+            const filteredPazienti = pazienti.filter(p => 
+                p.nome.toLowerCase().includes(searchTerm) || 
+                p.cognome.toLowerCase().includes(searchTerm)
+            );
+            renderTable(filteredPazienti);
+        });
+
+    } catch (error) {
+        console.error('Errore caricamento elenco pazienti:', error);
+        tableBody.innerHTML = `<tr><td colspan="6" class="text-center text-danger">Errore nel caricamento dei dati: ${error.message}</td></tr>`;
+    }
+
+    backButton.addEventListener('click', () => navigateTo('home'));
+}
+
+
+/**
+ * Mostra un messaggio all'utente.
+ * @param {string} message - Il testo del messaggio.
+ * @param {string} type - Il tipo di messaggio ('success', 'error', 'info').
+ * @param {string} containerId - L'ID del contenitore del messaggio.
+ */
 function mostraMessaggio(message, type = 'info', containerId = 'messaggio-container') {
     const container = document.getElementById(containerId);
     if (!container) return;
-    const alertType = type === 'error' ? 'danger' : type;
-    container.innerHTML = `<div class="alert alert-${alertType} d-flex align-items-center"><span class="material-icons me-2">${type === 'success' ? 'check_circle' : type}</span><div>${message}</div></div>`;
+
+    const alertType = type === 'error' ? 'danger' : type; // Bootstrap usa 'danger' per gli errori
+    const icon = {
+        success: 'check_circle',
+        error: 'error',
+        info: 'info'
+    }[type];
+
+    container.innerHTML = `
+        <div class="alert alert-${alertType} d-flex align-items-center" role="alert">
+            <span class="material-icons me-2">${icon}</span>
+            <div>${message}</div>
+        </div>
+    `;
 }
+
 
 // --- AUTENTICAZIONE ---
 function updateAuthUI(session) {

@@ -199,6 +199,8 @@ function initDimissioneView() {
 
 async function initGraficoView() {
     const repartoFilter = document.getElementById('filter-reparto');
+    const provenienzaFilter = document.getElementById('filter-provenienza');
+    const diagnosiFilter = document.getElementById('filter-diagnosi');
     const assistenzaFilter = document.getElementById('filter-assistenza');
     const applyButton = document.getElementById('apply-filters-btn');
     const chartContainer = document.getElementById('chart-container');
@@ -206,31 +208,62 @@ async function initGraficoView() {
 
     google.charts.load('current', { 'packages': ['corechart'] });
 
-    try {
-        const { data, error } = await supabase.from('pazienti').select('reparto_appartenenza');
-        if (error) throw error;
-        const reparti = [...new Set(data.map(item => item.reparto_appartenenza))].sort();
-        repartoFilter.innerHTML = '<option value="">Tutti</option>';
-        reparti.forEach(r => r && (repartoFilter.innerHTML += `<option value="${r}">${r}</option>`));
-    } catch (error) {
-        mostraMessaggio('Impossibile caricare i filtri dei reparti.', 'error');
-    }
+    // Funzione helper per popolare i filtri
+    const populateFilter = async (columnName, selectElement) => {
+        try {
+            const { data, error } = await supabase.from('pazienti').select(columnName);
+            if (error) throw error;
+            
+            const uniqueValues = [...new Set(data.map(item => item[columnName]))].sort();
+            selectElement.innerHTML = `<option value="">Tutti</option>`;
+            uniqueValues.forEach(value => {
+                if(value) {
+                    const option = document.createElement('option');
+                    option.value = value;
+                    option.textContent = value;
+                    selectElement.appendChild(option);
+                }
+            });
+        } catch (error) {
+            console.error(`Errore caricamento filtro ${columnName}:`, error);
+            selectElement.innerHTML = `<option value="">Errore</option>`;
+        }
+    };
+
+    // Popola tutti i filtri in parallelo
+    await Promise.all([
+        populateFilter('reparto_appartenenza', repartoFilter),
+        populateFilter('reparto_provenienza', provenienzaFilter),
+        populateFilter('diagnosi', diagnosiFilter)
+    ]);
 
     const drawChart = async () => {
         chartContainer.innerHTML = '<div class="d-flex justify-content-center align-items-center h-100"><div class="spinner-border"></div></div>';
         try {
             let query = supabase.from('pazienti').select('diagnosi');
+
+            // Applica filtri dinamicamente
             if (repartoFilter.value) query = query.eq('reparto_appartenenza', repartoFilter.value);
+            if (provenienzaFilter.value) query = query.eq('reparto_provenienza', provenienzaFilter.value);
+            if (diagnosiFilter.value) query = query.eq('diagnosi', diagnosiFilter.value);
             if (assistenzaFilter.value) query = query.eq('livello_assistenza', assistenzaFilter.value);
+
             const { data, error } = await query;
             if (error) throw error;
+
             if (data.length === 0) {
-                chartContainer.innerHTML = '<p class="text-muted text-center mt-5">Nessun dato trovato.</p>';
+                chartContainer.innerHTML = '<p class="text-muted text-center mt-5">Nessun dato trovato per i filtri selezionati.</p>';
                 return;
             }
+            
             const counts = data.reduce((acc, { diagnosi }) => (acc[diagnosi] = (acc[diagnosi] || 0) + 1, acc), {});
             const dataTable = google.visualization.arrayToDataTable([['Diagnosi', 'Numero'], ...Object.entries(counts)]);
-            new google.visualization.PieChart(chartContainer).draw(dataTable, { title: 'Distribuzione Diagnosi', pieHole: 0.4, legend: { position: 'bottom' } });
+            const options = {
+                title: 'Distribuzione Pazienti per Diagnosi',
+                pieHole: 0.4,
+                legend: { position: 'bottom' }
+            };
+            new google.visualization.PieChart(chartContainer).draw(dataTable, options);
         } catch (error) {
             chartContainer.innerHTML = `<div class="alert alert-danger">Errore: ${error.message}</div>`;
         }

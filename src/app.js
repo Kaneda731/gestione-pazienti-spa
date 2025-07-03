@@ -87,59 +87,88 @@ async function renderView() {
 
 // --- FUNZIONI SPECIFICHE PER VISTA ---
 
-function initInserimentoView() {
+async function initInserimentoView() {
     const form = document.getElementById('form-inserimento');
     const backButton = form.closest('.card').querySelector('button[data-view="home"]');
-    const today = new Date().toISOString().split('T')[0];
-    form.querySelector('#data_ricovero').value = today;
+    const title = document.getElementById('inserimento-title');
+    const submitButton = form.querySelector('button[type="submit"]');
+    const idInput = document.getElementById('paziente-id');
+
+    const editId = sessionStorage.getItem('editPazienteId');
+
+    if (editId) {
+        // Modalità Modifica
+        title.innerHTML = '<span class="material-icons me-2">edit</span>Modifica Paziente';
+        submitButton.innerHTML = '<span class="material-icons me-1" style="vertical-align: middle;">save</span>Salva Modifiche';
+
+        try {
+            const { data, error } = await supabase.from('pazienti').select('*').eq('id', editId).single();
+            if (error) throw error;
+            
+            // Popola il form con i dati del paziente
+            for (const key in data) {
+                if (form.elements[key]) {
+                    form.elements[key].value = data[key];
+                }
+            }
+        } catch (error) {
+            mostraMessaggio(`Errore nel caricamento dei dati: ${error.message}`, 'error');
+        }
+
+    } else {
+        // Modalità Inserimento
+        title.innerHTML = '<span class="material-icons me-2">person_add</span>Inserimento Nuovo Paziente';
+        submitButton.innerHTML = '<span class="material-icons me-1" style="vertical-align: middle;">save</span>Salva Paziente';
+        form.querySelector('#data_ricovero').value = new Date().toISOString().split('T')[0];
+    }
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         if (!form.checkValidity()) {
-            mostraMessaggio('Per favore, compila tutti i campi obbligatori.', 'error', 'messaggio-container');
+            mostraMessaggio('Per favore, compila tutti i campi obbligatori.', 'error');
             return;
         }
-        const submitButton = form.querySelector('button[type="submit"]');
+        
         submitButton.disabled = true;
+        const originalButtonHTML = submitButton.innerHTML;
         submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Salvataggio...';
-        mostraMessaggio('Salvataggio in corso...', 'info', 'messaggio-container');
+        
+        const formData = Object.fromEntries(new FormData(form));
         
         try {
-            // --- MODIFICA CHIAVE ---
-            // 1. Recupera l'utente corrente
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) {
-                throw new Error('Utente non autenticato. Impossibile salvare.');
+            let error;
+            if (editId) {
+                // Logica di Update
+                const { error: updateError } = await supabase.from('pazienti').update(formData).eq('id', editId);
+                error = updateError;
+            } else {
+                // Logica di Insert
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) throw new Error('Utente non autenticato.');
+                formData.user_id = user.id;
+                const { error: insertError } = await supabase.from('pazienti').insert([formData]);
+                error = insertError;
             }
 
-            // 2. Prepara i dati del paziente dal modulo
-            const paziente = Object.fromEntries(new FormData(form));
-            
-            // 3. Aggiungi esplicitamente l'ID dell'utente ai dati da salvare
-            paziente.user_id = user.id;
-            // --- FINE MODIFICA ---
+            if (error) throw error;
 
-            const { error } = await supabase.from('pazienti').insert([paziente]);
-            
-            if (error) {
-                // Se c'è un errore, lo lanciamo per essere catturato dal blocco catch
-                throw error;
-            }
-
-            mostraMessaggio('Paziente inserito con successo!', 'success', 'messaggio-container');
+            mostraMessaggio('Dati salvati con successo!', 'success');
             form.reset();
-            form.querySelector('#data_ricovero').value = today;
-            setTimeout(() => navigateTo('home'), 2000);
+            sessionStorage.removeItem('editPazienteId');
+            setTimeout(() => navigateTo('list'), 1500);
 
         } catch (error) {
-            console.error('Errore salvataggio paziente:', error);
-            mostraMessaggio(`Errore nel salvataggio: ${error.message}`, 'error', 'messaggio-container');
+            mostraMessaggio(`Errore nel salvataggio: ${error.message}`, 'error');
         } finally {
             submitButton.disabled = false;
-            submitButton.innerHTML = '<span class="material-icons me-1" style="vertical-align: middle;">save</span>Salva Paziente';
+            submitButton.innerHTML = originalButtonHTML;
         }
     });
-    backButton.addEventListener('click', () => navigateTo('home'));
+
+    backButton.addEventListener('click', () => {
+        sessionStorage.removeItem('editPazienteId');
+        navigateTo('list');
+    });
 }
 
 function initDimissioneView() {
@@ -320,7 +349,7 @@ async function initListView() {
         const renderTable = (pazientiToRender) => {
             tableBody.innerHTML = '';
             if (pazientiToRender.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Nessun paziente trovato.</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">Nessun paziente trovato.</td></tr>';
                 return;
             }
             pazientiToRender.forEach(p => {
@@ -332,6 +361,10 @@ async function initListView() {
                     <td>${p.diagnosi}</td>
                     <td>${p.reparto_appartenenza}</td>
                     <td>${p.data_dimissione ? `<span class="badge bg-secondary">Dimesso</span>` : `<span class="badge bg-success">Attivo</span>`}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary me-1" data-action="edit" data-id="${p.id}">Modifica</button>
+                        <button class="btn btn-sm btn-outline-danger" data-action="delete" data-id="${p.id}">Elimina</button>
+                    </td>
                 `;
                 tableBody.appendChild(row);
             });
@@ -344,9 +377,44 @@ async function initListView() {
             el.addEventListener('input', applyFilters);
         });
 
+        // Aggiungi event listener per i pulsanti di azione
+        tableBody.addEventListener('click', (e) => {
+            const action = e.target.dataset.action;
+            const id = e.target.dataset.id;
+            if (!action || !id) return;
+
+            if (action === 'edit') {
+                sessionStorage.setItem('editPazienteId', id);
+                navigateTo('inserimento');
+            } else if (action === 'delete') {
+                // Logica di eliminazione
+                const deleteModal = new bootstrap.Modal(document.getElementById('delete-confirm-modal'));
+                const confirmBtn = document.getElementById('confirm-delete-btn');
+                
+                const handleDelete = async () => {
+                    try {
+                        const { error } = await supabase.from('pazienti').delete().eq('id', id);
+                        if (error) throw error;
+                        
+                        // Rimuovi la riga dalla tabella e ricarica i dati
+                        initListView();
+
+                    } catch (error) {
+                        console.error('Errore eliminazione paziente:', error);
+                        alert(`Errore: ${error.message}`);
+                    } finally {
+                        deleteModal.hide();
+                    }
+                };
+
+                confirmBtn.onclick = handleDelete;
+                deleteModal.show();
+            }
+        });
+
     } catch (error) {
         console.error('Errore caricamento elenco pazienti:', error);
-        tableBody.innerHTML = `<tr><td colspan="6" class="text-center text-danger">Errore: ${error.message}</td></tr>`;
+        tableBody.innerHTML = `<tr><td colspan="7" class="text-center text-danger">Errore: ${error.message}</td></tr>`;
     }
 
     backButton.addEventListener('click', () => navigateTo('home'));

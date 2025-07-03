@@ -100,13 +100,14 @@
         <div class="view">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h3><span class="material-icons me-2">person_add</span>Inserimento Nuovo Paziente</h3>
+                    <h3 id="inserimento-title"><span class="material-icons me-2">person_add</span>Inserimento Nuovo Paziente</h3>
                     <button class="btn btn-sm btn-outline-secondary" data-view="home">
                         <span class="material-icons me-1" style="vertical-align: text-bottom;">arrow_back</span>Torna al Menu
                     </button>
                 </div>
                 <div class="card-body">
                     <form id="form-inserimento">
+                        <input type="hidden" id="paziente-id" name="id">
                         <div id="messaggio-container" class="mb-3"></div>
                         <div class="row g-3">
                             <!-- Dati Anagrafici -->
@@ -367,6 +368,7 @@
                                     <th>Diagnosi</th>
                                     <th>Reparto</th>
                                     <th>Stato</th>
+                                    <th>Azioni</th>
                                 </tr>
                             </thead>
                             <tbody id="pazienti-table-body">
@@ -394,7 +396,27 @@
         </div>
     </template>
 
+    <!-- Modal di Conferma Eliminazione -->
+    <div class="modal fade" id="delete-confirm-modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Conferma Eliminazione</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Sei sicuro di voler eliminare questo paziente? L'azione è irreversibile.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+                    <button type="button" class="btn btn-danger" id="confirm-delete-btn">Elimina</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Script Supabase e App -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://www.gstatic.com/charts/loader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="app.js" type="module"></script>

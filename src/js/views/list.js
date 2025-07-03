@@ -156,6 +156,95 @@ async function populateFilter(columnName, selectElement) {
     }
 }
 
+function convertToCSV(data) {
+    if (!data || data.length === 0) {
+        return '';
+    }
+
+    const headers = [
+        'Cognome', 'Nome', 'Data Ricovero', 'Data Dimissione', 
+        'Reparto Appartenenza', 'Reparto Provenienza', 'Diagnosi', 
+        'Livello Assistenza', 'Stato'
+    ];
+    
+    const rows = data.map(p => {
+        const escape = (str) => {
+            if (str === null || str === undefined) return '';
+            const s = String(str);
+            if (s.search(/("|,|\n)/g) >= 0) {
+                return `"${s.replace(/"/g, '""')}"`;
+            }
+            return s;
+        };
+
+        return [
+            escape(p.cognome),
+            escape(p.nome),
+            escape(p.data_ricovero ? new Date(p.data_ricovero).toLocaleDateString('it-IT') : ''),
+            escape(p.data_dimissione ? new Date(p.data_dimissione).toLocaleDateString('it-IT') : ''),
+            escape(p.reparto_appartenenza),
+            escape(p.reparto_provenienza),
+            escape(p.diagnosi),
+            escape(p.livello_assistenza),
+            p.data_dimissione ? 'Dimesso' : 'Attivo'
+        ].join(',');
+    });
+
+    return [headers.join(','), ...rows].join('\r\n');
+}
+
+async function exportToCSV() {
+    const exportBtn = document.getElementById('export-csv-btn');
+    const originalBtnContent = exportBtn.innerHTML;
+    exportBtn.disabled = true;
+    exportBtn.innerHTML = `<span class="spinner-border spinner-border-sm"></span> Esportazione...`;
+
+    try {
+        const searchInput = document.getElementById('list-search');
+        const repartoFilter = document.getElementById('list-filter-reparto');
+        const diagnosiFilter = document.getElementById('list-filter-diagnosi');
+        const statoFilter = document.getElementById('list-filter-stato');
+
+        let query = supabase.from('pazienti').select('*');
+
+        const searchTerm = searchInput.value.trim();
+        if (searchTerm) query = query.or(`nome.ilike.%${searchTerm}%,cognome.ilike.%${searchTerm}%`);
+        if (repartoFilter.value) query = query.eq('reparto_appartenenza', repartoFilter.value);
+        if (diagnosiFilter.value) query = query.eq('diagnosi', diagnosiFilter.value);
+        if (statoFilter.value) query = query.eq('diagnosi', diagnosiFilter.value);
+        if (statoFilter.value === 'attivo') query = query.is('data_dimissione', null);
+        else if (statoFilter.value === 'dimesso') query = query.not('data_dimissione', 'is', null);
+
+        query = query.order(sortColumn, { ascending: sortDirection === 'asc' });
+
+        const { data, error } = await query;
+        if (error) throw error;
+
+        if (data.length === 0) {
+            alert('Nessun dato da esportare per i filtri selezionati.');
+            return;
+        }
+
+        const csvContent = convertToCSV(data);
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', 'esportazione_pazienti.csv');
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+    } catch (error) {
+        console.error('Errore durante l\'esportazione CSV:', error);
+        alert(`Errore durante l'esportazione: ${error.message}`);
+    } finally {
+        exportBtn.disabled = false;
+        exportBtn.innerHTML = originalBtnContent;
+    }
+}
+
 export async function initListView(urlParams) {
     const viewContainer = document.querySelector('#app-container .view');
     if (!viewContainer) return;
@@ -169,6 +258,7 @@ export async function initListView(urlParams) {
     const prevButton = document.getElementById('prev-page-btn');
     const nextButton = document.getElementById('next-page-btn');
     const backButton = viewContainer.querySelector('button[data-view="home"]');
+    const exportButton = document.getElementById('export-csv-btn');
 
     // --- Inizializzazione ---
     await Promise.all([
@@ -194,6 +284,9 @@ export async function initListView(urlParams) {
             handleFilterChange();
         }
     });
+
+    // Esportazione
+    exportButton.addEventListener('click', exportToCSV);
 
     // Paginazione
     prevButton.addEventListener('click', () => {

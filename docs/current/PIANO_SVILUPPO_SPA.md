@@ -31,12 +31,17 @@ Ora che le fondamenta sono solide, ci concentreremo sull'aggiunta di funzionalit
     -   **Azione:** Aggiunti controlli di paginazione e implementata la logica per caricare i dati a blocchi utilizzando la funzione `.range()` di Supabase.
     -   **Risultato:** L'interfaccia è più reattiva e il carico iniziale di dati è ridotto.
 
-2.  **Ordinamento Dinamico della Tabella:**
+2.  **Ordinamento Dinamico della Tabella: (✓ Completato)**
     -   **Obiettivo:** Permettere all'utente di ordinare i dati con un clic.
-    -   **Azione:** Rendere cliccabili le intestazioni della tabella per ordinare i risultati in base alla colonna selezionata.
+    -   **Azione:** Implementata la logica per l'ordinamento dinamico dei dati cliccando sulle intestazioni della tabella.
+    -   **Risultato:** L'utente può ora ordinare i pazienti per cognome, nome e data di ricovero.
+
+3.  **Persistenza dello Stato dei Filtri:**
+    -   **Obiettivo:** Mantenere i filtri attivi anche dopo un ricaricamento della pagina.
+    -   **Azione:** Salvare i filtri applicati come parametri nell'URL (es. `...#list?stato=attivo`).
 ...
 ...
 ## 3. Prossimi Passi
 
-La Fase 1 è completa e la paginazione è stata implementata. Il prossimo passo della **Fase 2** è l'implementazione dell'**Ordinamento Dinamico della Tabella**.
+La Fase 1, la paginazione e l'ordinamento dinamico sono completi. Il prossimo passo della **Fase 2** è l'implementazione della **Persistenza dello Stato dei Filtri**.
 

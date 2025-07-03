@@ -2,15 +2,24 @@
 import { supabase } from '../supabase.js';
 import { navigateTo } from '../router.js';
 
+const ITEMS_PER_PAGE = 10;
+let currentPage = 0;
+
 export async function initListView() {
     const tableBody = document.getElementById('pazienti-table-body');
     if (!tableBody) return;
 
+    // Elementi UI
     const searchInput = document.getElementById('list-search');
     const repartoFilter = document.getElementById('list-filter-reparto');
     const diagnosiFilter = document.getElementById('list-filter-diagnosi');
     const statoFilter = document.getElementById('list-filter-stato');
     const backButton = tableBody.closest('.card').querySelector('button[data-view="home"]');
+    
+    // Elementi di Paginazione
+    const prevButton = document.getElementById('prev-page-btn');
+    const nextButton = document.getElementById('next-page-btn');
+    const pageInfo = document.getElementById('page-info');
 
     const renderTable = (pazientiToRender) => {
         tableBody.innerHTML = '';
@@ -36,11 +45,18 @@ export async function initListView() {
         });
     };
 
+    const updatePaginationControls = (totalItems) => {
+        const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+        pageInfo.textContent = `Pagina ${currentPage + 1} di ${totalPages}`;
+        prevButton.disabled = currentPage === 0;
+        nextButton.disabled = currentPage >= totalPages - 1;
+    };
+
     const fetchAndRenderPazienti = async () => {
         tableBody.innerHTML = '<tr><td colspan="7" class="text-center"><div class="spinner-border"></div></td></tr>';
         
         try {
-            let query = supabase.from('pazienti').select('*').order('cognome', { ascending: true });
+            let query = supabase.from('pazienti').select('*', { count: 'exact' });
 
             // Applica filtri
             const searchTerm = searchInput.value.trim();
@@ -59,10 +75,16 @@ export async function initListView() {
                 query = query.not('data_dimissione', 'is', null);
             }
 
-            const { data, error } = await query;
+            // Applica paginazione
+            const startIndex = currentPage * ITEMS_PER_PAGE;
+            const endIndex = startIndex + ITEMS_PER_PAGE - 1;
+            query = query.range(startIndex, endIndex).order('cognome', { ascending: true });
+
+            const { data, error, count } = await query;
             if (error) throw error;
 
             renderTable(data);
+            updatePaginationControls(count);
 
         } catch (error) {
             console.error('Errore caricamento elenco pazienti:', error);
@@ -84,7 +106,7 @@ export async function initListView() {
         }
     };
 
-    // Popola i filtri e carica i dati iniziali
+    // Inizializzazione
     await Promise.all([
         populateFilter('reparto_appartenenza', repartoFilter),
         populateFilter('diagnosi', diagnosiFilter)
@@ -92,12 +114,26 @@ export async function initListView() {
     
     fetchAndRenderPazienti();
 
-    // Aggiungi event listeners ai filtri
+    // Event Listeners
     [searchInput, repartoFilter, diagnosiFilter, statoFilter].forEach(el => {
-        el.addEventListener('input', fetchAndRenderPazienti);
+        el.addEventListener('input', () => {
+            currentPage = 0; // Resetta la pagina quando cambiano i filtri
+            fetchAndRenderPazienti();
+        });
     });
 
-    // Gestione azioni (edit/delete)
+    prevButton.addEventListener('click', () => {
+        if (currentPage > 0) {
+            currentPage--;
+            fetchAndRenderPazienti();
+        }
+    });
+
+    nextButton.addEventListener('click', () => {
+        currentPage++;
+        fetchAndRenderPazienti();
+    });
+
     tableBody.addEventListener('click', (e) => {
         const action = e.target.dataset.action;
         const id = e.target.dataset.id;
@@ -114,7 +150,7 @@ export async function initListView() {
                 try {
                     const { error } = await supabase.from('pazienti').delete().eq('id', id);
                     if (error) throw error;
-                    fetchAndRenderPazienti(); // Ricarica la tabella
+                    fetchAndRenderPazienti();
                 } catch (error) {
                     console.error('Errore eliminazione paziente:', error);
                     alert(`Errore: ${error.message}`);

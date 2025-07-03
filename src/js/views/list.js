@@ -21,6 +21,30 @@ function updateSortIndicators() {
     });
 }
 
+function buildQuery() {
+    const searchInput = document.getElementById('list-search');
+    const repartoFilter = document.getElementById('list-filter-reparto');
+    const diagnosiFilter = document.getElementById('list-filter-diagnosi');
+    const statoFilter = document.getElementById('list-filter-stato');
+
+    let query = supabase.from('pazienti').select('*', { count: 'exact' });
+
+    // Filtri
+    const searchTerm = searchInput.value.trim();
+    if (searchTerm) query = query.or(`nome.ilike.%${searchTerm}%,cognome.ilike.%${searchTerm}%`);
+    if (repartoFilter.value) query = query.eq('reparto_appartenenza', repartoFilter.value);
+    if (diagnosiFilter.value) query = query.eq('diagnosi', diagnosiFilter.value);
+    if (statoFilter.value === 'attivo') query = query.is('data_dimissione', null);
+    else if (statoFilter.value === 'dimesso') query = query.not('data_dimissione', 'is', null);
+
+    // Ordinamento e Paginazione
+    const startIndex = currentPage * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE - 1;
+    query = query.order(sortColumn, { ascending: sortDirection === 'asc' }).range(startIndex, endIndex);
+
+    return query;
+}
+
 async function fetchAndRenderPazienti() {
     const tableBody = document.getElementById('pazienti-table-body');
     if (!tableBody) return;
@@ -28,26 +52,7 @@ async function fetchAndRenderPazienti() {
     tableBody.innerHTML = '<tr><td colspan="7" class="text-center"><div class="spinner-border"></div></td></tr>';
     
     try {
-        const searchInput = document.getElementById('list-search');
-        const repartoFilter = document.getElementById('list-filter-reparto');
-        const diagnosiFilter = document.getElementById('list-filter-diagnosi');
-        const statoFilter = document.getElementById('list-filter-stato');
-
-        let query = supabase.from('pazienti').select('*', { count: 'exact' });
-
-        // Filtri
-        const searchTerm = searchInput.value.trim();
-        if (searchTerm) query = query.or(`nome.ilike.%${searchTerm}%,cognome.ilike.%${searchTerm}%`);
-        if (repartoFilter.value) query = query.eq('reparto_appartenenza', repartoFilter.value);
-        if (diagnosiFilter.value) query = query.eq('diagnosi', diagnosiFilter.value);
-        if (statoFilter.value === 'attivo') query = query.is('data_dimissione', null);
-        else if (statoFilter.value === 'dimesso') query = query.not('data_dimissione', 'is', null);
-
-        // Ordinamento e Paginazione
-        const startIndex = currentPage * ITEMS_PER_PAGE;
-        const endIndex = startIndex + ITEMS_PER_PAGE - 1;
-        query = query.order(sortColumn, { ascending: sortDirection === 'asc' }).range(startIndex, endIndex);
-
+        const query = buildQuery();
         const { data, error, count } = await query;
         if (error) throw error;
 
@@ -100,9 +105,12 @@ function updatePaginationControls(totalItems) {
 
 async function populateFilter(columnName, selectElement) {
     try {
-        const { data, error } = await supabase.from('pazienti').select(columnName);
+        // Seleziona solo la colonna specificata e rimuovi i duplicati a livello di DB
+        const { data, error } = await supabase.from('pazienti').select(columnName, { distinct: true });
         if (error) throw error;
-        const uniqueValues = [...new Set(data.map(item => item[columnName]).filter(Boolean))].sort();
+        
+        const uniqueValues = data.map(item => item[columnName]).filter(Boolean).sort();
+        
         selectElement.innerHTML = `<option value="">Tutti</option>`;
         uniqueValues.forEach(value => {
             selectElement.innerHTML += `<option value="${value}">${value}</option>`;
@@ -116,15 +124,19 @@ export async function initListView() {
     const viewContainer = document.querySelector('#app-container .view');
     if (!viewContainer) return;
 
+    // --- Elementi DOM ---
     const searchInput = document.getElementById('list-search');
     const repartoFilter = document.getElementById('list-filter-reparto');
     const diagnosiFilter = document.getElementById('list-filter-diagnosi');
     const statoFilter = document.getElementById('list-filter-stato');
-    const backButton = viewContainer.querySelector('button[data-view="home"]');
+    const filterContainer = viewContainer.querySelector('.filters-container');
+    const tableBody = document.getElementById('pazienti-table-body');
+    const tableHeader = viewContainer.querySelector('thead');
     const prevButton = document.getElementById('prev-page-btn');
     const nextButton = document.getElementById('next-page-btn');
-    const tableBody = document.getElementById('pazienti-table-body');
+    const backButton = viewContainer.querySelector('button[data-view="home"]');
 
+    // --- Inizializzazione ---
     await Promise.all([
         populateFilter('reparto_appartenenza', repartoFilter),
         populateFilter('diagnosi', diagnosiFilter)
@@ -132,13 +144,17 @@ export async function initListView() {
     
     fetchAndRenderPazienti();
 
-    [searchInput, repartoFilter, diagnosiFilter, statoFilter].forEach(el => {
-        el.addEventListener('input', () => {
+    // --- Gestori di Eventi ---
+
+    // Filtri
+    filterContainer.addEventListener('input', (e) => {
+        if (e.target.matches('input, select')) {
             currentPage = 0;
             fetchAndRenderPazienti();
-        });
+        }
     });
 
+    // Paginazione
     prevButton.addEventListener('click', () => {
         if (currentPage > 0) {
             currentPage--;
@@ -151,10 +167,31 @@ export async function initListView() {
         fetchAndRenderPazienti();
     });
 
+    // Ordinamento Tabella
+    if (tableHeader) {
+        tableHeader.addEventListener('click', (e) => {
+            const header = e.target.closest('th');
+            if (header && header.dataset.sort) {
+                const newSortColumn = header.dataset.sort;
+                if (sortColumn === newSortColumn) {
+                    sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+                } else {
+                    sortColumn = newSortColumn;
+                    sortDirection = 'asc';
+                }
+                currentPage = 0;
+                fetchAndRenderPazienti();
+            }
+        });
+    }
+
+    // Azioni sulla tabella (Modifica/Elimina)
     tableBody.addEventListener('click', (e) => {
-        const action = e.target.dataset.action;
-        const id = e.target.dataset.id;
-        if (!action || !id) return;
+        const button = e.target.closest('button[data-action]');
+        if (!button) return;
+
+        const action = button.dataset.action;
+        const id = button.dataset.id;
 
         if (action === 'edit') {
             sessionStorage.setItem('editPazienteId', id);
@@ -180,24 +217,7 @@ export async function initListView() {
         }
     });
 
-    // Event Delegation per l'ordinamento, agganciato all'intestazione della tabella
-    const tableHeader = viewContainer.querySelector('thead');
-    if (tableHeader) {
-        tableHeader.addEventListener('click', (e) => {
-            const header = e.target.closest('th');
-            if (header && header.dataset.sort) {
-                const newSortColumn = header.dataset.sort;
-                if (sortColumn === newSortColumn) {
-                    sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
-                } else {
-                    sortColumn = newSortColumn;
-                    sortDirection = 'asc';
-                }
-                currentPage = 0;
-                fetchAndRenderPazienti();
-            }
-        });
-    }
-
+    // Navigazione
     backButton.addEventListener('click', () => navigateTo('home'));
 }
+

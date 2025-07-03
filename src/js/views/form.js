@@ -57,9 +57,13 @@ export async function initInserimentoView() {
         try {
             let error;
             if (editId) {
+                // In modalità modifica, non inviamo l'ID nel corpo dell'update
+                delete formData.id; 
                 const { error: updateError } = await supabase.from('pazienti').update(formData).eq('id', editId);
                 error = updateError;
             } else {
+                // In modalità inserimento, rimuoviamo l'ID vuoto per permettere al DB di generarlo
+                delete formData.id;
                 const { data: { user } } = await supabase.auth.getUser();
                 if (!user) throw new Error('Utente non autenticato.');
                 formData.user_id = user.id;

@@ -1,20 +1,27 @@
 // src/js/views/list.js
 import { supabase } from '../supabase.js';
 import { navigateTo } from '../router.js';
+import { convertToCSV } from '../utils.js';
 
 const ITEMS_PER_PAGE = 10;
-let currentPage = 0;
-let sortColumn = 'cognome';
-let sortDirection = 'asc';
+
+// Oggetto per centralizzare lo stato della vista
+const state = {
+    currentPage: 0,
+    sortColumn: 'cognome',
+    sortDirection: 'asc',
+};
+
+// Oggetto per "caching" degli elementi del DOM
+const domElements = {};
 
 function updateSortIndicators() {
-    const tableHeaders = document.querySelectorAll('th[data-sort]');
-    tableHeaders.forEach(header => {
+    domElements.tableHeaders.forEach(header => {
         const indicator = header.querySelector('.sort-indicator');
         if (!indicator) return;
 
-        if (header.dataset.sort === sortColumn) {
-            indicator.textContent = sortDirection === 'asc' ? ' ▲' : ' ▼';
+        if (header.dataset.sort === state.sortColumn) {
+            indicator.textContent = state.sortDirection === 'asc' ? ' ▲' : ' ▼';
         } else {
             indicator.textContent = '';
         }
@@ -22,72 +29,64 @@ function updateSortIndicators() {
 }
 
 function buildQuery() {
-    const searchInput = document.getElementById('list-search');
-    const repartoFilter = document.getElementById('list-filter-reparto');
-    const diagnosiFilter = document.getElementById('list-filter-diagnosi');
-    const statoFilter = document.getElementById('list-filter-stato');
-
     let query = supabase.from('pazienti').select('*', { count: 'exact' });
 
     // Filtri
-    const searchTerm = searchInput.value.trim();
+    const searchTerm = domElements.searchInput.value.trim();
     if (searchTerm) query = query.or(`nome.ilike.%${searchTerm}%,cognome.ilike.%${searchTerm}%`);
-    if (repartoFilter.value) query = query.eq('reparto_appartenenza', repartoFilter.value);
-    if (diagnosiFilter.value) query = query.eq('diagnosi', diagnosiFilter.value);
-    if (statoFilter.value === 'attivo') query = query.is('data_dimissione', null);
-    else if (statoFilter.value === 'dimesso') query = query.not('data_dimissione', 'is', null);
+    if (domElements.repartoFilter.value) query = query.eq('reparto_appartenenza', domElements.repartoFilter.value);
+    if (domElements.diagnosiFilter.value) query = query.eq('diagnosi', domElements.diagnosiFilter.value);
+    if (domElements.statoFilter.value === 'attivo') query = query.is('data_dimissione', null);
+    else if (domElements.statoFilter.value === 'dimesso') query = query.not('data_dimissione', 'is', null);
 
     // Ordinamento e Paginazione
-    const startIndex = currentPage * ITEMS_PER_PAGE;
+    const startIndex = state.currentPage * ITEMS_PER_PAGE;
     const endIndex = startIndex + ITEMS_PER_PAGE - 1;
-    query = query.order(sortColumn, { ascending: sortDirection === 'asc' }).range(startIndex, endIndex);
+    query = query.order(state.sortColumn, { ascending: state.sortDirection === 'asc' }).range(startIndex, endIndex);
 
     return query;
 }
 
 function applyFiltersFromURL(urlParams) {
-    document.getElementById('list-search').value = urlParams.get('search') || '';
-    document.getElementById('list-filter-reparto').value = urlParams.get('reparto') || '';
-    document.getElementById('list-filter-diagnosi').value = urlParams.get('diagnosi') || '';
-    document.getElementById('list-filter-stato').value = urlParams.get('stato') || '';
+    domElements.searchInput.value = urlParams.get('search') || '';
+    domElements.repartoFilter.value = urlParams.get('reparto') || '';
+    domElements.diagnosiFilter.value = urlParams.get('diagnosi') || '';
+    domElements.statoFilter.value = urlParams.get('stato') || '';
     
-    currentPage = parseInt(urlParams.get('page') || '0', 10);
-    sortColumn = urlParams.get('sort') || 'cognome';
-    sortDirection = urlParams.get('dir') || 'asc';
+    state.currentPage = parseInt(urlParams.get('page') || '0', 10);
+    state.sortColumn = urlParams.get('sort') || 'cognome';
+    state.sortDirection = urlParams.get('dir') || 'asc';
 }
 
 function updateURLWithFilters() {
     const params = new URLSearchParams();
     
-    const searchTerm = document.getElementById('list-search').value.trim();
+    const searchTerm = domElements.searchInput.value.trim();
     if (searchTerm) params.set('search', searchTerm);
 
-    const reparto = document.getElementById('list-filter-reparto').value;
+    const reparto = domElements.repartoFilter.value;
     if (reparto) params.set('reparto', reparto);
 
-    const diagnosi = document.getElementById('list-filter-diagnosi').value;
+    const diagnosi = domElements.diagnosiFilter.value;
     if (diagnosi) params.set('diagnosi', diagnosi);
 
-    const stato = document.getElementById('list-filter-stato').value;
+    const stato = domElements.statoFilter.value;
     if (stato) params.set('stato', stato);
 
-    if (currentPage > 0) params.set('page', currentPage);
-    if (sortColumn !== 'cognome') params.set('sort', sortColumn);
-    if (sortDirection !== 'asc') params.set('dir', sortDirection);
+    if (state.currentPage > 0) params.set('page', state.currentPage);
+    if (state.sortColumn !== 'cognome') params.set('sort', state.sortColumn);
+    if (state.sortDirection !== 'asc') params.set('dir', state.sortDirection);
 
     const queryString = params.toString();
     const newUrl = queryString ? `#list?${queryString}` : '#list';
     
-    // Usa replaceState per non intasare la cronologia del browser
     history.replaceState(null, '', newUrl);
 }
 
-
 async function fetchAndRenderPazienti() {
-    const tableBody = document.getElementById('pazienti-table-body');
-    if (!tableBody) return;
+    if (!domElements.tableBody) return;
 
-    tableBody.innerHTML = '<tr><td colspan="7" class="text-center"><div class="spinner-border"></div></td></tr>';
+    domElements.tableBody.innerHTML = '<tr><td colspan="7" class="text-center"><div class="spinner-border"></div></td></tr>';
     
     try {
         const query = buildQuery();
@@ -100,20 +99,18 @@ async function fetchAndRenderPazienti() {
 
     } catch (error) {
         console.error('Errore dettagliato durante il fetch dei pazienti:', error);
-        tableBody.innerHTML = `<tr><td colspan="7" class="text-center text-danger"><strong>Errore nel caricamento dei dati.</strong><br>Controlla la console per i dettagli.</td></tr>`;
+        domElements.tableBody.innerHTML = `<tr><td colspan="7" class="text-center text-danger"><strong>Errore nel caricamento dei dati.</strong><br>Controlla la console per i dettagli.</td></tr>`;
     }
 }
 
 function renderTable(pazientiToRender) {
-    const tableBody = document.getElementById('pazienti-table-body');
-    tableBody.innerHTML = '';
+    domElements.tableBody.innerHTML = '';
     if (pazientiToRender.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">Nessun paziente trovato.</td></tr>';
+        domElements.tableBody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">Nessun paziente trovato.</td></tr>';
         return;
     }
-    pazientiToRender.forEach(p => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
+    const rowsHtml = pazientiToRender.map(p => `
+        <tr>
             <td>${p.cognome}</td>
             <td>${p.nome}</td>
             <td>${new Date(p.data_ricovero).toLocaleDateString()}</td>
@@ -124,21 +121,16 @@ function renderTable(pazientiToRender) {
                 <button class="btn btn-sm btn-outline-primary me-1" data-action="edit" data-id="${p.id}">Modifica</button>
                 <button class="btn btn-sm btn-outline-danger" data-action="delete" data-id="${p.id}">Elimina</button>
             </td>
-        `;
-        tableBody.appendChild(row);
-    });
+        </tr>
+    `).join('');
+    domElements.tableBody.innerHTML = rowsHtml;
 }
 
 function updatePaginationControls(totalItems) {
-    const pageInfo = document.getElementById('page-info');
-    const prevButton = document.getElementById('prev-page-btn');
-    const nextButton = document.getElementById('next-page-btn');
-    if (!pageInfo || !prevButton || !nextButton) return;
-
     const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
-    pageInfo.textContent = `Pagina ${currentPage + 1} di ${totalPages || 1}`;
-    prevButton.disabled = currentPage === 0;
-    nextButton.disabled = currentPage >= totalPages - 1;
+    domElements.pageInfo.textContent = `Pagina ${state.currentPage + 1} di ${totalPages || 1}`;
+    domElements.prevButton.disabled = state.currentPage === 0;
+    domElements.nextButton.disabled = state.currentPage >= totalPages - 1;
 }
 
 async function populateFilter(columnName, selectElement) {
@@ -156,70 +148,25 @@ async function populateFilter(columnName, selectElement) {
     }
 }
 
-function convertToCSV(data) {
-    if (!data || data.length === 0) {
-        return '';
-    }
 
-    const headers = [
-        'Cognome', 'Nome', 'Data Ricovero', 'Data Dimissione', 
-        'Reparto Appartenenza', 'Reparto Provenienza', 'Diagnosi', 
-        'Livello Assistenza', 'Stato'
-    ];
-    
-    const rows = data.map(p => {
-        const escape = (str) => {
-            if (str === null || str === undefined) return '';
-            const s = String(str);
-            if (s.search(/("|,|\n)/g) >= 0) {
-                return `"${s.replace(/"/g, '""')}"`;
-            }
-            return s;
-        };
-
-        return [
-            escape(p.cognome),
-            escape(p.nome),
-            escape(p.data_ricovero ? new Date(p.data_ricovero).toLocaleDateString('it-IT') : ''),
-            escape(p.data_dimissione ? new Date(p.data_dimissione).toLocaleDateString('it-IT') : ''),
-            escape(p.reparto_appartenenza),
-            escape(p.reparto_provenienza),
-            escape(p.diagnosi),
-            escape(p.livello_assistenza),
-            p.data_dimissione ? 'Dimesso' : 'Attivo'
-        ].join(',');
-    });
-
-    return [headers.join(','), ...rows].join('\r\n');
-}
 
 async function exportToCSV() {
-    const exportBtn = document.getElementById('export-csv-btn');
-    const originalBtnContent = exportBtn.innerHTML;
-    exportBtn.disabled = true;
-    exportBtn.innerHTML = `<span class="spinner-border spinner-border-sm"></span> Esportazione...`;
+    const originalBtnContent = domElements.exportButton.innerHTML;
+    domElements.exportButton.disabled = true;
+    domElements.exportButton.innerHTML = `<span class="spinner-border spinner-border-sm"></span> Esportazione...`;
 
     try {
-        const searchInput = document.getElementById('list-search');
-        const repartoFilter = document.getElementById('list-filter-reparto');
-        const diagnosiFilter = document.getElementById('list-filter-diagnosi');
-        const statoFilter = document.getElementById('list-filter-stato');
-
         let query = supabase.from('pazienti').select('*');
-
-        const searchTerm = searchInput.value.trim();
+        const searchTerm = domElements.searchInput.value.trim();
         if (searchTerm) query = query.or(`nome.ilike.%${searchTerm}%,cognome.ilike.%${searchTerm}%`);
-        if (repartoFilter.value) query = query.eq('reparto_appartenenza', repartoFilter.value);
-        if (diagnosiFilter.value) query = query.eq('diagnosi', diagnosiFilter.value);
-        if (statoFilter.value) query = query.eq('diagnosi', diagnosiFilter.value);
-        if (statoFilter.value === 'attivo') query = query.is('data_dimissione', null);
-        else if (statoFilter.value === 'dimesso') query = query.not('data_dimissione', 'is', null);
-
-        query = query.order(sortColumn, { ascending: sortDirection === 'asc' });
+        if (domElements.repartoFilter.value) query = query.eq('reparto_appartenenza', domElements.repartoFilter.value);
+        if (domElements.diagnosiFilter.value) query = query.eq('diagnosi', domElements.diagnosiFilter.value);
+        if (domElements.statoFilter.value === 'attivo') query = query.is('data_dimissione', null);
+        else if (domElements.statoFilter.value === 'dimesso') query = query.not('data_dimissione', 'is', null);
+        query = query.order(state.sortColumn, { ascending: state.sortDirection === 'asc' });
 
         const { data, error } = await query;
         if (error) throw error;
-
         if (data.length === 0) {
             alert('Nessun dato da esportare per i filtri selezionati.');
             return;
@@ -228,107 +175,81 @@ async function exportToCSV() {
         const csvContent = convertToCSV(data);
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');
-        const url = URL.createObjectURL(blob);
-        link.setAttribute('href', url);
-        link.setAttribute('download', 'esportazione_pazienti.csv');
-        link.style.visibility = 'hidden';
+        link.href = URL.createObjectURL(blob);
+        link.download = 'esportazione_pazienti.csv';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-
     } catch (error) {
         console.error('Errore durante l\'esportazione CSV:', error);
-        alert(`Errore durante l'esportazione: ${error.message}`);
+        alert(`Errore durante l\'esportazione: ${error.message}`);
     } finally {
-        exportBtn.disabled = false;
-        exportBtn.innerHTML = originalBtnContent;
+        domElements.exportButton.disabled = false;
+        domElements.exportButton.innerHTML = originalBtnContent;
     }
 }
 
-export async function initListView(urlParams) {
-    const viewContainer = document.querySelector('#app-container .view');
-    if (!viewContainer) return;
+function cacheDOMElements(viewContainer) {
+    domElements.repartoFilter = document.getElementById('list-filter-reparto');
+    domElements.diagnosiFilter = document.getElementById('list-filter-diagnosi');
+    domElements.statoFilter = document.getElementById('list-filter-stato');
+    domElements.searchInput = document.getElementById('list-search');
+    domElements.filterContainer = viewContainer.querySelector('.filters-container');
+    domElements.tableBody = document.getElementById('pazienti-table-body');
+    domElements.tableHeaders = viewContainer.querySelectorAll('th[data-sort]');
+    domElements.prevButton = document.getElementById('prev-page-btn');
+    domElements.nextButton = document.getElementById('next-page-btn');
+    domElements.pageInfo = document.getElementById('page-info');
+    domElements.backButton = viewContainer.querySelector('button[data-view="home"]');
+    domElements.exportButton = document.getElementById('export-csv-btn');
+}
 
-    // --- Elementi DOM ---
-    const repartoFilter = document.getElementById('list-filter-reparto');
-    const diagnosiFilter = document.getElementById('list-filter-diagnosi');
-    const filterContainer = viewContainer.querySelector('.filters-container');
-    const tableBody = document.getElementById('pazienti-table-body');
-    const tableHeader = viewContainer.querySelector('thead');
-    const prevButton = document.getElementById('prev-page-btn');
-    const nextButton = document.getElementById('next-page-btn');
-    const backButton = viewContainer.querySelector('button[data-view="home"]');
-    const exportButton = document.getElementById('export-csv-btn');
-
-    // --- Inizializzazione ---
-    await Promise.all([
-        populateFilter('reparto_appartenenza', repartoFilter),
-        populateFilter('diagnosi', diagnosiFilter)
-    ]);
-
-    applyFiltersFromURL(urlParams);
-    
-    fetchAndRenderPazienti();
-
-    // --- Gestori di Eventi ---
-
+function setupEventListeners() {
     const handleFilterChange = () => {
-        currentPage = 0;
+        state.currentPage = 0;
         updateURLWithFilters();
         fetchAndRenderPazienti();
     };
 
-    // Filtri
-    filterContainer.addEventListener('input', (e) => {
-        if (e.target.matches('input, select')) {
-            handleFilterChange();
-        }
+    domElements.filterContainer.addEventListener('input', e => {
+        if (e.target.matches('input, select')) handleFilterChange();
     });
 
-    // Esportazione
-    exportButton.addEventListener('click', exportToCSV);
+    domElements.exportButton.addEventListener('click', exportToCSV);
 
-    // Paginazione
-    prevButton.addEventListener('click', () => {
-        if (currentPage > 0) {
-            currentPage--;
+    domElements.prevButton.addEventListener('click', () => {
+        if (state.currentPage > 0) {
+            state.currentPage--;
             updateURLWithFilters();
             fetchAndRenderPazienti();
         }
     });
 
-    nextButton.addEventListener('click', () => {
-        currentPage++;
+    domElements.nextButton.addEventListener('click', () => {
+        state.currentPage++;
         updateURLWithFilters();
         fetchAndRenderPazienti();
     });
 
-    // Ordinamento Tabella
-    if (tableHeader) {
-        tableHeader.addEventListener('click', (e) => {
-            const header = e.target.closest('th');
-            if (header && header.dataset.sort) {
-                const newSortColumn = header.dataset.sort;
-                if (sortColumn === newSortColumn) {
-                    sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
-                } else {
-                    sortColumn = newSortColumn;
-                    sortDirection = 'asc';
-                }
-                currentPage = 0;
-                updateURLWithFilters();
-                fetchAndRenderPazienti();
+    domElements.tableHeaders.forEach(header => {
+        header.addEventListener('click', () => {
+            const newSortColumn = header.dataset.sort;
+            if (state.sortColumn === newSortColumn) {
+                state.sortDirection = state.sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                state.sortColumn = newSortColumn;
+                state.sortDirection = 'asc';
             }
+            state.currentPage = 0;
+            updateURLWithFilters();
+            fetchAndRenderPazienti();
         });
-    }
+    });
 
-    // Azioni sulla tabella (Modifica/Elimina)
-    tableBody.addEventListener('click', (e) => {
+    domElements.tableBody.addEventListener('click', e => {
         const button = e.target.closest('button[data-action]');
         if (!button) return;
-
-        const action = button.dataset.action;
-        const id = button.dataset.id;
+        const { action, id } = button.dataset;
 
         if (action === 'edit') {
             sessionStorage.setItem('editPazienteId', id);
@@ -336,12 +257,10 @@ export async function initListView(urlParams) {
         } else if (action === 'delete') {
             const deleteModal = new bootstrap.Modal(document.getElementById('delete-confirm-modal'));
             const confirmBtn = document.getElementById('confirm-delete-btn');
-            
-            const handleDelete = async () => {
+            confirmBtn.onclick = async () => {
                 try {
-                    const { error } = await supabase.from('pazienti').delete().eq('id', id);
-                    if (error) throw error;
-                    fetchAndRenderPazienti(); // Ricarica i dati dopo l'eliminazione
+                    await supabase.from('pazienti').delete().eq('id', id);
+                    fetchAndRenderPazienti();
                 } catch (error) {
                     console.error('Errore eliminazione paziente:', error);
                     alert(`Errore: ${error.message}`);
@@ -349,12 +268,26 @@ export async function initListView(urlParams) {
                     deleteModal.hide();
                 }
             };
-            confirmBtn.onclick = handleDelete;
             deleteModal.show();
         }
     });
 
-    // Navigazione
-    backButton.addEventListener('click', () => navigateTo('home'));
+    domElements.backButton.addEventListener('click', () => navigateTo('home'));
+}
+
+export async function initListView(urlParams) {
+    const viewContainer = document.querySelector('#app-container .view');
+    if (!viewContainer) return;
+
+    cacheDOMElements(viewContainer);
+
+    await Promise.all([
+        populateFilter('reparto_appartenenza', domElements.repartoFilter),
+        populateFilter('diagnosi', domElements.diagnosiFilter)
+    ]);
+
+    applyFiltersFromURL(urlParams);
+    fetchAndRenderPazienti();
+    setupEventListeners();
 }
 

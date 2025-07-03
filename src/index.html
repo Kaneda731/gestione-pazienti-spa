@@ -331,8 +331,31 @@
                     </button>
                 </div>
                 <div class="card-body">
-                    <div class="mb-3">
-                        <input type="text" id="list-search" class="form-control" placeholder="Cerca per nome o cognome...">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-3">
+                            <label for="list-filter-reparto" class="form-label">Reparto</label>
+                            <select id="list-filter-reparto" class="form-select form-select-sm">
+                                <!-- Popolato dinamicamente -->
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="list-filter-diagnosi" class="form-label">Diagnosi</label>
+                            <select id="list-filter-diagnosi" class="form-select form-select-sm">
+                                <!-- Popolato dinamicamente -->
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="list-filter-stato" class="form-label">Stato</label>
+                            <select id="list-filter-stato" class="form-select form-select-sm">
+                                <option value="">Tutti</option>
+                                <option value="attivo">Attivo</option>
+                                <option value="dimesso">Dimesso</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="list-search" class="form-label">Cerca</label>
+                            <input type="text" id="list-search" class="form-control form-control-sm" placeholder="Per nome o cognome...">
+                        </div>
                     </div>
                     <div class="table-responsive">
                         <table class="table table-striped table-hover">

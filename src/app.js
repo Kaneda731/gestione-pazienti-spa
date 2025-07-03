@@ -274,6 +274,9 @@ async function initGraficoView() {
 async function initListView() {
     const tableBody = document.getElementById('pazienti-table-body');
     const searchInput = document.getElementById('list-search');
+    const repartoFilter = document.getElementById('list-filter-reparto');
+    const diagnosiFilter = document.getElementById('list-filter-diagnosi');
+    const statoFilter = document.getElementById('list-filter-stato');
     const backButton = tableBody.closest('.card').querySelector('button[data-view="home"]');
     
     tableBody.innerHTML = '<tr><td colspan="6" class="text-center"><div class="spinner-border"></div></td></tr>';
@@ -285,6 +288,34 @@ async function initListView() {
             .order('cognome', { ascending: true });
 
         if (error) throw error;
+
+        // Popola filtri
+        const populateFilter = (columnName, selectElement) => {
+            const uniqueValues = [...new Set(pazienti.map(p => p[columnName]))].sort();
+            selectElement.innerHTML = `<option value="">Tutti</option>`;
+            uniqueValues.forEach(value => {
+                if(value) selectElement.innerHTML += `<option value="${value}">${value}</option>`;
+            });
+        };
+        populateFilter('reparto_appartenenza', repartoFilter);
+        populateFilter('diagnosi', diagnosiFilter);
+
+        const applyFilters = () => {
+            const searchTerm = searchInput.value.toLowerCase();
+            const reparto = repartoFilter.value;
+            const diagnosi = diagnosiFilter.value;
+            const stato = statoFilter.value;
+
+            const filteredPazienti = pazienti.filter(p => {
+                const searchMatch = p.nome.toLowerCase().includes(searchTerm) || p.cognome.toLowerCase().includes(searchTerm);
+                const repartoMatch = !reparto || p.reparto_appartenenza === reparto;
+                const diagnosiMatch = !diagnosi || p.diagnosi === diagnosi;
+                const statoMatch = !stato || (stato === 'attivo' && !p.data_dimissione) || (stato === 'dimesso' && p.data_dimissione);
+                
+                return searchMatch && repartoMatch && diagnosiMatch && statoMatch;
+            });
+            renderTable(filteredPazienti);
+        };
 
         const renderTable = (pazientiToRender) => {
             tableBody.innerHTML = '';
@@ -308,18 +339,14 @@ async function initListView() {
 
         renderTable(pazienti);
 
-        searchInput.addEventListener('input', () => {
-            const searchTerm = searchInput.value.toLowerCase();
-            const filteredPazienti = pazienti.filter(p => 
-                p.nome.toLowerCase().includes(searchTerm) || 
-                p.cognome.toLowerCase().includes(searchTerm)
-            );
-            renderTable(filteredPazienti);
+        // Aggiungi event listeners ai filtri
+        [searchInput, repartoFilter, diagnosiFilter, statoFilter].forEach(el => {
+            el.addEventListener('input', applyFilters);
         });
 
     } catch (error) {
         console.error('Errore caricamento elenco pazienti:', error);
-        tableBody.innerHTML = `<tr><td colspan="6" class="text-center text-danger">Errore nel caricamento dei dati: ${error.message}</td></tr>`;
+        tableBody.innerHTML = `<tr><td colspan="6" class="text-center text-danger">Errore: ${error.message}</td></tr>`;
     }
 
     backButton.addEventListener('click', () => navigateTo('home'));

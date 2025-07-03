@@ -22,7 +22,12 @@ async function populateFormForEdit(editId) {
         // Popola dinamicamente i campi del form
         for (const key in data) {
             if (dom.form.elements[key]) {
-                dom.form.elements[key].value = data[key];
+                // Correzione per i campi di tipo 'date'
+                if (dom.form.elements[key].type === 'date' && data[key]) {
+                    dom.form.elements[key].value = data[key].split('T')[0];
+                } else {
+                    dom.form.elements[key].value = data[key];
+                }
             }
         }
     } catch (error) {

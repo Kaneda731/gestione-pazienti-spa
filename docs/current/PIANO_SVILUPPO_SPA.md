@@ -21,15 +21,15 @@ Questa fase è fondamentale per garantire la scalabilità e la manutenibilità f
     -   **Azione:** Modificare la vista "Elenco Pazienti" per costruire query dinamiche a Supabase. I filtri (per reparto, diagnosi, stato) e la ricerca testuale verranno eseguiti direttamente dal database.
     -   **Risultato Atteso:** Performance drasticamente migliorate, specialmente con un grande numero di pazienti.
 
-2.  **Modularizzazione del Codice JavaScript:**
+2.  **Modularizzazione del Codice JavaScript: (✓ Completato)**
     -   **Obiettivo:** Suddividere il file monolitico `src/app.js` in moduli specializzati.
     -   **Azione:** Creare una nuova struttura di cartelle (`src/js/`) e separare la logica in file distinti:
-        -   `config.js`: Per le credenziali Supabase.
+        -   `supabase.js`: Per le credenziali e il client Supabase.
         -   `router.js`: Per la gestione della navigazione.
         -   `auth.js`: Per l'autenticazione.
         -   `ui.js`: Per funzioni di UI riutilizzabili (es. `mostraMessaggio`).
         -   `views/`: Una cartella contenente la logica per ogni vista specifica (es. `list.js`, `form.js`).
-    -   **Risultato Atteso:** Codice più organizzato, leggibile e facile da manutenere.
+    -   **Risultato:** Codice più organizzato, leggibile e facile da manutenere.
 
 ### Fase 2: Miglioramento dell'Esperienza Utente (UX)
 
@@ -61,4 +61,4 @@ Queste attività sono a lungo termine e mirano a rendere l'applicazione ancora p
 
 ## 3. Prossimi Passi
 
-Se sei d'accordo con questo piano, il primo passo è iniziare con la **Fase 1**. Procederò con lo spostamento della logica di filtro sul server.
+Il refactoring strutturale è completo. Il prossimo passo è implementare la **Fase 1.1: Spostamento della Logica di Filtro e Ricerca sul Server**.

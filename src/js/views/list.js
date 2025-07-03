@@ -116,8 +116,8 @@ function renderTable(pazientiToRender) {
             : `<span class="badge bg-success">Attivo</span>`;
 
         const actionButton = isDimesso
-            ? `<button class="btn btn-sm btn-outline-success" data-action="riattiva" data-id="${p.id}" title="Riattiva Paziente"><span class="material-icons" style="font-size: 1.1em;">undo</span></button>`
-            : `<button class="btn btn-sm btn-outline-warning" data-action="dimetti" data-id="${p.id}" title="Dimetti Paziente"><span class="material-icons" style="font-size: 1.1em;">event_available</span></button>`;
+            ? `<button class="btn btn-sm btn-outline-success" data-action="riattiva" data-id="${p.id}" title="Riattiva Paziente"><span class="material-icons" style="font-size: 1.1em; pointer-events: none;">undo</span></button>`
+            : `<button class="btn btn-sm btn-outline-warning" data-action="dimetti" data-id="${p.id}" title="Dimetti Paziente"><span class="material-icons" style="font-size: 1.1em; pointer-events: none;">event_available</span></button>`;
 
         return `
             <tr>
@@ -128,9 +128,9 @@ function renderTable(pazientiToRender) {
                 <td>${p.reparto_appartenenza}</td>
                 <td>${statusBadge}</td>
                 <td class="text-nowrap">
-                    <button class="btn btn-sm btn-outline-primary me-1" data-action="edit" data-id="${p.id}" title="Modifica"><span class="material-icons" style="font-size: 1.1em;">edit</span></button>
+                    <button class="btn btn-sm btn-outline-primary me-1" data-action="edit" data-id="${p.id}" title="Modifica"><span class="material-icons" style="font-size: 1.1em; pointer-events: none;">edit</span></button>
                     ${actionButton}
-                    <button class="btn btn-sm btn-outline-danger ms-1" data-action="delete" data-id="${p.id}" title="Elimina"><span class="material-icons" style="font-size: 1.1em;">delete</span></button>
+                    <button class="btn btn-sm btn-outline-danger ms-1" data-action="delete" data-id="${p.id}" title="Elimina"><span class="material-icons" style="font-size: 1.1em; pointer-events: none;">delete</span></button>
                 </td>
             </tr>
         `;
@@ -208,9 +208,29 @@ async function handleStatusChange(pazienteId, isDimissione) {
         data_dimissione: isDimissione ? new Date().toISOString().split('T')[0] : null
     };
     try {
-        const { error } = await supabase.from('pazienti').update(updateData).eq('id', pazienteId);
-        if (error) throw error;
-        fetchAndRenderPazienti(); // Ricarica la tabella per mostrare lo stato aggiornato
+        // Aggiungendo .select() alla fine, chiediamo a Supabase di restituire i dati aggiornati.
+        // Questo ci permette di verificare se l'operazione ha avuto successo.
+        const { data, error } = await supabase
+            .from('pazienti')
+            .update(updateData)
+            .eq('id', pazienteId)
+            .select(); // <-- CHIAVE DELLA DIAGNOSI
+
+        if (error) {
+            // Gestisce errori di rete o violazioni di policy esplicite
+            throw error;
+        }
+
+        if (!data || data.length === 0) {
+            // Questo accade se l'ID non viene trovato o se le policy RLS (Row Level Security)
+            // impediscono l'update, ma senza generare un errore esplicito.
+            alert('Operazione non riuscita. Il paziente non è stato trovato o non si hanno i permessi per modificarlo.');
+            console.warn('Nessuna riga modificata per l-ID:', pazienteId);
+            return;
+        }
+        
+        // Se tutto va bene, ricarica la tabella
+        fetchAndRenderPazienti(); 
     } catch (error) {
         console.error('Errore durante l\'aggiornamento dello stato del paziente:', error);
         alert(`Errore: ${error.message}`);

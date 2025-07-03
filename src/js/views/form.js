@@ -13,6 +13,7 @@ const dom = {};
 async function populateFormForEdit(editId) {
     dom.title.innerHTML = '<span class="material-icons me-2">edit</span>Modifica Paziente';
     dom.submitButton.innerHTML = '<span class="material-icons me-1" style="vertical-align: middle;">save</span>Salva Modifiche';
+    dom.dataDimissioneContainer.style.display = 'block'; // Mostra il campo
 
     try {
         const { data, error } = await supabase.from('pazienti').select('*').eq('id', editId).single();
@@ -38,6 +39,7 @@ function setupFormForInsert() {
     dom.submitButton.innerHTML = '<span class="material-icons me-1" style="vertical-align: middle;">save</span>Salva Paziente';
     dom.form.reset();
     dom.idInput.value = '';
+    dom.dataDimissioneContainer.style.display = 'none'; // Nasconde il campo
     // Imposta la data di ricovero di default a oggi
     dom.form.querySelector('#data_ricovero').value = new Date().toISOString().split('T')[0];
 }
@@ -61,6 +63,11 @@ async function handleFormSubmit(e, editId) {
     const formData = Object.fromEntries(new FormData(dom.form));
     delete formData.id; // Rimuove l'ID dal corpo della richiesta in ogni caso
 
+    // Se la data di dimissione è vuota, assicurati che venga inviato 'null'
+    if (!formData.data_dimissione) {
+        formData.data_dimissione = null;
+    }
+
     try {
         let error;
         if (editId) {
@@ -69,6 +76,7 @@ async function handleFormSubmit(e, editId) {
             error = updateError;
         } else {
             // Modalità Inserimento
+            delete formData.data_dimissione; // Non si può inserire un nuovo paziente già dimesso
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) throw new Error('Utente non autenticato.');
             formData.user_id = user.id;
@@ -116,6 +124,7 @@ export async function initInserimentoView() {
     dom.title = document.getElementById('inserimento-title');
     dom.submitButton = formElement.querySelector('button[type="submit"]');
     dom.idInput = document.getElementById('paziente-id');
+    dom.dataDimissioneContainer = document.getElementById('data-dimissione-container');
 
     const editId = sessionStorage.getItem('editPazienteId');
 

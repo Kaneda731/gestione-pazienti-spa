@@ -109,20 +109,32 @@ function renderTable(pazientiToRender) {
         domElements.tableBody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">Nessun paziente trovato.</td></tr>';
         return;
     }
-    const rowsHtml = pazientiToRender.map(p => `
-        <tr>
-            <td>${p.cognome}</td>
-            <td>${p.nome}</td>
-            <td>${new Date(p.data_ricovero).toLocaleDateString()}</td>
-            <td>${p.diagnosi}</td>
-            <td>${p.reparto_appartenenza}</td>
-            <td>${p.data_dimissione ? `<span class="badge bg-secondary">Dimesso</span>` : `<span class="badge bg-success">Attivo</span>`}</td>
-            <td>
-                <button class="btn btn-sm btn-outline-primary me-1" data-action="edit" data-id="${p.id}">Modifica</button>
-                <button class="btn btn-sm btn-outline-danger" data-action="delete" data-id="${p.id}">Elimina</button>
-            </td>
-        </tr>
-    `).join('');
+    const rowsHtml = pazientiToRender.map(p => {
+        const isDimesso = p.data_dimissione;
+        const statusBadge = isDimesso
+            ? `<span class="badge bg-secondary">Dimesso</span>`
+            : `<span class="badge bg-success">Attivo</span>`;
+
+        const actionButton = isDimesso
+            ? `<button class="btn btn-sm btn-outline-success" data-action="riattiva" data-id="${p.id}" title="Riattiva Paziente"><span class="material-icons" style="font-size: 1.1em;">undo</span></button>`
+            : `<button class="btn btn-sm btn-outline-warning" data-action="dimetti" data-id="${p.id}" title="Dimetti Paziente"><span class="material-icons" style="font-size: 1.1em;">event_available</span></button>`;
+
+        return `
+            <tr>
+                <td>${p.cognome}</td>
+                <td>${p.nome}</td>
+                <td>${new Date(p.data_ricovero).toLocaleDateString()}</td>
+                <td>${p.diagnosi}</td>
+                <td>${p.reparto_appartenenza}</td>
+                <td>${statusBadge}</td>
+                <td class="text-nowrap">
+                    <button class="btn btn-sm btn-outline-primary me-1" data-action="edit" data-id="${p.id}" title="Modifica"><span class="material-icons" style="font-size: 1.1em;">edit</span></button>
+                    ${actionButton}
+                    <button class="btn btn-sm btn-outline-danger ms-1" data-action="delete" data-id="${p.id}" title="Elimina"><span class="material-icons" style="font-size: 1.1em;">delete</span></button>
+                </td>
+            </tr>
+        `;
+    }).join('');
     domElements.tableBody.innerHTML = rowsHtml;
 }
 
@@ -191,6 +203,20 @@ function cacheDOMElements(viewContainer) {
     domElements.exportButton = document.getElementById('export-csv-btn');
 }
 
+async function handleStatusChange(pazienteId, isDimissione) {
+    const updateData = {
+        data_dimissione: isDimissione ? new Date().toISOString().split('T')[0] : null
+    };
+    try {
+        const { error } = await supabase.from('pazienti').update(updateData).eq('id', pazienteId);
+        if (error) throw error;
+        fetchAndRenderPazienti(); // Ricarica la tabella per mostrare lo stato aggiornato
+    } catch (error) {
+        console.error('Errore durante l\'aggiornamento dello stato del paziente:', error);
+        alert(`Errore: ${error.message}`);
+    }
+}
+
 function setupEventListeners() {
     const handleFilterChange = () => {
         state.currentPage = 0;
@@ -238,24 +264,33 @@ function setupEventListeners() {
         if (!button) return;
         const { action, id } = button.dataset;
 
-        if (action === 'edit') {
-            sessionStorage.setItem('editPazienteId', id);
-            navigateTo('inserimento');
-        } else if (action === 'delete') {
-            const deleteModal = new bootstrap.Modal(document.getElementById('delete-confirm-modal'));
-            const confirmBtn = document.getElementById('confirm-delete-btn');
-            confirmBtn.onclick = async () => {
-                try {
-                    await supabase.from('pazienti').delete().eq('id', id);
-                    fetchAndRenderPazienti();
-                } catch (error) {
-                    console.error('Errore eliminazione paziente:', error);
-                    alert(`Errore: ${error.message}`);
-                } finally {
-                    deleteModal.hide();
-                }
-            };
-            deleteModal.show();
+        switch (action) {
+            case 'edit':
+                sessionStorage.setItem('editPazienteId', id);
+                navigateTo('inserimento');
+                break;
+            case 'delete':
+                const deleteModal = new bootstrap.Modal(document.getElementById('delete-confirm-modal'));
+                const confirmBtn = document.getElementById('confirm-delete-btn');
+                confirmBtn.onclick = async () => {
+                    try {
+                        await supabase.from('pazienti').delete().eq('id', id);
+                        fetchAndRenderPazienti();
+                    } catch (error) {
+                        console.error('Errore eliminazione paziente:', error);
+                        alert(`Errore: ${error.message}`);
+                    } finally {
+                        deleteModal.hide();
+                    }
+                };
+                deleteModal.show();
+                break;
+            case 'dimetti':
+                handleStatusChange(id, true);
+                break;
+            case 'riattiva':
+                handleStatusChange(id, false);
+                break;
         }
     });
 

@@ -18,7 +18,10 @@ export function navigateTo(viewName) {
 }
 
 export async function renderView() {
-    const requestedViewName = window.location.hash.substring(1) || 'home';
+    const hash = window.location.hash.substring(1) || 'home';
+    const [requestedViewName, queryString] = hash.split('?');
+    const urlParams = new URLSearchParams(queryString);
+
     const protectedViews = ['inserimento', 'dimissione', 'grafico', 'list'];
     
     const { data: { session } } = await supabase.auth.getSession();
@@ -27,6 +30,7 @@ export async function renderView() {
     let template;
 
     if (protectedViews.includes(requestedViewName) && !session) {
+        localStorage.setItem('redirectUrl', hash); // Salva l'URL desiderato
         viewToRender = 'loginRequired';
         template = templates.loginRequired;
     } else {
@@ -46,10 +50,10 @@ export async function renderView() {
     
     appContainer.appendChild(viewContent);
 
-    // Inizializza la logica specifica della vista
+    // Inizializza la logica specifica della vista, passando i parametri URL
     const initializer = viewInitializers[viewToRender];
     if (initializer) {
-        initializer();
+        initializer(urlParams); // Passa gli URLSearchParams alla funzione di init
     } else if (viewToRender === 'home') {
         document.querySelectorAll('.menu-card').forEach(card => {
             card.addEventListener('click', () => {

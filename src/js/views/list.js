@@ -45,6 +45,44 @@ function buildQuery() {
     return query;
 }
 
+function applyFiltersFromURL(urlParams) {
+    document.getElementById('list-search').value = urlParams.get('search') || '';
+    document.getElementById('list-filter-reparto').value = urlParams.get('reparto') || '';
+    document.getElementById('list-filter-diagnosi').value = urlParams.get('diagnosi') || '';
+    document.getElementById('list-filter-stato').value = urlParams.get('stato') || '';
+    
+    currentPage = parseInt(urlParams.get('page') || '0', 10);
+    sortColumn = urlParams.get('sort') || 'cognome';
+    sortDirection = urlParams.get('dir') || 'asc';
+}
+
+function updateURLWithFilters() {
+    const params = new URLSearchParams();
+    
+    const searchTerm = document.getElementById('list-search').value.trim();
+    if (searchTerm) params.set('search', searchTerm);
+
+    const reparto = document.getElementById('list-filter-reparto').value;
+    if (reparto) params.set('reparto', reparto);
+
+    const diagnosi = document.getElementById('list-filter-diagnosi').value;
+    if (diagnosi) params.set('diagnosi', diagnosi);
+
+    const stato = document.getElementById('list-filter-stato').value;
+    if (stato) params.set('stato', stato);
+
+    if (currentPage > 0) params.set('page', currentPage);
+    if (sortColumn !== 'cognome') params.set('sort', sortColumn);
+    if (sortDirection !== 'asc') params.set('dir', sortDirection);
+
+    const queryString = params.toString();
+    const newUrl = queryString ? `#list?${queryString}` : '#list';
+    
+    // Usa replaceState per non intasare la cronologia del browser
+    history.replaceState(null, '', newUrl);
+}
+
+
 async function fetchAndRenderPazienti() {
     const tableBody = document.getElementById('pazienti-table-body');
     if (!tableBody) return;
@@ -105,11 +143,9 @@ function updatePaginationControls(totalItems) {
 
 async function populateFilter(columnName, selectElement) {
     try {
-        // Seleziona solo la colonna specificata e rimuovi i duplicati a livello di DB
-        const { data, error } = await supabase.from('pazienti').select(columnName, { distinct: true });
+        const { data, error } = await supabase.from('pazienti').select(columnName);
         if (error) throw error;
-        
-        const uniqueValues = data.map(item => item[columnName]).filter(Boolean).sort();
+        const uniqueValues = [...new Set(data.map(item => item[columnName]).filter(Boolean))].sort();
         
         selectElement.innerHTML = `<option value="">Tutti</option>`;
         uniqueValues.forEach(value => {
@@ -120,15 +156,13 @@ async function populateFilter(columnName, selectElement) {
     }
 }
 
-export async function initListView() {
+export async function initListView(urlParams) {
     const viewContainer = document.querySelector('#app-container .view');
     if (!viewContainer) return;
 
     // --- Elementi DOM ---
-    const searchInput = document.getElementById('list-search');
     const repartoFilter = document.getElementById('list-filter-reparto');
     const diagnosiFilter = document.getElementById('list-filter-diagnosi');
-    const statoFilter = document.getElementById('list-filter-stato');
     const filterContainer = viewContainer.querySelector('.filters-container');
     const tableBody = document.getElementById('pazienti-table-body');
     const tableHeader = viewContainer.querySelector('thead');
@@ -141,16 +175,23 @@ export async function initListView() {
         populateFilter('reparto_appartenenza', repartoFilter),
         populateFilter('diagnosi', diagnosiFilter)
     ]);
+
+    applyFiltersFromURL(urlParams);
     
     fetchAndRenderPazienti();
 
     // --- Gestori di Eventi ---
 
+    const handleFilterChange = () => {
+        currentPage = 0;
+        updateURLWithFilters();
+        fetchAndRenderPazienti();
+    };
+
     // Filtri
     filterContainer.addEventListener('input', (e) => {
         if (e.target.matches('input, select')) {
-            currentPage = 0;
-            fetchAndRenderPazienti();
+            handleFilterChange();
         }
     });
 
@@ -158,12 +199,14 @@ export async function initListView() {
     prevButton.addEventListener('click', () => {
         if (currentPage > 0) {
             currentPage--;
+            updateURLWithFilters();
             fetchAndRenderPazienti();
         }
     });
 
     nextButton.addEventListener('click', () => {
         currentPage++;
+        updateURLWithFilters();
         fetchAndRenderPazienti();
     });
 
@@ -180,6 +223,7 @@ export async function initListView() {
                     sortDirection = 'asc';
                 }
                 currentPage = 0;
+                updateURLWithFilters();
                 fetchAndRenderPazienti();
             }
         });
@@ -204,7 +248,7 @@ export async function initListView() {
                 try {
                     const { error } = await supabase.from('pazienti').delete().eq('id', id);
                     if (error) throw error;
-                    fetchAndRenderPazienti();
+                    fetchAndRenderPazienti(); // Ricarica i dati dopo l'eliminazione
                 } catch (error) {
                     console.error('Errore eliminazione paziente:', error);
                     alert(`Errore: ${error.message}`);

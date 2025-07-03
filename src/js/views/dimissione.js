@@ -106,7 +106,7 @@ function setupEventListeners() {
  * Inizializza la vista di dimissione paziente.
  */
 export function initDimissioneView() {
-    const view = document.querySelector('#view-dimissione');
+    const view = document.querySelector('#app-container .view');
     if (!view) return;
 
     // Caching degli elementi DOM
@@ -125,6 +125,8 @@ export function initDimissioneView() {
     dom.searchInput.value = '';
     selectedPaziente = null;
 
-    setupEventListeners();
-    dom.searchInput.focus();
+    setTimeout(() => {
+        setupEventListeners();
+        dom.searchInput.focus();
+    }, 0);
 }

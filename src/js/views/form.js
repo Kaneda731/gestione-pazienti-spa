@@ -112,7 +112,7 @@ function setupFormEventListeners(editId) {
 
     dom.backButton.addEventListener('click', () => {
         sessionStorage.removeItem('editPazienteId');
-        navigateTo('list');
+        navigateTo('home');
     });
 }
 

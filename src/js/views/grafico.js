@@ -75,7 +75,7 @@ function setupEventListeners() {
  * Inizializza la vista del grafico.
  */
 export async function initGraficoView() {
-    const view = document.querySelector('#view-grafico');
+    const view = document.querySelector('#app-container .view');
     if (!view) return;
 
     // Caching degli elementi DOM
@@ -97,6 +97,6 @@ export async function initGraficoView() {
             populateFilter('reparto_provenienza', dom.provenienzaFilter),
             populateFilter('diagnosi', dom.diagnosiFilter)
         ]);
-        setupEventListeners();
+        setTimeout(() => setupEventListeners(), 0);
     });
 }

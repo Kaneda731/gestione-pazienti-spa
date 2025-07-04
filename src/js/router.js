@@ -5,12 +5,14 @@ import { initInserimentoView } from './views/form.js';
 import { initDimissioneView } from './views/dimissione.js';
 import { initGraficoView } from './views/grafico.js';
 import { initListView } from './views/list.js';
+import { initDiagnosiView } from './views/diagnosi.js';
 
 const viewInitializers = {
     inserimento: initInserimentoView,
     dimissione: initDimissioneView,
     grafico: initGraficoView,
     list: initListView,
+    diagnosi: initDiagnosiView,
 };
 
 export function navigateTo(viewName) {
@@ -22,7 +24,7 @@ export async function renderView() {
     const [requestedViewName, queryString] = hash.split('?');
     const urlParams = new URLSearchParams(queryString);
 
-    const protectedViews = ['inserimento', 'dimissione', 'grafico', 'list'];
+    const protectedViews = ['inserimento', 'dimissione', 'grafico', 'list', 'diagnosi'];
     
     const { data: { session } } = await supabase.auth.getSession();
 

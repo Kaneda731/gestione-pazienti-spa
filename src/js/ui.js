@@ -11,6 +11,7 @@ export const templates = {
     dimissione: document.getElementById('view-dimissione'),
     grafico: document.getElementById('view-grafico'),
     list: document.getElementById('view-list'),
+    diagnosi: document.getElementById('view-diagnosi'),
     loginRequired: document.getElementById('view-login-required'),
     login: document.getElementById('auth-login'),
     logout: document.getElementById('auth-logout'),

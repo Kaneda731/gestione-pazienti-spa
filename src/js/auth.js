@@ -1,3 +1,4 @@
+/* Cache busting - Ven  4 Lug 2025 05:03:55 CEST */
 // src/js/auth.js
 import { supabase } from './supabase.js';
 import { authContainer, templates } from './ui.js';
@@ -38,10 +39,12 @@ export function updateAuthUI(session) {
             </button>
         `;
         
-        // Crea il modal di login se non esiste già
-        if (!document.getElementById('auth-modal')) {
-            createAuthModal();
+        // Crea il modal di login se non esiste già o forzane la ricreazione
+        const existingModal = document.getElementById('auth-modal');
+        if (existingModal) {
+            existingModal.remove(); // Rimuovi il modal esistente per forzare ricreazione
         }
+        createAuthModal();
         
         // Event listener per aprire il modal
         document.getElementById('login-modal-trigger').addEventListener('click', () => {

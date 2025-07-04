@@ -148,7 +148,7 @@ class MobileCardManager {
                 }
                 e.preventDefault();
                 card.click();
-            });
+            }, { passive: false }); // Deve essere false per usare preventDefault()
             
             // Feedback tattile (solo se supportato e permesso)
             card.addEventListener('touchstart', (e) => {
@@ -162,7 +162,7 @@ class MobileCardManager {
                         // Ignora errori di vibrazione
                     }
                 }
-            });
+            }, { passive: true }); // Può essere passive, non usa preventDefault()
         });
     }
 }
@@ -180,7 +180,7 @@ if (window.innerWidth <= 767) {
                     grid.style.gridTemplateColumns = '1fr';
                 });
             }
-        });
+        }, { passive: true }); // Può essere passive, non modifica il DOM durante l'evento
     });
 }
 

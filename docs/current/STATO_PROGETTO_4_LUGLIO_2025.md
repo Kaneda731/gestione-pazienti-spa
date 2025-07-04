@@ -324,6 +324,7 @@ backdrop-filter: blur(10px);
 - ✅ **Event listeners ottimizzati** - Prevenzione duplicazioni event listener resize
 - ✅ **Controlli null safety** - Protezione accesso proprietà su elementi potenzialmente null
 - ✅ **Warning vibrazione risolto** - Gestione sicura navigator.vibrate per mobile
+- ✅ **Event listeners passivi** - Risolti warning performance touchstart/resize con { passive: true/false }
 
 ### **🎛️ CONTROLLI DI SICUREZZA DOM**
 ```javascript
@@ -344,6 +345,11 @@ function updateSortIndicators() {
 // Prevenzione duplicazione event listeners
 window.removeEventListener('resize', ensureCorrectView);
 window.addEventListener('resize', ensureCorrectView);
+
+// Event listeners passivi per performance mobile (mobile-cards-examples.js)
+card.addEventListener('touchstart', handler, { passive: true });  // No preventDefault
+card.addEventListener('touchend', handler, { passive: false });   // Con preventDefault
+window.addEventListener('resize', handler, { passive: true });    // Performance resize
 ```
 
 ### **📈 RISULTATI CONSOLE**

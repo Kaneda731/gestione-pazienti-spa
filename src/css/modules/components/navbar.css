@@ -90,3 +90,54 @@
     border-color: rgba(255, 255, 255, 0.5);
     color: white;
 }
+
+/* ===================================
+   NAVBAR DESKTOP/TABLET
+   =================================== */
+
+.navbar {
+    background: var(--navbar-bg) !important;
+    backdrop-filter: var(--glass-blur);
+    box-shadow: var(--navbar-shadow);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    transition: var(--transition);
+}
+
+/* === RESPONSIVE DESKTOP/TABLET === */
+@media (min-width: 768px) {
+    .navbar {
+        padding: 0.75rem 1.5rem !important;
+        min-height: 64px;
+    }
+    
+    .navbar-brand {
+        font-size: 1.25rem;
+        padding: 0.5rem 0;
+    }
+    
+    .navbar-brand:hover {
+        transform: translateX(2px);
+    }
+}
+
+@media (min-width: 1200px) {
+    .navbar {
+        padding: 1rem 2rem !important;
+    }
+    
+    .navbar-brand {
+        font-size: 1.375rem;
+    }
+    
+    #theme-toggle {
+        padding: 0.625rem !important;
+    }
+    
+    #auth-container .btn {
+        padding: 0.625rem 1.25rem !important;
+        font-size: 1rem !important;
+    }
+}

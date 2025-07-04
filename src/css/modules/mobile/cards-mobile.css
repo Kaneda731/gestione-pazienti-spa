@@ -1,0 +1,130 @@
+/* ===================================
+   CARDS MOBILE
+   =================================== */
+
+/* === LAYOUT MOBILE OTTIMIZZATO === */
+@media (max-width: 767px) {
+    .card {
+        margin-bottom: 1rem !important;
+        border-radius: var(--border-radius) !important;
+        box-shadow: var(--shadow-sm) !important; /* Shadow più leggera su mobile */
+    }
+    
+    .card:hover {
+        transform: none !important; /* Disabilita hover transform su mobile */
+        box-shadow: var(--shadow-md) !important;
+    }
+    
+    .card-header {
+        padding: 1rem !important;
+        font-size: 1rem !important;
+        border-radius: var(--border-radius) var(--border-radius) 0 0 !important;
+    }
+    
+    .card-body {
+        padding: 1rem !important;
+    }
+    
+    /* Quando card-body è l'ultimo elemento */
+    .card-body:last-child {
+        border-radius: 0 0 var(--border-radius) var(--border-radius) !important;
+        padding-bottom: 1.25rem !important;
+    }
+    
+    /* Quando card-body è l'unico elemento */
+    .card > .card-body:only-child {
+        border-radius: var(--border-radius) !important;
+        padding: 1.25rem 1rem !important;
+    }
+}
+
+/* === SMALL MOBILE === */
+@media (max-width: 480px) {
+    .card {
+        margin-bottom: 0.75rem !important;
+    }
+    
+    .card-header {
+        padding: 0.75rem !important;
+        font-size: 0.9rem !important;
+    }
+    
+    .card-body {
+        padding: 0.75rem !important;
+    }
+    
+    .card-body:last-child {
+        padding-bottom: 1rem !important;
+    }
+    
+    .card > .card-body:only-child {
+        padding: 1rem 0.75rem !important;
+    }
+}
+
+/* === ELEVATION SYSTEM MOBILE === */
+@media (max-width: 767px) {
+    /* Riduci le elevation su mobile per performance */
+    .elevation-1 {
+        box-shadow: var(--shadow-sm) !important;
+    }
+    
+    .elevation-2 {
+        box-shadow: var(--shadow-sm) !important;
+    }
+    
+    .elevation-3 {
+        box-shadow: var(--shadow-md) !important;
+    }
+    
+    .elevation-4 {
+        box-shadow: var(--shadow-md) !important;
+    }
+    
+    .elevation-5 {
+        box-shadow: var(--shadow-lg) !important;
+    }
+}
+
+/* === ACCESSIBILITÀ MOBILE === */
+@media (max-width: 767px) {
+    /* Touch areas ottimizzate */
+    .card {
+        touch-action: manipulation;
+    }
+    
+    /* Focus migliorato per navigation via tastiera */
+    .card:focus {
+        outline: 2px solid var(--primary-color) !important;
+        outline-offset: 2px !important;
+    }
+    
+    /* Migliora la leggibilità su mobile */
+    .card-header,
+    .card-body {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+}
+
+/* === PERFORMANCE MOBILE === */
+@media (max-width: 767px) {
+    /* Disabilita backdrop-filter su mobile per performance */
+    .card {
+        backdrop-filter: none !important;
+    }
+    
+    /* Hardware acceleration per smooth scrolling */
+    .card {
+        will-change: transform;
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
+    }
+    
+    /* Riduci animazioni complesse su mobile */
+    @media (prefers-reduced-motion: reduce) {
+        .card {
+            transition: none !important;
+        }
+    }
+}

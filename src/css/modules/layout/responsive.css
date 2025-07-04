@@ -77,14 +77,67 @@ body {
 /* Fix per evitare scroll orizzontale */
 * {
     box-sizing: border-box;
-}
+/* ===================================
+   RESPONSIVE DESKTOP/TABLET LAYOUT
+   =================================== */
 
+/* Base responsive */
 img {
     max-width: 100%;
     height: auto;
 }
 
-/* Utility responsive classes */
+/* === DESKTOP/TABLET BREAKPOINTS === */
+@media (min-width: 768px) {
+    .container {
+        padding: 0 1.5rem;
+        max-width: 1200px;
+    }
+    
+    .card-body {
+        padding: 1.5rem;
+    }
+    
+    .card-header {
+        padding: 1.5rem;
+    }
+}
+
+@media (min-width: 1200px) {
+    .container {
+        padding: 0 2rem;
+        max-width: 1400px;
+    }
+    
+    .card-body {
+        padding: 2rem;
+    }
+    
+    .card-header {
+        padding: 2rem;
+    }
+    
+    h1, h2, h3 {
+        font-size: 2rem;
+    }
+    
+    .btn {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+    }
+}
+
+@media (min-width: 1600px) {
+    .container {
+        max-width: 1600px;
+    }
+    
+    h1, h2, h3 {
+        font-size: 2.25rem;
+    }
+}
+
+/* === UTILITY CLASSES === */
 .d-mobile-none {
     display: none !important;
 }
@@ -102,46 +155,5 @@ img {
 @media (min-width: 768px) {
     .d-mobile-only {
         display: none !important;
-    }
-}
-
-/* ===================================
-   MOBILE TOUCH & SCROLL FIXES
-   =================================== */
-
-/* Previeni problemi di scroll su mobile */
-@media (max-width: 767px) {
-    body {
-        -webkit-overflow-scrolling: touch;
-        overflow-x: hidden;
-    }
-    
-    /* Fix per elementi con transform che causano scroll bloccato */
-    * {
-        -webkit-transform: translateZ(0);
-        transform: translateZ(0);
-    }
-    
-    /* Area touch migliorata per pulsanti */
-    .btn {
-        min-height: 44px;
-        min-width: 44px;
-        touch-action: manipulation;
-    }
-    
-    /* Migliora la scrollabilità */
-    .table-responsive,
-    .card-body,
-    main {
-        -webkit-overflow-scrolling: touch;
-    }
-    
-    /* Riduce animazioni per performance su mobile */
-    @media (prefers-reduced-motion: reduce) {
-        * {
-            animation-duration: 0.01ms !important;
-            animation-iteration-count: 1 !important;
-            transition-duration: 0.01ms !important;
-        }
     }
 }

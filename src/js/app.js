@@ -35,6 +35,48 @@ function initThemeToggle() {
     }
 }
 
+/**
+ * Inizializza la gestione globale dei pulsanti "Torna al Menu"
+ * Utilizza event delegation per gestire tutti i pulsanti con classe btn-back-menu
+ */
+function initBackToMenuButtons() {
+    document.addEventListener('click', (event) => {
+        // Verifica se l'elemento cliccato o un suo genitore ha la classe btn-back-menu
+        const backButton = event.target.closest('.btn-back-menu');
+        
+        if (backButton) {
+            event.preventDefault();
+            
+            // Feedback visivo immediato
+            backButton.style.transform = 'scale(0.95)';
+            backButton.style.transition = 'transform 0.1s ease';
+            
+            setTimeout(() => {
+                backButton.style.transform = '';
+                backButton.style.transition = '';
+            }, 150);
+            
+            // Ottieni la vista di destinazione dall'attributo data-view
+            const targetView = backButton.getAttribute('data-view') || 'home';
+            
+            // Pulisci eventuali dati di sessione se necessario
+            if (targetView === 'home') {
+                sessionStorage.removeItem('editPazienteId');
+                sessionStorage.removeItem('formData');
+                sessionStorage.removeItem('currentFilters');
+            }
+            
+            // Naviga alla vista target con un piccolo delay per il feedback visivo
+            setTimeout(() => {
+                navigateTo(targetView);
+                
+                // Log per debug (rimuovibile in produzione)
+                console.log(`🔙 Navigazione: ${window.location.hash} → #${targetView}`);
+            }, 100);
+        }
+    });
+}
+
 // Gestisce la navigazione quando l'hash dell'URL cambia
 window.addEventListener('hashchange', renderView);
 
@@ -42,6 +84,9 @@ window.addEventListener('hashchange', renderView);
 window.addEventListener('load', () => {
     // Inizializza il tema
     initThemeToggle();
+    
+    // Inizializza la gestione dei pulsanti "Torna al Menu"
+    initBackToMenuButtons();
     
     initAuth(session => {
         const redirectUrl = localStorage.getItem('redirectUrl');

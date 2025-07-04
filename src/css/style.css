@@ -18,12 +18,12 @@
     --info-color: #0dcaf0;
     --light-color: #f8f9fa;
     --dark-color: #212529;
-    --body-bg: #f8f9fa;
-    --card-bg: #ffffff;
+    --body-bg: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    --card-bg: rgba(255, 255, 255, 0.95);
     --border-radius: 12px;
-    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
-    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
-    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.2);
+    --shadow-sm: 0 4px 8px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 8px 20px rgba(0, 0, 0, 0.12);
+    --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.15);
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -130,6 +130,12 @@ body {
     min-height: 100vh;
 }
 
+/* Background gradiente per light mode */
+body {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    background-attachment: fixed;
+}
+
 /* Background gradiente per dark mode */
 [data-bs-theme="dark"] body {
     background: linear-gradient(135deg, #1a1d29, #1e2330);
@@ -173,9 +179,12 @@ body {
 /* === MENU CARDS === */
 .menu-card {
     background: var(--card-bg);
+    backdrop-filter: blur(10px);
     border-radius: var(--border-radius);
-    border: none;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15), 0 4px 10px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), 
+                0 4px 16px rgba(0, 0, 0, 0.06),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
     cursor: pointer;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     overflow: hidden;
@@ -191,7 +200,7 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(135deg, rgba(13, 110, 253, 0.15), rgba(59, 130, 246, 0.1));
+    background: linear-gradient(135deg, rgba(13, 110, 253, 0.08), rgba(59, 130, 246, 0.05));
     opacity: 0;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -211,10 +220,12 @@ body {
 
 .menu-card:hover {
     transform: perspective(1000px) translateY(-15px) scale(1.08) rotateX(5deg) rotateY(2deg);
-    box-shadow: 0 25px 50px rgba(13, 110, 253, 0.4), 
-                0 15px 35px rgba(13, 110, 253, 0.2),
-                0 5px 15px rgba(0, 0, 0, 0.1),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.98);
+    box-shadow: 0 32px 64px rgba(13, 110, 253, 0.2), 
+                0 16px 32px rgba(13, 110, 253, 0.15),
+                0 8px 20px rgba(0, 0, 0, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    border-color: rgba(13, 110, 253, 0.2);
 }
 
 .menu-card:hover::before {
@@ -242,10 +253,10 @@ body {
     align-items: center;
     justify-content: center;
     margin: 0 auto;
-    box-shadow: 0 12px 30px rgba(13, 110, 253, 0.4),
-                0 8px 20px rgba(13, 110, 253, 0.2),
-                inset 0 2px 4px rgba(255, 255, 255, 0.2),
-                inset 0 -2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 12px 32px rgba(13, 110, 253, 0.3),
+                0 8px 24px rgba(13, 110, 253, 0.15),
+                inset 0 2px 4px rgba(255, 255, 255, 0.3),
+                inset 0 -2px 4px rgba(0, 0, 0, 0.08);
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     transform: perspective(1000px) rotateX(0deg) rotateY(0deg);
@@ -258,7 +269,7 @@ body {
     left: -15px;
     right: -15px;
     bottom: -15px;
-    background: radial-gradient(circle, rgba(13, 110, 253, 0.3) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(13, 110, 253, 0.2) 0%, transparent 70%);
     border-radius: 50%;
     opacity: 0;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -267,11 +278,11 @@ body {
 
 .menu-card:hover .icon-wrapper {
     transform: perspective(1000px) scale(1.2) rotateX(10deg) rotateY(-5deg) rotateZ(5deg);
-    box-shadow: 0 20px 45px rgba(13, 110, 253, 0.5),
-                0 15px 30px rgba(13, 110, 253, 0.3),
-                0 8px 15px rgba(0, 0, 0, 0.2),
-                inset 0 3px 6px rgba(255, 255, 255, 0.3),
-                inset 0 -3px 6px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 24px 48px rgba(13, 110, 253, 0.4),
+                0 16px 32px rgba(13, 110, 253, 0.25),
+                0 8px 20px rgba(0, 0, 0, 0.1),
+                inset 0 3px 6px rgba(255, 255, 255, 0.4),
+                inset 0 -3px 6px rgba(0, 0, 0, 0.1);
 }
 
 .menu-card:hover .icon-wrapper::before {
@@ -343,10 +354,20 @@ body {
 /* === CARD STYLES === */
 .card {
     background: var(--card-bg);
+    backdrop-filter: blur(10px);
     border-radius: var(--border-radius);
-    border: none;
+    border: 1px solid rgba(255, 255, 255, 0.7);
     box-shadow: var(--shadow-sm);
     transition: var(--transition);
+}
+
+/* Light mode card styling */
+.card {
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), 
+                0 4px 16px rgba(0, 0, 0, 0.04),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 /* Dark mode card styling */
@@ -359,7 +380,7 @@ body {
 
 .card-header {
     background: transparent;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
     padding: 1.5rem;
     border-radius: var(--border-radius) var(--border-radius) 0 0 !important;
 }
@@ -376,25 +397,30 @@ body {
 .modern-form .form-control,
 .modern-form .form-select {
     border-radius: 8px;
-    border: 2px solid #e9ecef;
+    border: 2px solid rgba(226, 232, 240, 0.8);
     padding: 0.75rem 1rem;
     transition: var(--transition);
-    background: var(--card-bg);
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(5px);
 }
 
 .modern-form .form-control:focus,
 .modern-form .form-select:focus {
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
-    background: var(--card-bg);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+    background: rgba(255, 255, 255, 0.95);
 }
 
 .form-section {
-    background: var(--card-bg);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
     border-radius: var(--border-radius);
     padding: 1.5rem;
-    box-shadow: var(--shadow-sm);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), 
+                0 4px 16px rgba(0, 0, 0, 0.04),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
     margin-bottom: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.7);
 }
 
 /* Dark mode form section styling */

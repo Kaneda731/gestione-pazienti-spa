@@ -174,7 +174,7 @@ function createAuthModal() {
                                 </div>
                                 <div class="mb-3">
                                     <label for="modal-signup-password" class="form-label">
-                                        <i class="material-icons me-1" style="font-size: 1em; vertical-align: text-bottom;">lock</i>
+                                        <i class="material-icons me-1" style="font-size: 1em; vertical-align: text-bottom;" aria-hidden="true">lock</i>
                                         Password
                                     </label>
                                     <input type="password" 
@@ -443,6 +443,9 @@ export function initAuth(onAuthStateChange) {
     
     // TERZA: Listener normale per Supabase auth
     supabase.auth.onAuthStateChange((_event, session) => {
+        // Pulisci i parametri OAuth dall'URL se presenti
+        cleanOAuthParamsFromURL();
+        
         // Se non c'è una sessione Supabase, controlla di nuovo il bypass
         if (!session) {
             const bypassSession = checkDevelopmentBypass();
@@ -585,4 +588,30 @@ export function clearDevelopmentBypass() {
     localStorage.removeItem('dev.bypass.enabled');
     localStorage.removeItem('dev.bypass.timestamp');
     // Bypass sviluppo pulito
+}
+
+/**
+ * Pulisce i parametri OAuth dall'URL dopo il login
+ */
+function cleanOAuthParamsFromURL() {
+    const url = new URL(window.location);
+    const oauthParams = [
+        'access_token', 'expires_at', 'expires_in', 
+        'provider_token', 'refresh_token', 'token_type'
+    ];
+    
+    let hasOAuthParams = false;
+    oauthParams.forEach(param => {
+        if (url.searchParams.has(param)) {
+            url.searchParams.delete(param);
+            hasOAuthParams = true;
+        }
+    });
+    
+    // Se c'erano parametri OAuth, aggiorna l'URL senza ricaricare la pagina
+    if (hasOAuthParams) {
+        // Mantieni solo l'hash se presente (per il routing SPA)
+        const newUrl = url.pathname + url.search + url.hash;
+        window.history.replaceState({}, '', newUrl);
+    }
 }

@@ -14,39 +14,88 @@
 
 /* Variabili CSS principali */
 :root {
-    /* Colori principali */
-    --primary-color: #0d6efd;
-    --secondary-color: #6c757d;
-    --success-color: #198754;
-    --danger-color: #dc3545;
-    --warning-color: #ffc107;
-    --info-color: #0dcaf0;
-    --light-color: #f8f9fa;
-    --dark-color: #212529;
+    /* Colori principali - Palette coordinata */
+    --primary-color: #3b82f6;
+    --primary-light: #60a5fa;
+    --primary-dark: #1d4ed8;
+    --secondary-color: #6b7280;
+    --secondary-light: #9ca3af;
+    --secondary-dark: #4b5563;
+    --success-color: #10b981;
+    --success-light: #34d399;
+    --success-dark: #059669;
+    --danger-color: #ef4444;
+    --danger-light: #f87171;
+    --danger-dark: #dc2626;
+    --warning-color: #f59e0b;
+    --warning-light: #fbbf24;
+    --warning-dark: #d97706;
+    --info-color: #06b6d4;
+    --info-light: #22d3ee;
+    --info-dark: #0891b2;
+    --light-color: #f8fafc;
+    --dark-color: #1f2937;
     
-    /* Testi */
-    --text-primary: #1e293b;
-    --text-secondary: #475569;
-    --text-muted: #94a3b8;
+    /* Testi - Gerarchia più definita */
+    --text-primary: #111827;
+    --text-secondary: #4b5563;
+    --text-muted: #6b7280;
+    --text-light: #9ca3af;
     
-    /* Backgrounds e superfici */
-    --body-bg: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-    --card-bg: rgba(255, 255, 255, 0.95);
+    /* Backgrounds e superfici - Più sofisticati */
+    --body-bg: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 50%, #e5e7eb 100%);
+    --card-bg: rgba(255, 255, 255, 0.9);
+    --card-bg-hover: rgba(255, 255, 255, 0.95);
     --bg-primary: #ffffff;
-    --bg-secondary: #f8fafc;
-    --bg-tertiary: #f1f5f9;
+    --bg-secondary: #f9fafb;
+    --bg-tertiary: #f3f4f6;
+    --bg-quaternary: #e5e7eb;
     
-    /* Borders */
-    --border-color: #e2e8f0;
+    /* Navbar - Coordinata con primary */
+    --navbar-bg: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 30%, var(--primary-light) 70%, var(--info-color) 100%);
+    --navbar-shadow: 0 8px 32px rgba(59, 130, 246, 0.25), 0 4px 16px rgba(29, 78, 216, 0.15), 0 0 20px rgba(96, 165, 250, 0.1);
+    
+    /* Borders - Più delicati */
+    --border-color: #e5e7eb;
+    --border-color-light: #f3f4f6;
+    --border-color-dark: #d1d5db;
     --border-radius: 12px;
     --border-radius-sm: 0.5rem;
     --border-radius-lg: 1rem;
     
-    /* Shadows e effetti */
-    --shadow-sm: 0 4px 8px rgba(0, 0, 0, 0.08);
-    --shadow-md: 0 8px 20px rgba(0, 0, 0, 0.12);
-    --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.15);
-    --shadow-xl: 0 25px 50px rgba(0, 0, 0, 0.2);
+    /* Shadows e effetti - Più sofisticati */
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.08);
+    --shadow-xl: 0 16px 40px rgba(0, 0, 0, 0.15), 0 8px 16px rgba(0, 0, 0, 0.1);
+    
+    /* Status badges - Coordinati con palette */
+    --badge-success-bg: linear-gradient(135deg, var(--success-light), var(--success-color));
+    --badge-success-color: var(--success-dark);
+    --badge-success-border: var(--success-light);
+    --badge-danger-bg: linear-gradient(135deg, var(--danger-light), var(--danger-color));
+    --badge-danger-color: var(--danger-dark);
+    --badge-danger-border: var(--danger-light);
+    
+    /* Alerts - Coordinati con palette */
+    --alert-success-bg: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(52, 211, 153, 0.15));
+    --alert-success-color: var(--success-dark);
+    --alert-danger-bg: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(248, 113, 113, 0.15));
+    --alert-danger-color: var(--danger-dark);
+    --alert-warning-bg: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(251, 191, 36, 0.15));
+    --alert-warning-color: var(--warning-dark);
+    
+    /* Form inputs - Coordinati */
+    --input-bg: var(--bg-primary);
+    --input-border: var(--border-color);
+    --input-border-focus: var(--primary-color);
+    --input-shadow-focus: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    
+    /* Glassmorphism effects */
+    --glass-bg: rgba(255, 255, 255, 0.8);
+    --glass-border: rgba(255, 255, 255, 0.9);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    --glass-blur: blur(12px);
     
     /* Transizioni */
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);

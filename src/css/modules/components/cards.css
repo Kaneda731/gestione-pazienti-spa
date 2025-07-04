@@ -6,7 +6,8 @@
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
     box-shadow: var(--shadow-md);
-    background: var(--bg-primary);
+    background: var(--card-bg);
+    backdrop-filter: var(--glass-blur);
     transition: var(--transition);
     overflow: hidden;
 }
@@ -14,36 +15,38 @@
 .card:hover {
     box-shadow: var(--shadow-lg);
     transform: translateY(-2px);
+    background: var(--card-bg-hover);
 }
 
 .card-header {
     background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color-light);
     padding: 1.5rem;
     font-weight: 600;
+    color: var(--text-primary);
 }
 
 .card-body {
     padding: 1.5rem;
 }
 
-/* Elevation system */
+/* Elevation system - Sofisticato */
 .elevation-1 {
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-sm);
 }
 
 .elevation-2 {
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+    box-shadow: var(--shadow-md);
 }
 
 .elevation-3 {
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.14);
+    box-shadow: var(--shadow-lg);
 }
 
 .elevation-4 {
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.16);
+    box-shadow: var(--shadow-xl);
 }
 
 .elevation-5 {
-    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.18);
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.2), 0 12px 24px rgba(0, 0, 0, 0.15);
 }

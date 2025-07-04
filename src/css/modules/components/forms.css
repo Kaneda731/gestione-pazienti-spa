@@ -5,19 +5,21 @@
 /* Base form styles */
 .form-control, 
 .form-select {
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--input-border);
     border-radius: var(--border-radius-sm);
     padding: 0.75rem 1rem;
     transition: var(--transition);
-    background: var(--bg-primary);
+    background: var(--input-bg);
     font-size: 0.95rem;
+    color: var(--text-primary);
 }
 
 .form-control:focus, 
 .form-select:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    border-color: var(--input-border-focus);
+    box-shadow: var(--input-shadow-focus);
     outline: 0;
+    background: var(--bg-primary);
 }
 
 .form-label {
@@ -43,8 +45,8 @@
 
 .filters-container .form-control:focus,
 .filters-container .form-select:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    border-color: var(--input-border-focus);
+    box-shadow: var(--input-shadow-focus);
 }
 
 .filters-container .form-label {

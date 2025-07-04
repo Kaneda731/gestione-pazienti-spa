@@ -1,0 +1,37 @@
+/* ===================================
+   VARIABILI CSS E CONFIGURAZIONE TEMA
+   =================================== */
+
+/* Transizioni globali per il cambio tema */
+* {
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Transizioni specifiche per componenti che cambiano background */
+.card, .menu-card, .form-section, .form-control, .form-select {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Variabili CSS principali */
+:root {
+    /* Colori principali */
+    --primary-color: #0d6efd;
+    --secondary-color: #6c757d;
+    --success-color: #198754;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #0dcaf0;
+    --light-color: #f8f9fa;
+    --dark-color: #212529;
+    
+    /* Backgrounds e superfici */
+    --body-bg: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    --card-bg: rgba(255, 255, 255, 0.95);
+    
+    /* Design system */
+    --border-radius: 12px;
+    --shadow-sm: 0 4px 8px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 8px 20px rgba(0, 0, 0, 0.12);
+    --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.15);
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}

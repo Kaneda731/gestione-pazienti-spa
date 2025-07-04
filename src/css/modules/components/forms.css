@@ -1,0 +1,81 @@
+/* ===================================
+   FORM STYLES
+   =================================== */
+
+/* Base form styles */
+.form-control, 
+.form-select {
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    padding: 0.75rem 1rem;
+    transition: var(--transition);
+    background: var(--bg-primary);
+    font-size: 0.95rem;
+}
+
+.form-control:focus, 
+.form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    outline: 0;
+}
+
+.form-label {
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+/* Filtri elenco pazienti - uniformità altezza */
+.filters-container .form-control,
+.filters-container .form-select {
+    height: 3rem;
+    padding: 1rem;
+    font-size: 0.9rem;
+}
+
+.filters-container .form-control-sm,
+.filters-container .form-select-sm {
+    height: 3rem !important;
+    padding: 1rem !important;
+    font-size: 0.9rem !important;
+}
+
+.filters-container .form-control:focus,
+.filters-container .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.filters-container .form-label {
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+/* Form sections */
+.form-section {
+    background: var(--bg-secondary);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    border: 1px solid var(--border-color);
+    margin-bottom: 1.5rem;
+}
+
+.section-title {
+    color: var(--text-primary);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.section-title .material-icons {
+    color: var(--primary-color);
+    background: rgba(37, 99, 235, 0.1);
+    border-radius: 50%;
+    padding: 6px;
+    font-size: 20px;
+}

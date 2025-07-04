@@ -1,0 +1,49 @@
+/* ===================================
+   CARD STYLES
+   =================================== */
+
+.card {
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+    background: var(--bg-primary);
+    transition: var(--transition);
+    overflow: hidden;
+}
+
+.card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+}
+
+.card-header {
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+    border-bottom: 1px solid var(--border-color);
+    padding: 1.5rem;
+    font-weight: 600;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+/* Elevation system */
+.elevation-1 {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.elevation-2 {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+}
+
+.elevation-3 {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.14);
+}
+
+.elevation-4 {
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.16);
+}
+
+.elevation-5 {
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.18);
+}

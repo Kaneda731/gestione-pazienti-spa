@@ -63,7 +63,7 @@ function createAuthModal() {
                             window.location.hostname === 'localhost';
 
     const modalHTML = `
-        <div class="modal fade" id="auth-modal" tabindex="-1" aria-labelledby="authModalLabel" aria-hidden="true" role="dialog" aria-modal="true">
+        <div class="modal fade" id="auth-modal" tabindex="-1" aria-labelledby="authModalLabel" aria-hidden="true" role="dialog" aria-modal="true" aria-describedby="auth-modal-description">
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content" style="background: var(--card-bg); border: none; box-shadow: var(--shadow-lg);">
                     <div class="modal-header" style="background: linear-gradient(135deg, var(--primary-color), #0d47a1); color: white; border: none;">
@@ -74,6 +74,9 @@ function createAuthModal() {
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Chiudi modal di autenticazione"></button>
                     </div>
                     <div class="modal-body" role="main">
+                        <div id="auth-modal-description" class="visually-hidden">
+                            Modal per l'autenticazione dell'utente. Compila i campi per accedere al sistema.
+                        </div>
                         ${isInternalServer ? `
                             <div class="alert alert-info d-flex align-items-center mb-3" role="alert" aria-live="polite">
                                 <i class="material-icons me-2" style="font-size: 1.2em;" aria-hidden="true">info</i>
@@ -86,16 +89,19 @@ function createAuthModal() {
                         
                         <!-- Contenuto Login -->
                         <div id="login-content" role="form" aria-label="Modulo di accesso">
-                            <form id="email-login-form" class="mb-3" novalidate>
+                            <form id="email-login-form" class="mb-3" novalidate autocomplete="on">
                                 <div class="mb-3">
                                     <label for="modal-login-email" class="form-label">
                                         <i class="material-icons me-1" style="font-size: 1em; vertical-align: text-bottom;" aria-hidden="true">email</i>
                                         Email
                                     </label>
-                                    <input type="email" class="form-control" id="modal-login-email" required 
-                                           autocomplete="username email"
-                                           aria-describedby="login-email-help"
-                                           style="padding-left: 2.5rem; background-image: url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"%23666\" viewBox=\"0 0 24 24\"><path d=\"M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z\"/></svg>'); background-repeat: no-repeat; background-position: 8px center; background-size: 16px;">
+                                    <input type="email" 
+                                           class="form-control input-with-email-icon" 
+                                           id="modal-login-email" 
+                                           name="email"
+                                           required 
+                                           autocomplete="email"
+                                           aria-describedby="login-email-help">
                                     <div id="login-email-help" class="form-text visually-hidden">Inserisci la tua email per accedere</div>
                                 </div>
                                 <div class="mb-3">
@@ -103,10 +109,13 @@ function createAuthModal() {
                                         <i class="material-icons me-1" style="font-size: 1em; vertical-align: text-bottom;" aria-hidden="true">lock</i>
                                         Password
                                     </label>
-                                    <input type="password" class="form-control" id="modal-login-password" required
+                                    <input type="password" 
+                                           class="form-control input-with-password-icon" 
+                                           id="modal-login-password" 
+                                           name="password"
+                                           required
                                            autocomplete="current-password"
-                                           aria-describedby="login-password-help"
-                                           style="padding-left: 2.5rem; background-image: url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"%23666\" viewBox=\"0 0 24 24\"><path d=\"M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM12 17c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zM15.1 8H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z\"/></svg>'); background-repeat: no-repeat; background-position: 8px center; background-size: 16px;">
+                                           aria-describedby="login-password-help">
                                     <div id="login-password-help" class="form-text visually-hidden">Inserisci la tua password</div>
                                 </div>
                                 <button type="submit" class="btn btn-primary w-100 mb-3" aria-describedby="login-submit-help">
@@ -150,33 +159,44 @@ function createAuthModal() {
                         
                         <!-- Contenuto Registrazione -->
                         <div id="signup-content" style="display: none;">
-                            <form id="email-signup-form">
+                            <form id="email-signup-form" autocomplete="on">
                                 <div class="mb-3">
                                     <label for="modal-signup-email" class="form-label">
                                         <i class="material-icons me-1" style="font-size: 1em; vertical-align: text-bottom;">email</i>
                                         Email
                                     </label>
-                                    <input type="email" class="form-control" id="modal-signup-email" required
-                                           autocomplete="username email"
-                                           style="padding-left: 2.5rem; background-image: url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"%23666\" viewBox=\"0 0 24 24\"><path d=\"M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z\"/></svg>'); background-repeat: no-repeat; background-position: 8px center; background-size: 16px;">
+                                    <input type="email" 
+                                           class="form-control input-with-email-icon" 
+                                           id="modal-signup-email" 
+                                           name="email"
+                                           required
+                                           autocomplete="email">
                                 </div>
                                 <div class="mb-3">
                                     <label for="modal-signup-password" class="form-label">
                                         <i class="material-icons me-1" style="font-size: 1em; vertical-align: text-bottom;">lock</i>
                                         Password
                                     </label>
-                                    <input type="password" class="form-control" id="modal-signup-password" required minlength="6"
-                                           autocomplete="new-password"
-                                           style="padding-left: 2.5rem; background-image: url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"%23666\" viewBox=\"0 0 24 24\"><path d=\"M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM12 17c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zM15.1 8H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z\"/></svg>'); background-repeat: no-repeat; background-position: 8px center; background-size: 16px;">
+                                    <input type="password" 
+                                           class="form-control input-with-password-icon" 
+                                           id="modal-signup-password" 
+                                           name="password"
+                                           required 
+                                           minlength="6"
+                                           autocomplete="new-password">
                                 </div>
                                 <div class="mb-3">
                                     <label for="modal-signup-password-confirm" class="form-label">
                                         <i class="material-icons me-1" style="font-size: 1em; vertical-align: text-bottom;">lock_outline</i>
                                         Conferma Password
                                     </label>
-                                    <input type="password" class="form-control" id="modal-signup-password-confirm" required minlength="6"
-                                           autocomplete="new-password"
-                                           style="padding-left: 2.5rem; background-image: url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"%23666\" viewBox=\"0 0 24 24\"><path d=\"M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM12 17c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zM15.1 8H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z\"/></svg>'); background-repeat: no-repeat; background-position: 8px center; background-size: 16px;">
+                                    <input type="password" 
+                                           class="form-control input-with-password-icon" 
+                                           id="modal-signup-password-confirm" 
+                                           name="password-confirm"
+                                           required 
+                                           minlength="6"
+                                           autocomplete="new-password">
                                 </div>
                                 <button type="submit" class="btn btn-success w-100">
                                     <i class="material-icons me-1" style="font-size: 1em;">person_add</i>

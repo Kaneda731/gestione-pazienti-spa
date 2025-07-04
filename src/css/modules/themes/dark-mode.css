@@ -54,10 +54,8 @@
     padding-bottom: 2rem;
 }
 
-[data-bs-theme="dark"] #view-home .row.g-4 {
-    margin-top: 2rem;
-    margin-bottom: 2rem;
-    padding: 2rem 1rem;
+[data-bs-theme="dark"] .menu-cards-grid {
+    padding: 3rem 1rem;
 }
 
 /* Navbar nel tema scuro */
@@ -292,4 +290,45 @@
 
 [data-bs-theme="dark"] #page-info {
     color: var(--text-secondary);
+}
+
+/* ===================================
+   DARK MODE MOBILE OPTIMIZATIONS
+   =================================== */
+
+/* Mobile menu cards nel tema scuro */
+@media (max-width: 767px) {
+    [data-bs-theme="dark"] .menu-cards-grid {
+        padding: 1.5rem 1rem;
+    }
+    
+    [data-bs-theme="dark"] .menu-card {
+        background: linear-gradient(145deg, #252a3a, #2a3045);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4), 
+                    0 2px 8px rgba(30, 35, 48, 0.3),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+    
+    [data-bs-theme="dark"] .menu-card:hover {
+        background: linear-gradient(145deg, #2a3045, #2f3555);
+        box-shadow: 0 8px 20px rgba(77, 171, 247, 0.25), 
+                    0 4px 12px rgba(77, 171, 247, 0.15),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+    
+    /* Mobile table cards nel tema scuro */
+    [data-bs-theme="dark"] .table tbody tr {
+        background: var(--card-bg);
+        border-color: var(--border-color);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+    
+    [data-bs-theme="dark"] .table tbody td {
+        border-bottom-color: var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    [data-bs-theme="dark"] .table tbody td:before {
+        color: var(--primary-color);
+    }
 }

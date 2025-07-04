@@ -1,0 +1,109 @@
+/* ===================================
+   TABLES MOBILE - CARD LAYOUT
+   =================================== */
+
+/* Layout card-based per tabelle su mobile */
+@media (max-width: 767px) {
+    .table-responsive {
+        overflow: visible !important;
+        background: transparent;
+    }
+    
+    /* Trasforma tabella in layout card */
+    .table,
+    .table thead,
+    .table tbody,
+    .table th,
+    .table td,
+    .table tr {
+        display: block;
+    }
+    
+    /* Nascondi header su mobile */
+    .table thead {
+        display: none;
+    }
+    
+    /* Ogni riga diventa una card */
+    .table tbody tr {
+        background: var(--card-bg);
+        border-radius: var(--border-radius);
+        margin-bottom: 1rem;
+        padding: 1rem;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        position: relative;
+        transition: box-shadow 0.2s ease;
+    }
+    
+    .table tbody tr:hover {
+        box-shadow: var(--shadow-md);
+    }
+    
+    /* Celle mobile con etichette */
+    .table tbody td {
+        border: none;
+        padding: 0.5rem 0;
+        text-align: left !important;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        min-height: 44px; /* Area touch ottimale */
+    }
+    
+    /* Ultima cella (azioni) centrata */
+    .table tbody td:last-child {
+        border-bottom: none;
+        margin-top: 0.5rem;
+        padding-top: 1rem;
+        justify-content: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    
+    /* Etichette mobile */
+    .table tbody td:before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: var(--primary-color);
+        flex: 0 0 40%;
+        font-size: 0.9rem;
+        margin-right: 1rem;
+    }
+    
+    /* Nessuna etichetta per le azioni */
+    .table tbody td:last-child:before {
+        display: none;
+    }
+    
+    /* Badge status mobile */
+    .badge {
+        font-size: 0.75rem;
+        padding: 0.3rem 0.6rem;
+        border-radius: 12px;
+    }
+    
+    /* Pulsanti azione mobile ottimizzati */
+    .table tbody td:last-child .btn {
+        min-width: 44px;
+        height: 44px;
+        margin: 0.2rem;
+        font-size: 0.9rem;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        touch-action: manipulation;
+    }
+    
+    .table tbody td:last-child .btn .material-icons {
+        font-size: 1.2em;
+    }
+    
+    /* Hover ottimizzato per mobile */
+    .table tbody td:last-child .btn:hover {
+        transform: scale(1.05);
+        transition: transform 0.1s ease;
+    }
+}

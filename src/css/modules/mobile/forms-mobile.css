@@ -1,0 +1,92 @@
+/* ===================================
+   FORMS MOBILE
+   =================================== */
+
+@media (max-width: 767px) {
+    /* Previene zoom su iOS */
+    .form-control, 
+    .form-select {
+        font-size: 16px; /* Importante per iOS */
+        min-height: 44px; /* Touch area ottimale */
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .form-control:focus, 
+    .form-select:focus {
+        transform: none; /* Nessuna animazione su mobile */
+        box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.15);
+    }
+    
+    /* Label mobile ottimizzate */
+    .form-label {
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+        display: block;
+    }
+    
+    /* Input group mobile */
+    .input-group .form-control {
+        border-radius: 8px 0 0 8px;
+    }
+    
+    .input-group .btn {
+        border-radius: 0 8px 8px 0;
+        min-height: 44px;
+    }
+    
+    /* Textarea mobile */
+    textarea.form-control {
+        min-height: 120px;
+        resize: vertical;
+    }
+    
+    /* Select mobile migliorato */
+    .form-select {
+        background-size: 16px;
+        background-position: right 1rem center;
+        padding-right: 3rem;
+    }
+    
+    /* Form floating labels mobile */
+    .form-floating .form-control,
+    .form-floating .form-select {
+        padding-top: 1.25rem;
+        padding-bottom: 0.25rem;
+    }
+    
+    .form-floating label {
+        font-size: 0.85rem;
+        padding: 0.25rem 1rem;
+    }
+    
+    /* Checkbox e radio mobile */
+    .form-check-input {
+        width: 1.25rem;
+        height: 1.25rem;
+        margin-top: 0.125rem;
+    }
+    
+    .form-check-label {
+        padding-left: 0.5rem;
+        font-size: 0.95rem;
+        line-height: 1.4;
+    }
+    
+    /* Form validation mobile */
+    .invalid-feedback,
+    .valid-feedback {
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+    }
+    
+    /* Form row mobile */
+    .row .col-form-label {
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+}

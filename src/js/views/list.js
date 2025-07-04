@@ -181,12 +181,12 @@ function renderTable(pazientiToRender) {
 
         return `
             <tr>
-                <td>${p.cognome}</td>
-                <td>${p.nome}</td>
-                <td>${new Date(p.data_ricovero).toLocaleDateString()}</td>
-                <td>${p.diagnosi}</td>
-                <td>${p.reparto_appartenenza}</td>
-                <td>${statusBadge}</td>
+                <td data-label="Cognome">${p.cognome}</td>
+                <td data-label="Nome">${p.nome}</td>
+                <td data-label="Data Ricovero">${new Date(p.data_ricovero).toLocaleDateString()}</td>
+                <td data-label="Diagnosi">${p.diagnosi}</td>
+                <td data-label="Reparto">${p.reparto_appartenenza}</td>
+                <td data-label="Stato">${statusBadge}</td>
                 <td class="text-nowrap">
                     <button class="btn btn-sm btn-outline-primary me-1" data-action="edit" data-id="${p.id}" title="Modifica"><span class="material-icons" style="font-size: 1.1em; pointer-events: none;">edit</span></button>
                     ${actionButton}

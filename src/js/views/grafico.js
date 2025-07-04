@@ -95,7 +95,7 @@ export async function initGraficoView() {
         await Promise.all([
             populateFilter('reparto_appartenenza', dom.repartoFilter),
             populateFilter('reparto_provenienza', dom.provenienzaFilter),
-            populateFilter('diagnosi', dom.diagnosiFilter)
+            populateFilter('nome', dom.diagnosiFilter, 'diagnosi')
         ]);
         setTimeout(() => setupEventListeners(), 0);
     });

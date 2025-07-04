@@ -6,6 +6,28 @@ import { navigateTo } from '../router.js';
 // Oggetto per il caching degli elementi del DOM del form
 const dom = {};
 
+async function loadDiagnosiOptions() {
+    const { data, error } = await supabase
+        .from('diagnosi')
+        .select('nome')
+        .order('nome', { ascending: true });
+
+    if (error) {
+        console.error('Error loading diagnosi options:', error.message);
+        mostraMessaggio('Errore durante il caricamento delle opzioni di diagnosi.', 'danger');
+        return;
+    }
+
+    const diagnosiSelect = dom.form.querySelector('#diagnosi');
+    diagnosiSelect.innerHTML = '<option value="">Seleziona diagnosi...</option>';
+    data.forEach(d => {
+        const option = document.createElement('option');
+        option.value = d.nome;
+        option.textContent = d.nome;
+        diagnosiSelect.appendChild(option);
+    });
+}
+
 /**
  * Popola il form con i dati di un paziente per la modifica.
  * @param {string} editId - L'ID del paziente da modificare.
@@ -139,5 +161,6 @@ export async function initInserimentoView() {
         setupFormForInsert();
     }
 
+    await loadDiagnosiOptions();
     setupFormEventListeners(editId);
 }

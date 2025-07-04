@@ -325,7 +325,7 @@ export async function initListView(urlParams) {
 
     await Promise.all([
         populateFilter('reparto_appartenenza', domElements.repartoFilter),
-        populateFilter('diagnosi', domElements.diagnosiFilter)
+        populateFilter('nome', domElements.diagnosiFilter, 'diagnosi')
     ]);
 
     applyFiltersFromURL(urlParams);

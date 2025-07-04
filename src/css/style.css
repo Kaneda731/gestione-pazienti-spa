@@ -1333,3 +1333,94 @@ body {
     padding-right: 15px !important;
     max-width: 100% !important;
 }
+
+/* === AUTH MODAL STYLES === */
+/* Stili per il modal di autenticazione elegante */
+.modal-content {
+    border-radius: var(--border-radius) !important;
+    backdrop-filter: blur(15px);
+}
+
+.modal-header {
+    border-radius: var(--border-radius) var(--border-radius) 0 0 !important;
+}
+
+/* Input con icone inline eleganti */
+.modal-body input[style*="background-image"] {
+    transition: var(--transition);
+    border: 1px solid rgba(13, 110, 253, 0.2);
+}
+
+.modal-body input[style*="background-image"]:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+    background-color: rgba(13, 110, 253, 0.02);
+}
+
+/* Pulsanti nel modal */
+.modal-body .btn {
+    transition: var(--transition);
+    font-weight: 500;
+    border-radius: 6px;
+}
+
+.modal-body .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Info utente nella navbar */
+.navbar-text {
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+    opacity: 0.9;
+}
+
+/* Pulsante Accedi nella navbar */
+#login-modal-trigger {
+    font-weight: 500;
+    transition: var(--transition);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(10px);
+}
+
+#login-modal-trigger:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Dark mode per modal */
+[data-bs-theme="dark"] .modal-content {
+    background: var(--input-bg) !important;
+    border: 1px solid var(--border-color);
+}
+
+[data-bs-theme="dark"] .modal-body input[style*="background-image"] {
+    background-color: var(--input-bg);
+    border-color: var(--border-color);
+    color: var(--dark-color);
+}
+
+[data-bs-theme="dark"] .modal-body input[style*="background-image"]:focus {
+    background-color: var(--input-bg);
+    border-color: var(--primary-color);
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+    .modal-dialog {
+        margin: 1rem;
+        max-width: calc(100% - 2rem);
+    }
+    
+    .navbar-text {
+        font-size: 0.9rem;
+    }
+    
+    .navbar-text .material-icons {
+        font-size: 1em !important;
+    }
+}

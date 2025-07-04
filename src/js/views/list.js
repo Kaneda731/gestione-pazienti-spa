@@ -102,6 +102,9 @@ async function fetchAndRenderPazienti() {
         renderCards(data);
         updatePaginationControls(count);
         updateSortIndicators();
+        
+        // Forza la visibilità corretta basata sulla dimensione dello schermo
+        ensureCorrectView();
 
     } catch (error) {
         console.error('Errore dettagliato durante il fetch dei pazienti:', error);
@@ -110,6 +113,54 @@ async function fetchAndRenderPazienti() {
             cardsContainer.innerHTML = '<div class="text-center text-danger p-4"><strong>Errore nel caricamento dei dati.</strong></div>';
         }
     }
+}
+
+function ensureCorrectView() {
+    const tableContainer = document.querySelector('.table-responsive');
+    const cardsContainer = document.getElementById('pazienti-cards-container');
+    
+    if (tableContainer && cardsContainer) {
+        // SOLUZIONE RADICALE: Card per tutti i dispositivi sotto 1500px
+        if (window.innerWidth < 1500) {
+            // Schermi piccoli/medi: FORZA nascondere tabella, mostra card
+            tableContainer.style.display = 'none';
+            tableContainer.style.visibility = 'hidden';
+            tableContainer.style.opacity = '0';
+            tableContainer.style.width = '0';
+            tableContainer.style.height = '0';
+            tableContainer.style.overflow = 'hidden';
+            tableContainer.classList.add('d-none');
+            tableContainer.classList.remove('d-xl-block');
+            
+            cardsContainer.style.display = 'block';
+            cardsContainer.style.visibility = 'visible';
+            cardsContainer.style.opacity = '1';
+            cardsContainer.style.width = '100%';
+            cardsContainer.style.maxWidth = '100%';
+            cardsContainer.classList.remove('d-xl-none');
+            cardsContainer.classList.add('d-block');
+        } else {
+            // Solo schermi molto grandi (1500px+): mostra tabella, nascondi card
+            tableContainer.style.display = 'block';
+            tableContainer.style.visibility = 'visible';
+            tableContainer.style.opacity = '1';
+            tableContainer.style.width = 'auto';
+            tableContainer.style.height = 'auto';
+            tableContainer.style.overflow = 'auto';
+            tableContainer.classList.remove('d-none');
+            tableContainer.classList.add('d-xl-block');
+            
+            cardsContainer.style.display = 'none';
+            cardsContainer.style.visibility = 'hidden';
+            cardsContainer.style.opacity = '0';
+            cardsContainer.classList.add('d-xl-none');
+            cardsContainer.classList.remove('d-block');
+        }
+    }
+    
+    // SICUREZZA EXTRA: forza l'overflow nascosto sul body
+    document.body.style.overflowX = 'hidden';
+    document.body.style.maxWidth = '100vw';
 }
 
 function renderTable(pazientiToRender) {
@@ -369,6 +420,9 @@ function setupEventListeners() {
     }
 
     domElements.backButton.addEventListener('click', () => navigateTo('home'));
+    
+    // Event listener per ridimensionamento finestra
+    window.addEventListener('resize', ensureCorrectView);
 }
 
 function handlePatientAction(action, id) {
@@ -407,6 +461,12 @@ export async function initListView(urlParams) {
     if (!viewContainer) return;
 
     cacheDOMElements(viewContainer);
+    
+    // FORZA la vista corretta immediatamente al caricamento
+    ensureCorrectView();
+    
+    // Seconda chiamata dopo un breve delay per assicurarsi che tutto sia renderizzato
+    setTimeout(ensureCorrectView, 100);
 
     await Promise.all([
         populateFilter('reparto_appartenenza', domElements.repartoFilter),
@@ -423,5 +483,8 @@ export async function initListView(urlParams) {
     applyFiltersFromURL(urlParams);
     fetchAndRenderPazienti();
     setupEventListeners();
+    
+    // Terza chiamata dopo il rendering dei dati
+    setTimeout(ensureCorrectView, 200);
 }
 

@@ -6,15 +6,23 @@
     <title>Gestione Pazienti</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Google Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <!-- Custom CSS -->
-    <link href="css/style.css" rel="stylesheet">
     <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .navbar {
+            box-shadow: 0 2px 4px rgba(0,0,0,.1);
+        }
+        .menu-card {
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .menu-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 20px rgba(0,0,0,.15);
+        }
         .view {
             display: none;
         }
@@ -25,13 +33,13 @@
 </head>
 <body>
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary modern-navbar">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container-fluid">
             <a class="navbar-brand d-flex align-items-center" href="#">
                 <span class="material-icons me-2">local_hospital</span>
-                <span>Gestione Pazienti</span>
+                Gestione Pazienti
             </a>
-            <div id="auth-container" class="ms-auto">
+            <div id="auth-container">
                 <!-- I pulsanti di Login/Logout verranno inseriti qui da app.js -->
             </div>
         </div>
@@ -47,48 +55,94 @@
     <template id="view-home">
         <div class="view">
             <div class="row text-center g-4">
-                <div class="col-md-6 col-lg-3">
-                    <div class="card menu-card h-100 elevation-2" data-view="inserimento">
-                        <div class="card-body d-flex flex-column justify-content-center align-items-center p-4">
-                            <div class="icon-wrapper mb-3">
-                                <span class="material-icons" style="font-size: 48px;">person_add</span>
-                            </div>
-                            <h5 class="card-title mt-2 mb-3">Nuovo Paziente</h5>
-                            <p class="card-text">Registra un nuovo paziente nel sistema con tutti i dettagli necessari.</p>
+                <div class="col-md-4">
+                    <div class="card menu-card h-100" data-view="inserimento">
+                        <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                            <span class="material-icons" style="font-size: 48px;">person_add</span>
+                            <h5 class="card-title mt-3">Nuovo Paziente</h5>
+                            <p class="card-text">Registra un nuovo paziente nel sistema.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card menu-card h-100" data-view="dimissione">
+                        <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                            <span class="material-icons" style="font-size: 48px;">event_available</span>
+                            <h5 class="card-title mt-3">Dimetti Paziente</h5>
+                            <p class="card-text">Cerca un paziente e inserisci la data di dimissione.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card menu-card h-100" data-view="grafico">
+                        <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                            <span class="material-icons" style="font-size: 48px;">pie_chart</span>
+                            <h5 class="card-title mt-3">Grafico Diagnosi</h5>
+                            <p class="card-text">Visualizza le statistiche filtrate delle diagnosi.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card menu-card h-100" data-view="list">
+                        <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                            <span class="material-icons" style="font-size: 48px;">list_alt</span>
+                            <h5 class="card-title mt-3">Elenco Pazienti</h5>
+                            <p class="card-text">Visualizza e gestisci tutti i pazienti.</p>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-3">
-                    <div class="card menu-card h-100 elevation-2" data-view="dimissione">
+                    <div class="card menu-card h-100 elevation-2" data-view="diagnosi">
                         <div class="card-body d-flex flex-column justify-content-center align-items-center p-4">
                             <div class="icon-wrapper mb-3">
-                                <span class="material-icons" style="font-size: 48px;">event_available</span>
+                                <span class="material-icons" style="font-size: 48px;">medical_information</span>
                             </div>
-                            <h5 class="card-title mt-2 mb-3">Dimetti Paziente</h5>
-                            <p class="card-text">Cerca un paziente attivo e registra la data di dimissione.</p>
+                            <h5 class="card-title mt-2 mb-3">Gestione Diagnosi</h5>
+                            <p class="card-text">Aggiungi, modifica o elimina le diagnosi disponibili nel sistema.</p>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-6 col-lg-3">
-                    <div class="card menu-card h-100 elevation-2" data-view="grafico">
-                        <div class="card-body d-flex flex-column justify-content-center align-items-center p-4">
-                            <div class="icon-wrapper mb-3">
-                                <span class="material-icons" style="font-size: 48px;">pie_chart</span>
-                            </div>
-                            <h5 class="card-title mt-2 mb-3">Grafico Diagnosi</h5>
-                            <p class="card-text">Visualizza statistiche avanzate e grafici delle diagnosi.</p>
-                        </div>
-                    </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- Template: Gestione Diagnosi -->
+    <template id="view-diagnosi">
+        <div class="view">
+            <div class="card elevation-3">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0">
+                        <span class="material-icons me-2" style="vertical-align: text-bottom;">medical_information</span>
+                        Gestione Diagnosi
+                    </h3>
+                    <button class="btn btn-outline-secondary btn-sm" data-view="home">
+                        <span class="material-icons me-1" style="vertical-align: text-bottom;">arrow_back</span>
+                        Torna al Menu
+                    </button>
                 </div>
-                <div class="col-md-6 col-lg-3">
-                    <div class="card menu-card h-100 elevation-2" data-view="list">
-                        <div class="card-body d-flex flex-column justify-content-center align-items-center p-4">
-                            <div class="icon-wrapper mb-3">
-                                <span class="material-icons" style="font-size: 48px;">list_alt</span>
-                            </div>
-                            <h5 class="card-title mt-2 mb-3">Elenco Pazienti</h5>
-                            <p class="card-text">Visualizza, filtra e gestisci tutti i pazienti registrati.</p>
+                <div class="card-body">
+                    <form id="diagnosi-form" class="mb-4 modern-form">
+                        <div class="input-group">
+                            <input type="text" id="diagnosi-name" class="form-control" placeholder="Nome nuova diagnosi" required>
+                            <button type="submit" id="save-diagnosi-btn" class="btn btn-primary">
+                                <span class="material-icons me-1" style="vertical-align: middle;">add</span>
+                                Aggiungi Diagnosi
+                            </button>
                         </div>
+                    </form>
+
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Nome Diagnosi</th>
+                                    <th class="text-end">Azioni</th>
+                                </tr>
+                            </thead>
+                            <tbody id="diagnosi-table-body">
+                                <!-- Le diagnosi verranno caricate qui -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -98,119 +152,89 @@
     <!-- Template: Inserimento Paziente -->
     <template id="view-inserimento">
         <div class="view">
-            <div class="card elevation-3">
+            <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h3 id="inserimento-title" class="mb-0">
-                        <span class="material-icons me-2" style="vertical-align: text-bottom;">person_add</span>
-                        Inserimento Nuovo Paziente
-                    </h3>
-                    <button class="btn btn-outline-secondary btn-sm" data-view="home">
-                        <span class="material-icons me-1" style="vertical-align: text-bottom;">arrow_back</span>
-                        Torna al Menu
+                    <h3 id="inserimento-title"><span class="material-icons me-2">person_add</span>Inserimento Nuovo Paziente</h3>
+                    <button class="btn btn-sm btn-outline-secondary" data-view="home">
+                        <span class="material-icons me-1" style="vertical-align: text-bottom;">arrow_back</span>Torna al Menu
                     </button>
                 </div>
                 <div class="card-body">
-                    <form id="form-inserimento" class="modern-form">
+                    <form id="form-inserimento">
                         <input type="hidden" id="paziente-id" name="id">
-                        <div id="messaggio-container" class="mb-4"></div>
-                        
-                        <!-- Sezione Dati Anagrafici -->
-                        <div class="form-section mb-4">
-                            <h5 class="section-title mb-3">
-                                <span class="material-icons me-2" style="vertical-align: text-bottom;">person</span>
-                                Dati Anagrafici
-                            </h5>
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label for="nome" class="form-label">Nome</label>
-                                    <input type="text" class="form-control" id="nome" name="nome" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="cognome" class="form-label">Cognome</label>
-                                    <input type="text" class="form-control" id="cognome" name="cognome" required>
-                                </div>
+                        <div id="messaggio-container" class="mb-3"></div>
+                        <div class="row g-3">
+                            <!-- Dati Anagrafici -->
+                            <div class="col-md-6">
+                                <label for="nome" class="form-label">Nome</label>
+                                <input type="text" class="form-control" id="nome" name="nome" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="cognome" class="form-label">Cognome</label>
+                                <input type="text" class="form-control" id="cognome" name="cognome" required>
+                            </div>
+
+                            <!-- Dati Ricovero -->
+                            <div class="col-md-6">
+                                <label for="data_ricovero" class="form-label">Data di Ricovero</label>
+                                <input type="date" class="form-control" id="data_ricovero" name="data_ricovero" required>
+                            </div>
+                            <div class="col-md-6" id="data-dimissione-container" style="display: none;">
+                                <label for="data_dimissione" class="form-label">Data di Dimissione</label>
+                                <input type="date" class="form-control" id="data_dimissione" name="data_dimissione">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="diagnosi" class="form-label">Diagnosi</label>
+                                <select class="form-select" id="diagnosi" name="diagnosi" required>
+                                    <option value="">Seleziona diagnosi...</option>
+                                    <option value="Politrauma">Politrauma</option>
+                                    <option value="Frattura_Femore">Frattura Femore</option>
+                                    <option value="Frattura_Gamba">Frattura Gamba</option>
+                                    <option value="Gonartrosi">Gonartrosi</option>
+                                    <option value="Frattura_Bacino">Frattura Bacino</option>
+                                    <option value="Frattura_Spalla">Frattura Spalla</option>
+                                    <option value="NeoFormazione Cute">NeoFormazione Cute</option>
+                                    <option value="Frattura_Mano">Frattura Mano</option>
+                                    <option value="Frattura_Polso">Frattura Polso</option>
+                                    <option value="Ulcera">Ulcera</option>
+                                    <option value="Deiescenza_Ferita">Deiescenza Ferita</option>
+                                    <option value="Artrosi_Spalla">Artrosi Spalla</option>
+                                    <option value="Lesione_Tendinea">Lesione Tendinea</option>
+                                    <option value="Frattura_Periprotesica">Frattura Periprotesica</option>
+                                    <option value="FLC">FLC</option>
+                                    <option value="Protesi_Mammaria">Protesi Mammaria</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="reparto_appartenenza" class="form-label">Reparto Appartenenza</label>
+                                <select class="form-select" id="reparto_appartenenza" name="reparto_appartenenza" required>
+                                    <option value="">Seleziona...</option>
+                                    <option value="Ortopedia">Ortopedia</option>
+                                    <option value="Chirurgia Arti">Chirurgia Arti</option>
+                                    <option value="Plastica">Plastica</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="reparto_provenienza" class="form-label">Reparto Provenienza</label>
+                                <select class="form-select" id="reparto_provenienza" name="reparto_provenienza">
+                                    <option value="">Seleziona...</option>
+                                    <option value="AR">AR</option>
+                                    <option value="PO">PO</option>
+                                    <option value="CO">CO</option>
+                                    <option value="CR">CR</option>
+                                    <option value="PS">PS</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="livello_assistenza" class="form-label">Livello Assistenza</label>
+                                <select class="form-select" id="livello_assistenza" name="livello_assistenza" required>
+                                    <option value="">Seleziona...</option>
+                                    <option value="Bassa">Bassa</option>
+                                    <option value="Media">Media</option>
+                                    <option value="Alta">Alta</option>
+                                </select>
                             </div>
                         </div>
-
-                        <!-- Sezione Dati Ricovero -->
-                        <div class="form-section mb-4">
-                            <h5 class="section-title mb-3">
-                                <span class="material-icons me-2" style="vertical-align: text-bottom;">calendar_today</span>
-                                Dati di Ricovero
-                            </h5>
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label for="data_ricovero" class="form-label">Data di Ricovero</label>
-                                    <input type="date" class="form-control" id="data_ricovero" name="data_ricovero" required>
-                                </div>
-                                <div class="col-md-6" id="data-dimissione-container" style="display: none;">
-                                    <label for="data_dimissione" class="form-label">Data di Dimissione</label>
-                                    <input type="date" class="form-control" id="data_dimissione" name="data_dimissione">
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="diagnosi" class="form-label">Diagnosi</label>
-                                    <select class="form-select" id="diagnosi" name="diagnosi" required>
-                                        <option value="">Seleziona diagnosi...</option>
-                                        <option value="Politrauma">Politrauma</option>
-                                        <option value="Frattura_Femore">Frattura Femore</option>
-                                        <option value="Frattura_Gamba">Frattura Gamba</option>
-                                        <option value="Gonartrosi">Gonartrosi</option>
-                                        <option value="Frattura_Bacino">Frattura Bacino</option>
-                                        <option value="Frattura_Spalla">Frattura Spalla</option>
-                                        <option value="NeoFormazione Cute">NeoFormazione Cute</option>
-                                        <option value="Frattura_Mano">Frattura Mano</option>
-                                        <option value="Frattura_Polso">Frattura Polso</option>
-                                        <option value="Ulcera">Ulcera</option>
-                                        <option value="Deiescenza_Ferita">Deiescenza Ferita</option>
-                                        <option value="Artrosi_Spalla">Artrosi Spalla</option>
-                                        <option value="Lesione_Tendinea">Lesione Tendinea</option>
-                                        <option value="Frattura_Periprotesica">Frattura Periprotesica</option>
-                                        <option value="FLC">FLC</option>
-                                        <option value="Protesi_Mammaria">Protesi Mammaria</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Sezione Informazioni Reparto -->
-                        <div class="form-section mb-4">
-                            <h5 class="section-title mb-3">
-                                <span class="material-icons me-2" style="vertical-align: text-bottom;">business</span>
-                                Informazioni Reparto
-                            </h5>
-                            <div class="row g-3">
-                                <div class="col-md-4">
-                                    <label for="reparto_appartenenza" class="form-label">Reparto Appartenenza</label>
-                                    <select class="form-select" id="reparto_appartenenza" name="reparto_appartenenza" required>
-                                        <option value="">Seleziona...</option>
-                                        <option value="Ortopedia">Ortopedia</option>
-                                        <option value="Chirurgia Arti">Chirurgia Arti</option>
-                                        <option value="Plastica">Plastica</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-4">
-                                    <label for="reparto_provenienza" class="form-label">Reparto Provenienza</label>
-                                    <select class="form-select" id="reparto_provenienza" name="reparto_provenienza">
-                                        <option value="">Seleziona...</option>
-                                        <option value="AR">AR</option>
-                                        <option value="PO">PO</option>
-                                        <option value="CO">CO</option>
-                                        <option value="CR">CR</option>
-                                        <option value="PS">PS</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-4">
-                                    <label for="livello_assistenza" class="form-label">Livello Assistenza</label>
-                                    <select class="form-select" id="livello_assistenza" name="livello_assistenza" required>
-                                        <option value="">Seleziona...</option>
-                                        <option value="Bassa">Bassa</option>
-                                        <option value="Media">Media</option>
-                                        <option value="Alta">Alta</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
                         <div class="mt-4 text-center">
                             <button type="submit" class="btn btn-primary btn-lg">
                                 <span class="material-icons me-1" style="vertical-align: middle;">save</span>
@@ -226,30 +250,21 @@
     <!-- Template: Dimissione Paziente -->
     <template id="view-dimissione">
         <div class="view">
-            <div class="card elevation-3">
+            <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h3 class="mb-0">
-                        <span class="material-icons me-2" style="vertical-align: text-bottom;">event_available</span>
-                        Dimissione Paziente
-                    </h3>
-                    <button class="btn btn-outline-secondary btn-sm" data-view="home">
-                        <span class="material-icons me-1" style="vertical-align: text-bottom;">arrow_back</span>
-                        Torna al Menu
+                    <h3><span class="material-icons me-2">event_available</span>Dimissione Paziente</h3>
+                    <button class="btn btn-sm btn-outline-secondary" data-view="home">
+                        <span class="material-icons me-1" style="vertical-align: text-bottom;">arrow_back</span>Torna al Menu
                     </button>
                 </div>
                 <div class="card-body">
-                    <div id="messaggio-container-dimissione" class="mb-4"></div>
-                    
+                    <div id="messaggio-container-dimissione" class="mb-3"></div>
                     <!-- Sezione di Ricerca -->
-                    <div class="form-section mb-4">
-                        <h5 class="section-title mb-3">
-                            <span class="material-icons me-2" style="vertical-align: text-bottom;">search</span>
-                            Ricerca Paziente
-                        </h5>
-                        <label for="search-paziente" class="form-label">Cerca per cognome</label>
+                    <div class="mb-4">
+                        <label for="search-paziente" class="form-label">Cerca Paziente (per cognome)</label>
                         <div class="input-group">
                             <input type="text" id="search-paziente" class="form-control" placeholder="Inserisci il cognome e premi Invio...">
-                            <button id="search-button" class="btn btn-primary" type="button">
+                            <button id="search-button" class="btn btn-outline-secondary" type="button">
                                 <span class="material-icons" style="vertical-align: middle;">search</span>
                             </button>
                         </div>
@@ -262,28 +277,19 @@
 
                     <!-- Modulo di Dimissione (visibile dopo aver selezionato un paziente) -->
                     <form id="form-dimissione" class="d-none">
-                        <div class="form-section">
-                            <h5 class="section-title mb-3">
-                                <span class="material-icons me-2" style="vertical-align: text-bottom;">person</span>
-                                Dettagli Paziente Selezionato
-                            </h5>
-                            <div class="mb-3">
-                                <strong>Paziente:</strong> <span id="selected-paziente-nome" class="text-primary"></span>
-                            </div>
-                            <div class="mb-3">
-                                <strong>Data Ricovero:</strong> <span id="selected-paziente-ricovero" class="text-muted"></span>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="data_dimissione" class="form-label">Data di Dimissione</label>
-                                <input type="date" id="data_dimissione" name="data_dimissione" class="form-control" required>
-                            </div>
-                            
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <span class="material-icons me-1" style="vertical-align: middle;">check_circle</span>
-                                Conferma Dimissione
-                            </button>
+                        <h5 class="mb-3">Dettagli Paziente Selezionato</h5>
+                        <p><strong>Paziente:</strong> <span id="selected-paziente-nome"></span></p>
+                        <p><strong>Data Ricovero:</strong> <span id="selected-paziente-ricovero"></span></p>
+                        
+                        <div class="mb-3">
+                            <label for="data_dimissione" class="form-label">Data di Dimissione</label>
+                            <input type="date" id="data_dimissione" name="data_dimissione" class="form-control" required>
                         </div>
+                        
+                        <button type="submit" class="btn btn-primary">
+                            <span class="material-icons me-1" style="vertical-align: middle;">check_circle</span>
+                            Conferma Dimissione
+                        </button>
                     </form>
                 </div>
             </div>
@@ -293,72 +299,62 @@
     <!-- Template: Grafico -->
     <template id="view-grafico">
         <div class="view">
-            <div class="card elevation-3">
+            <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h3 class="mb-0">
-                        <span class="material-icons me-2" style="vertical-align: text-bottom;">pie_chart</span>
-                        Grafico Diagnosi Filtrato
-                    </h3>
-                    <button class="btn btn-outline-secondary btn-sm" data-view="home">
-                        <span class="material-icons me-1" style="vertical-align: text-bottom;">arrow_back</span>
-                        Torna al Menu
+                    <h3><span class="material-icons me-2">pie_chart</span>Grafico Diagnosi Filtrato</h3>
+                    <button class="btn btn-sm btn-outline-secondary" data-view="home">
+                        <span class="material-icons me-1" style="vertical-align: text-bottom;">arrow_back</span>Torna al Menu
                     </button>
                 </div>
                 <div class="card-body">
                     <!-- Filtri -->
-                    <div class="filters-container">
-                        <div class="row g-3 mb-3">
-                            <div class="col-md-4">
-                                <label for="filter-reparto" class="form-label">Reparto Appartenenza</label>
-                                <select id="filter-reparto" class="form-select">
-                                    <!-- Opzioni caricate dinamicamente -->
-                                </select>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="filter-provenienza" class="form-label">Reparto Provenienza</label>
-                                <select id="filter-provenienza" class="form-select">
-                                    <!-- Opzioni caricate dinamicamente -->
-                                </select>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="filter-diagnosi" class="form-label">Diagnosi</label>
-                                <select id="filter-diagnosi" class="form-select">
-                                    <!-- Opzioni caricate dinamicamente -->
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label for="filter-assistenza" class="form-label">Livello Assistenza</label>
-                                <select id="filter-assistenza" class="form-select">
-                                    <option value="">Tutti</option>
-                                    <option value="Bassa">Bassa</option>
-                                    <option value="Media">Media</option>
-                                    <option value="Alta">Alta</option>
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label for="filter-start-date" class="form-label">Ricovero Dal</label>
-                                <input type="date" id="filter-start-date" class="form-control">
-                            </div>
-                            <div class="col-md-3">
-                                <label for="filter-end-date" class="form-label">Ricovero Al</label>
-                                <input type="date" id="filter-end-date" class="form-control">
-                            </div>
-                            <div class="col-md-3 d-flex align-items-end">
-                                <button id="apply-filters-btn" class="btn btn-primary w-100">
-                                    <span class="material-icons me-1" style="vertical-align: middle;">filter_alt</span>
-                                    Applica Filtri
-                                </button>
-                            </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label for="filter-reparto" class="form-label">Reparto Appartenenza</label>
+                            <select id="filter-reparto" class="form-select">
+                                <!-- Opzioni caricate dinamicamente -->
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="filter-provenienza" class="form-label">Reparto Provenienza</label>
+                            <select id="filter-provenienza" class="form-select">
+                                <!-- Opzioni caricate dinamicamente -->
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="filter-diagnosi" class="form-label">Diagnosi</label>
+                            <select id="filter-diagnosi" class="form-select">
+                                <!-- Opzioni caricate dinamicamente -->
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="filter-assistenza" class="form-label">Livello Assistenza</label>
+                            <select id="filter-assistenza" class="form-select">
+                                <option value="">Tutti</option>
+                                <option value="Bassa">Bassa</option>
+                                <option value="Media">Media</option>
+                                <option value="Alta">Alta</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="filter-start-date" class="form-label">Ricovero Dal</label>
+                            <input type="date" id="filter-start-date" class="form-control">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="filter-end-date" class="form-label">Ricovero Al</label>
+                            <input type="date" id="filter-end-date" class="form-control">
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button id="apply-filters-btn" class="btn btn-primary w-100">
+                                <span class="material-icons me-1" style="vertical-align: middle;">filter_alt</span>
+                                Applica Filtri
+                            </button>
                         </div>
                     </div>
-                    
                     <!-- Contenitore Grafico -->
                     <div id="chart-container" style="width: 100%; height: 400px;">
-                        <div class="d-flex justify-content-center align-items-center h-100 empty-state">
-                            <div>
-                                <span class="material-icons">bar_chart</span>
-                                <p class="mb-0">Seleziona i filtri e clicca "Applica" per visualizzare il grafico.</p>
-                            </div>
+                        <div class="d-flex justify-content-center align-items-center h-100">
+                            <p class="text-muted">Seleziona i filtri e clicca "Applica" per visualizzare il grafico.</p>
                         </div>
                     </div>
                 </div>
@@ -369,14 +365,12 @@
     <!-- Template: Login Richiesto -->
     <template id="view-login-required">
         <div class="view">
-            <div class="card text-center elevation-3" style="max-width: 400px; margin: 2rem auto;">
-                <div class="card-body p-4">
-                    <div class="icon-wrapper mx-auto mb-4" style="width: 80px; height: 80px; background: linear-gradient(135deg, #fef3c7, #fde68a);">
-                        <span class="material-icons" style="font-size: 32px; color: #f59e0b;">lock</span>
-                    </div>
-                    <h5 class="card-title mb-3">Accesso Richiesto</h5>
-                    <p class="card-text text-muted mb-4">Devi effettuare il login per accedere a questa funzionalità.</p>
-                    <button class="btn btn-primary btn-lg" id="login-prompt-button">
+            <div class="card text-center">
+                <div class="card-body">
+                    <span class="material-icons" style="font-size: 48px; color: #ffc107;">lock</span>
+                    <h5 class="card-title mt-3">Accesso Richiesto</h5>
+                    <p class="card-text">Devi effettuare il login per accedere a questa funzionalità.</p>
+                    <button class="btn btn-primary" id="login-prompt-button">
                         <span class="material-icons me-1" style="vertical-align: middle;">login</span>
                         Accedi con Google
                     </button>
@@ -388,53 +382,45 @@
     <!-- Template: Elenco Pazienti -->
     <template id="view-list">
         <div class="view">
-            <div class="card elevation-3">
+            <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h3 class="mb-0">
-                        <span class="material-icons me-2" style="vertical-align: text-bottom;">list_alt</span>
-                        Elenco Pazienti
-                    </h3>
-                    <button class="btn btn-outline-secondary btn-sm" data-view="home">
-                        <span class="material-icons me-1" style="vertical-align: text-bottom;">arrow_back</span>
-                        Torna al Menu
+                    <h3><span class="material-icons me-2">list_alt</span>Elenco Pazienti</h3>
+                    <button class="btn btn-sm btn-outline-secondary" data-view="home">
+                        <span class="material-icons me-1" style="vertical-align: text-bottom;">arrow_back</span>Torna al Menu
                     </button>
                 </div>
                 <div class="card-body">
-                    <div class="filters-container">
-                        <div class="row g-3">
-                            <div class="col-md-3">
-                                <label for="list-filter-reparto" class="form-label">Reparto</label>
-                                <select id="list-filter-reparto" class="form-select form-select-sm">
-                                    <!-- Popolato dinamicamente -->
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label for="list-filter-diagnosi" class="form-label">Diagnosi</label>
-                                <select id="list-filter-diagnosi" class="form-select form-select-sm">
-                                    <!-- Popolato dinamicamente -->
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label for="list-filter-stato" class="form-label">Stato</label>
-                                <select id="list-filter-stato" class="form-select form-select-sm">
-                                    <option value="">Tutti</option>
-                                    <option value="attivo">Attivo</option>
-                                    <option value="dimesso">Dimesso</option>
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label for="list-search" class="form-label">Cerca</label>
-                                <input type="text" id="list-search" class="form-control form-control-sm" placeholder="Per nome o cognome...">
-                            </div>
-                            <div class="col-md-3 d-flex align-items-end">
-                                <button id="export-csv-btn" class="btn btn-outline-success btn-sm w-100">
-                                    <span class="material-icons me-1" style="vertical-align: text-bottom;">download</span>
-                                    Esporta CSV
-                                </button>
-                            </div>
+                    <div class="filters-container row g-3 mb-3">
+                        <div class="col-md-3">
+                            <label for="list-filter-reparto" class="form-label">Reparto</label>
+                            <select id="list-filter-reparto" class="form-select form-select-sm">
+                                <!-- Popolato dinamicamente -->
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="list-filter-diagnosi" class="form-label">Diagnosi</label>
+                            <select id="list-filter-diagnosi" class="form-select form-select-sm">
+                                <!-- Popolato dinamicamente -->
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="list-filter-stato" class="form-label">Stato</label>
+                            <select id="list-filter-stato" class="form-select form-select-sm">
+                                <option value="">Tutti</option>
+                                <option value="attivo">Attivo</option>
+                                <option value="dimesso">Dimesso</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="list-search" class="form-label">Cerca</label>
+                            <input type="text" id="list-search" class="form-control form-control-sm" placeholder="Per nome o cognome...">
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button id="export-csv-btn" class="btn btn-sm btn-outline-success w-100">
+                                <span class="material-icons me-1" style="vertical-align: text-bottom;">download</span>Esporta CSV
+                            </button>
                         </div>
                     </div>
-                    
                     <div class="table-responsive">
                         <table class="table table-striped table-hover">
                             <thead>
@@ -453,18 +439,11 @@
                             </tbody>
                         </table>
                     </div>
-                    
                     <!-- Controlli di Paginazione -->
-                    <div id="pagination-controls" class="d-flex justify-content-between align-items-center mt-4">
-                        <button id="prev-page-btn" class="btn btn-outline-secondary">
-                            <span class="material-icons me-1" style="vertical-align: text-bottom;">chevron_left</span>
-                            Precedente
-                        </button>
-                        <span id="page-info" class="text-muted"></span>
-                        <button id="next-page-btn" class="btn btn-outline-secondary">
-                            Successivo
-                            <span class="material-icons ms-1" style="vertical-align: text-bottom;">chevron_right</span>
-                        </button>
+                    <div id="pagination-controls" class="d-flex justify-content-between align-items-center mt-3">
+                        <button id="prev-page-btn" class="btn btn-outline-secondary">&laquo; Precedente</button>
+                        <span id="page-info"></span>
+                        <button id="next-page-btn" class="btn btn-outline-secondary">Successivo &raquo;</button>
                     </div>
                 </div>
             </div>
@@ -491,27 +470,15 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">
-                        <span class="material-icons me-2" style="vertical-align: text-bottom; color: var(--danger-color);">warning</span>
-                        Conferma Eliminazione
-                    </h5>
+                    <h5 class="modal-title">Conferma Eliminazione</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="text-center mb-3">
-                        <span class="material-icons" style="font-size: 48px; color: var(--danger-color);">delete_forever</span>
-                    </div>
-                    <p class="text-center">Sei sicuro di voler eliminare questo paziente? <strong>L'azione è irreversibile.</strong></p>
+                    <p>Sei sicuro di voler eliminare questo paziente? L'azione è irreversibile.</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <span class="material-icons me-1" style="vertical-align: text-bottom;">close</span>
-                        Annulla
-                    </button>
-                    <button type="button" class="btn btn-danger" id="confirm-delete-btn">
-                        <span class="material-icons me-1" style="vertical-align: text-bottom;">delete</span>
-                        Elimina
-                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+                    <button type="button" class="btn btn-danger" id="confirm-delete-btn">Elimina</button>
                 </div>
             </div>
         </div>

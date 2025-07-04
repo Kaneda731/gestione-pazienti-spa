@@ -1,3 +1,13 @@
+/* === TRANSIZIONI TEMA === */
+* {
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Transizione specifica per elementi che cambiano background */
+.card, .menu-card, .form-section, .form-control, .form-select {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 /* === VARIABILI CSS === */
 :root {
     --primary-color: #0d6efd;
@@ -19,17 +29,17 @@
 
 /* === TEMA SCURO === */
 [data-bs-theme="dark"] {
-    --body-bg: #1a1a1a;
-    --card-bg: #2d2d2d;
+    --body-bg: linear-gradient(135deg, #1a1d29, #1e2330);
+    --card-bg: #252a3a;
     --primary-color: #4dabf7;
     --secondary-color: #adb5bd;
-    --light-color: #343a40;
+    --light-color: #3d4454;
     --dark-color: #f8f9fa;
     --border-color: #495057;
-    --input-bg: #343a40;
-    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
-    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+    --input-bg: #3d4454;
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6);
 }
 
 /* Stili specifici per la dark mode */
@@ -63,13 +73,67 @@
     border-bottom-color: var(--border-color);
 }
 
+/* === DARK MODE MENU CARDS === */
+[data-bs-theme="dark"] .menu-card {
+    background: linear-gradient(145deg, #252a3a, #2a3045);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6), 
+                0 4px 10px rgba(30, 35, 48, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(77, 171, 247, 0.1);
+}
+
+[data-bs-theme="dark"] .menu-card:hover {
+    transform: perspective(1000px) translateY(-15px) scale(1.08) rotateX(5deg) rotateY(2deg);
+    background: linear-gradient(145deg, #2a3045, #2f3555);
+    box-shadow: 0 25px 50px rgba(77, 171, 247, 0.4), 
+                0 15px 35px rgba(77, 171, 247, 0.25),
+                0 8px 20px rgba(0, 0, 0, 0.6),
+                inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    border-color: rgba(77, 171, 247, 0.3);
+}
+
+[data-bs-theme="dark"] .menu-card::before {
+    background: linear-gradient(135deg, rgba(77, 171, 247, 0.12), rgba(119, 184, 252, 0.08));
+}
+
+[data-bs-theme="dark"] .menu-card::after {
+    background: radial-gradient(circle at center, rgba(77, 171, 247, 0.25) 0%, transparent 70%);
+}
+
+[data-bs-theme="dark"] .icon-wrapper {
+    background: linear-gradient(135deg, #4dabf7, #339af0);
+    box-shadow: 0 12px 30px rgba(77, 171, 247, 0.5),
+                0 8px 20px rgba(77, 171, 247, 0.3),
+                inset 0 2px 4px rgba(255, 255, 255, 0.15),
+                inset 0 -2px 4px rgba(0, 0, 0, 0.3);
+}
+
+[data-bs-theme="dark"] .menu-card:hover .icon-wrapper {
+    box-shadow: 0 20px 45px rgba(77, 171, 247, 0.6),
+                0 15px 30px rgba(77, 171, 247, 0.4),
+                0 8px 15px rgba(0, 0, 0, 0.4),
+                inset 0 3px 6px rgba(255, 255, 255, 0.2),
+                inset 0 -3px 6px rgba(0, 0, 0, 0.35);
+}
+
+[data-bs-theme="dark"] .icon-wrapper::before {
+    background: radial-gradient(circle, rgba(77, 171, 247, 0.3) 0%, transparent 70%);
+}
+
 /* === STILI GLOBALI === */
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background-color: var(--body-bg);
+    background: var(--body-bg);
     line-height: 1.6;
     color: var(--dark-color);
     transition: var(--transition);
+    min-height: 100vh;
+}
+
+/* Background gradiente per dark mode */
+[data-bs-theme="dark"] body {
+    background: linear-gradient(135deg, #1a1d29, #1e2330);
+    background-attachment: fixed;
 }
 
 /* === NAVBAR === */
@@ -111,11 +175,13 @@ body {
     background: var(--card-bg);
     border-radius: var(--border-radius);
     border: none;
-    box-shadow: var(--shadow-sm);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15), 0 4px 10px rgba(0, 0, 0, 0.1);
     cursor: pointer;
-    transition: var(--transition);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     overflow: hidden;
     position: relative;
+    min-height: 280px;
+    transform: perspective(1000px) rotateX(0deg) rotateY(0deg);
 }
 
 .menu-card::before {
@@ -125,48 +191,107 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(135deg, rgba(13, 110, 253, 0.1), rgba(13, 110, 253, 0.05));
+    background: linear-gradient(135deg, rgba(13, 110, 253, 0.15), rgba(59, 130, 246, 0.1));
     opacity: 0;
-    transition: var(--transition);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.menu-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at center, rgba(13, 110, 253, 0.3) 0%, transparent 70%);
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: scale(0.8);
 }
 
 .menu-card:hover {
-    transform: translateY(-8px) scale(1.02);
-    box-shadow: var(--shadow-lg);
+    transform: perspective(1000px) translateY(-15px) scale(1.08) rotateX(5deg) rotateY(2deg);
+    box-shadow: 0 25px 50px rgba(13, 110, 253, 0.4), 
+                0 15px 35px rgba(13, 110, 253, 0.2),
+                0 5px 15px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .menu-card:hover::before {
     opacity: 1;
 }
 
+.menu-card:hover::after {
+    opacity: 1;
+    transform: scale(1);
+}
+
 .menu-card .card-body {
     position: relative;
     z-index: 2;
-    padding: 2rem;
+    padding: 2.5rem 2rem;
 }
 
 /* === ICON WRAPPER === */
 .icon-wrapper {
-    width: 80px;
-    height: 80px;
+    width: 100px;
+    height: 100px;
     border-radius: 50%;
     background: linear-gradient(135deg, var(--primary-color), #4dabf7);
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto;
-    box-shadow: var(--shadow-md);
-    transition: var(--transition);
+    box-shadow: 0 12px 30px rgba(13, 110, 253, 0.4),
+                0 8px 20px rgba(13, 110, 253, 0.2),
+                inset 0 2px 4px rgba(255, 255, 255, 0.2),
+                inset 0 -2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    transform: perspective(1000px) rotateX(0deg) rotateY(0deg);
+}
+
+.icon-wrapper::before {
+    content: '';
+    position: absolute;
+    top: -15px;
+    left: -15px;
+    right: -15px;
+    bottom: -15px;
+    background: radial-gradient(circle, rgba(13, 110, 253, 0.3) 0%, transparent 70%);
+    border-radius: 50%;
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: scale(0.8);
 }
 
 .menu-card:hover .icon-wrapper {
-    transform: scale(1.1) rotate(5deg);
-    box-shadow: var(--shadow-lg);
+    transform: perspective(1000px) scale(1.2) rotateX(10deg) rotateY(-5deg) rotateZ(5deg);
+    box-shadow: 0 20px 45px rgba(13, 110, 253, 0.5),
+                0 15px 30px rgba(13, 110, 253, 0.3),
+                0 8px 15px rgba(0, 0, 0, 0.2),
+                inset 0 3px 6px rgba(255, 255, 255, 0.3),
+                inset 0 -3px 6px rgba(0, 0, 0, 0.15);
+}
+
+.menu-card:hover .icon-wrapper::before {
+    opacity: 1;
+    transform: scale(1.2);
 }
 
 .icon-wrapper .material-icons {
     color: white;
-    font-size: 2.5rem !important;
+    font-size: 3rem !important;
+    position: relative;
+    z-index: 2;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    transform: perspective(1000px) rotateX(0deg);
+    transition: all 0.3s ease;
+}
+
+.menu-card:hover .icon-wrapper .material-icons {
+    transform: perspective(1000px) rotateX(-5deg) scale(1.1);
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
 }
 
 /* === ELEVATION SYSTEM === */
@@ -186,6 +311,35 @@ body {
     box-shadow: 0 12px 24px rgba(0, 0, 0, 0.18);
 }
 
+/* === MENU CARD TEXT STYLES === */
+.menu-card .card-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 2;
+}
+
+.menu-card .card-text {
+    font-size: 1rem;
+    line-height: 1.5;
+    opacity: 0.8;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 2;
+}
+
+.menu-card:hover .card-title {
+    color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+.menu-card:hover .card-text {
+    opacity: 1;
+    transform: translateY(-1px);
+}
+
 /* === CARD STYLES === */
 .card {
     background: var(--card-bg);
@@ -195,11 +349,23 @@ body {
     transition: var(--transition);
 }
 
+/* Dark mode card styling */
+[data-bs-theme="dark"] .card {
+    background: linear-gradient(145deg, #252a3a, #2a3045);
+    border: 1px solid rgba(77, 171, 247, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 
+                0 2px 6px rgba(30, 35, 48, 0.3);
+}
+
 .card-header {
     background: transparent;
     border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     padding: 1.5rem;
     border-radius: var(--border-radius) var(--border-radius) 0 0 !important;
+}
+
+[data-bs-theme="dark"] .card-header {
+    border-bottom-color: rgba(77, 171, 247, 0.2);
 }
 
 .card-body {
@@ -229,6 +395,14 @@ body {
     padding: 1.5rem;
     box-shadow: var(--shadow-sm);
     margin-bottom: 1.5rem;
+}
+
+/* Dark mode form section styling */
+[data-bs-theme="dark"] .form-section {
+    background: linear-gradient(145deg, #252a3a, #2a3045);
+    border: 1px solid rgba(77, 171, 247, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 
+                0 2px 6px rgba(30, 35, 48, 0.3);
 }
 
 .section-title {

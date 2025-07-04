@@ -685,3 +685,28 @@ body {
     border-color: var(--primary-color);
     box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
 }
+
+/* === DROPDOWN COMPATIBILITY FIX === */
+/* Fix più completo per compatibilità cross-browser */
+[data-bs-theme="dark"] select,
+[data-bs-theme="dark"] select option,
+[data-bs-theme="dark"] select optgroup {
+    background-color: #3d4454 !important;
+    color: #f8f9fa !important;
+}
+
+[data-bs-theme="dark"] select:focus {
+    background-color: #3d4454 !important;
+    color: #f8f9fa !important;
+}
+
+/* Webkit browsers (Chrome, Safari, Edge) */
+[data-bs-theme="dark"] select option:checked {
+    background-color: var(--primary-color) !important;
+    color: white !important;
+}
+
+/* Firefox */
+[data-bs-theme="dark"] select option:hover {
+    background-color: rgba(77, 171, 247, 0.2) !important;
+}

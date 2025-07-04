@@ -10,21 +10,24 @@
 }
 
 .table thead th {
-    background: linear-gradient(135deg, var(--primary-color), #4dabf7);
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
     color: white;
     border: none;
     font-weight: 600;
     padding: 1rem;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .table tbody td {
     padding: 1rem;
-    border-color: rgba(0, 0, 0, 0.05);
+    border-color: var(--border-color-light);
     vertical-align: middle;
+    background: var(--bg-primary);
 }
 
 .table-hover tbody tr:hover {
-    background-color: rgba(13, 110, 253, 0.05);
+    background-color: rgba(59, 130, 246, 0.05);
+    transition: var(--transition-fast);
 }
 
 /* Fix azioni tabella - evita accavallamento icone */

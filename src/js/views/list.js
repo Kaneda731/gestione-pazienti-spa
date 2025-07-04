@@ -325,7 +325,7 @@ export async function initListView(urlParams) {
 
     await Promise.all([
         populateFilter('reparto_appartenenza', domElements.repartoFilter),
-        populateFilter('nome', domElements.diagnosiFilter, 'diagnosi')
+        populateFilter('diagnosi', domElements.diagnosiFilter)
     ]);
 
     // Inizializza i custom select dopo aver caricato le opzioni

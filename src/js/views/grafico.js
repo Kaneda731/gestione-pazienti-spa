@@ -95,7 +95,7 @@ export async function initGraficoView() {
         await Promise.all([
             populateFilter('reparto_appartenenza', dom.repartoFilter),
             populateFilter('reparto_provenienza', dom.provenienzaFilter),
-            populateFilter('nome', dom.diagnosiFilter, 'diagnosi')
+            populateFilter('diagnosi', dom.diagnosiFilter)
         ]);
         
         // Inizializza i custom select dopo aver caricato le opzioni

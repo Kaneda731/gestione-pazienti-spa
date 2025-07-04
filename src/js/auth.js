@@ -61,7 +61,8 @@ function createAuthModal() {
     const isInternalServer = window.location.hostname.includes('vgold') || 
                             window.location.hostname.includes('interno') ||
                             window.location.hostname === 'localhost' ||
-                            window.location.hostname === '127.0.0.1';
+                            window.location.hostname === '127.0.0.1' ||
+                            window.location.hostname.includes('127.0.0.1');
 
     const modalHTML = `
         <div class="modal fade" id="auth-modal" tabindex="-1" aria-labelledby="authModalLabel" role="dialog" aria-modal="true" aria-describedby="auth-modal-description">
@@ -632,10 +633,11 @@ function cleanOAuthParamsFromURL() {
  */
 function autoEnableLocalhostBypass() {
     const isLocalhost = window.location.hostname === 'localhost' || 
-                       window.location.hostname === '127.0.0.1';
+                       window.location.hostname === '127.0.0.1' ||
+                       window.location.hostname.includes('127.0.0.1');
     
     if (isLocalhost && !checkDevelopmentBypass()) {
-        console.log('🔧 Auto-attivazione bypass sviluppo su localhost');
+        console.log('🔧 Auto-attivazione bypass sviluppo su ' + window.location.hostname);
         return enableDevelopmentBypass();
     }
     return null;

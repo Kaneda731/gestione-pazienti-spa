@@ -1,5 +1,6 @@
 // src/js/router.js
 import { supabase } from './supabase.js';
+import { checkDevelopmentBypass } from './auth.js';
 import { appContainer, templates } from './ui.js';
 import { initInserimentoView } from './views/form.js';
 import { initDimissioneView } from './views/dimissione.js';

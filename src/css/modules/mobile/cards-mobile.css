@@ -84,30 +84,36 @@
     }
     
     /* === LISTA COMPATTA === */
-    .card-list-compact {
+    .card.card-list-compact {
         border-left: 4px solid var(--primary-color) !important;
         border-radius: 0 var(--border-radius) var(--border-radius) 0 !important;
         margin-bottom: 0.5rem !important;
         box-shadow: var(--shadow-xs) !important;
+        background: var(--card-bg) !important;
+        border: 1px solid var(--border-color) !important;
+        border-left: 4px solid var(--primary-color) !important;
     }
     
-    .card-list-compact .card-body {
+    .card.card-list-compact .card-body {
         padding: 0.75rem 1rem !important;
         display: flex !important;
         justify-content: space-between !important;
         align-items: center !important;
+        border-radius: 0 !important;
     }
     
-    .card-list-compact .card-title {
+    .card.card-list-compact .card-title {
         font-weight: 600 !important;
         font-size: 0.95rem !important;
         margin: 0 !important;
+        color: var(--text-primary) !important;
     }
     
-    .card-list-compact .card-meta {
+    .card.card-list-compact .card-meta {
         font-size: 0.8rem !important;
         color: var(--text-secondary) !important;
         text-align: right !important;
+        margin: 0 !important;
     }
     
     /* Quando card-body è l'ultimo elemento */
@@ -422,68 +428,76 @@
     }
 }
 
-/* === FINAL MOBILE CARDS STYLES === */
+/* === FINAL MOBILE CARDS STYLES - DEFINITIVO === */
 @media (max-width: 767px) {
-    .card-list-compact {
+    /* OVERRIDE COMPLETO: Card compatte moderne */
+    .card.card-list-compact {
         background: var(--card-bg) !important;
         border: 1px solid var(--border-color) !important;
-        border-radius: var(--border-radius) !important;
+        border-left: 4px solid var(--primary-color) !important;
+        border-radius: 0 8px 8px 0 !important;
         margin-bottom: 0.75rem !important;
         padding: 0 !important;
-        box-shadow: var(--shadow-sm) !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.08) !important;
         transition: all 0.2s ease !important;
+        display: block !important;
     }
     
-    .card-list-compact:active {
+    .card.card-list-compact:active {
         transform: scale(0.98) !important;
-        box-shadow: var(--shadow-xs) !important;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.1) !important;
     }
     
-    .card-list-compact .card-body {
+    .card.card-list-compact .card-body {
         display: flex !important;
         justify-content: space-between !important;
         align-items: center !important;
         padding: 0.75rem 1rem !important;
         gap: 1rem !important;
+        border-radius: 0 !important;
+        background: transparent !important;
     }
     
-    .card-list-compact .card-title {
+    .card.card-list-compact .card-title {
         font-weight: 600 !important;
-        font-size: 1rem !important;
-        margin: 0 !important;
+        font-size: 0.95rem !important;
+        margin: 0 0 0.25rem 0 !important;
         color: var(--text-primary) !important;
+        line-height: 1.2 !important;
     }
     
-    .card-list-compact .card-meta {
-        font-size: 0.85rem !important;
+    .card.card-list-compact .card-meta {
+        font-size: 0.8rem !important;
         color: var(--text-secondary) !important;
         margin: 0 !important;
-        opacity: 0.8 !important;
+        opacity: 0.85 !important;
+        line-height: 1.1 !important;
     }
     
     /* Status indicators eleganti */
-    .status-success {
+    .card.status-success {
         border-left: 4px solid var(--success-color) !important;
     }
     
-    .status-error {
+    .card.status-error {
         border-left: 4px solid var(--danger-color) !important;
     }
     
-    .status-warning {
+    .card.status-warning {
         border-left: 4px solid var(--warning-color) !important;
     }
     
-    .status-info {
+    .card.status-info {
         border-left: 4px solid var(--info-color) !important;
     }
     
-    /* Mobile buttons ottimizzati */
+    /* Pulsanti mobile ottimizzati */
     .mobile-compact {
         padding: 0.25rem 0.5rem !important;
         min-width: 36px !important;
         min-height: 36px !important;
         border-radius: 6px !important;
+        font-size: 0.8rem !important;
     }
     
     .mobile-horizontal {

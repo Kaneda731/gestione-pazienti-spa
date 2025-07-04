@@ -6,6 +6,12 @@
 [data-bs-theme="dark"] {
     --body-bg: linear-gradient(135deg, #1a1d29, #1e2330);
     --card-bg: #252a3a;
+    --bg-primary: #1e2330;
+    --bg-secondary: #252a3a;
+    --bg-tertiary: #2a3045;
+    --text-primary: #f8f9fa;
+    --text-secondary: #cbd5e1;
+    --text-muted: #94a3b8;
     --primary-color: #4dabf7;
     --secondary-color: #adb5bd;
     --light-color: #3d4454;
@@ -15,6 +21,54 @@
     --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.4);
     --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
     --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
+/* Body nel tema scuro */
+[data-bs-theme="dark"] body {
+    background: var(--body-bg);
+    color: var(--text-primary);
+}
+
+/* Navbar nel tema scuro */
+[data-bs-theme="dark"] .navbar {
+    background: linear-gradient(135deg, #1a1d29 0%, #1e2330 30%, #252a3a 70%, #2a3045 100%) !important;
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 4px 16px rgba(0, 0, 0, 0.4), 0 0 20px rgba(77, 171, 247, 0.2);
+}
+
+[data-bs-theme="dark"] .navbar-brand,
+[data-bs-theme="dark"] .navbar-brand span {
+    color: var(--text-primary) !important;
+}
+
+[data-bs-theme="dark"] .navbar-brand .material-icons {
+    background: rgba(77, 171, 247, 0.1);
+    color: var(--primary-color);
+}
+
+[data-bs-theme="dark"] #theme-toggle {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+[data-bs-theme="dark"] #theme-toggle:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: var(--primary-color);
+}
+
+/* Card nel tema scuro */
+[data-bs-theme="dark"] .card {
+    background: var(--card-bg);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+[data-bs-theme="dark"] .card-header {
+    background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+    border-bottom-color: var(--border-color);
+    color: var(--text-primary);
 }
 
 /* Form controls nel tema scuro */
@@ -34,16 +88,46 @@
 
 /* Tabelle nel tema scuro */
 [data-bs-theme="dark"] .table {
-    color: var(--dark-color);
+    background: var(--card-bg);
+    color: var(--text-primary);
 }
 
-[data-bs-theme="dark"] .table th,
-[data-bs-theme="dark"] .table td {
+[data-bs-theme="dark"] .table th {
+    background: linear-gradient(135deg, var(--primary-color), #339af0);
+    color: white;
     border-color: var(--border-color);
 }
 
-[data-bs-theme="dark"] .card-header {
-    border-bottom-color: var(--border-color);
+[data-bs-theme="dark"] .table td {
+    border-color: var(--border-color);
+    background: var(--card-bg);
+}
+
+[data-bs-theme="dark"] .table-hover tbody tr:hover {
+    background-color: rgba(77, 171, 247, 0.1);
+}
+
+[data-bs-theme="dark"] .table-responsive {
+    background: var(--card-bg);
+}
+
+/* Scrollbar per tabelle responsive nel tema scuro */
+[data-bs-theme="dark"] .table-responsive::-webkit-scrollbar {
+    height: 8px;
+}
+
+[data-bs-theme="dark"] .table-responsive::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+    border-radius: 4px;
+}
+
+[data-bs-theme="dark"] .table-responsive::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 4px;
+}
+
+[data-bs-theme="dark"] .table-responsive::-webkit-scrollbar-thumb:hover {
+    background: #339af0;
 }
 
 /* Menu cards nel tema scuro */

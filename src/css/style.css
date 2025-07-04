@@ -282,6 +282,64 @@ body {
     display: block;
 }
 
+/* === FIX AZIONI TABELLA ELENCO PAZIENTI === */
+.table td.text-nowrap {
+    white-space: nowrap;
+    width: auto !important; /* Larghezza automatica per eliminare spazio vuoto */
+    min-width: fit-content; /* Solo lo spazio necessario */
+    padding: 0.75rem 0.5rem; /* Padding ridotto lateralmente */
+}
+
+.table .btn-sm {
+    padding: 0.375rem 0.5rem; /* Padding aumentato per allineamento */
+    font-size: 0.75rem;
+    margin: 0 2px; /* Margine orizzontale tra pulsanti */
+    min-width: 32px; /* Larghezza minima per touch-friendly */
+    height: 32px; /* Altezza fissa */
+    display: inline-flex; /* Mantiene in linea */
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle; /* Allineamento verticale con il testo */
+    line-height: 1; /* Line height fisso */
+}
+
+.table .btn-sm .material-icons {
+    font-size: 1em !important;
+    line-height: 1;
+    vertical-align: baseline; /* Allineamento icona */
+}
+
+/* Contenitore azioni sempre in riga */
+.table td.text-nowrap {
+    display: table-cell !important; /* Mantiene comportamento tabella */
+    vertical-align: middle !important; /* Allineamento verticale perfetto */
+    text-align: left; /* Allineamento a sinistra */
+    white-space: nowrap;
+}
+
+/* Fix specifico per eliminare scalino */
+.table td {
+    vertical-align: middle !important; /* Tutte le celle allineate al centro */
+}
+
+.table tr {
+    height: 48px; /* Altezza riga uniforme */
+}
+
+/* Responsive: Mantieni compatto anche su mobile */
+@media (max-width: 576px) {
+    .table .btn-sm {
+        min-width: 28px;
+        height: 28px;
+        padding: 0.3rem 0.4rem;
+        margin: 0 1px;
+    }
+    
+    .table tr {
+        height: 42px;
+    }
+}
+
 /* === MENU CARDS === */
 .menu-card {
     background: var(--card-bg);

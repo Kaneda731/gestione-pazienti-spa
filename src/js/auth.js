@@ -1,218 +1,300 @@
 /* Cache busting - Ven  4 Lug 2025 05:03:55 CEST */
-// src/js/auth.js
+// src/js/auth.js - VERSIONE PULITA E RIORGANIZZATA
 import { supabase } from './supabase.js';
-import { authContainer, templates } from './ui.js';
+import { authContainer } from './ui.js';
+
+// ===================================
+// COSTANTI E CONFIGURAZIONE
+// ===================================
+const OAUTH_PARAMS = [
+    'access_token', 'expires_at', 'expires_in', 
+    'provider_token', 'refresh_token', 'token_type'
+];
+
+const SESSION_DURATION = 24 * 60 * 60 * 1000; // 24 ore
+
+// ===================================
+// UTILITY FUNCTIONS
+// ===================================
 
 /**
- * Aggiorna l'interfaccia utente di autenticazione in base alla sessione.
- * @param {object | null} session - La sessione utente di Supabase.
+ * Identifica il tipo di ambiente di hosting
+ */
+function getEnvironmentType() {
+    const hostname = window.location.hostname;
+    
+    return {
+        isInternalServer: hostname.includes('vgold') || hostname.includes('interno'),
+        isLocalhost: hostname === 'localhost' || hostname === '127.0.0.1' || hostname.includes('127.0.0.1'),
+        isProduction: !hostname.includes('localhost') && !hostname.includes('127.0.0.1') && !hostname.includes('vgold') && !hostname.includes('interno')
+    };
+}
+
+/**
+ * Pulisce i parametri OAuth dall'URL dopo il login
+ */
+function cleanOAuthParamsFromURL() {
+    const url = new URL(window.location);
+    let hasOAuthParams = false;
+    
+    OAUTH_PARAMS.forEach(param => {
+        if (url.searchParams.has(param)) {
+            url.searchParams.delete(param);
+            hasOAuthParams = true;
+        }
+    });
+    
+    if (hasOAuthParams) {
+        const newUrl = url.pathname + url.search + url.hash;
+        window.history.replaceState({}, '', newUrl);
+    }
+}
+
+// ===================================
+// GESTIONE SESSIONI DI SVILUPPO
+// ===================================
+
+/**
+ * Crea una sessione fittizia per sviluppo
+ */
+export function enableDevelopmentBypass() {
+    const env = getEnvironmentType();
+    
+    if (!env.isLocalhost && !env.isInternalServer) {
+        return null;
+    }
+    
+    const mockSession = {
+        user: {
+            email: 'sviluppatore@vgold.local',
+            id: 'dev-user-123',
+            app_metadata: { provider: 'development' },
+            user_metadata: { name: 'Sviluppatore V Gold' }
+        },
+        access_token: 'dev-token-' + Date.now(),
+        refresh_token: 'dev-refresh-token',
+        expires_at: Date.now() + SESSION_DURATION,
+        token_type: 'bearer',
+        created_at: new Date().toISOString(),
+        expires_in: 86400,
+        isDevelopmentBypass: true
+    };
+    
+    const sessionData = JSON.stringify(mockSession);
+    sessionStorage.setItem('supabase.auth.token', sessionData);
+    localStorage.setItem('dev.bypass.session', sessionData);
+    localStorage.setItem('dev.bypass.enabled', 'true');
+    localStorage.setItem('dev.bypass.timestamp', Date.now().toString());
+    
+    return mockSession;
+}
+
+/**
+ * Controlla se esiste una sessione di bypass valida
+ */
+export function checkDevelopmentBypass() {
+    try {
+        const bypassEnabled = localStorage.getItem('dev.bypass.enabled');
+        const savedSession = localStorage.getItem('dev.bypass.session');
+        const timestamp = localStorage.getItem('dev.bypass.timestamp');
+        
+        if (!bypassEnabled || !savedSession || !timestamp) {
+            return null;
+        }
+        
+        // Verifica validità sessione
+        const sessionAge = Date.now() - parseInt(timestamp);
+        if (sessionAge > SESSION_DURATION) {
+            clearDevelopmentBypass();
+            return null;
+        }
+        
+        const session = JSON.parse(savedSession);
+        if (session.isDevelopmentBypass) {
+            sessionStorage.setItem('supabase.auth.token', savedSession);
+            return session;
+        }
+    } catch (error) {
+        console.warn('Errore durante il controllo bypass sviluppo:', error);
+        clearDevelopmentBypass();
+    }
+    
+    return null;
+}
+
+/**
+ * Pulisce tutte le tracce del bypass sviluppo
+ */
+export function clearDevelopmentBypass() {
+    sessionStorage.removeItem('supabase.auth.token');
+    localStorage.removeItem('dev.bypass.session');
+    localStorage.removeItem('dev.bypass.enabled');
+    localStorage.removeItem('dev.bypass.timestamp');
+}
+
+/**
+ * Auto-attiva il bypass sviluppo su localhost
+ */
+function autoEnableLocalhostBypass() {
+    const env = getEnvironmentType();
+    const manualLogout = localStorage.getItem('user.manual.logout');
+    
+    if (env.isLocalhost && !manualLogout && !checkDevelopmentBypass()) {
+        console.log('🔧 Auto-attivazione bypass sviluppo su ' + window.location.hostname);
+        return enableDevelopmentBypass();
+    }
+    
+    return null;
+}
+
+// ===================================
+// AUTENTICAZIONE EMAIL
+// ===================================
+
+/**
+ * Login con email e password
+ */
+export async function signInWithEmail(email, password) {
+    try {
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email: email,
+            password: password
+        });
+        
+        if (error) throw error;
+        return { success: true, data };
+    } catch (error) {
+        console.error('Errore login email:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+/**
+ * Registrazione con email e password
+ */
+export async function signUpWithEmail(email, password) {
+    try {
+        const { data, error } = await supabase.auth.signUp({
+            email: email,
+            password: password
+        });
+        
+        if (error) throw error;
+        return { success: true, data };
+    } catch (error) {
+        console.error('Errore registrazione email:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// ===================================
+// GESTIONE UI
+// ===================================
+
+/**
+ * Aggiorna l'interfaccia utente di autenticazione
  */
 export function updateAuthUI(session) {
     authContainer.innerHTML = '';
     
     if (session) {
-        // Utente loggato - mostra info utente compatte nella navbar
-        authContainer.innerHTML = `
-            <div class="d-flex align-items-center">
-                <span class="navbar-text me-2 text-light">
-                    <i class="material-icons me-1" style="font-size: 1.1em; vertical-align: text-bottom;">account_circle</i>
-                    ${session.user.email}
-                </span>
-                <button id="logout-button" class="btn btn-outline-light btn-sm">
-                    <i class="material-icons me-1" style="font-size: 1em;">logout</i>
-                    Esci
-                </button>
-            </div>
-        `;
-        
-        document.getElementById('logout-button').addEventListener('click', () => {
-            // Pulisci TUTTE le sessioni (normale e bypass)
-            clearDevelopmentBypass();
-            supabase.auth.signOut();
-        });
+        renderLoggedInUI(session);
     } else {
-        // Utente non loggato - mostra pulsante login elegante
-        authContainer.innerHTML = `
-            <button id="login-modal-trigger" class="btn btn-outline-light">
-                <i class="material-icons me-1" style="font-size: 1em;">login</i>
-                Accedi
-            </button>
-        `;
-        
-        // Crea il modal di login se non esiste già o forzane la ricreazione
-        const existingModal = document.getElementById('auth-modal');
-        if (existingModal) {
-            existingModal.remove(); // Rimuovi il modal esistente per forzare ricreazione
-        }
-        createAuthModal();
-        
-        // Event listener per aprire il modal
-        document.getElementById('login-modal-trigger').addEventListener('click', () => {
-            const modal = new bootstrap.Modal(document.getElementById('auth-modal'));
-            modal.show();
-        });
+        renderLoginUI();
     }
 }
 
 /**
- * Crea il modal di autenticazione elegante
+ * Renderizza UI per utente loggato
+ */
+function renderLoggedInUI(session) {
+    authContainer.innerHTML = `
+        <div class="d-flex align-items-center">
+            <span class="navbar-text me-2 text-light">
+                <i class="material-icons me-1" style="font-size: 1.1em; vertical-align: text-bottom;">account_circle</i>
+                ${session.user.email}
+            </span>
+            <button id="logout-button" class="btn btn-outline-light btn-sm">
+                <i class="material-icons me-1" style="font-size: 1em;">logout</i>
+                Esci
+            </button>
+        </div>
+    `;
+    
+    setupLogoutHandler();
+}
+
+/**
+ * Renderizza UI per login
+ */
+function renderLoginUI() {
+    authContainer.innerHTML = `
+        <button id="login-modal-trigger" class="btn btn-outline-light">
+            <i class="material-icons me-1" style="font-size: 1em;">login</i>
+            Accedi
+        </button>
+    `;
+    
+    // Rimuovi modal esistente e creane uno nuovo
+    const existingModal = document.getElementById('auth-modal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    createAuthModal();
+    setupLoginModalHandler();
+}
+
+/**
+ * Configura handler per logout
+ */
+function setupLogoutHandler() {
+    document.getElementById('logout-button').addEventListener('click', async () => {
+        localStorage.setItem('user.manual.logout', 'true');
+        clearDevelopmentBypass();
+        sessionStorage.removeItem('supabase.auth.token');
+        
+        await supabase.auth.signOut();
+        updateAuthUI(null);
+        
+        if (window.onAuthStateChangeCallback) {
+            window.onAuthStateChangeCallback(null);
+        }
+        
+        setTimeout(() => window.location.reload(), 100);
+    });
+}
+
+/**
+ * Configura handler per modal login
+ */
+function setupLoginModalHandler() {
+    document.getElementById('login-modal-trigger').addEventListener('click', () => {
+        const modal = new bootstrap.Modal(document.getElementById('auth-modal'));
+        modal.show();
+    });
+}
+
+// ===================================
+// MODAL DI AUTENTICAZIONE
+// ===================================
+
+/**
+ * Crea il modal di autenticazione
  */
 function createAuthModal() {
-    const isInternalServer = window.location.hostname.includes('vgold') || 
-                            window.location.hostname.includes('interno') ||
-                            window.location.hostname === 'localhost' ||
-                            window.location.hostname === '127.0.0.1' ||
-                            window.location.hostname.includes('127.0.0.1');
-
+    const env = getEnvironmentType();
+    
     const modalHTML = `
-        <div class="modal fade" id="auth-modal" tabindex="-1" aria-labelledby="authModalLabel" role="dialog" aria-modal="true" aria-describedby="auth-modal-description">
+        <div class="modal fade" id="auth-modal" tabindex="-1" aria-labelledby="authModalLabel" role="dialog" aria-modal="true">
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content" style="background: var(--card-bg); border: none; box-shadow: var(--shadow-lg);">
-                    <div class="modal-header" style="background: linear-gradient(135deg, var(--primary-color), #0d47a1); color: white; border: none;">
-                        <h5 class="modal-title d-flex align-items-center" id="authModalLabel">
-                            <i class="material-icons me-2" aria-hidden="true">security</i>
-                            <span id="modal-title">Accesso al Sistema</span>
-                        </h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Chiudi modal di autenticazione"></button>
-                    </div>
+                    ${createModalHeader()}
                     <div class="modal-body" role="main">
-                        <div id="auth-modal-description" class="visually-hidden">
-                            Modal per l'autenticazione dell'utente. Compila i campi per accedere al sistema.
-                        </div>
-                        ${isInternalServer ? `
-                            <div class="alert alert-info d-flex align-items-center mb-3" role="alert" aria-live="polite">
-                                <i class="material-icons me-2" style="font-size: 1.2em;" aria-hidden="true">info</i>
-                                <div>
-                                    <strong>Server interno rilevato</strong><br>
-                                    <small>Usa l'accesso email o il bypass sviluppo per ambienti aziendali.</small>
-                                </div>
-                            </div>
-                        ` : ''}
-                        
-                        <!-- Contenuto Login -->
-                        <div id="login-content" role="form" aria-label="Modulo di accesso">
-                            <form id="email-login-form" class="mb-3" novalidate autocomplete="on">
-                                <div class="mb-3">
-                                    <label for="modal-login-email" class="form-label">
-                                        <i class="material-icons me-1" style="font-size: 1em; vertical-align: text-bottom;" aria-hidden="true">email</i>
-                                        Email
-                                    </label>
-                                    <input type="email" 
-                                           class="form-control input-with-email-icon" 
-                                           id="modal-login-email" 
-                                           name="email"
-                                           required 
-                                           autocomplete="email"
-                                           aria-describedby="login-email-help">
-                                    <div id="login-email-help" class="form-text visually-hidden">Inserisci la tua email per accedere</div>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="modal-login-password" class="form-label">
-                                        <i class="material-icons me-1" style="font-size: 1em; vertical-align: text-bottom;" aria-hidden="true">lock</i>
-                                        Password
-                                    </label>
-                                    <input type="password" 
-                                           class="form-control input-with-password-icon" 
-                                           id="modal-login-password" 
-                                           name="password"
-                                           required
-                                           autocomplete="current-password"
-                                           aria-describedby="login-password-help">
-                                    <div id="login-password-help" class="form-text visually-hidden">Inserisci la tua password</div>
-                                </div>
-                                <button type="submit" class="btn btn-primary w-100 mb-3" aria-describedby="login-submit-help">
-                                    <i class="material-icons me-1" style="font-size: 1em;" aria-hidden="true">login</i>
-                                    Accedi con Email
-                                </button>
-                                <div id="login-submit-help" class="form-text visually-hidden">Premere per accedere con email e password</div>
-                            </form>
-                            
-                            <!-- Opzioni Alternative -->
-                            <div class="d-grid gap-2">
-                                ${!isInternalServer ? `
-                                    <button id="google-login-btn" class="btn btn-outline-danger">
-                                        <i class="material-icons me-1" style="font-size: 1em;">account_circle</i>
-                                        Accedi con Google
-                                    </button>
-                                ` : ''}
-                                
-                                ${isInternalServer ? `
-                                    <button id="dev-bypass-btn" class="btn btn-outline-secondary">
-                                        <i class="material-icons me-1" style="font-size: 1em;">developer_mode</i>
-                                        ${localStorage.getItem('dev.bypass.enabled') ? 'Bypass Attivo' : 'Bypass Sviluppo'}
-                                    </button>
-                                    ${localStorage.getItem('dev.bypass.enabled') ? `
-                                        <button id="clear-bypass-btn" class="btn btn-outline-warning btn-sm mt-2">
-                                            <i class="material-icons me-1" style="font-size: 0.9em;">clear</i>
-                                            Disattiva Bypass
-                                        </button>
-                                    ` : ''}
-                                ` : ''}
-                            </div>
-                            
-                            <hr class="my-3">
-                            <div class="text-center">
-                                <small class="text-muted">
-                                    Non hai un account? 
-                                    <a href="#" id="show-signup-link" class="text-decoration-none">Registrati qui</a>
-                                </small>
-                            </div>
-                        </div>
-                        
-                        <!-- Contenuto Registrazione -->
-                        <div id="signup-content" style="display: none;">
-                            <form id="email-signup-form" autocomplete="on">
-                                <div class="mb-3">
-                                    <label for="modal-signup-email" class="form-label">
-                                        <i class="material-icons me-1" style="font-size: 1em; vertical-align: text-bottom;">email</i>
-                                        Email
-                                    </label>
-                                    <input type="email" 
-                                           class="form-control input-with-email-icon" 
-                                           id="modal-signup-email" 
-                                           name="email"
-                                           required
-                                           autocomplete="email">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="modal-signup-password" class="form-label">
-                                        <i class="material-icons me-1" style="font-size: 1em; vertical-align: text-bottom;" aria-hidden="true">lock</i>
-                                        Password
-                                    </label>
-                                    <input type="password" 
-                                           class="form-control input-with-password-icon" 
-                                           id="modal-signup-password" 
-                                           name="password"
-                                           required 
-                                           minlength="6"
-                                           autocomplete="new-password">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="modal-signup-password-confirm" class="form-label">
-                                        <i class="material-icons me-1" style="font-size: 1em; vertical-align: text-bottom;">lock_outline</i>
-                                        Conferma Password
-                                    </label>
-                                    <input type="password" 
-                                           class="form-control input-with-password-icon" 
-                                           id="modal-signup-password-confirm" 
-                                           name="password-confirm"
-                                           required 
-                                           minlength="6"
-                                           autocomplete="new-password">
-                                </div>
-                                <button type="submit" class="btn btn-success w-100">
-                                    <i class="material-icons me-1" style="font-size: 1em;">person_add</i>
-                                    Crea Account
-                                </button>
-                            </form>
-                            <hr class="my-3">
-                            <div class="text-center">
-                                <small class="text-muted">
-                                    Hai già un account? 
-                                    <a href="#" id="show-login-link" class="text-decoration-none">Accedi qui</a>
-                                </small>
-                            </div>
-                        </div>
+                        ${createEnvironmentAlert(env)}
+                        ${createLoginForm()}
+                        ${createAuthOptions(env)}
+                        ${createSignupForm()}
                     </div>
                 </div>
             </div>
@@ -224,67 +306,247 @@ function createAuthModal() {
 }
 
 /**
- * Configura gli event listener per il modal di autenticazione
+ * Crea header del modal
+ */
+function createModalHeader() {
+    return `
+        <div class="modal-header" style="background: linear-gradient(135deg, var(--primary-color), #0d47a1); color: white; border: none;">
+            <h5 class="modal-title d-flex align-items-center" id="authModalLabel">
+                <i class="material-icons me-2" aria-hidden="true">security</i>
+                <span id="modal-title">Accesso al Sistema</span>
+            </h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Chiudi modal"></button>
+        </div>
+    `;
+}
+
+/**
+ * Crea alert ambiente
+ */
+function createEnvironmentAlert(env) {
+    if (env.isInternalServer && !env.isLocalhost) {
+        return `
+            <div class="alert alert-info d-flex align-items-center mb-3" role="alert">
+                <i class="material-icons me-2" style="font-size: 1.2em;" aria-hidden="true">info</i>
+                <div>
+                    <strong>Server interno rilevato</strong><br>
+                    <small>Usa l'accesso email o il bypass sviluppo.</small>
+                </div>
+            </div>
+        `;
+    }
+    
+    if (env.isLocalhost) {
+        return `
+            <div class="alert alert-success d-flex align-items-center mb-3" role="alert">
+                <i class="material-icons me-2" style="font-size: 1.2em;" aria-hidden="true">developer_mode</i>
+                <div>
+                    <strong>Ambiente di sviluppo</strong><br>
+                    <small>Google OAuth e bypass sviluppo disponibili.</small>
+                </div>
+            </div>
+        `;
+    }
+    
+    return '';
+}
+
+/**
+ * Crea form di login
+ */
+function createLoginForm() {
+    return `
+        <div id="login-content" role="form" aria-label="Modulo di accesso">
+            <form id="email-login-form" class="mb-3" novalidate autocomplete="on">
+                <div class="mb-3">
+                    <label for="modal-login-email" class="form-label">
+                        <i class="material-icons me-1" style="font-size: 1em;" aria-hidden="true">email</i>
+                        Email
+                    </label>
+                    <input type="email" class="form-control" id="modal-login-email" name="email" required autocomplete="email">
+                </div>
+                <div class="mb-3">
+                    <label for="modal-login-password" class="form-label">
+                        <i class="material-icons me-1" style="font-size: 1em;" aria-hidden="true">lock</i>
+                        Password
+                    </label>
+                    <input type="password" class="form-control" id="modal-login-password" name="password" required autocomplete="current-password">
+                </div>
+                <button type="submit" class="btn btn-primary w-100 mb-3">
+                    <i class="material-icons me-1" style="font-size: 1em;" aria-hidden="true">login</i>
+                    Accedi con Email
+                </button>
+            </form>
+        </div>
+    `;
+}
+
+/**
+ * Crea opzioni di autenticazione alternative
+ */
+function createAuthOptions(env) {
+    const showGoogle = !env.isInternalServer || env.isLocalhost;
+    const showBypass = env.isInternalServer || env.isLocalhost;
+    const bypassActive = localStorage.getItem('dev.bypass.enabled');
+    
+    return `
+        <div class="d-grid gap-2 mb-3">
+            ${showGoogle ? `
+                <button id="google-login-btn" class="btn btn-outline-danger">
+                    <i class="material-icons me-1">account_circle</i>
+                    Accedi con Google
+                </button>
+            ` : ''}
+            
+            ${showBypass ? `
+                <button id="dev-bypass-btn" class="btn btn-outline-secondary">
+                    <i class="material-icons me-1">developer_mode</i>
+                    ${bypassActive ? 'Bypass Attivo' : 'Bypass Sviluppo'}
+                </button>
+                ${bypassActive ? `
+                    <button id="clear-bypass-btn" class="btn btn-outline-warning btn-sm">
+                        <i class="material-icons me-1" style="font-size: 0.9em;">clear</i>
+                        Disattiva Bypass
+                    </button>
+                ` : ''}
+            ` : ''}
+        </div>
+        
+        <hr class="my-3">
+        <div class="text-center">
+            <small class="text-muted">
+                Non hai un account? 
+                <a href="#" id="show-signup-link" class="text-decoration-none">Registrati qui</a>
+            </small>
+        </div>
+    `;
+}
+
+/**
+ * Crea form di registrazione
+ */
+function createSignupForm() {
+    return `
+        <div id="signup-content" style="display: none;">
+            <form id="email-signup-form" autocomplete="on">
+                <div class="mb-3">
+                    <label for="modal-signup-email" class="form-label">
+                        <i class="material-icons me-1">email</i>
+                        Email
+                    </label>
+                    <input type="email" class="form-control" id="modal-signup-email" name="email" required autocomplete="email">
+                </div>
+                <div class="mb-3">
+                    <label for="modal-signup-password" class="form-label">
+                        <i class="material-icons me-1">lock</i>
+                        Password
+                    </label>
+                    <input type="password" class="form-control" id="modal-signup-password" name="password" required minlength="6" autocomplete="new-password">
+                </div>
+                <div class="mb-3">
+                    <label for="modal-signup-password-confirm" class="form-label">
+                        <i class="material-icons me-1">lock_outline</i>
+                        Conferma Password
+                    </label>
+                    <input type="password" class="form-control" id="modal-signup-password-confirm" name="password-confirm" required minlength="6" autocomplete="new-password">
+                </div>
+                <button type="submit" class="btn btn-success w-100">
+                    <i class="material-icons me-1">person_add</i>
+                    Crea Account
+                </button>
+            </form>
+            <hr class="my-3">
+            <div class="text-center">
+                <small class="text-muted">
+                    Hai già un account? 
+                    <a href="#" id="show-login-link" class="text-decoration-none">Accedi qui</a>
+                </small>
+            </div>
+        </div>
+    `;
+}
+
+// ===================================
+// EVENT LISTENERS MODAL
+// ===================================
+
+/**
+ * Configura tutti gli event listener del modal
  */
 function setupModalEventListeners() {
-    // Login con email
+    setupEmailLoginHandler();
+    setupGoogleLoginHandler();
+    setupBypassHandlers();
+    setupToggleHandlers();
+    setupSignupHandler();
+}
+
+/**
+ * Handler per login email
+ */
+function setupEmailLoginHandler() {
     const emailForm = document.getElementById('email-login-form');
     emailForm?.addEventListener('submit', async (e) => {
         e.preventDefault();
+        
         const email = document.getElementById('modal-login-email').value;
         const password = document.getElementById('modal-login-password').value;
-        
         const submitBtn = emailForm.querySelector('button[type="submit"]');
-        const originalText = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Accesso...';
-        submitBtn.disabled = true;
+        
+        setButtonLoading(submitBtn, 'Accesso...');
         
         const result = await signInWithEmail(email, password);
         
-        if (!result.success) {
-            // Mostra errore nel modal
-            showModalError(`Errore di accesso: ${result.error}`);
-            submitBtn.innerHTML = originalText;
-            submitBtn.disabled = false;
-        } else {
-            // Chiudi il modal al successo
+        if (result.success) {
+            localStorage.removeItem('user.manual.logout');
             bootstrap.Modal.getInstance(document.getElementById('auth-modal')).hide();
+        } else {
+            showModalError(`Errore di accesso: ${result.error}`);
+            resetButton(submitBtn, 'Accedi con Email');
         }
     });
-    
-    // Login con Google
+}
+
+/**
+ * Handler per Google login
+ */
+function setupGoogleLoginHandler() {
     const googleBtn = document.getElementById('google-login-btn');
     googleBtn?.addEventListener('click', () => {
         supabase.auth.signInWithOAuth({ provider: 'google' });
     });
-    
-    // Bypass sviluppo
+}
+
+/**
+ * Handler per bypass sviluppo
+ */
+function setupBypassHandlers() {
     const devBtn = document.getElementById('dev-bypass-btn');
     devBtn?.addEventListener('click', () => {
+        localStorage.removeItem('user.manual.logout');
+        
         const mockSession = enableDevelopmentBypass();
         if (mockSession) {
             updateAuthUI(mockSession);
-            // Triggepa il callback di auth state change manualmente
             if (window.onAuthStateChangeCallback) {
                 window.onAuthStateChangeCallback(mockSession);
             }
-            // Chiudi il modal
             bootstrap.Modal.getInstance(document.getElementById('auth-modal')).hide();
         }
     });
     
-    // Pulsante per disattivare il bypass
     const clearBypassBtn = document.getElementById('clear-bypass-btn');
     clearBypassBtn?.addEventListener('click', () => {
         clearDevelopmentBypass();
         showModalSuccess('Bypass sviluppo disattivato. Ricarica la pagina per applicare.');
-        // Ricarica il modal per aggiornare i pulsanti
-        setTimeout(() => {
-            window.location.reload();
-        }, 1500);
+        setTimeout(() => window.location.reload(), 1500);
     });
-    
-    // Toggle tra login e signup
+}
+
+/**
+ * Handler per toggle login/signup
+ */
+function setupToggleHandlers() {
     const showSignup = document.getElementById('show-signup-link');
     const showLogin = document.getElementById('show-login-link');
     const loginContent = document.getElementById('login-content');
@@ -304,11 +566,16 @@ function setupModalEventListeners() {
         loginContent.style.display = 'block';
         modalTitle.innerHTML = '<i class="material-icons me-2">security</i>Accesso al Sistema';
     });
-    
-    // Registrazione con email
+}
+
+/**
+ * Handler per registrazione
+ */
+function setupSignupHandler() {
     const signupForm = document.getElementById('email-signup-form');
     signupForm?.addEventListener('submit', async (e) => {
         e.preventDefault();
+        
         const email = document.getElementById('modal-signup-email').value;
         const password = document.getElementById('modal-signup-password').value;
         const passwordConfirm = document.getElementById('modal-signup-password-confirm').value;
@@ -319,146 +586,134 @@ function setupModalEventListeners() {
         }
         
         const submitBtn = signupForm.querySelector('button[type="submit"]');
-        const originalText = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Registrazione...';
-        submitBtn.disabled = true;
+        setButtonLoading(submitBtn, 'Registrazione...');
         
         const result = await signUpWithEmail(email, password);
         
         if (result.success) {
             showModalSuccess('Registrazione completata! Controlla la tua email per confermare l\'account.');
-            // Torna al login dopo 2 secondi
             setTimeout(() => {
-                signupContent.style.display = 'none';
-                loginContent.style.display = 'block';
-                modalTitle.innerHTML = '<i class="material-icons me-2">security</i>Accesso al Sistema';
+                document.getElementById('signup-content').style.display = 'none';
+                document.getElementById('login-content').style.display = 'block';
+                document.getElementById('modal-title').innerHTML = '<i class="material-icons me-2">security</i>Accesso al Sistema';
             }, 2000);
         } else {
             showModalError(`Errore di registrazione: ${result.error}`);
         }
         
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
+        resetButton(submitBtn, 'Crea Account');
     });
 }
 
+// ===================================
+// UTILITY UI
+// ===================================
+
 /**
- * Mostra un messaggio di errore nel modal con accessibilità migliorata
+ * Imposta stato loading per pulsante
+ */
+function setButtonLoading(button, text) {
+    button.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span>${text}`;
+    button.disabled = true;
+}
+
+/**
+ * Ripristina pulsante normale
+ */
+function resetButton(button, text) {
+    button.innerHTML = text;
+    button.disabled = false;
+}
+
+/**
+ * Mostra messaggio di errore nel modal
  */
 function showModalError(message) {
-    const modalBody = document.querySelector('#auth-modal .modal-body');
-    let alertContainer = modalBody.querySelector('.auth-alert');
-    
-    if (!alertContainer) {
-        alertContainer = document.createElement('div');
-        alertContainer.className = 'auth-alert';
-        alertContainer.setAttribute('aria-live', 'assertive');
-        alertContainer.setAttribute('aria-atomic', 'true');
-        modalBody.insertBefore(alertContainer, modalBody.firstChild);
-    }
-    
-    alertContainer.innerHTML = `
-        <div class="alert alert-danger d-flex align-items-center alert-dismissible" role="alert">
-            <i class="material-icons me-2" aria-hidden="true">error</i>
-            <div>${message}</div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Chiudi messaggio di errore"></button>
-        </div>
-    `;
-    
-    // Focus sul messaggio per screen reader
-    setTimeout(() => {
-        const alert = alertContainer.querySelector('.alert');
-        if (alert) {
-            alert.focus();
-        }
-    }, 100);
+    showModalMessage(message, 'danger', 'error');
 }
 
 /**
- * Mostra un messaggio di successo nel modal con accessibilità migliorata
+ * Mostra messaggio di successo nel modal
  */
 function showModalSuccess(message) {
+    showModalMessage(message, 'success', 'check_circle');
+}
+
+/**
+ * Mostra messaggio generico nel modal
+ */
+function showModalMessage(message, type, icon) {
     const modalBody = document.querySelector('#auth-modal .modal-body');
     let alertContainer = modalBody.querySelector('.auth-alert');
     
     if (!alertContainer) {
         alertContainer = document.createElement('div');
         alertContainer.className = 'auth-alert';
-        alertContainer.setAttribute('aria-live', 'polite');
+        alertContainer.setAttribute('aria-live', type === 'danger' ? 'assertive' : 'polite');
         alertContainer.setAttribute('aria-atomic', 'true');
         modalBody.insertBefore(alertContainer, modalBody.firstChild);
     }
     
     alertContainer.innerHTML = `
-        <div class="alert alert-success d-flex align-items-center alert-dismissible" role="alert">
-            <i class="material-icons me-2" aria-hidden="true">check_circle</i>
+        <div class="alert alert-${type} d-flex align-items-center alert-dismissible" role="alert">
+            <i class="material-icons me-2" aria-hidden="true">${icon}</i>
             <div>${message}</div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Chiudi messaggio di successo"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Chiudi messaggio"></button>
         </div>
     `;
-    
-    // Focus sul messaggio per screen reader
-    setTimeout(() => {
-        const alert = alertContainer.querySelector('.alert');
-        if (alert) {
-            alert.focus();
-        }
-    }, 100);
 }
 
+// ===================================
+// INIZIALIZZAZIONE
+// ===================================
+
 /**
- * Inizializza il listener per i cambiamenti di stato dell'autenticazione.
- * @param {function} onAuthStateChange - Callback da eseguire quando lo stato di autenticazione cambia.
+ * Inizializza il sistema di autenticazione
  */
 export function initAuth(onAuthStateChange) {
-    // Salva il callback globalmente per il bypass di sviluppo
     window.onAuthStateChangeCallback = onAuthStateChange;
     
-    // PRIMA: Auto-attiva bypass su localhost se non esiste
+    // Auto-attiva bypass su localhost se necessario
     const autoBypassSession = autoEnableLocalhostBypass();
     if (autoBypassSession) {
         updateAuthUI(autoBypassSession);
         if (onAuthStateChange) {
             onAuthStateChange(autoBypassSession);
         }
-        return; // Exit early con sessione auto-attivata
+        return;
     }
     
-    // SECONDA: Controlla se c'è una sessione di bypass sviluppo persistente
+    // Controlla sessione di bypass esistente
     const developmentSession = checkDevelopmentBypass();
     if (developmentSession) {
         updateAuthUI(developmentSession);
         if (onAuthStateChange) {
             onAuthStateChange(developmentSession);
         }
-        return; // Exit early con sessione di sviluppo
+        return;
     }
     
-    // SECONDA: Controlla se c'è una sessione di bypass salvata in sessionStorage
+    // Controlla sessione salvata in sessionStorage
     const savedBypassSession = sessionStorage.getItem('supabase.auth.token');
     if (savedBypassSession) {
         try {
             const session = JSON.parse(savedBypassSession);
-            // Verifica che sia una sessione di sviluppo valida
             if (session.isDevelopmentBypass) {
                 updateAuthUI(session);
                 if (onAuthStateChange) {
                     onAuthStateChange(session);
                 }
-                return; // Exit early se c'è una sessione bypass valida
+                return;
             }
         } catch (e) {
-            // Sessione corrotta, rimuovila
             sessionStorage.removeItem('supabase.auth.token');
         }
     }
     
-    // TERZA: Listener normale per Supabase auth
+    // Listener Supabase standard
     supabase.auth.onAuthStateChange((_event, session) => {
-        // Pulisci i parametri OAuth dall'URL se presenti
         cleanOAuthParamsFromURL();
         
-        // Se non c'è una sessione Supabase, controlla di nuovo il bypass
         if (!session) {
             const bypassSession = checkDevelopmentBypass();
             if (bypassSession) {
@@ -471,174 +726,4 @@ export function initAuth(onAuthStateChange) {
             onAuthStateChange(session);
         }
     });
-}
-
-/**
- * Autenticazione con email e password per ambienti aziendali
- * Alternativa quando OAuth Google non funziona su server interni
- */
-export async function signInWithEmail(email, password) {
-    try {
-        const { data, error } = await supabase.auth.signInWithPassword({
-            email: email,
-            password: password
-        });
-        
-        if (error) throw error;
-        return { success: true, data };
-    } catch (error) {
-        console.error('Errore login email:', error);
-        return { success: false, error: error.message };
-    }
-}
-
-export async function signUpWithEmail(email, password) {
-    try {
-        const { data, error } = await supabase.auth.signUp({
-            email: email,
-            password: password
-        });
-        
-        if (error) throw error;
-        return { success: true, data };
-    } catch (error) {
-        console.error('Errore registrazione email:', error);
-        return { success: false, error: error.message };
-    }
-}
-
-/**
- * Bypass temporaneo per sviluppo su server interni
- * Crea una sessione fittizia per testare l'app con persistenza migliorata
- */
-export function enableDevelopmentBypass() {
-    const isDevelopment = window.location.hostname === 'localhost' || 
-                         window.location.hostname.includes('127.0.0.1') ||
-                         window.location.hostname.includes('.local') ||
-                         window.location.hostname.includes('vgold') ||
-                         window.location.hostname.includes('interno');
-                         
-    if (isDevelopment) {
-        // Simula una sessione per sviluppo con timestamp per validità
-        const mockSession = {
-            user: {
-                email: 'sviluppatore@vgold.local',
-                id: 'dev-user-123',
-                app_metadata: { provider: 'development' },
-                user_metadata: { name: 'Sviluppatore V Gold' }
-            },
-            access_token: 'dev-token-' + Date.now(),
-            refresh_token: 'dev-refresh-token',
-            expires_at: Date.now() + (24 * 60 * 60 * 1000), // 24 ore
-            token_type: 'bearer',
-            created_at: new Date().toISOString(),
-            expires_in: 86400,
-            // Flag per identificare che è una sessione di sviluppo
-            isDevelopmentBypass: true
-        };
-        
-        // Memorizza la sessione in ENTRAMBI sessionStorage e localStorage per persistenza
-        const sessionData = JSON.stringify(mockSession);
-        sessionStorage.setItem('supabase.auth.token', sessionData);
-        localStorage.setItem('dev.bypass.session', sessionData);
-        localStorage.setItem('dev.bypass.enabled', 'true');
-        localStorage.setItem('dev.bypass.timestamp', Date.now().toString());
-        
-        // Bypass sviluppo attivato - sessione persistente creata
-        return mockSession;
-    }
-    return null;
-}
-
-/**
- * Controlla se esiste una sessione di bypass valida salvata
- */
-export function checkDevelopmentBypass() {
-    try {
-        const bypassEnabled = localStorage.getItem('dev.bypass.enabled');
-        const savedSession = localStorage.getItem('dev.bypass.session');
-        const timestamp = localStorage.getItem('dev.bypass.timestamp');
-        
-        if (!bypassEnabled || !savedSession || !timestamp) {
-            return null;
-        }
-        
-        // Verifica se la sessione è ancora valida (24 ore)
-        const sessionAge = Date.now() - parseInt(timestamp);
-        const maxAge = 24 * 60 * 60 * 1000; // 24 ore
-        
-        if (sessionAge > maxAge) {
-            // Sessione scaduta, pulisci
-            clearDevelopmentBypass();
-            return null;
-        }
-        
-        const session = JSON.parse(savedSession);
-        
-        // Verifica che sia effettivamente una sessione di sviluppo
-        if (session.isDevelopmentBypass) {
-            // Ripristina anche in sessionStorage
-            sessionStorage.setItem('supabase.auth.token', savedSession);
-            // Sessione bypass sviluppo ripristinata automaticamente
-            return session;
-        }
-        
-    } catch (error) {
-        console.warn('Errore durante il controllo bypass sviluppo:', error);
-        clearDevelopmentBypass();
-    }
-    
-    return null;
-}
-
-/**
- * Pulisce tutte le tracce del bypass sviluppo
- */
-export function clearDevelopmentBypass() {
-    sessionStorage.removeItem('supabase.auth.token');
-    localStorage.removeItem('dev.bypass.session');
-    localStorage.removeItem('dev.bypass.enabled');
-    localStorage.removeItem('dev.bypass.timestamp');
-    // Bypass sviluppo pulito
-}
-
-/**
- * Pulisce i parametri OAuth dall'URL dopo il login
- */
-function cleanOAuthParamsFromURL() {
-    const url = new URL(window.location);
-    const oauthParams = [
-        'access_token', 'expires_at', 'expires_in', 
-        'provider_token', 'refresh_token', 'token_type'
-    ];
-    
-    let hasOAuthParams = false;
-    oauthParams.forEach(param => {
-        if (url.searchParams.has(param)) {
-            url.searchParams.delete(param);
-            hasOAuthParams = true;
-        }
-    });
-    
-    // Se c'erano parametri OAuth, aggiorna l'URL senza ricaricare la pagina
-    if (hasOAuthParams) {
-        // Mantieni solo l'hash se presente (per il routing SPA)
-        const newUrl = url.pathname + url.search + url.hash;
-        window.history.replaceState({}, '', newUrl);
-    }
-}
-
-/**
- * Auto-attiva il bypass sviluppo su localhost se non è già presente una sessione
- */
-function autoEnableLocalhostBypass() {
-    const isLocalhost = window.location.hostname === 'localhost' || 
-                       window.location.hostname === '127.0.0.1' ||
-                       window.location.hostname.includes('127.0.0.1');
-    
-    if (isLocalhost && !checkDevelopmentBypass()) {
-        console.log('🔧 Auto-attivazione bypass sviluppo su ' + window.location.hostname);
-        return enableDevelopmentBypass();
-    }
-    return null;
 }

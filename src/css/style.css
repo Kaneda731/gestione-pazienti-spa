@@ -710,3 +710,127 @@ body {
 [data-bs-theme="dark"] select option:hover {
     background-color: rgba(77, 171, 247, 0.2) !important;
 }
+
+/* === WEBKIT SPECIFIC DROPDOWN FIXES === */
+/* CSS aggressivo per WebKit browsers (Chrome, Safari, Edge) */
+[data-bs-theme="dark"] select,
+[data-bs-theme="dark"] select:focus {
+    color-scheme: dark !important;
+}
+
+[data-bs-theme="dark"] select option {
+    background: #3d4454 !important;
+    color: #f8f9fa !important;
+}
+
+/* Fix specifici per diversi browser */
+@-moz-document url-prefix() {
+    /* Firefox */
+    [data-bs-theme="dark"] select option {
+        background-color: #3d4454 !important;
+        color: #f8f9fa !important;
+    }
+}
+
+/* WebKit specific (Chrome, Safari, Edge) */
+[data-bs-theme="dark"] select::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+}
+
+/* CSS per forzare il color-scheme scuro */
+[data-bs-theme="dark"] {
+    color-scheme: dark;
+}
+
+/* Light mode color-scheme */
+[data-bs-theme="light"], :root {
+    color-scheme: light;
+}
+
+/* === CUSTOM DROPDOWN STYLES === */
+/* Stili per dropdown personalizzati come alternativa alle select native */
+.custom-dropdown {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+.custom-dropdown-trigger {
+    background: var(--card-bg);
+    border: 2px solid rgba(226, 232, 240, 0.8);
+    border-radius: 8px;
+    padding: 0.75rem 2.5rem 0.75rem 1rem;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+}
+
+.custom-dropdown-trigger::after {
+    content: '▼';
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.8rem;
+    transition: transform 0.3s ease;
+}
+
+.custom-dropdown.open .custom-dropdown-trigger::after {
+    transform: translateY(-50%) rotate(180deg);
+}
+
+.custom-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--card-bg);
+    border: 2px solid rgba(226, 232, 240, 0.8);
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.custom-dropdown.open .custom-dropdown-menu {
+    display: block;
+}
+
+.custom-dropdown-option {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    transition: var(--transition);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.custom-dropdown-option:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.custom-dropdown-option:last-child {
+    border-bottom: none;
+}
+
+/* Dark mode per custom dropdown */
+[data-bs-theme="dark"] .custom-dropdown-trigger,
+[data-bs-theme="dark"] .custom-dropdown-menu {
+    background: #3d4454;
+    border-color: #495057;
+    color: #f8f9fa;
+}
+
+[data-bs-theme="dark"] .custom-dropdown-option {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-bs-theme="dark"] .custom-dropdown-option:hover {
+    background-color: var(--primary-color);
+    color: white;
+}

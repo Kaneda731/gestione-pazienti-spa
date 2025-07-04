@@ -44,6 +44,20 @@
 [data-bs-theme="dark"] main#app-container {
     background: transparent;
     min-height: calc(100vh - 76px); /* Altezza navbar circa 76px */
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+/* Fix per le animazioni delle menu-card in dark mode */
+[data-bs-theme="dark"] #view-home {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+[data-bs-theme="dark"] #view-home .row.g-4 {
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+    padding: 2rem 1rem;
 }
 
 /* Navbar nel tema scuro */

@@ -111,12 +111,15 @@ html, body {
 main#app-container {
     background: transparent;
     position: relative;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
 }
 
 /* Fix animazioni view per evitare problemi di overflow */
 .view {
     background: transparent;
     position: relative;
+    padding-top: 1rem;
 }
 
 /* Fix Border-radius per tutte le card - Priorità massima */

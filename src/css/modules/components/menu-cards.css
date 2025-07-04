@@ -4,28 +4,36 @@
 
 /* Container per evitare taglio animazioni */
 #view-home .row.g-4 {
-    margin-top: 2rem;
-    margin-bottom: 2rem;
-    padding: 0 1rem;
+    margin-top: 3rem;
+    margin-bottom: 3rem;
+    padding: 2rem 1rem;
     overflow: visible !important;
 }
 
 #view-home .col-md-6,
 #view-home .col-lg-3 {
-    margin-bottom: 1.5rem;
+    margin-bottom: 2rem;
     overflow: visible !important;
-    padding: 1rem;
+    padding: 1.5rem 1rem;
 }
 
 /* Fix specifico per Bootstrap che potrebbe nascondere overflow */
 #view-home {
     overflow: visible !important;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
 }
 
 #view-home .container,
 #view-home .row,
 #view-home [class*="col-"] {
     overflow: visible !important;
+}
+
+/* Assicura che il main container abbia spazio sufficiente per le animazioni */
+main#app-container {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
 }
 
 /* Stili principali menu card */

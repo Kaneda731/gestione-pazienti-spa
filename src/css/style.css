@@ -247,6 +247,147 @@ body {
     background: linear-gradient(90deg, transparent, rgba(77, 171, 247, 0.3), transparent);
 }
 
+/* === PULSANTI PAGINAZIONE (STILE TORNA AL MENU) === */
+#prev-page-btn,
+#next-page-btn {
+    background: linear-gradient(135deg, var(--secondary-color), #495057);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    min-width: 120px;
+}
+
+#prev-page-btn::before,
+#next-page-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+    z-index: 1;
+}
+
+#prev-page-btn:hover,
+#next-page-btn:hover {
+    background: linear-gradient(135deg, #5a6268, var(--secondary-color));
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+    color: white;
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+#prev-page-btn:hover::before,
+#next-page-btn:hover::before {
+    left: 100%;
+}
+
+#prev-page-btn:active,
+#next-page-btn:active {
+    transform: translateY(0) scale(0.98);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+#prev-page-btn:disabled,
+#next-page-btn:disabled {
+    background: linear-gradient(135deg, #6c757d, #adb5bd);
+    color: #fff;
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+#prev-page-btn:disabled:hover,
+#next-page-btn:disabled:hover {
+    transform: none !important;
+    background: linear-gradient(135deg, #6c757d, #adb5bd);
+}
+
+/* Dark mode specifico per pulsanti paginazione */
+[data-bs-theme="dark"] #prev-page-btn,
+[data-bs-theme="dark"] #next-page-btn {
+    background: linear-gradient(135deg, #3d4454, #495057);
+    border-color: rgba(77, 171, 247, 0.2);
+    color: #e9ecef;
+}
+
+[data-bs-theme="dark"] #prev-page-btn:hover,
+[data-bs-theme="dark"] #next-page-btn:hover {
+    background: linear-gradient(135deg, #495057, #5a6268);
+    border-color: rgba(77, 171, 247, 0.4);
+    color: white;
+    box-shadow: 0 4px 15px rgba(77, 171, 247, 0.3);
+}
+
+[data-bs-theme="dark"] #prev-page-btn::before,
+[data-bs-theme="dark"] #next-page-btn::before {
+    background: linear-gradient(90deg, transparent, rgba(77, 171, 247, 0.3), transparent);
+}
+
+/* === LAYOUT PAGINAZIONE CENTRATA === */
+#pagination-controls {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 3rem; /* Spazio maggiore tra elementi */
+    margin-top: 1.5rem;
+    width: 100%;
+    flex-wrap: nowrap; /* Non andare a capo */
+}
+
+#prev-page-btn {
+    order: 1; /* Primo elemento */
+    flex: 0 0 auto; /* Non si espande */
+}
+
+#page-info {
+    order: 2; /* Elemento centrale */
+    text-align: center;
+    font-weight: 500;
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+    margin: 0 1rem; /* Margine laterale */
+    flex: 0 0 auto; /* Non si espande */
+    white-space: nowrap; /* Non andare a capo */
+}
+
+#next-page-btn {
+    order: 3; /* Ultimo elemento */
+    flex: 0 0 auto; /* Non si espande */
+}
+
+[data-bs-theme="dark"] #page-info {
+    color: #adb5bd;
+}
+
+/* Responsive: Stack verticale su mobile */
+@media (max-width: 576px) {
+    #pagination-controls {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    #prev-page-btn,
+    #next-page-btn {
+        width: 100%;
+        max-width: 200px;
+    }
+    
+    #page-info {
+        margin: 0.5rem 0;
+    }
+}
+
 /* === FIX ALLINEAMENTO FILTRI ELENCO PAZIENTI === */
 .filters-container .form-control,
 .filters-container .form-select {

@@ -103,6 +103,22 @@
    FIX SPECIFICI E OVERRIDE PRIORITARI
    ============================================= */
 
+/* Fix per evitare gap/frame visibili */
+html, body {
+    overflow-x: hidden;
+}
+
+main#app-container {
+    background: transparent;
+    position: relative;
+}
+
+/* Fix animazioni view per evitare problemi di overflow */
+.view {
+    background: transparent;
+    position: relative;
+}
+
 /* Fix Border-radius per tutte le card - Priorità massima */
 .card,
 .card.elevation-1,

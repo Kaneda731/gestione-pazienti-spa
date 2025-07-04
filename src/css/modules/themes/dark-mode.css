@@ -27,6 +27,23 @@
 [data-bs-theme="dark"] body {
     background: var(--body-bg);
     color: var(--text-primary);
+    margin: 0;
+    padding: 0;
+}
+
+/* Assicura che il background copra tutto in dark mode */
+[data-bs-theme="dark"] html {
+    background: var(--body-bg);
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 100%;
+}
+
+/* Main container nel tema scuro - rimuove gap */
+[data-bs-theme="dark"] main#app-container {
+    background: transparent;
+    min-height: calc(100vh - 76px); /* Altezza navbar circa 76px */
 }
 
 /* Navbar nel tema scuro */

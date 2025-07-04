@@ -328,6 +328,13 @@ export async function initListView(urlParams) {
         populateFilter('nome', domElements.diagnosiFilter, 'diagnosi')
     ]);
 
+    // Inizializza i custom select dopo aver caricato le opzioni
+    setTimeout(() => {
+        if (window.initCustomSelects) {
+            window.initCustomSelects();
+        }
+    }, 100);
+
     applyFiltersFromURL(urlParams);
     fetchAndRenderPazienti();
     setupEventListeners();

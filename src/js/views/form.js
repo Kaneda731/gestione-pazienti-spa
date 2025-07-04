@@ -50,6 +50,11 @@ async function populateFormForEdit(editId) {
                 } else {
                     dom.form.elements[key].value = data[key];
                 }
+                
+                // Se è una select con custom, aggiorna anche il custom select
+                if (dom.form.elements[key].hasAttribute('data-custom') && dom.form.elements[key].customSelectInstance) {
+                    dom.form.elements[key].customSelectInstance.setValue(data[key]);
+                }
             }
         }
     } catch (error) {
@@ -163,4 +168,11 @@ export async function initInserimentoView() {
 
     await loadDiagnosiOptions();
     setupFormEventListeners(editId);
+    
+    // Inizializza i custom select dopo aver caricato le opzioni
+    setTimeout(() => {
+        if (window.initCustomSelects) {
+            window.initCustomSelects();
+        }
+    }, 100);
 }

@@ -192,7 +192,7 @@
                             </div>
                             <div class="col-md-6">
                                 <label for="diagnosi" class="form-label">Diagnosi</label>
-                                <select class="form-select" id="diagnosi" name="diagnosi" required>
+                                <select class="form-select" id="diagnosi" name="diagnosi" required data-custom="true">
                                     <option value="">Seleziona diagnosi...</option>
                                     <option value="Politrauma">Politrauma</option>
                                     <option value="Frattura_Femore">Frattura Femore</option>
@@ -214,7 +214,7 @@
                             </div>
                             <div class="col-md-4">
                                 <label for="reparto_appartenenza" class="form-label">Reparto Appartenenza</label>
-                                <select class="form-select" id="reparto_appartenenza" name="reparto_appartenenza" required>
+                                <select class="form-select" id="reparto_appartenenza" name="reparto_appartenenza" required data-custom="true">
                                     <option value="">Seleziona...</option>
                                     <option value="Ortopedia">Ortopedia</option>
                                     <option value="Chirurgia Arti">Chirurgia Arti</option>
@@ -223,7 +223,7 @@
                             </div>
                             <div class="col-md-4">
                                 <label for="reparto_provenienza" class="form-label">Reparto Provenienza</label>
-                                <select class="form-select" id="reparto_provenienza" name="reparto_provenienza">
+                                <select class="form-select" id="reparto_provenienza" name="reparto_provenienza" data-custom="true">
                                     <option value="">Seleziona...</option>
                                     <option value="AR">AR</option>
                                     <option value="PO">PO</option>
@@ -234,7 +234,7 @@
                             </div>
                             <div class="col-md-4">
                                 <label for="livello_assistenza" class="form-label">Livello Assistenza</label>
-                                <select class="form-select" id="livello_assistenza" name="livello_assistenza" required>
+                                <select class="form-select" id="livello_assistenza" name="livello_assistenza" required data-custom="true">
                                     <option value="">Seleziona...</option>
                                     <option value="Bassa">Bassa</option>
                                     <option value="Media">Media</option>
@@ -318,25 +318,25 @@
                     <div class="row g-3 mb-3">
                         <div class="col-md-4">
                             <label for="filter-reparto" class="form-label">Reparto Appartenenza</label>
-                            <select id="filter-reparto" class="form-select">
+                            <select id="filter-reparto" class="form-select" data-custom="true">
                                 <!-- Opzioni caricate dinamicamente -->
                             </select>
                         </div>
                         <div class="col-md-4">
                             <label for="filter-provenienza" class="form-label">Reparto Provenienza</label>
-                            <select id="filter-provenienza" class="form-select">
+                            <select id="filter-provenienza" class="form-select" data-custom="true">
                                 <!-- Opzioni caricate dinamicamente -->
                             </select>
                         </div>
                         <div class="col-md-4">
                             <label for="filter-diagnosi" class="form-label">Diagnosi</label>
-                            <select id="filter-diagnosi" class="form-select">
+                            <select id="filter-diagnosi" class="form-select" data-custom="true">
                                 <!-- Opzioni caricate dinamicamente -->
                             </select>
                         </div>
                         <div class="col-md-3">
                             <label for="filter-assistenza" class="form-label">Livello Assistenza</label>
-                            <select id="filter-assistenza" class="form-select">
+                            <select id="filter-assistenza" class="form-select" data-custom="true">
                                 <option value="">Tutti</option>
                                 <option value="Bassa">Bassa</option>
                                 <option value="Media">Media</option>
@@ -495,6 +495,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://www.gstatic.com/charts/loader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/components/CustomSelect.js"></script>
     <script src="js/app.js" type="module"></script>
 </body>
 </html>

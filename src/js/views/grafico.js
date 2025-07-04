@@ -97,6 +97,13 @@ export async function initGraficoView() {
             populateFilter('reparto_provenienza', dom.provenienzaFilter),
             populateFilter('nome', dom.diagnosiFilter, 'diagnosi')
         ]);
-        setTimeout(() => setupEventListeners(), 0);
+        
+        // Inizializza i custom select dopo aver caricato le opzioni
+        setTimeout(() => {
+            if (window.initCustomSelects) {
+                window.initCustomSelects();
+            }
+            setupEventListeners();
+        }, 100);
     });
 }

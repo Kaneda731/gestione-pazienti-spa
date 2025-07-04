@@ -581,6 +581,145 @@ body {
     }
 }
 
+/* === RESPONSIVE TABLE IMPROVEMENTS === */
+.table-responsive {
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling su iOS */
+}
+
+/* Miglioramenti per la tabella dei pazienti */
+.table {
+    min-width: 800px; /* Larghezza minima per evitare cramping */
+    margin-bottom: 0;
+}
+
+/* Ottimizzazione colonne per schermi piccoli */
+@media (max-width: 1200px) {
+    .table th,
+    .table td {
+        padding: 0.5rem 0.4rem;
+        font-size: 0.9rem;
+    }
+    
+    .table th:nth-child(3), /* Data Ricovero */
+    .table td:nth-child(3) {
+        min-width: 110px;
+    }
+    
+    .table th:nth-child(4), /* Diagnosi */
+    .table td:nth-child(4) {
+        min-width: 120px;
+        max-width: 140px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    
+    .table th:nth-child(5), /* Reparto */
+    .table td:nth-child(5) {
+        min-width: 90px;
+    }
+}
+
+@media (max-width: 992px) {
+    .table {
+        min-width: 700px;
+    }
+    
+    .table th,
+    .table td {
+        padding: 0.4rem 0.3rem;
+        font-size: 0.85rem;
+    }
+    
+    /* Nascondi colonna Reparto su tablet */
+    .table th:nth-child(5),
+    .table td:nth-child(5) {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .table {
+        min-width: 600px;
+    }
+    
+    .table th,
+    .table td {
+        padding: 0.3rem 0.25rem;
+        font-size: 0.8rem;
+    }
+    
+    /* Nascondi anche la colonna Diagnosi su mobile */
+    .table th:nth-child(4),
+    .table td:nth-child(4) {
+        display: none;
+    }
+    
+    /* Riduci larghezza pulsanti azioni */
+    .table .btn {
+        padding: 0.2rem 0.4rem;
+        font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .table {
+        min-width: 500px;
+    }
+    
+    /* Compatta ulteriormente nomi e cognomi */
+    .table th:nth-child(1),
+    .table td:nth-child(1),
+    .table th:nth-child(2),
+    .table td:nth-child(2) {
+        max-width: 80px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+
+/* Stili per indicatori di ordinamento */
+.sort-indicator {
+    font-size: 0.8em;
+    margin-left: 0.25rem;
+    color: var(--primary-color);
+    opacity: 0.7;
+}
+
+/* Miglioramenti per il container della tabella */
+.table-responsive::-webkit-scrollbar {
+    height: 8px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 4px;
+    opacity: 0.7;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-color);
+    opacity: 1;
+}
+
+/* Dark mode per scrollbar */
+[data-bs-theme="dark"] .table-responsive::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+[data-bs-theme="dark"] .table-responsive::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+}
+
 /* === ANIMATIONS === */
 @keyframes fadeIn {
     from {
@@ -991,68 +1130,136 @@ body {
     }
 }
 
-/* === PULSANTE TORNA AL MENU === */
-.btn-back-menu {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    border: 1px solid rgba(13, 110, 253, 0.2);
-    color: #495057;
+/* === PATIENT CARDS FOR MOBILE === */
+.patient-card {
+    background: var(--card-bg);
+    border: 1px solid rgba(13, 110, 253, 0.1);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow-sm);
     transition: var(--transition);
-    box-shadow: var(--shadow-sm);
     backdrop-filter: blur(10px);
-    font-weight: 500;
-    position: relative;
-    overflow: hidden;
 }
 
-.btn-back-menu::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(13, 110, 253, 0.1), transparent);
-    transition: left 0.5s ease;
-}
-
-.btn-back-menu:hover::before {
-    left: 100%;
-}
-
-.btn-back-menu:hover {
-    background: linear-gradient(135deg, #ffffff 0%, #f1f3f4 100%);
+.patient-card:hover {
     border-color: var(--primary-color);
-    color: var(--primary-color);
+    box-shadow: var(--shadow-md);
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(13, 110, 253, 0.15);
 }
 
-.btn-back-menu:active {
-    transform: translateY(0);
-    box-shadow: var(--shadow-sm);
+.patient-card-header {
+    display: flex;
+    justify-content: between;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
 
-/* Dark mode per pulsante back */
-[data-bs-theme="dark"] .btn-back-menu {
-    background: linear-gradient(135deg, #3d4454 0%, #495057 100%);
-    border-color: rgba(77, 171, 247, 0.3);
-    color: #f8f9fa;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+.patient-name {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--primary-color);
+    margin: 0;
 }
 
-[data-bs-theme="dark"] .btn-back-menu::before {
-    background: linear-gradient(90deg, transparent, rgba(77, 171, 247, 0.2), transparent);
+.patient-status {
+    font-size: 0.8rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    font-weight: 500;
+    margin-left: auto;
 }
 
-[data-bs-theme="dark"] .btn-back-menu:hover {
-    background: linear-gradient(135deg, #4dabf7 0%, #339af0 100%);
-    border-color: #4dabf7;
-    color: white;
-    box-shadow: 0 8px 25px rgba(77, 171, 247, 0.4), 
-                0 4px 12px rgba(77, 171, 247, 0.2);
+.patient-status.attivo {
+    background: rgba(25, 135, 84, 0.1);
+    color: #198754;
+    border: 1px solid rgba(25, 135, 84, 0.2);
 }
 
-[data-bs-theme="dark"] .btn-back-menu:active {
-    background: linear-gradient(135deg, #339af0 0%, #228be6 100%);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+.patient-status.dimesso {
+    background: rgba(108, 117, 125, 0.1);
+    color: #6c757d;
+    border: 1px solid rgba(108, 117, 125, 0.2);
+}
+
+.patient-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.patient-detail {
+    display: flex;
+    flex-direction: column;
+}
+
+.patient-detail-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.6);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.2rem;
+}
+
+.patient-detail-value {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: inherit;
+}
+
+.patient-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.patient-actions .btn {
+    flex: 1;
+    min-width: 80px;
+    font-size: 0.8rem;
+    padding: 0.4rem 0.8rem;
+}
+
+/* Dark mode per patient cards */
+[data-bs-theme="dark"] .patient-card {
+    background: var(--input-bg);
+    border-color: var(--border-color);
+}
+
+[data-bs-theme="dark"] .patient-card:hover {
+    border-color: var(--primary-color);
+}
+
+[data-bs-theme="dark"] .patient-card-header {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-bs-theme="dark"] .patient-detail-label {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+[data-bs-theme="dark"] .patient-status.attivo {
+    background: rgba(25, 135, 84, 0.2);
+    color: #4dbf69;
+}
+
+[data-bs-theme="dark"] .patient-status.dimesso {
+    background: rgba(108, 117, 125, 0.2);
+    color: #adb5bd;
+}
+
+/* Responsive adjustments per patient cards */
+@media (max-width: 576px) {
+    .patient-details {
+        grid-template-columns: 1fr;
+    }
+    
+    .patient-actions .btn {
+        font-size: 0.75rem;
+        padding: 0.3rem 0.6rem;
+    }
 }

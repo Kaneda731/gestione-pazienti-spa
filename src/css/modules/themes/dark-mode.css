@@ -226,3 +226,40 @@
 [data-bs-theme="dark"] .custom-select-arrow {
     color: var(--primary-color);
 }
+
+/* Pulsanti di paginazione nel tema scuro - stile coerente con btn-back-menu */
+[data-bs-theme="dark"] #prev-page-btn,
+[data-bs-theme="dark"] #next-page-btn {
+    background: linear-gradient(135deg, #3d4454, #495057);
+    border-color: rgba(77, 171, 247, 0.2);
+    color: #e9ecef;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+[data-bs-theme="dark"] #prev-page-btn::before,
+[data-bs-theme="dark"] #next-page-btn::before {
+    background: linear-gradient(90deg, transparent, rgba(77, 171, 247, 0.3), transparent);
+}
+
+[data-bs-theme="dark"] #prev-page-btn:hover,
+[data-bs-theme="dark"] #next-page-btn:hover {
+    background: linear-gradient(135deg, #495057, #5a6268);
+    border-color: rgba(77, 171, 247, 0.4);
+    color: white;
+    box-shadow: 0 4px 15px rgba(77, 171, 247, 0.3);
+}
+
+[data-bs-theme="dark"] #prev-page-btn:hover::before,
+[data-bs-theme="dark"] #next-page-btn:hover::before {
+    left: 100%;
+}
+
+[data-bs-theme="dark"] #prev-page-btn:active,
+[data-bs-theme="dark"] #next-page-btn:active {
+    transform: translateY(0) scale(0.98);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+[data-bs-theme="dark"] #page-info {
+    color: var(--text-secondary);
+}

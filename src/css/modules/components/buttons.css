@@ -4,17 +4,19 @@
 
 /* Pulsanti "Torna al Menu" */
 .btn-back-menu {
-    background: linear-gradient(135deg, var(--secondary-color), #495057);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: white;
-    border-radius: 8px;
-    padding: 0.375rem 0.75rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Usa variabili CSS per valori comuni */
+    border-radius: var(--btn-border-radius);
+    padding: var(--btn-padding);
+    font-size: var(--btn-font-size);
+    font-weight: var(--btn-font-weight);
+    transition: var(--transition);
     position: relative;
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--shadow-sm);
+    border: var(--btn-border);
+    color: white;
+    /* Specifico per btn-back-menu */
+    background: linear-gradient(135deg, var(--secondary-color), #495057);
 }
 
 .btn-back-menu::before {
@@ -25,16 +27,16 @@
     width: 100%;
     height: 100%;
     background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.5s;
+    transition: var(--btn-shine-transition);
     z-index: 1;
 }
 
 .btn-back-menu:hover {
-    background: linear-gradient(135deg, #5a6268, var(--secondary-color));
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+    transform: var(--btn-transform-hover);
+    box-shadow: var(--btn-shadow-hover);
     color: white;
-    border-color: rgba(255, 255, 255, 0.3);
+    border-color: var(--btn-border-hover);
+    background: linear-gradient(135deg, #5a6268, var(--secondary-color));
 }
 
 .btn-back-menu:hover::before {
@@ -42,8 +44,8 @@
 }
 
 .btn-back-menu:active {
-    transform: translateY(0) scale(0.98);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    transform: var(--btn-transform-active);
+    box-shadow: var(--shadow-sm);
 }
 
 .btn-back-menu .material-icons {
@@ -55,20 +57,22 @@
     transform: translateX(-2px);
 }
 
-/* Pulsanti paginazione */
+/* Pulsanti paginazione - usano variabili comuni */
 #prev-page-btn,
 #next-page-btn {
-    background: linear-gradient(135deg, var(--secondary-color), #495057);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: white;
-    border-radius: 8px;
-    padding: 0.5rem 1rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Usa variabili CSS per valori comuni */
+    border-radius: var(--btn-border-radius);
+    padding: var(--btn-padding);
+    font-size: var(--btn-font-size);
+    font-weight: var(--btn-font-weight);
+    transition: var(--transition);
     position: relative;
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--shadow-sm);
+    border: var(--btn-border);
+    color: white;
+    /* Specifico per paginazione */
+    background: linear-gradient(135deg, var(--secondary-color), #495057);
     min-width: 120px;
 }
 
@@ -81,16 +85,17 @@
     width: 100%;
     height: 100%;
     background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.5s;
+    transition: var(--btn-shine-transition);
     z-index: 1;
 }
 
 #prev-page-btn:hover,
 #next-page-btn:hover {
-    background: linear-gradient(135deg, #5a6268, var(--secondary-color));
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+    transform: var(--btn-transform-hover);
+    box-shadow: var(--btn-shadow-hover);
     color: white;
+    border-color: var(--btn-border-hover);
+    background: linear-gradient(135deg, #5a6268, var(--secondary-color));
 }
 
 #prev-page-btn:hover::before,
@@ -98,19 +103,27 @@
     left: 100%;
 }
 
+#prev-page-btn:active,
+#next-page-btn:active {
+    transform: var(--btn-transform-active);
+    box-shadow: var(--shadow-sm);
+}
+
 /* Pulsante esporta CSV */
 #export-csv-btn {
-    background: linear-gradient(135deg, var(--success-color), #0f5132);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: white;
-    border-radius: 8px;
-    padding: 0.5rem 1rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Usa variabili CSS per valori comuni */
+    border-radius: var(--btn-border-radius);
+    font-size: var(--btn-font-size);
+    font-weight: var(--btn-font-weight);
+    transition: var(--transition);
     position: relative;
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--shadow-sm);
+    border: var(--btn-border);
+    color: white;
+    /* Specifico per export CSV */
+    background: linear-gradient(135deg, var(--success-color), #0f5132);
+    padding: 0.5rem 1rem;
     min-width: 140px;
 }
 
@@ -122,50 +135,17 @@
     width: 100%;
     height: 100%;
     background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.5s;
+    transition: var(--btn-shine-transition);
     z-index: 1;
 }
 
 #export-csv-btn:hover {
     background: linear-gradient(135deg, #157347, var(--success-color));
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+    transform: var(--btn-transform-hover);
+    box-shadow: var(--btn-shadow-hover);
     color: white;
 }
 
 #export-csv-btn:hover::before {
     left: 100%;
-}
-
-/* Layout paginazione */
-#pagination-controls {
-    gap: 1rem;
-    flex-wrap: wrap;
-}
-
-#page-info {
-    font-weight: 500;
-    color: var(--secondary-color);
-    font-size: 0.9rem;
-    white-space: nowrap;
-}
-
-@media (max-width: 768px) {
-    #pagination-controls {
-        justify-content: center !important;
-        text-align: center;
-    }
-    
-    #page-info {
-        order: 3;
-        width: 100%;
-        margin-top: 0.5rem;
-    }
-    
-    #prev-page-btn,
-    #next-page-btn {
-        min-width: 100px;
-        font-size: 0.8rem;
-        padding: 0.4rem 0.8rem;
-    }
 }

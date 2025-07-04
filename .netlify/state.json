@@ -1,0 +1,20 @@
+{
+	"geolocation": {
+		"data": {
+			"city": "Fiumicino",
+			"country": {
+				"code": "IT",
+				"name": "Italy"
+			},
+			"subdivision": {
+				"code": "62",
+				"name": "Lazio"
+			},
+			"timezone": "Europe/Rome",
+			"latitude": 41.7716,
+			"longitude": 12.2366,
+			"postalCode": "00054"
+		},
+		"timestamp": 1751584916454
+	}
+}

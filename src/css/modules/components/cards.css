@@ -24,10 +24,21 @@
     padding: 1.5rem;
     font-weight: 600;
     color: var(--text-primary);
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
 }
 
 .card-body {
     padding: 1.5rem;
+}
+
+/* Quando card-body è l'ultimo elemento della card */
+.card-body:last-child {
+    border-radius: 0 0 var(--border-radius) var(--border-radius);
+}
+
+/* Quando card-body è l'unico elemento della card */
+.card > .card-body:only-child {
+    border-radius: var(--border-radius);
 }
 
 /* Elevation system - Sofisticato */

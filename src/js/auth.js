@@ -60,7 +60,8 @@ export function updateAuthUI(session) {
 function createAuthModal() {
     const isInternalServer = window.location.hostname.includes('vgold') || 
                             window.location.hostname.includes('interno') ||
-                            window.location.hostname === 'localhost';
+                            window.location.hostname === 'localhost' ||
+                            window.location.hostname === '127.0.0.1';
 
     const modalHTML = `
         <div class="modal fade" id="auth-modal" tabindex="-1" aria-labelledby="authModalLabel" role="dialog" aria-modal="true" aria-describedby="auth-modal-description">
@@ -412,7 +413,17 @@ export function initAuth(onAuthStateChange) {
     // Salva il callback globalmente per il bypass di sviluppo
     window.onAuthStateChangeCallback = onAuthStateChange;
     
-    // PRIMA: Controlla se c'è una sessione di bypass sviluppo persistente
+    // PRIMA: Auto-attiva bypass su localhost se non esiste
+    const autoBypassSession = autoEnableLocalhostBypass();
+    if (autoBypassSession) {
+        updateAuthUI(autoBypassSession);
+        if (onAuthStateChange) {
+            onAuthStateChange(autoBypassSession);
+        }
+        return; // Exit early con sessione auto-attivata
+    }
+    
+    // SECONDA: Controlla se c'è una sessione di bypass sviluppo persistente
     const developmentSession = checkDevelopmentBypass();
     if (developmentSession) {
         updateAuthUI(developmentSession);
@@ -614,4 +625,18 @@ function cleanOAuthParamsFromURL() {
         const newUrl = url.pathname + url.search + url.hash;
         window.history.replaceState({}, '', newUrl);
     }
+}
+
+/**
+ * Auto-attiva il bypass sviluppo su localhost se non è già presente una sessione
+ */
+function autoEnableLocalhostBypass() {
+    const isLocalhost = window.location.hostname === 'localhost' || 
+                       window.location.hostname === '127.0.0.1';
+    
+    if (isLocalhost && !checkDevelopmentBypass()) {
+        console.log('🔧 Auto-attivazione bypass sviluppo su localhost');
+        return enableDevelopmentBypass();
+    }
+    return null;
 }

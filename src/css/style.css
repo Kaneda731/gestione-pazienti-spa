@@ -98,3 +98,31 @@
     color: var(--alert-warning-color);
     border: 1px solid var(--warning-light);
 }
+
+/* =============================================
+   FIX SPECIFICI E OVERRIDE PRIORITARI
+   ============================================= */
+
+/* Fix Border-radius per tutte le card - Priorità massima */
+.card,
+.card.elevation-1,
+.card.elevation-2, 
+.card.elevation-3,
+.card.elevation-4,
+.card.elevation-5 {
+    border-radius: var(--border-radius) !important;
+    overflow: hidden !important;
+}
+
+/* Fix specifico per card-header e card-body */
+.card .card-header {
+    border-radius: var(--border-radius) var(--border-radius) 0 0 !important;
+}
+
+.card .card-body:last-child {
+    border-radius: 0 0 var(--border-radius) var(--border-radius) !important;
+}
+
+.card .card-body:only-child {
+    border-radius: var(--border-radius) !important;
+}

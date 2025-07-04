@@ -4,7 +4,7 @@
 
 .card {
     border: 1px solid var(--border-color);
-    border-radius: var(--border-radius);
+    border-radius: var(--border-radius) !important;
     box-shadow: var(--shadow-md);
     background: var(--card-bg);
     backdrop-filter: var(--glass-blur);
@@ -24,7 +24,7 @@
     padding: 1.5rem;
     font-weight: 600;
     color: var(--text-primary);
-    border-radius: var(--border-radius) var(--border-radius) 0 0;
+    border-radius: var(--border-radius) var(--border-radius) 0 0 !important;
 }
 
 .card-body {
@@ -33,12 +33,25 @@
 
 /* Quando card-body è l'ultimo elemento della card */
 .card-body:last-child {
-    border-radius: 0 0 var(--border-radius) var(--border-radius);
+    border-radius: 0 0 var(--border-radius) var(--border-radius) !important;
 }
 
 /* Quando card-body è l'unico elemento della card */
 .card > .card-body:only-child {
-    border-radius: var(--border-radius);
+    border-radius: var(--border-radius) !important;
+}
+
+/* Fix specifico per la vista diagnosi */
+#view-diagnosi .card {
+    border-radius: var(--border-radius) !important;
+}
+
+#view-diagnosi .card .card-header {
+    border-radius: var(--border-radius) var(--border-radius) 0 0 !important;
+}
+
+#view-diagnosi .card .card-body {
+    border-radius: 0 0 var(--border-radius) var(--border-radius) !important;
 }
 
 /* Elevation system - Sofisticato */

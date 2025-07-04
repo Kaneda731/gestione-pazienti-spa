@@ -529,7 +529,7 @@ export function enableDevelopmentBypass() {
         localStorage.setItem('dev.bypass.enabled', 'true');
         localStorage.setItem('dev.bypass.timestamp', Date.now().toString());
         
-        console.log('🔓 Bypass sviluppo attivato - sessione persistente creata');
+        // Bypass sviluppo attivato - sessione persistente creata
         return mockSession;
     }
     return null;
@@ -564,7 +564,7 @@ export function checkDevelopmentBypass() {
         if (session.isDevelopmentBypass) {
             // Ripristina anche in sessionStorage
             sessionStorage.setItem('supabase.auth.token', savedSession);
-            console.log('🔄 Sessione bypass sviluppo ripristinata automaticamente');
+            // Sessione bypass sviluppo ripristinata automaticamente
             return session;
         }
         
@@ -584,5 +584,5 @@ export function clearDevelopmentBypass() {
     localStorage.removeItem('dev.bypass.session');
     localStorage.removeItem('dev.bypass.enabled');
     localStorage.removeItem('dev.bypass.timestamp');
-    console.log('🧹 Bypass sviluppo pulito');
+    // Bypass sviluppo pulito
 }

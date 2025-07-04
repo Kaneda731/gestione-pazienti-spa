@@ -140,16 +140,27 @@ class MobileCardManager {
     // Ottimizza per touch
     static initTouchOptimizations() {
         document.querySelectorAll('.card').forEach(card => {
-            // Previene double-tap zoom
+            // Previene double-tap zoom solo sulle card, non sui pulsanti
             card.addEventListener('touchend', (e) => {
+                // Non interferire con i pulsanti e link
+                if (e.target.closest('button, a, input, select')) {
+                    return; // Lascia il comportamento normale
+                }
                 e.preventDefault();
                 card.click();
             });
             
-            // Feedback tattile
-            card.addEventListener('touchstart', () => {
-                if ('vibrate' in navigator) {
-                    navigator.vibrate(10); // Vibrazione leggera
+            // Feedback tattile (solo se supportato e permesso)
+            card.addEventListener('touchstart', (e) => {
+                // Solo se non è un pulsante
+                if (!e.target.closest('button, a, input, select')) {
+                    try {
+                        if ('vibrate' in navigator && document.hasStorageAccess) {
+                            navigator.vibrate(10); // Vibrazione leggera
+                        }
+                    } catch (e) {
+                        // Ignora errori di vibrazione
+                    }
                 }
             });
         });

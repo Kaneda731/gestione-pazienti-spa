@@ -16,7 +16,11 @@ const state = {
 const domElements = {};
 
 function updateSortIndicators() {
+    // Controllo esistenza prima di procedere
+    if (!domElements.tableHeaders || domElements.tableHeaders.length === 0) return;
+    
     domElements.tableHeaders.forEach(header => {
+        if (!header) return;
         const indicator = header.querySelector('.sort-indicator');
         if (!indicator) return;
 
@@ -31,13 +35,21 @@ function updateSortIndicators() {
 function buildQuery() {
     let query = supabase.from('pazienti').select('*', { count: 'exact' });
 
-    // Filtri
-    const searchTerm = domElements.searchInput.value.trim();
-    if (searchTerm) query = query.or(`nome.ilike.%${searchTerm}%,cognome.ilike.%${searchTerm}%`);
-    if (domElements.repartoFilter.value) query = query.eq('reparto_appartenenza', domElements.repartoFilter.value);
-    if (domElements.diagnosiFilter.value) query = query.eq('diagnosi', domElements.diagnosiFilter.value);
-    if (domElements.statoFilter.value === 'attivo') query = query.is('data_dimissione', null);
-    else if (domElements.statoFilter.value === 'dimesso') query = query.not('data_dimissione', 'is', null);
+    // Filtri - Controllo esistenza elementi DOM prima dell'uso
+    if (domElements.searchInput) {
+        const searchTerm = domElements.searchInput.value.trim();
+        if (searchTerm) query = query.or(`nome.ilike.%${searchTerm}%,cognome.ilike.%${searchTerm}%`);
+    }
+    if (domElements.repartoFilter && domElements.repartoFilter.value) {
+        query = query.eq('reparto_appartenenza', domElements.repartoFilter.value);
+    }
+    if (domElements.diagnosiFilter && domElements.diagnosiFilter.value) {
+        query = query.eq('diagnosi', domElements.diagnosiFilter.value);
+    }
+    if (domElements.statoFilter) {
+        if (domElements.statoFilter.value === 'attivo') query = query.is('data_dimissione', null);
+        else if (domElements.statoFilter.value === 'dimesso') query = query.not('data_dimissione', 'is', null);
+    }
 
     // Ordinamento e Paginazione
     const startIndex = state.currentPage * ITEMS_PER_PAGE;
@@ -315,9 +327,17 @@ function renderCards(pazientiToRender) {
 
 function updatePaginationControls(totalItems) {
     const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
-    domElements.pageInfo.textContent = `Pagina ${state.currentPage + 1} di ${totalPages || 1}`;
-    domElements.prevButton.disabled = state.currentPage === 0;
-    domElements.nextButton.disabled = state.currentPage >= totalPages - 1;
+    
+    // Controllo esistenza elementi prima dell'uso
+    if (domElements.pageInfo) {
+        domElements.pageInfo.textContent = `Pagina ${state.currentPage + 1} di ${totalPages || 1}`;
+    }
+    if (domElements.prevButton) {
+        domElements.prevButton.disabled = state.currentPage === 0;
+    }
+    if (domElements.nextButton) {
+        domElements.nextButton.disabled = state.currentPage >= totalPages - 1;
+    }
 }
 
 
@@ -474,7 +494,8 @@ function setupEventListeners() {
 
     domElements.backButton.addEventListener('click', () => navigateTo('home'));
     
-    // Event listener per ridimensionamento finestra
+    // Event listener per ridimensionamento finestra - rimuovi eventuali listener precedenti
+    window.removeEventListener('resize', ensureCorrectView);
     window.addEventListener('resize', ensureCorrectView);
 }
 
@@ -513,7 +534,7 @@ export async function initListView(urlParams) {
     const viewContainer = document.querySelector('#app-container .view');
     if (!viewContainer) return;
 
-    console.log('🔄 Inizializzazione ListView...');
+    // Inizializzazione ListView
     
     cacheDOMElements(viewContainer);
     
@@ -524,36 +545,26 @@ export async function initListView(urlParams) {
     setTimeout(ensureCorrectView, 100);
 
     try {
-        console.log('📊 Inizio caricamento filtri...');
-        console.log('DOM Elements:', {
-            repartoFilter: !!domElements.repartoFilter,
-            diagnosiFilter: !!domElements.diagnosiFilter,
-            repartoHTML: domElements.repartoFilter?.innerHTML,
-            diagnosiHTML: domElements.diagnosiFilter?.innerHTML
-        });
-
+        // Inizio caricamento filtri
         // Attendere il caricamento dei filtri prima di procedere
         await Promise.all([
             populateFilter('reparto_appartenenza', domElements.repartoFilter),
             populateFilter('diagnosi', domElements.diagnosiFilter)
         ]);
 
-        console.log('✅ Filtri caricati, contenuto dopo populate:', {
-            repartoHTML: domElements.repartoFilter?.innerHTML,
-            diagnosiHTML: domElements.diagnosiFilter?.innerHTML
-        });
+        // Filtri caricati
 
         // Inizializza i custom select per tutti i filtri (incluso quello di stato che ha opzioni statiche)
         if (window.initCustomSelects) {
-            console.log('🎨 Inizializzazione custom selects...');
+            // Inizializzazione custom selects
             window.initCustomSelects();
         }
 
         // Forza un refresh dei custom select per assicurarsi che le opzioni dinamiche siano caricate
         if (window.refreshCustomSelects) {
-            console.log('🔄 Refresh custom selects con nuove opzioni...');
+            // Refresh custom selects con nuove opzioni
             window.refreshCustomSelects();
-            console.log('✅ Custom selects refreshed');
+            // Custom selects refreshed
         }
 
         applyFiltersFromURL(urlParams);

@@ -71,7 +71,7 @@ function initBackToMenuButtons() {
                 navigateTo(targetView);
                 
                 // Log per debug (rimuovibile in produzione)
-                console.log(`🔙 Navigazione: ${window.location.hash} → #${targetView}`);
+                // Navigazione:
             }, 100);
         }
     });

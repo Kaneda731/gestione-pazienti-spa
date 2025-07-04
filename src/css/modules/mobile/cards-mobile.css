@@ -421,3 +421,79 @@
         margin-bottom: 0.25rem !important;
     }
 }
+
+/* === FINAL MOBILE CARDS STYLES === */
+@media (max-width: 767px) {
+    .card-list-compact {
+        background: var(--card-bg) !important;
+        border: 1px solid var(--border-color) !important;
+        border-radius: var(--border-radius) !important;
+        margin-bottom: 0.75rem !important;
+        padding: 0 !important;
+        box-shadow: var(--shadow-sm) !important;
+        transition: all 0.2s ease !important;
+    }
+    
+    .card-list-compact:active {
+        transform: scale(0.98) !important;
+        box-shadow: var(--shadow-xs) !important;
+    }
+    
+    .card-list-compact .card-body {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        padding: 0.75rem 1rem !important;
+        gap: 1rem !important;
+    }
+    
+    .card-list-compact .card-title {
+        font-weight: 600 !important;
+        font-size: 1rem !important;
+        margin: 0 !important;
+        color: var(--text-primary) !important;
+    }
+    
+    .card-list-compact .card-meta {
+        font-size: 0.85rem !important;
+        color: var(--text-secondary) !important;
+        margin: 0 !important;
+        opacity: 0.8 !important;
+    }
+    
+    /* Status indicators eleganti */
+    .status-success {
+        border-left: 4px solid var(--success-color) !important;
+    }
+    
+    .status-error {
+        border-left: 4px solid var(--danger-color) !important;
+    }
+    
+    .status-warning {
+        border-left: 4px solid var(--warning-color) !important;
+    }
+    
+    .status-info {
+        border-left: 4px solid var(--info-color) !important;
+    }
+    
+    /* Mobile buttons ottimizzati */
+    .mobile-compact {
+        padding: 0.25rem 0.5rem !important;
+        min-width: 36px !important;
+        min-height: 36px !important;
+        border-radius: 6px !important;
+    }
+    
+    .mobile-horizontal {
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.25rem !important;
+        flex-shrink: 0 !important;
+    }
+    
+    .mobile-text-xs .material-icons {
+        font-size: 1rem !important;
+    }
+}

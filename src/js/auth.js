@@ -63,7 +63,7 @@ function createAuthModal() {
                             window.location.hostname === 'localhost';
 
     const modalHTML = `
-        <div class="modal fade" id="auth-modal" tabindex="-1" aria-labelledby="authModalLabel" aria-hidden="true" role="dialog" aria-modal="true" aria-describedby="auth-modal-description">
+        <div class="modal fade" id="auth-modal" tabindex="-1" aria-labelledby="authModalLabel" role="dialog" aria-modal="true" aria-describedby="auth-modal-description">
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content" style="background: var(--card-bg); border: none; box-shadow: var(--shadow-lg);">
                     <div class="modal-header" style="background: linear-gradient(135deg, var(--primary-color), #0d47a1); color: white; border: none;">

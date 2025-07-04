@@ -74,4 +74,11 @@ export async function renderView() {
             });
         }
     }
+    
+    // Inizializza custom select per tutte le viste (fallback)
+    setTimeout(() => {
+        if (window.initCustomSelects) {
+            window.initCustomSelects();
+        }
+    }, 200);
 }

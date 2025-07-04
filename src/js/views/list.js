@@ -120,9 +120,9 @@ function ensureCorrectView() {
     const cardsContainer = document.getElementById('pazienti-cards-container');
     
     if (tableContainer && cardsContainer) {
-        // SOLUZIONE RADICALE: Card per tutti i dispositivi sotto 1500px
-        if (window.innerWidth < 1500) {
-            // Schermi piccoli/medi: FORZA nascondere tabella, mostra card
+        // BREAKPOINT CORRETTO: Card per dispositivi sotto 1200px (standard Bootstrap xl)
+        if (window.innerWidth < 1200) {
+            // Schermi piccoli/medi: mostra card, nascondi tabella
             tableContainer.style.display = 'none';
             tableContainer.style.visibility = 'hidden';
             tableContainer.style.opacity = '0';
@@ -140,7 +140,7 @@ function ensureCorrectView() {
             cardsContainer.classList.remove('d-xl-none');
             cardsContainer.classList.add('d-block');
         } else {
-            // Solo schermi molto grandi (1500px+): mostra tabella, nascondi card
+            // Schermi grandi (1200px+): mostra tabella, nascondi card
             tableContainer.style.display = 'block';
             tableContainer.style.visibility = 'visible';
             tableContainer.style.opacity = '1';
@@ -460,6 +460,8 @@ export async function initListView(urlParams) {
     const viewContainer = document.querySelector('#app-container .view');
     if (!viewContainer) return;
 
+    console.log('🔄 Inizializzazione ListView...');
+    
     cacheDOMElements(viewContainer);
     
     // FORZA la vista corretta immediatamente al caricamento
@@ -468,23 +470,52 @@ export async function initListView(urlParams) {
     // Seconda chiamata dopo un breve delay per assicurarsi che tutto sia renderizzato
     setTimeout(ensureCorrectView, 100);
 
-    await Promise.all([
-        populateFilter('reparto_appartenenza', domElements.repartoFilter),
-        populateFilter('diagnosi', domElements.diagnosiFilter)
-    ]);
+    try {
+        console.log('📊 Inizio caricamento filtri...');
+        console.log('DOM Elements:', {
+            repartoFilter: !!domElements.repartoFilter,
+            diagnosiFilter: !!domElements.diagnosiFilter,
+            repartoHTML: domElements.repartoFilter?.innerHTML,
+            diagnosiHTML: domElements.diagnosiFilter?.innerHTML
+        });
 
-    // Inizializza i custom select dopo aver caricato le opzioni
-    setTimeout(() => {
+        // Attendere il caricamento dei filtri prima di procedere
+        await Promise.all([
+            populateFilter('reparto_appartenenza', domElements.repartoFilter),
+            populateFilter('diagnosi', domElements.diagnosiFilter)
+        ]);
+
+        console.log('✅ Filtri caricati, contenuto dopo populate:', {
+            repartoHTML: domElements.repartoFilter?.innerHTML,
+            diagnosiHTML: domElements.diagnosiFilter?.innerHTML
+        });
+
+        // Inizializza i custom select per tutti i filtri (incluso quello di stato che ha opzioni statiche)
         if (window.initCustomSelects) {
+            console.log('🎨 Inizializzazione custom selects...');
             window.initCustomSelects();
         }
-    }, 100);
 
-    applyFiltersFromURL(urlParams);
-    fetchAndRenderPazienti();
-    setupEventListeners();
-    
-    // Terza chiamata dopo il rendering dei dati
-    setTimeout(ensureCorrectView, 200);
+        // Forza un refresh dei custom select per assicurarsi che le opzioni dinamiche siano caricate
+        if (window.refreshCustomSelects) {
+            console.log('🔄 Refresh custom selects con nuove opzioni...');
+            window.refreshCustomSelects();
+            console.log('✅ Custom selects refreshed');
+        }
+
+        applyFiltersFromURL(urlParams);
+        fetchAndRenderPazienti();
+        setupEventListeners();
+        
+        // Terza chiamata dopo il rendering dei dati
+        setTimeout(ensureCorrectView, 200);
+    } catch (error) {
+        console.error('❌ Errore durante l\'inizializzazione della lista:', error);
+        // Continua anche in caso di errore nel caricamento filtri
+        applyFiltersFromURL(urlParams);
+        fetchAndRenderPazienti();
+        setupEventListeners();
+        setTimeout(ensureCorrectView, 200);
+    }
 }
 

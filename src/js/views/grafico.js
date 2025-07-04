@@ -92,18 +92,28 @@ export async function initGraficoView() {
     // Carica Google Charts e popola i filtri in parallelo
     google.charts.load('current', { 'packages': ['corechart'] });
     google.charts.setOnLoadCallback(async () => {
-        await Promise.all([
-            populateFilter('reparto_appartenenza', dom.repartoFilter),
-            populateFilter('reparto_provenienza', dom.provenienzaFilter),
-            populateFilter('diagnosi', dom.diagnosiFilter)
-        ]);
-        
-        // Inizializza i custom select dopo aver caricato le opzioni
-        setTimeout(() => {
+        try {
+            await Promise.all([
+                populateFilter('reparto_appartenenza', dom.repartoFilter),
+                populateFilter('reparto_provenienza', dom.provenienzaFilter),
+                populateFilter('diagnosi', dom.diagnosiFilter)
+            ]);
+            
+            // Inizializza i custom select solo dopo aver caricato le opzioni
             if (window.initCustomSelects) {
                 window.initCustomSelects();
             }
+            
+            // Refresh per assicurarsi che le opzioni dinamiche siano caricate
+            if (window.refreshCustomSelects) {
+                window.refreshCustomSelects();
+            }
+            
             setupEventListeners();
-        }, 100);
+        } catch (error) {
+            console.error('Errore durante il caricamento dei filtri:', error);
+            // Continua anche in caso di errore
+            setupEventListeners();
+        }
     });
 }

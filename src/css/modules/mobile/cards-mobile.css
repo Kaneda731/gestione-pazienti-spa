@@ -1,28 +1,113 @@
 /* ===================================
-   CARDS MOBILE
+   CARDS MOBILE MODERNE
    =================================== */
 
-/* === LAYOUT MOBILE OTTIMIZZATO === */
+/* === LAYOUT MOBILE IBRIDO/COMPATTO === */
 @media (max-width: 767px) {
+    /* Card standard - Layout verticale ottimizzato */
     .card {
         margin-bottom: 1rem !important;
         border-radius: var(--border-radius) !important;
-        box-shadow: var(--shadow-sm) !important; /* Shadow più leggera su mobile */
+        box-shadow: var(--shadow-sm) !important;
+        transition: all 0.2s ease !important;
     }
     
-    .card:hover {
-        transform: none !important; /* Disabilita hover transform su mobile */
-        box-shadow: var(--shadow-md) !important;
+    /* Touch feedback moderno */
+    .card:active {
+        transform: scale(0.98) !important;
+        box-shadow: var(--shadow-xs) !important;
     }
     
     .card-header {
         padding: 1rem !important;
         font-size: 1rem !important;
         border-radius: var(--border-radius) var(--border-radius) 0 0 !important;
+        background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%) !important;
     }
     
     .card-body {
         padding: 1rem !important;
+    }
+    
+    /* === LAYOUT ORIZZONTALE COMPATTO === */
+    .card.card-horizontal {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        padding: 0.75rem !important;
+        min-height: 80px !important;
+    }
+    
+    .card-horizontal .card-header {
+        flex: 0 0 auto !important;
+        min-width: 80px !important;
+        padding: 0.5rem !important;
+        margin-right: 0.75rem !important;
+        border-radius: var(--border-radius) !important;
+        border-bottom: none !important;
+        font-size: 0.85rem !important;
+        text-align: center !important;
+    }
+    
+    .card-horizontal .card-body {
+        flex: 1 !important;
+        padding: 0.5rem 0 !important;
+    }
+    
+    /* === GRID 2x2 PER CARD PICCOLE === */
+    .cards-grid-mobile {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 0.75rem !important;
+        margin-bottom: 1rem !important;
+    }
+    
+    .cards-grid-mobile .card {
+        margin-bottom: 0 !important;
+        text-align: center !important;
+        min-height: 100px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+    }
+    
+    .cards-grid-mobile .card-header {
+        padding: 0.5rem !important;
+        font-size: 0.8rem !important;
+        border-bottom: none !important;
+        border-radius: var(--border-radius) var(--border-radius) 0 0 !important;
+    }
+    
+    .cards-grid-mobile .card-body {
+        padding: 0.5rem !important;
+        font-size: 0.9rem !important;
+    }
+    
+    /* === LISTA COMPATTA === */
+    .card-list-compact {
+        border-left: 4px solid var(--primary-color) !important;
+        border-radius: 0 var(--border-radius) var(--border-radius) 0 !important;
+        margin-bottom: 0.5rem !important;
+        box-shadow: var(--shadow-xs) !important;
+    }
+    
+    .card-list-compact .card-body {
+        padding: 0.75rem 1rem !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+    }
+    
+    .card-list-compact .card-title {
+        font-weight: 600 !important;
+        font-size: 0.95rem !important;
+        margin: 0 !important;
+    }
+    
+    .card-list-compact .card-meta {
+        font-size: 0.8rem !important;
+        color: var(--text-secondary) !important;
+        text-align: right !important;
     }
     
     /* Quando card-body è l'ultimo elemento */
@@ -59,6 +144,158 @@
     
     .card > .card-body:only-child {
         padding: 1rem 0.75rem !important;
+    }
+    
+    /* Grid 2x2 su schermi molto piccoli diventa 1 colonna */
+    .cards-grid-mobile {
+        grid-template-columns: 1fr !important;
+        gap: 0.5rem !important;
+    }
+    
+    /* Lista compatta ancora più compatta */
+    .card-list-compact .card-body {
+        padding: 0.5rem 0.75rem !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 0.25rem !important;
+    }
+    
+    .card-list-compact .card-meta {
+        text-align: left !important;
+        font-size: 0.75rem !important;
+    }
+}
+
+/* === SCROLL ORIZZONTALE MODERNO === */
+@media (max-width: 767px) {
+    .cards-scroll-container {
+        display: flex !important;
+        overflow-x: auto !important;
+        scroll-snap-type: x mandatory !important;
+        gap: 1rem !important;
+        padding: 0 1rem 1rem 1rem !important;
+        margin: 0 -1rem !important;
+        scrollbar-width: none !important; /* Firefox */
+        -ms-overflow-style: none !important; /* IE 10+ */
+    }
+    
+    .cards-scroll-container::-webkit-scrollbar {
+        display: none !important; /* Safari and Chrome */
+    }
+    
+    .cards-scroll-container .card {
+        flex: 0 0 280px !important;
+        scroll-snap-align: start !important;
+        margin-bottom: 0 !important;
+    }
+    
+    /* Indicatore scroll moderno */
+    .cards-scroll-container::after {
+        content: '' !important;
+        flex: 0 0 1rem !important;
+    }
+    
+    /* Shadow laterali per indicare scroll */
+    .cards-scroll-wrapper {
+        position: relative !important;
+    }
+    
+    .cards-scroll-wrapper::before,
+    .cards-scroll-wrapper::after {
+        content: '' !important;
+        position: absolute !important;
+        top: 0 !important;
+        bottom: 0 !important;
+        width: 20px !important;
+        z-index: 2 !important;
+        pointer-events: none !important;
+    }
+    
+    .cards-scroll-wrapper::before {
+        left: 0 !important;
+        background: linear-gradient(to right, var(--bg-primary) 0%, transparent 100%) !important;
+    }
+    
+    .cards-scroll-wrapper::after {
+        right: 0 !important;
+        background: linear-gradient(to left, var(--bg-primary) 0%, transparent 100%) !important;
+    }
+}
+
+/* === MICRO-INTERAZIONI MODERNE === */
+@media (max-width: 767px) {
+    /* Ripple effect al tocco */
+    .card {
+        position: relative !important;
+        overflow: hidden !important;
+    }
+    
+    .card::before {
+        content: '' !important;
+        position: absolute !important;
+        top: 50% !important;
+        left: 50% !important;
+        width: 0 !important;
+        height: 0 !important;
+        border-radius: 50% !important;
+        background: rgba(var(--primary-color-rgb), 0.3) !important;
+        transform: translate(-50%, -50%) !important;
+        transition: width 0.6s, height 0.6s !important;
+        z-index: 0 !important;
+    }
+    
+    .card:active::before {
+        width: 300px !important;
+        height: 300px !important;
+    }
+    
+    .card-header,
+    .card-body {
+        position: relative !important;
+        z-index: 1 !important;
+    }
+    
+    /* Loading states */
+    .card.loading {
+        opacity: 0.7 !important;
+        pointer-events: none !important;
+    }
+    
+    .card.loading::after {
+        content: '' !important;
+        position: absolute !important;
+        top: 50% !important;
+        left: 50% !important;
+        width: 20px !important;
+        height: 20px !important;
+        border: 2px solid var(--border-color) !important;
+        border-top: 2px solid var(--primary-color) !important;
+        border-radius: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        animation: spin 1s linear infinite !important;
+        z-index: 2 !important;
+    }
+    
+    @keyframes spin {
+        0% { transform: translate(-50%, -50%) rotate(0deg); }
+        100% { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+    
+    /* Status indicators */
+    .card.status-success {
+        border-left: 4px solid var(--success-color) !important;
+    }
+    
+    .card.status-warning {
+        border-left: 4px solid var(--warning-color) !important;
+    }
+    
+    .card.status-error {
+        border-left: 4px solid var(--danger-color) !important;
+    }
+    
+    .card.status-info {
+        border-left: 4px solid var(--info-color) !important;
     }
 }
 
@@ -126,5 +363,61 @@
         .card {
             transition: none !important;
         }
+    }
+}
+
+/* === UTILITY CLASSES MOBILE === */
+@media (max-width: 767px) {
+    /* Quick layout switchers */
+    .mobile-horizontal {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+    }
+    
+    .mobile-vertical {
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    
+    .mobile-grid-2 {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 0.75rem !important;
+    }
+    
+    .mobile-hidden {
+        display: none !important;
+    }
+    
+    .mobile-compact {
+        padding: 0.5rem !important;
+        margin-bottom: 0.5rem !important;
+    }
+    
+    /* Typography helpers */
+    .mobile-text-sm {
+        font-size: 0.85rem !important;
+    }
+    
+    .mobile-text-xs {
+        font-size: 0.75rem !important;
+    }
+    
+    /* Spacing helpers */
+    .mobile-p-sm {
+        padding: 0.5rem !important;
+    }
+    
+    .mobile-p-xs {
+        padding: 0.25rem !important;
+    }
+    
+    .mobile-m-sm {
+        margin: 0.5rem !important;
+    }
+    
+    .mobile-mb-xs {
+        margin-bottom: 0.25rem !important;
     }
 }

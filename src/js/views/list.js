@@ -208,56 +208,109 @@ function renderCards(pazientiToRender) {
         return;
     }
     
-    const cardsHtml = pazientiToRender.map(p => {
-        const isDimesso = p.data_dimissione;
-        const statusClass = isDimesso ? 'dimesso' : 'attivo';
-        const statusText = isDimesso ? 'Dimesso' : 'Attivo';
-        
-        const actionButton = isDimesso
-            ? `<button class="btn btn-outline-success" data-action="riattiva" data-id="${p.id}" title="Riattiva Paziente">
-                 <span class="material-icons me-1" style="font-size: 1em;">undo</span>Riattiva
-               </button>`
-            : `<button class="btn btn-outline-warning" data-action="dimetti" data-id="${p.id}" title="Dimetti Paziente">
-                 <span class="material-icons me-1" style="font-size: 1em;">event_available</span>Dimetti
-               </button>`;
+    // Detect mobile and apply modern layout
+    const isMobile = window.innerWidth <= 767;
+    const isSmallMobile = window.innerWidth <= 480;
+    
+    if (isMobile) {
+        // Use modern mobile layouts
+        const cardsHtml = pazientiToRender.map(p => {
+            const isDimesso = p.data_dimissione;
+            const statusClass = isDimesso ? 'error' : 'success';
+            const statusText = isDimesso ? 'Dimesso' : 'Attivo';
+            
+            const actionButton = isDimesso
+                ? `<button class="btn btn-sm btn-outline-success mobile-compact" data-action="riattiva" data-id="${p.id}" title="Riattiva">
+                     <span class="material-icons mobile-text-xs">undo</span>
+                   </button>`
+                : `<button class="btn btn-sm btn-outline-warning mobile-compact" data-action="dimetti" data-id="${p.id}" title="Dimetti">
+                     <span class="material-icons mobile-text-xs">event_available</span>
+                   </button>`;
 
-        return `
-            <div class="patient-card">
-                <div class="patient-card-header">
-                    <h6 class="patient-name">${p.cognome} ${p.nome}</h6>
-                    <span class="patient-status ${statusClass}">${statusText}</span>
-                </div>
-                <div class="patient-details">
-                    <div class="patient-detail">
-                        <span class="patient-detail-label">Data Ricovero</span>
-                        <span class="patient-detail-value">${new Date(p.data_ricovero).toLocaleDateString()}</span>
-                    </div>
-                    <div class="patient-detail">
-                        <span class="patient-detail-label">Diagnosi</span>
-                        <span class="patient-detail-value">${p.diagnosi}</span>
-                    </div>
-                    <div class="patient-detail">
-                        <span class="patient-detail-label">Reparto</span>
-                        <span class="patient-detail-value">${p.reparto_appartenenza}</span>
-                    </div>
-                    <div class="patient-detail">
-                        <span class="patient-detail-label">Livello</span>
-                        <span class="patient-detail-value">${p.livello_assistenza}</span>
+            // Use compact list layout for mobile
+            return `
+                <div class="card card-list-compact status-${statusClass}">
+                    <div class="card-body">
+                        <div>
+                            <div class="card-title">${p.cognome} ${p.nome}</div>
+                            <div class="card-meta mobile-text-sm">
+                                ${p.diagnosi} • ${p.reparto_appartenenza}
+                            </div>
+                        </div>
+                        <div class="mobile-horizontal" style="gap: 0.25rem;">
+                            <button class="btn btn-sm btn-outline-primary mobile-compact" data-action="edit" data-id="${p.id}" title="Modifica">
+                                <span class="material-icons mobile-text-xs">edit</span>
+                            </button>
+                            ${actionButton}
+                            <button class="btn btn-sm btn-outline-danger mobile-compact" data-action="delete" data-id="${p.id}" title="Elimina">
+                                <span class="material-icons mobile-text-xs">delete</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
-                <div class="patient-actions">
-                    <button class="btn btn-outline-primary" data-action="edit" data-id="${p.id}">
-                        <span class="material-icons me-1" style="font-size: 1em;">edit</span>Modifica
-                    </button>
-                    ${actionButton}
-                    <button class="btn btn-outline-danger" data-action="delete" data-id="${p.id}">
-                        <span class="material-icons me-1" style="font-size: 1em;">delete</span>Elimina
-                    </button>
+            `;
+        }).join('');
+        
+        cardsContainer.innerHTML = cardsHtml;
+        
+        // Add touch optimizations
+        if (window.MobileCardManager) {
+            window.MobileCardManager.initTouchOptimizations();
+        }
+        
+    } else {
+        // Desktop/tablet layout (existing)
+        const cardsHtml = pazientiToRender.map(p => {
+            const isDimesso = p.data_dimissione;
+            const statusClass = isDimesso ? 'dimesso' : 'attivo';
+            const statusText = isDimesso ? 'Dimesso' : 'Attivo';
+            
+            const actionButton = isDimesso
+                ? `<button class="btn btn-outline-success" data-action="riattiva" data-id="${p.id}" title="Riattiva Paziente">
+                     <span class="material-icons me-1" style="font-size: 1em;">undo</span>Riattiva
+                   </button>`
+                : `<button class="btn btn-outline-warning" data-action="dimetti" data-id="${p.id}" title="Dimetti Paziente">
+                     <span class="material-icons me-1" style="font-size: 1em;">event_available</span>Dimetti
+                   </button>`;
+
+            return `
+                <div class="patient-card">
+                    <div class="patient-card-header">
+                        <h6 class="patient-name">${p.cognome} ${p.nome}</h6>
+                        <span class="patient-status ${statusClass}">${statusText}</span>
+                    </div>
+                    <div class="patient-details">
+                        <div class="patient-detail">
+                            <span class="patient-detail-label">Data Ricovero</span>
+                            <span class="patient-detail-value">${new Date(p.data_ricovero).toLocaleDateString()}</span>
+                        </div>
+                        <div class="patient-detail">
+                            <span class="patient-detail-label">Diagnosi</span>
+                            <span class="patient-detail-value">${p.diagnosi}</span>
+                        </div>
+                        <div class="patient-detail">
+                            <span class="patient-detail-label">Reparto</span>
+                            <span class="patient-detail-value">${p.reparto_appartenenza}</span>
+                        </div>
+                        <div class="patient-detail">
+                            <span class="patient-detail-label">Livello</span>
+                            <span class="patient-detail-value">${p.livello_assistenza}</span>
+                        </div>
+                    </div>
+                    <div class="patient-actions">
+                        <button class="btn btn-outline-primary" data-action="edit" data-id="${p.id}">
+                            <span class="material-icons me-1" style="font-size: 1em;">edit</span>Modifica
+                        </button>
+                        ${actionButton}
+                        <button class="btn btn-outline-danger" data-action="delete" data-id="${p.id}">
+                            <span class="material-icons me-1" style="font-size: 1em;">delete</span>Elimina
+                        </button>
+                    </div>
                 </div>
-            </div>
-        `;
-    }).join('');
-    cardsContainer.innerHTML = cardsHtml;
+            `;
+        }).join('');
+        cardsContainer.innerHTML = cardsHtml;
+    }
 }
 
 function updatePaginationControls(totalItems) {

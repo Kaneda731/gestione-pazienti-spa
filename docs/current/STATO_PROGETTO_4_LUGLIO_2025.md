@@ -27,6 +27,7 @@ gestione-pazienti-spa/
 ├── netlify.toml                    # Config deployment Netlify
 ├── README.md                       # Documentazione base
 ├── docs/
+│   ├── MOBILE_CARDS_GUIDE.md              # 🆕 Guida card mobile moderne
 │   └── current/
 │       ├── CONFIGURAZIONE_AUTH_SERVER_INTERNO.md  # Setup auth server V Gold
 │       ├── PIANO_SVILUPPO_SPA.md                  # Roadmap sviluppo
@@ -67,6 +68,7 @@ gestione-pazienti-spa/
 │       ├── supabase.js            # Configurazione Supabase
 │       ├── ui.js                  # Template e gestione UI
 │       ├── utils.js               # Utilità generiche
+│       ├── mobile-cards-examples.js  # 🆕 Helper card mobile moderne
 │       ├── components/
 │       │   └── CustomSelect.js    # Dropdown personalizzati
 │       └── views/
@@ -74,7 +76,7 @@ gestione-pazienti-spa/
 │           ├── dimissione.js      # Gestione dimissioni
 │           ├── form.js            # Form inserimento pazienti
 │           ├── grafico.js         # Dashboard grafici
-│           └── list.js            # Elenco pazienti responsive
+│           └── list.js            # Elenco pazienti responsive + 🆕 mobile moderno
 ```
 
 ---
@@ -290,6 +292,7 @@ backdrop-filter: blur(10px);
 - ✅ **Performance Mobile** - Touch areas, hardware acceleration, reduced motion
 - ✅ **Live Server Setup** - Testing mobile con auto-reload
 - ✅ **Manutenibilità** - File piccoli (50-180 righe), singola responsabilità
+- ✅ **Card Mobile Moderne** - 5 layout moderni con micro-interazioni avanzate
 
 #### **🔐 Autenticazione**
 - ✅ **Server interni V Gold** - Bypass sviluppo persistente
@@ -453,3 +456,76 @@ python3 -m http.server 8000
 
 *Documento aggiornato automaticamente il 4 Luglio 2025*  
 *Versione: 2.1 - Enterprise Ready + Modular CSS Architecture*
+
+---
+
+## 📱 **CARD MOBILE MODERNE (Implementate 4 Luglio 2025)**
+
+### **🎯 5 LAYOUT MODERNI PER MOBILE**
+
+#### **1. Layout Orizzontale Compatto** 
+```css
+.card.card-horizontal
+```
+- **Uso**: Lista pazienti su mobile
+- **Layout**: Flexbox orizzontale con header laterale
+- **Dimensioni**: Min-height 80px, informazioni essenziali
+- **Performance**: Touch-optimized, hardware accelerated
+
+#### **2. Grid 2x2 per Statistiche**
+```css
+.cards-grid-mobile
+```
+- **Uso**: Dashboard rapida con KPI
+- **Layout**: CSS Grid 2 colonne (1 su small mobile)
+- **Dimensioni**: 100px altezza minima, testo centrato
+- **Responsive**: Auto-stack su dispositivi <480px
+
+#### **3. Lista Compatta con Status**
+```css
+.card.card-list-compact.status-{success|warning|error|info}
+```
+- **Uso**: Lista pazienti con priorità visiva
+- **Features**: Barra colorata sinistra, layout split
+- **Spacing**: Margin ridotto (0.5rem), padding ottimizzato
+- **Accessibility**: Status semantici per screen reader
+
+#### **4. Scroll Orizzontale**
+```css
+.cards-scroll-wrapper > .cards-scroll-container
+```
+- **Uso**: Navigazione reparti/sezioni
+- **Features**: Scroll-snap, shadow gradients, no scrollbar
+- **Dimensioni**: Card fisse 280px, gap 1rem
+- **Touch**: Momentum scrolling, snap-to-start
+
+#### **5. Micro-interazioni Avanzate**
+```css
+.card:active::before  /* Ripple effect */
+.card.loading         /* Loading spinner */
+```
+- **Ripple Effect**: Animazione onda al touch (300px radius)
+- **Loading States**: Spinner automatico con overlay
+- **Touch Feedback**: Scale 0.98 al tap attivo
+- **Vibration**: Navigator.vibrate(10ms) su touch
+
+### **🛠 UTILITY CLASSES MOBILE**
+```css
+.mobile-horizontal    /* Flex row layout */
+.mobile-grid-2        /* Grid 2 colonne */
+.mobile-compact       /* Padding ridotto */
+.mobile-text-sm       /* Font 0.85rem */
+.mobile-text-xs       /* Font 0.75rem */
+.mobile-hidden        /* Nascosto su mobile */
+```
+
+### **🎯 GESTIONE AUTOMATICA**
+- **Rilevamento Viewport**: Auto-switch desktop/mobile (767px)
+- **Layout Intelligente**: `renderCards()` applica layout appropriato
+- **Performance**: Hardware acceleration, will-change, reduced motion
+- **Accessibility**: Touch areas 44px+, focus indicators, semantic HTML
+
+### **📚 DOCUMENTAZIONE**
+- **File**: `docs/MOBILE_CARDS_GUIDE.md` - Guida completa con esempi
+- **Manager JS**: `js/mobile-cards-examples.js` - Helper e utilità
+- **CSS**: `css/modules/mobile/cards-mobile.css` - Implementazione completa

@@ -89,4 +89,182 @@
         margin-bottom: 0.5rem;
         font-weight: 600;
     }
+    
+    /* ===================================
+       CUSTOM SELECT MOBILE SUPPORT
+       =================================== */
+    
+    /* CustomSelect Mobile Optimizations */
+    .custom-select-wrapper {
+        position: relative;
+        margin-bottom: 1rem;
+    }
+    
+    .custom-select-trigger {
+        min-height: 48px; /* Touch target size */
+        padding: 0.75rem 1rem;
+        font-size: 16px; /* Previene zoom iOS */
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+    }
+    
+    .custom-select-trigger:active {
+        background-color: rgba(var(--primary-rgb), 0.1);
+        transform: scale(0.98);
+        transition: transform 0.1s ease;
+    }
+    
+    .custom-select-dropdown {
+        position: fixed !important; /* Fixed positioning per mobile */
+        top: auto !important;
+        left: 1rem !important;
+        right: 1rem !important;
+        bottom: 20% !important;
+        max-height: 50vh !important;
+        z-index: 9999 !important; /* Massima priorità */
+        border-radius: 1rem;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(20px);
+        border: 2px solid var(--primary-color);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .custom-select-options {
+        padding: 0.5rem 0;
+    }
+    
+    .custom-select-option {
+        min-height: 48px; /* Touch target size */
+        padding: 0.875rem 1.25rem;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+        position: relative;
+    }
+    
+    .custom-select-option:active {
+        background-color: rgba(var(--primary-rgb), 0.2);
+        transform: scale(0.98);
+        transition: all 0.1s ease;
+    }
+    
+    .custom-select-option:hover,
+    .custom-select-option.focused {
+        background-color: rgba(var(--primary-rgb), 0.15);
+        color: var(--primary-color);
+    }
+    
+    /* Feedback visivo per touch */
+    .custom-select-option::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(var(--primary-rgb), 0.3);
+        transform: translate(-50%, -50%);
+        transition: width 0.3s ease, height 0.3s ease;
+        pointer-events: none;
+        z-index: 0;
+    }
+    
+    .custom-select-option:active::before {
+        width: 100%;
+        height: 100%;
+    }
+    
+    /* Animazione apertura dropdown mobile */
+    .custom-select-wrapper.open .custom-select-dropdown {
+        animation: slideUpMobile 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    }
+    
+    @keyframes slideUpMobile {
+        from {
+            opacity: 0;
+            transform: translateY(100%) scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+    
+    /* Overlay per chiudere dropdown */
+    .custom-select-wrapper.open::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 9998;
+        backdrop-filter: blur(4px);
+    }
+    
+    /* Scroll smooth su iOS */
+    .custom-select-dropdown {
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE/Edge */
+    }
+    
+    .custom-select-dropdown::-webkit-scrollbar {
+        display: none; /* Chrome/Safari */
+    }
+}
+
+/* ===================================
+   TABLET PORTRAIT - Layout intermedio
+   =================================== */
+@media (min-width: 768px) and (max-width: 991px) {
+    .custom-select-dropdown {
+        max-height: 250px;
+        z-index: 1100;
+    }
+    
+    .custom-select-option {
+        min-height: 44px;
+        padding: 0.75rem 1rem;
+    }
+}
+
+/* ===================================
+   SMALL MOBILE - Layout compatto
+   =================================== */
+@media (max-width: 480px) {
+    .custom-select-dropdown {
+        left: 0.5rem !important;
+        right: 0.5rem !important;
+        bottom: 15% !important;
+        max-height: 60vh !important;
+        border-radius: 0.75rem;
+    }
+    
+    .custom-select-option {
+        padding: 1rem 1rem;
+        font-size: 0.95rem;
+    }
+}
+
+/* ===================================
+   DARK MODE MOBILE ADJUSTMENTS
+   =================================== */
+@media (max-width: 767px) {
+    [data-bs-theme="dark"] .custom-select-dropdown {
+        background: rgba(var(--dark-bg-rgb), 0.95);
+        border-color: var(--primary-color);
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+    }
+    
+    [data-bs-theme="dark"] .custom-select-wrapper.open::before {
+        background: rgba(0, 0, 0, 0.7);
+    }
 }

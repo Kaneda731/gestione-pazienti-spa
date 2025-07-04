@@ -76,6 +76,17 @@ class CustomSelect {
                 this.selectOption(option.value, option.textContent);
             });
             
+            // Supporto touch su mobile per le opzioni
+            optionElement.addEventListener('touchstart', (e) => {
+                e.stopPropagation();
+            }, { passive: true });
+            
+            optionElement.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.selectOption(option.value, option.textContent);
+            }, { passive: false });
+            
             optionsContainer.appendChild(optionElement);
         });
     }
@@ -84,18 +95,35 @@ class CustomSelect {
         const trigger = this.wrapper.querySelector('.custom-select-trigger');
         const dropdown = this.wrapper.querySelector('.custom-select-dropdown');
         
-        // Toggle dropdown
+        // Toggle dropdown - Supporto touch mobile
         trigger.addEventListener('click', (e) => {
             e.stopPropagation();
             this.toggle();
         });
         
-        // Close on outside click
+        // Supporto touch su mobile
+        trigger.addEventListener('touchstart', (e) => {
+            e.stopPropagation();
+        }, { passive: true });
+        
+        trigger.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.toggle();
+        }, { passive: false });
+        
+        // Close on outside click/touch
         document.addEventListener('click', (e) => {
             if (!this.wrapper.contains(e.target)) {
                 this.close();
             }
         });
+        
+        document.addEventListener('touchstart', (e) => {
+            if (!this.wrapper.contains(e.target)) {
+                this.close();
+            }
+        }, { passive: true });
         
         // Keyboard navigation
         this.wrapper.addEventListener('keydown', (e) => {
@@ -195,6 +223,28 @@ class CustomSelect {
                 firstOption.classList.add('focused');
             }
         }
+        
+        // Gestione mobile: aggiungi listener per overlay
+        if (window.innerWidth <= 767) {
+            this.addMobileOverlayListener();
+        }
+    }
+    
+    addMobileOverlayListener() {
+        // Listener per chiudere quando si clicca sull'overlay mobile
+        const overlay = this.wrapper.querySelector('::before');
+        this.mobileOverlayHandler = (e) => {
+            const dropdown = this.wrapper.querySelector('.custom-select-dropdown');
+            if (!dropdown.contains(e.target) && this.wrapper.classList.contains('open')) {
+                this.close();
+            }
+        };
+        
+        // Aggiungi listener al wrapper per intercettare click sull'overlay
+        setTimeout(() => {
+            document.addEventListener('click', this.mobileOverlayHandler);
+            document.addEventListener('touchstart', this.mobileOverlayHandler);
+        }, 100);
     }
     
     close() {
@@ -206,6 +256,13 @@ class CustomSelect {
         this.wrapper.querySelectorAll('.custom-select-option').forEach(opt => {
             opt.classList.remove('focused');
         });
+        
+        // Rimuovi listener mobile overlay
+        if (this.mobileOverlayHandler) {
+            document.removeEventListener('click', this.mobileOverlayHandler);
+            document.removeEventListener('touchstart', this.mobileOverlayHandler);
+            this.mobileOverlayHandler = null;
+        }
     }
     
     toggle() {
@@ -217,21 +274,14 @@ class CustomSelect {
     }
     
     destroy() {
+        // Pulisci listener mobile se presenti
+        if (this.mobileOverlayHandler) {
+            document.removeEventListener('click', this.mobileOverlayHandler);
+            document.removeEventListener('touchstart', this.mobileOverlayHandler);
+        }
+        
         this.wrapper.remove();
         this.selectElement.style.display = '';
-    }
-    
-    /**
-     * Ripopola le opzioni del custom select
-     * Utile quando le opzioni vengono caricate dinamicamente
-     */
-    refresh() {
-        this.populateOptions();
-        // Reset della selezione se il valore corrente non esiste più
-        const currentValueExists = this.selectElement.querySelector(`option[value="${this.selectedValue}"]`);
-        if (!currentValueExists && this.selectedValue) {
-            this.setValue('');
-        }
     }
 }
 
@@ -241,19 +291,6 @@ window.initCustomSelects = function(selector = '.form-select[data-custom="true"]
     selects.forEach(select => {
         if (!select.customSelectInstance) {
             select.customSelectInstance = new CustomSelect(select);
-        } else {
-            // Se l'istanza esiste già, refresh per aggiornare le opzioni
-            select.customSelectInstance.refresh();
-        }
-    });
-};
-
-// Funzione specifica per refreshare i custom select esistenti
-window.refreshCustomSelects = function(selector = '.form-select[data-custom="true"]') {
-    const selects = document.querySelectorAll(selector);
-    selects.forEach(select => {
-        if (select.customSelectInstance) {
-            select.customSelectInstance.refresh();
         }
     });
 };

@@ -60,20 +60,20 @@ function createAuthModal() {
                             window.location.hostname === 'localhost';
 
     const modalHTML = `
-        <div class="modal fade" id="auth-modal" tabindex="-1" aria-labelledby="authModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
+        <div class="modal fade" id="auth-modal" tabindex="-1" aria-labelledby="authModalLabel" aria-hidden="true" role="dialog" aria-modal="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content" style="background: var(--card-bg); border: none; box-shadow: var(--shadow-lg);">
                     <div class="modal-header" style="background: linear-gradient(135deg, var(--primary-color), #0d47a1); color: white; border: none;">
                         <h5 class="modal-title d-flex align-items-center" id="authModalLabel">
-                            <i class="material-icons me-2">security</i>
+                            <i class="material-icons me-2" aria-hidden="true">security</i>
                             <span id="modal-title">Accesso al Sistema</span>
                         </h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Chiudi modal di autenticazione"></button>
                     </div>
-                    <div class="modal-body">
+                    <div class="modal-body" role="main">
                         ${isInternalServer ? `
-                            <div class="alert alert-info d-flex align-items-center mb-3">
-                                <i class="material-icons me-2" style="font-size: 1.2em;">info</i>
+                            <div class="alert alert-info d-flex align-items-center mb-3" role="alert" aria-live="polite">
+                                <i class="material-icons me-2" style="font-size: 1.2em;" aria-hidden="true">info</i>
                                 <div>
                                     <strong>Server interno rilevato</strong><br>
                                     <small>Usa l'accesso email o il bypass sviluppo per ambienti aziendali.</small>
@@ -82,28 +82,35 @@ function createAuthModal() {
                         ` : ''}
                         
                         <!-- Contenuto Login -->
-                        <div id="login-content">
-                            <form id="email-login-form" class="mb-3">
+                        <div id="login-content" role="form" aria-label="Modulo di accesso">
+                            <form id="email-login-form" class="mb-3" novalidate>
                                 <div class="mb-3">
                                     <label for="modal-login-email" class="form-label">
-                                        <i class="material-icons me-1" style="font-size: 1em; vertical-align: text-bottom;">email</i>
+                                        <i class="material-icons me-1" style="font-size: 1em; vertical-align: text-bottom;" aria-hidden="true">email</i>
                                         Email
                                     </label>
                                     <input type="email" class="form-control" id="modal-login-email" required 
+                                           autocomplete="username email"
+                                           aria-describedby="login-email-help"
                                            style="padding-left: 2.5rem; background-image: url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"%23666\" viewBox=\"0 0 24 24\"><path d=\"M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z\"/></svg>'); background-repeat: no-repeat; background-position: 8px center; background-size: 16px;">
+                                    <div id="login-email-help" class="form-text visually-hidden">Inserisci la tua email per accedere</div>
                                 </div>
                                 <div class="mb-3">
                                     <label for="modal-login-password" class="form-label">
-                                        <i class="material-icons me-1" style="font-size: 1em; vertical-align: text-bottom;">lock</i>
+                                        <i class="material-icons me-1" style="font-size: 1em; vertical-align: text-bottom;" aria-hidden="true">lock</i>
                                         Password
                                     </label>
                                     <input type="password" class="form-control" id="modal-login-password" required
+                                           autocomplete="current-password"
+                                           aria-describedby="login-password-help"
                                            style="padding-left: 2.5rem; background-image: url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"%23666\" viewBox=\"0 0 24 24\"><path d=\"M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM12 17c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zM15.1 8H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z\"/></svg>'); background-repeat: no-repeat; background-position: 8px center; background-size: 16px;">
+                                    <div id="login-password-help" class="form-text visually-hidden">Inserisci la tua password</div>
                                 </div>
-                                <button type="submit" class="btn btn-primary w-100 mb-3">
-                                    <i class="material-icons me-1" style="font-size: 1em;">login</i>
+                                <button type="submit" class="btn btn-primary w-100 mb-3" aria-describedby="login-submit-help">
+                                    <i class="material-icons me-1" style="font-size: 1em;" aria-hidden="true">login</i>
                                     Accedi con Email
                                 </button>
+                                <div id="login-submit-help" class="form-text visually-hidden">Premere per accedere con email e password</div>
                             </form>
                             
                             <!-- Opzioni Alternative -->
@@ -147,6 +154,7 @@ function createAuthModal() {
                                         Email
                                     </label>
                                     <input type="email" class="form-control" id="modal-signup-email" required
+                                           autocomplete="username email"
                                            style="padding-left: 2.5rem; background-image: url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"%23666\" viewBox=\"0 0 24 24\"><path d=\"M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z\"/></svg>'); background-repeat: no-repeat; background-position: 8px center; background-size: 16px;">
                                 </div>
                                 <div class="mb-3">
@@ -155,6 +163,7 @@ function createAuthModal() {
                                         Password
                                     </label>
                                     <input type="password" class="form-control" id="modal-signup-password" required minlength="6"
+                                           autocomplete="new-password"
                                            style="padding-left: 2.5rem; background-image: url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"%23666\" viewBox=\"0 0 24 24\"><path d=\"M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM12 17c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zM15.1 8H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z\"/></svg>'); background-repeat: no-repeat; background-position: 8px center; background-size: 16px;">
                                 </div>
                                 <div class="mb-3">
@@ -163,6 +172,7 @@ function createAuthModal() {
                                         Conferma Password
                                     </label>
                                     <input type="password" class="form-control" id="modal-signup-password-confirm" required minlength="6"
+                                           autocomplete="new-password"
                                            style="padding-left: 2.5rem; background-image: url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"%23666\" viewBox=\"0 0 24 24\"><path d=\"M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM12 17c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zM15.1 8H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z\"/></svg>'); background-repeat: no-repeat; background-position: 8px center; background-size: 16px;">
                                 </div>
                                 <button type="submit" class="btn btn-success w-100">
@@ -308,7 +318,7 @@ function setupModalEventListeners() {
 }
 
 /**
- * Mostra un messaggio di errore nel modal
+ * Mostra un messaggio di errore nel modal con accessibilità migliorata
  */
 function showModalError(message) {
     const modalBody = document.querySelector('#auth-modal .modal-body');
@@ -317,20 +327,30 @@ function showModalError(message) {
     if (!alertContainer) {
         alertContainer = document.createElement('div');
         alertContainer.className = 'auth-alert';
+        alertContainer.setAttribute('aria-live', 'assertive');
+        alertContainer.setAttribute('aria-atomic', 'true');
         modalBody.insertBefore(alertContainer, modalBody.firstChild);
     }
     
     alertContainer.innerHTML = `
         <div class="alert alert-danger d-flex align-items-center alert-dismissible" role="alert">
-            <i class="material-icons me-2">error</i>
+            <i class="material-icons me-2" aria-hidden="true">error</i>
             <div>${message}</div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Chiudi messaggio di errore"></button>
         </div>
     `;
+    
+    // Focus sul messaggio per screen reader
+    setTimeout(() => {
+        const alert = alertContainer.querySelector('.alert');
+        if (alert) {
+            alert.focus();
+        }
+    }, 100);
 }
 
 /**
- * Mostra un messaggio di successo nel modal
+ * Mostra un messaggio di successo nel modal con accessibilità migliorata
  */
 function showModalSuccess(message) {
     const modalBody = document.querySelector('#auth-modal .modal-body');
@@ -339,16 +359,26 @@ function showModalSuccess(message) {
     if (!alertContainer) {
         alertContainer = document.createElement('div');
         alertContainer.className = 'auth-alert';
+        alertContainer.setAttribute('aria-live', 'polite');
+        alertContainer.setAttribute('aria-atomic', 'true');
         modalBody.insertBefore(alertContainer, modalBody.firstChild);
     }
     
     alertContainer.innerHTML = `
         <div class="alert alert-success d-flex align-items-center alert-dismissible" role="alert">
-            <i class="material-icons me-2">check_circle</i>
+            <i class="material-icons me-2" aria-hidden="true">check_circle</i>
             <div>${message}</div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Chiudi messaggio di successo"></button>
         </div>
     `;
+    
+    // Focus sul messaggio per screen reader
+    setTimeout(() => {
+        const alert = alertContainer.querySelector('.alert');
+        if (alert) {
+            alert.focus();
+        }
+    }, 100);
 }
 
 /**

@@ -1,0 +1,118 @@
+/* ===================================
+   MOBILE LAYOUT & NAVIGATION
+   =================================== */
+
+@media (max-width: 767px) {
+    /* Body mobile ottimizzato */
+    body {
+        -webkit-overflow-scrolling: touch;
+        overflow-x: hidden;
+        font-size: 16px; /* Previene zoom su iOS */
+    }
+    
+    /* Container principale mobile */
+    main#app-container {
+        padding-top: 1rem;
+        padding-bottom: 2rem;
+        margin: 0;
+    }
+    
+    /* Navbar mobile */
+    .navbar {
+        padding: 0.75rem 1rem;
+        min-height: 60px;
+    }
+    
+    .navbar-brand {
+        font-size: 1.1rem;
+    }
+    
+    .navbar-brand .material-icons {
+        font-size: 1.3rem;
+        margin-right: 0.5rem;
+    }
+    
+    /* Theme toggle mobile */
+    #theme-toggle {
+        min-width: 44px;
+        min-height: 44px;
+        padding: 0.5rem;
+        border-radius: 8px;
+    }
+    
+    /* Card generiche mobile */
+    .card {
+        border-radius: 12px;
+        margin-bottom: 1rem;
+    }
+    
+    .card-header {
+        padding: 1rem;
+        border-radius: 12px 12px 0 0;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    /* Form mobile */
+    .form-control,
+    .form-select {
+        min-height: 44px;
+        font-size: 16px; /* Previene zoom su iOS */
+        border-radius: 8px;
+    }
+    
+    /* Pulsanti mobile */
+    .btn {
+        min-height: 44px;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        touch-action: manipulation;
+    }
+    
+    .btn-sm {
+        min-height: 40px;
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+    
+    /* Spacing mobile ridotto */
+    .mt-5, .my-5 {
+        margin-top: 2rem !important;
+    }
+    
+    .mb-5, .my-5 {
+        margin-bottom: 2rem !important;
+    }
+    
+    .pt-5, .py-5 {
+        padding-top: 2rem !important;
+    }
+    
+    .pb-5, .py-5 {
+        padding-bottom: 2rem !important;
+    }
+    
+    /* Nascondi elementi non essenziali su mobile */
+    .d-none-mobile {
+        display: none !important;
+    }
+    
+    /* Performance mobile */
+    * {
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+    }
+    
+    /* Scrolling ottimizzato */
+    .table-responsive,
+    .card-body,
+    main,
+    .overflow-auto {
+        -webkit-overflow-scrolling: touch;
+    }
+}

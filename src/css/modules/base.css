@@ -9,6 +9,22 @@ body {
     line-height: 1.6;
     min-height: 100vh;
     transition: background-color 0.3s ease;
+    margin: 0;
+    padding: 0;
+}
+
+/* Assicura che html e body coprano tutto lo schermo */
+html {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    background: var(--body-bg);
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-size: cover;
 }
 
 /* Typography */

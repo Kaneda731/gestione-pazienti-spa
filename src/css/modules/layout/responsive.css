@@ -104,3 +104,44 @@ img {
         display: none !important;
     }
 }
+
+/* ===================================
+   MOBILE TOUCH & SCROLL FIXES
+   =================================== */
+
+/* Previeni problemi di scroll su mobile */
+@media (max-width: 767px) {
+    body {
+        -webkit-overflow-scrolling: touch;
+        overflow-x: hidden;
+    }
+    
+    /* Fix per elementi con transform che causano scroll bloccato */
+    * {
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
+    }
+    
+    /* Area touch migliorata per pulsanti */
+    .btn {
+        min-height: 44px;
+        min-width: 44px;
+        touch-action: manipulation;
+    }
+    
+    /* Migliora la scrollabilità */
+    .table-responsive,
+    .card-body,
+    main {
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Riduce animazioni per performance su mobile */
+    @media (prefers-reduced-motion: reduce) {
+        * {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
+    }
+}

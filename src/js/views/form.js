@@ -182,9 +182,14 @@ export async function initInserimentoView() {
 
         setupFormEventListeners(editId);
         
-        // Inizializza i custom select solo dopo che tutto è pronto
+        // Inizializza i custom select dopo aver caricato le opzioni
         if (window.initCustomSelects) {
             window.initCustomSelects();
+        }
+        
+        // Refresh per assicurarsi che le opzioni dinamiche siano caricate
+        if (window.refreshCustomSelects) {
+            window.refreshCustomSelects();
         }
     } catch (error) {
         console.error('Errore durante l\'inizializzazione del form:', error);

@@ -220,6 +220,19 @@ class CustomSelect {
         this.wrapper.remove();
         this.selectElement.style.display = '';
     }
+    
+    /**
+     * Ripopola le opzioni del custom select
+     * Utile quando le opzioni vengono caricate dinamicamente
+     */
+    refresh() {
+        this.populateOptions();
+        // Reset della selezione se il valore corrente non esiste più
+        const currentValueExists = this.selectElement.querySelector(`option[value="${this.selectedValue}"]`);
+        if (!currentValueExists && this.selectedValue) {
+            this.setValue('');
+        }
+    }
 }
 
 // Utility function per inizializzare automaticamente le custom select
@@ -228,6 +241,19 @@ window.initCustomSelects = function(selector = '.form-select[data-custom="true"]
     selects.forEach(select => {
         if (!select.customSelectInstance) {
             select.customSelectInstance = new CustomSelect(select);
+        } else {
+            // Se l'istanza esiste già, refresh per aggiornare le opzioni
+            select.customSelectInstance.refresh();
+        }
+    });
+};
+
+// Funzione specifica per refreshare i custom select esistenti
+window.refreshCustomSelects = function(selector = '.form-select[data-custom="true"]') {
+    const selects = document.querySelectorAll(selector);
+    selects.forEach(select => {
+        if (select.customSelectInstance) {
+            select.customSelectInstance.refresh();
         }
     });
 };

@@ -103,6 +103,12 @@ export async function initGraficoView() {
             if (window.initCustomSelects) {
                 window.initCustomSelects();
             }
+            
+            // Refresh per assicurarsi che le opzioni dinamiche siano caricate
+            if (window.refreshCustomSelects) {
+                window.refreshCustomSelects();
+            }
+            
             setupEventListeners();
         } catch (error) {
             console.error('Errore durante il caricamento dei filtri:', error);

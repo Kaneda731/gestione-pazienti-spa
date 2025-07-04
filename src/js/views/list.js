@@ -460,6 +460,8 @@ export async function initListView(urlParams) {
     const viewContainer = document.querySelector('#app-container .view');
     if (!viewContainer) return;
 
+    console.log('🔄 Inizializzazione ListView...');
+    
     cacheDOMElements(viewContainer);
     
     // FORZA la vista corretta immediatamente al caricamento
@@ -469,15 +471,36 @@ export async function initListView(urlParams) {
     setTimeout(ensureCorrectView, 100);
 
     try {
+        console.log('📊 Inizio caricamento filtri...');
+        console.log('DOM Elements:', {
+            repartoFilter: !!domElements.repartoFilter,
+            diagnosiFilter: !!domElements.diagnosiFilter,
+            repartoHTML: domElements.repartoFilter?.innerHTML,
+            diagnosiHTML: domElements.diagnosiFilter?.innerHTML
+        });
+
         // Attendere il caricamento dei filtri prima di procedere
         await Promise.all([
             populateFilter('reparto_appartenenza', domElements.repartoFilter),
             populateFilter('diagnosi', domElements.diagnosiFilter)
         ]);
 
-        // Inizializza i custom select solo dopo aver caricato le opzioni
+        console.log('✅ Filtri caricati, contenuto dopo populate:', {
+            repartoHTML: domElements.repartoFilter?.innerHTML,
+            diagnosiHTML: domElements.diagnosiFilter?.innerHTML
+        });
+
+        // Inizializza i custom select per tutti i filtri (incluso quello di stato che ha opzioni statiche)
         if (window.initCustomSelects) {
+            console.log('🎨 Inizializzazione custom selects...');
             window.initCustomSelects();
+        }
+
+        // Forza un refresh dei custom select per assicurarsi che le opzioni dinamiche siano caricate
+        if (window.refreshCustomSelects) {
+            console.log('🔄 Refresh custom selects con nuove opzioni...');
+            window.refreshCustomSelects();
+            console.log('✅ Custom selects refreshed');
         }
 
         applyFiltersFromURL(urlParams);
@@ -487,7 +510,7 @@ export async function initListView(urlParams) {
         // Terza chiamata dopo il rendering dei dati
         setTimeout(ensureCorrectView, 200);
     } catch (error) {
-        console.error('Errore durante l\'inizializzazione della lista:', error);
+        console.error('❌ Errore durante l\'inizializzazione della lista:', error);
         // Continua anche in caso di errore nel caricamento filtri
         applyFiltersFromURL(urlParams);
         fetchAndRenderPazienti();

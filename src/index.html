@@ -422,11 +422,6 @@
                             <label for="list-search" class="form-label">Cerca</label>
                             <input type="text" id="list-search" class="form-control form-control-sm" placeholder="Per nome o cognome...">
                         </div>
-                        <div class="col-md-3 d-flex align-items-end">
-                            <button id="export-csv-btn" class="btn btn-sm btn-outline-success w-100">
-                                <span class="material-icons me-1" style="vertical-align: text-bottom;">download</span>Esporta CSV
-                            </button>
-                        </div>
                     </div>
                     
                     <!-- Vista Tabella (Solo Desktop XL) -->
@@ -447,6 +442,13 @@
                                 <!-- Le righe verranno popolate dinamicamente -->
                             </tbody>
                         </table>
+                    </div>
+                    
+                    <!-- Barra azioni sotto tabella -->
+                    <div class="d-flex justify-content-end align-items-center mt-3 mb-3">
+                        <button id="export-csv-btn" class="btn btn-outline-success">
+                            <span class="material-icons me-1" style="vertical-align: text-bottom;">download</span>Esporta CSV
+                        </button>
                     </div>
                     
                     <!-- Vista Card (Mobile, Tablet, Desktop) -->

@@ -990,3 +990,69 @@ body {
         padding: 0.625rem 0.875rem;
     }
 }
+
+/* === PULSANTE TORNA AL MENU === */
+.btn-back-menu {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 1px solid rgba(13, 110, 253, 0.2);
+    color: #495057;
+    transition: var(--transition);
+    box-shadow: var(--shadow-sm);
+    backdrop-filter: blur(10px);
+    font-weight: 500;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-back-menu::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(13, 110, 253, 0.1), transparent);
+    transition: left 0.5s ease;
+}
+
+.btn-back-menu:hover::before {
+    left: 100%;
+}
+
+.btn-back-menu:hover {
+    background: linear-gradient(135deg, #ffffff 0%, #f1f3f4 100%);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(13, 110, 253, 0.15);
+}
+
+.btn-back-menu:active {
+    transform: translateY(0);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Dark mode per pulsante back */
+[data-bs-theme="dark"] .btn-back-menu {
+    background: linear-gradient(135deg, #3d4454 0%, #495057 100%);
+    border-color: rgba(77, 171, 247, 0.3);
+    color: #f8f9fa;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+[data-bs-theme="dark"] .btn-back-menu::before {
+    background: linear-gradient(90deg, transparent, rgba(77, 171, 247, 0.2), transparent);
+}
+
+[data-bs-theme="dark"] .btn-back-menu:hover {
+    background: linear-gradient(135deg, #4dabf7 0%, #339af0 100%);
+    border-color: #4dabf7;
+    color: white;
+    box-shadow: 0 8px 25px rgba(77, 171, 247, 0.4), 
+                0 4px 12px rgba(77, 171, 247, 0.2);
+}
+
+[data-bs-theme="dark"] .btn-back-menu:active {
+    background: linear-gradient(135deg, #339af0 0%, #228be6 100%);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}

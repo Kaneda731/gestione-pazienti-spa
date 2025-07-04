@@ -325,6 +325,7 @@ backdrop-filter: blur(10px);
 - ✅ **Controlli null safety** - Protezione accesso proprietà su elementi potenzialmente null
 - ✅ **Warning vibrazione risolto** - Gestione sicura navigator.vibrate per mobile
 - ✅ **Event listeners passivi** - Risolti warning performance touchstart/resize con { passive: true/false }
+- ✅ **CustomSelect mobile fix** - Risolto bug dropdown non funzionanti su dispositivi touch
 
 ### **🎛️ CONTROLLI DI SICUREZZA DOM**
 ```javascript
@@ -350,6 +351,11 @@ window.addEventListener('resize', ensureCorrectView);
 card.addEventListener('touchstart', handler, { passive: true });  // No preventDefault
 card.addEventListener('touchend', handler, { passive: false });   // Con preventDefault
 window.addEventListener('resize', handler, { passive: true });    // Performance resize
+
+// CustomSelect mobile support (CustomSelect.js)
+trigger.addEventListener('touchstart', handler, { passive: true });
+trigger.addEventListener('touchend', handler, { passive: false });
+optionElement.addEventListener('touchend', handler, { passive: false });
 ```
 
 ### **📈 RISULTATI CONSOLE**

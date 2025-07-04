@@ -5,8 +5,8 @@
 /* === LAYOUT MOBILE OTTIMIZZATO === */
 @media (max-width: 767px) {
     .navbar {
-        padding: 0.5rem 1rem !important;
-        min-height: 56px; /* iOS standard navbar height */
+        padding: 0.5rem 1rem !important; /* Allineato con layout-mobile */
+        min-height: 52px; /* Allineato con layout-mobile */
     }
     
     .navbar-brand {

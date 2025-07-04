@@ -25,8 +25,8 @@ export function updateAuthUI(session) {
         `;
         
         document.getElementById('logout-button').addEventListener('click', () => {
-            // Pulisci anche la sessione di sviluppo se presente
-            sessionStorage.removeItem('supabase.auth.token');
+            // Pulisci TUTTE le sessioni (normale e bypass)
+            clearDevelopmentBypass();
             supabase.auth.signOut();
         });
     } else {
@@ -118,8 +118,14 @@ function createAuthModal() {
                                 ${isInternalServer ? `
                                     <button id="dev-bypass-btn" class="btn btn-outline-secondary">
                                         <i class="material-icons me-1" style="font-size: 1em;">developer_mode</i>
-                                        Bypass Sviluppo
+                                        ${localStorage.getItem('dev.bypass.enabled') ? 'Bypass Attivo' : 'Bypass Sviluppo'}
                                     </button>
+                                    ${localStorage.getItem('dev.bypass.enabled') ? `
+                                        <button id="clear-bypass-btn" class="btn btn-outline-warning btn-sm mt-2">
+                                            <i class="material-icons me-1" style="font-size: 0.9em;">clear</i>
+                                            Disattiva Bypass
+                                        </button>
+                                    ` : ''}
                                 ` : ''}
                             </div>
                             
@@ -149,7 +155,7 @@ function createAuthModal() {
                                         Password
                                     </label>
                                     <input type="password" class="form-control" id="modal-signup-password" required minlength="6"
-                                           style="padding-left: 2.5rem; background-image: url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"%23666\" viewBox=\"0 0 24 24\"><path d=\"M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM12 17c-1.1 0-2-.9-2 2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zM15.1 8H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z\"/></svg>'); background-repeat: no-repeat; background-position: 8px center; background-size: 16px;">
+                                           style="padding-left: 2.5rem; background-image: url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"%23666\" viewBox=\"0 0 24 24\"><path d=\"M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM12 17c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zM15.1 8H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z\"/></svg>'); background-repeat: no-repeat; background-position: 8px center; background-size: 16px;">
                                 </div>
                                 <div class="mb-3">
                                     <label for="modal-signup-password-confirm" class="form-label">
@@ -230,6 +236,17 @@ function setupModalEventListeners() {
             // Chiudi il modal
             bootstrap.Modal.getInstance(document.getElementById('auth-modal')).hide();
         }
+    });
+    
+    // Pulsante per disattivare il bypass
+    const clearBypassBtn = document.getElementById('clear-bypass-btn');
+    clearBypassBtn?.addEventListener('click', () => {
+        clearDevelopmentBypass();
+        showModalSuccess('Bypass sviluppo disattivato. Ricarica la pagina per applicare.');
+        // Ricarica il modal per aggiornare i pulsanti
+        setTimeout(() => {
+            window.location.reload();
+        }, 1500);
     });
     
     // Toggle tra login e signup
@@ -342,33 +359,42 @@ export function initAuth(onAuthStateChange) {
     // Salva il callback globalmente per il bypass di sviluppo
     window.onAuthStateChangeCallback = onAuthStateChange;
     
-    // Controlla se c'è una sessione di bypass salvata
+    // PRIMA: Controlla se c'è una sessione di bypass sviluppo persistente
+    const developmentSession = checkDevelopmentBypass();
+    if (developmentSession) {
+        updateAuthUI(developmentSession);
+        if (onAuthStateChange) {
+            onAuthStateChange(developmentSession);
+        }
+        return; // Exit early con sessione di sviluppo
+    }
+    
+    // SECONDA: Controlla se c'è una sessione di bypass salvata in sessionStorage
     const savedBypassSession = sessionStorage.getItem('supabase.auth.token');
     if (savedBypassSession) {
         try {
             const session = JSON.parse(savedBypassSession);
-            updateAuthUI(session);
-            if (onAuthStateChange) {
-                onAuthStateChange(session);
+            // Verifica che sia una sessione di sviluppo valida
+            if (session.isDevelopmentBypass) {
+                updateAuthUI(session);
+                if (onAuthStateChange) {
+                    onAuthStateChange(session);
+                }
+                return; // Exit early se c'è una sessione bypass valida
             }
-            return; // Exit early se c'è una sessione bypass
         } catch (e) {
             // Sessione corrotta, rimuovila
             sessionStorage.removeItem('supabase.auth.token');
         }
     }
     
-    // Listener normale per Supabase auth
+    // TERZA: Listener normale per Supabase auth
     supabase.auth.onAuthStateChange((_event, session) => {
-        // Se non c'è una sessione Supabase, controlla il bypass
+        // Se non c'è una sessione Supabase, controlla di nuovo il bypass
         if (!session) {
-            const bypassSession = sessionStorage.getItem('supabase.auth.token');
+            const bypassSession = checkDevelopmentBypass();
             if (bypassSession) {
-                try {
-                    session = JSON.parse(bypassSession);
-                } catch (e) {
-                    sessionStorage.removeItem('supabase.auth.token');
-                }
+                session = bypassSession;
             }
         }
         
@@ -415,7 +441,7 @@ export async function signUpWithEmail(email, password) {
 
 /**
  * Bypass temporaneo per sviluppo su server interni
- * Crea una sessione fittizia per testare l'app
+ * Crea una sessione fittizia per testare l'app con persistenza migliorata
  */
 export function enableDevelopmentBypass() {
     const isDevelopment = window.location.hostname === 'localhost' || 
@@ -425,18 +451,85 @@ export function enableDevelopmentBypass() {
                          window.location.hostname.includes('interno');
                          
     if (isDevelopment) {
-        // Simula una sessione per sviluppo
+        // Simula una sessione per sviluppo con timestamp per validità
         const mockSession = {
             user: {
                 email: 'sviluppatore@vgold.local',
-                id: 'dev-user-123'
+                id: 'dev-user-123',
+                app_metadata: { provider: 'development' },
+                user_metadata: { name: 'Sviluppatore V Gold' }
             },
-            access_token: 'dev-token'
+            access_token: 'dev-token-' + Date.now(),
+            refresh_token: 'dev-refresh-token',
+            expires_at: Date.now() + (24 * 60 * 60 * 1000), // 24 ore
+            token_type: 'bearer',
+            created_at: new Date().toISOString(),
+            expires_in: 86400,
+            // Flag per identificare che è una sessione di sviluppo
+            isDevelopmentBypass: true
         };
         
-        // Memorizza la sessione simulata
-        sessionStorage.setItem('supabase.auth.token', JSON.stringify(mockSession));
+        // Memorizza la sessione in ENTRAMBI sessionStorage e localStorage per persistenza
+        const sessionData = JSON.stringify(mockSession);
+        sessionStorage.setItem('supabase.auth.token', sessionData);
+        localStorage.setItem('dev.bypass.session', sessionData);
+        localStorage.setItem('dev.bypass.enabled', 'true');
+        localStorage.setItem('dev.bypass.timestamp', Date.now().toString());
+        
+        console.log('🔓 Bypass sviluppo attivato - sessione persistente creata');
         return mockSession;
     }
     return null;
+}
+
+/**
+ * Controlla se esiste una sessione di bypass valida salvata
+ */
+export function checkDevelopmentBypass() {
+    try {
+        const bypassEnabled = localStorage.getItem('dev.bypass.enabled');
+        const savedSession = localStorage.getItem('dev.bypass.session');
+        const timestamp = localStorage.getItem('dev.bypass.timestamp');
+        
+        if (!bypassEnabled || !savedSession || !timestamp) {
+            return null;
+        }
+        
+        // Verifica se la sessione è ancora valida (24 ore)
+        const sessionAge = Date.now() - parseInt(timestamp);
+        const maxAge = 24 * 60 * 60 * 1000; // 24 ore
+        
+        if (sessionAge > maxAge) {
+            // Sessione scaduta, pulisci
+            clearDevelopmentBypass();
+            return null;
+        }
+        
+        const session = JSON.parse(savedSession);
+        
+        // Verifica che sia effettivamente una sessione di sviluppo
+        if (session.isDevelopmentBypass) {
+            // Ripristina anche in sessionStorage
+            sessionStorage.setItem('supabase.auth.token', savedSession);
+            console.log('🔄 Sessione bypass sviluppo ripristinata automaticamente');
+            return session;
+        }
+        
+    } catch (error) {
+        console.warn('Errore durante il controllo bypass sviluppo:', error);
+        clearDevelopmentBypass();
+    }
+    
+    return null;
+}
+
+/**
+ * Pulisce tutte le tracce del bypass sviluppo
+ */
+export function clearDevelopmentBypass() {
+    sessionStorage.removeItem('supabase.auth.token');
+    localStorage.removeItem('dev.bypass.session');
+    localStorage.removeItem('dev.bypass.enabled');
+    localStorage.removeItem('dev.bypass.timestamp');
+    console.log('🧹 Bypass sviluppo pulito');
 }

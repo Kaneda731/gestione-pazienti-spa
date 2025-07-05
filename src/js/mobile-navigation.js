@@ -16,10 +16,9 @@ class MobileNavigation {
     
     init() {
         if (window.innerWidth <= 768) {
-            this.createFAB();
-            this.createBreadcrumb();
             this.setupEventListeners();
             this.updateNavigation();
+            // FAB e breadcrumb vengono creati solo quando necessario in updateView()
         }
     }
     
@@ -30,24 +29,12 @@ class MobileNavigation {
             existingFab.remove();
         }
         
-        // Crea il contenitore FAB
+        // Crea il contenitore FAB (semplificato senza menu)
         const fabContainer = document.createElement('div');
         fabContainer.className = 'mobile-fab-container';
         
         fabContainer.innerHTML = `
-            <div class="fab-overlay"></div>
-            <div class="fab-menu">
-                <button class="fab-mini" data-action="refresh" title="Aggiorna">
-                    <span class="material-icons">refresh</span>
-                </button>
-                <button class="fab-mini" data-action="search" title="Cerca">
-                    <span class="material-icons">search</span>
-                </button>
-                <button class="fab-mini" data-action="add" title="Aggiungi">
-                    <span class="material-icons">add</span>
-                </button>
-            </div>
-            <button class="mobile-fab pulse" data-action="home">
+            <button class="mobile-fab" data-action="home" title="Torna alla Home">
                 <span class="material-icons">home</span>
             </button>
         `;
@@ -78,35 +65,8 @@ class MobileNavigation {
             this.handleFABClick();
         });
         
-        // Long press sul FAB per aprire menu
-        let longPressTimer;
-        this.fabElement?.addEventListener('touchstart', (e) => {
-            longPressTimer = setTimeout(() => {
-                this.toggleFABMenu();
-                navigator.vibrate?.(50); // Haptic feedback se supportato
-            }, 500);
-        });
-        
-        this.fabElement?.addEventListener('touchend', () => {
-            clearTimeout(longPressTimer);
-        });
-        
-        // Click sui mini FAB
-        document.addEventListener('click', (e) => {
-            if (e.target.closest('.fab-mini')) {
-                e.preventDefault();
-                const action = e.target.closest('.fab-mini').dataset.action;
-                this.handleMiniAction(action);
-                this.closeFABMenu();
-            }
-        });
-        
-        // Click sull'overlay per chiudere menu
-        document.addEventListener('click', (e) => {
-            if (e.target.classList.contains('fab-overlay')) {
-                this.closeFABMenu();
-            }
-        });
+        // Click sull'overlay per chiudere menu (non più necessario)
+        // Click sui mini FAB (non più necessario)
         
         // Scroll behavior per FAB
         let scrollTimer;
@@ -128,13 +88,9 @@ class MobileNavigation {
     }
     
     handleFABClick() {
-        if (this.currentView === 'home') {
-            // Se siamo già home, mostra menu opzioni
-            this.toggleFABMenu();
-        } else {
-            // Altrimenti, torna alla home
-            this.navigateToHome();
-        }
+        // Il FAB ora appare solo nelle viste diverse da home
+        // Quindi cliccare su FAB significa sempre "torna alla home"
+        this.navigateToHome();
     }
     
     navigateToHome() {
@@ -161,12 +117,23 @@ class MobileNavigation {
             this.navigationStack = ['home'];
         }
         
+        // Gestione FAB e breadcrumb in base alla vista
+        if (newView === 'home') {
+            // Nella home, nascondi FAB e breadcrumb
+            this.hideFABAndBreadcrumb();
+        } else {
+            // Nelle altre viste, mostra FAB e breadcrumb
+            this.showFABAndBreadcrumb();
+        }
+        
         this.updateNavigation();
         this.updateFABIcon();
         this.updateBreadcrumb();
         
-        // Animazione di feedback
-        this.animateFAB();
+        // Animazione di feedback solo se FAB è visibile
+        if (newView !== 'home') {
+            this.animateFAB();
+        }
     }
     
     updateNavigation() {
@@ -183,7 +150,8 @@ class MobileNavigation {
         if (!this.fabElement) return;
         
         const icon = this.fabElement.querySelector('.material-icons');
-        const newIcon = this.currentView === 'home' ? 'menu' : 'home';
+        // Il FAB ora mostra sempre l'icona "home" perché appare solo nelle altre viste
+        const newIcon = 'home';
         
         // Animazione di cambio icona
         icon.style.transform = 'scale(0)';
@@ -193,12 +161,7 @@ class MobileNavigation {
         }, 150);
         
         // Aggiorna data-action
-        this.fabElement.dataset.action = this.currentView === 'home' ? 'menu' : 'home';
-        
-        // Rimuovi pulse se non siamo in home
-        if (this.currentView !== 'home') {
-            this.fabElement.classList.remove('pulse');
-        }
+        this.fabElement.dataset.action = 'home';
     }
     
     updateBreadcrumb() {
@@ -316,6 +279,30 @@ class MobileNavigation {
         this.updateView(view);
     }
     
+    // Metodi per gestire visibilità FAB e breadcrumb
+    showFABAndBreadcrumb() {
+        if (!this.fabElement) {
+            this.createFAB();
+        }
+        this.createBreadcrumb();
+        
+        const fabContainer = document.querySelector('.mobile-fab-container');
+        if (fabContainer) {
+            fabContainer.style.display = 'block';
+        }
+    }
+    
+    hideFABAndBreadcrumb() {
+        const fabContainer = document.querySelector('.mobile-fab-container');
+        if (fabContainer) {
+            fabContainer.style.display = 'none';
+        }
+        
+        // Rimuovi breadcrumb dalla home
+        const breadcrumbs = document.querySelectorAll('.mobile-breadcrumb');
+        breadcrumbs.forEach(b => b.style.display = 'none');
+    }
+    
     // Cleanup
     destroy() {
         const fabContainer = document.querySelector('.mobile-fab-container');
@@ -325,6 +312,8 @@ class MobileNavigation {
         
         const breadcrumbs = document.querySelectorAll('.mobile-breadcrumb');
         breadcrumbs.forEach(b => b.remove());
+        
+        this.fabElement = null;
     }
 }
 

@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo: Prima vs Dopo - Navigazione Mobile</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 1rem;
+        }
+        
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+        
+        .demo-section {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .demo-title {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #333;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        
+        .phone-frame {
+            width: 300px;
+            height: 600px;
+            background: #f8f9fa;
+            border: 8px solid #333;
+            border-radius: 25px;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .phone-screen {
+            width: 100%;
+            height: 100%;
+            background: white;
+            position: relative;
+            overflow-y: auto;
+        }
+        
+        /* SISTEMA TRADIZIONALE */
+        .traditional-header {
+            background: #e9ecef;
+            padding: 1rem;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .traditional-back-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            width: 100%;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .traditional-content {
+            padding: 1rem;
+            height: calc(100% - 120px);
+        }
+        
+        /* SISTEMA NUOVO */
+        .new-breadcrumb {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 0.5rem 1rem;
+            margin: 0.5rem;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+        
+        .breadcrumb-item {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .breadcrumb-item.current {
+            background: #3498db;
+            color: white;
+        }
+        
+        .new-content {
+            padding: 1rem;
+            height: calc(100% - 80px);
+            padding-bottom: 80px; /* Spazio per FAB */
+        }
+        
+        .new-fab {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            box-shadow: 0 4px 16px rgba(52, 152, 219, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 4px 16px rgba(52, 152, 219, 0.4); }
+            50% { box-shadow: 0 4px 16px rgba(52, 152, 219, 0.8); }
+            100% { box-shadow: 0 4px 16px rgba(52, 152, 219, 0.4); }
+        }
+        
+        .content-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .vs-badge {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #e74c3c;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: bold;
+            z-index: 10;
+            box-shadow: 0 4px 16px rgba(231, 76, 60, 0.3);
+        }
+        
+        .material-icons {
+            font-size: 18px;
+        }
+        
+        .advantages {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: #e8f5e8;
+            border-radius: 10px;
+        }
+        
+        .advantages h3 {
+            color: #27ae60;
+            margin-bottom: 1rem;
+        }
+        
+        .advantages ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .advantages li {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .check-icon {
+            color: #27ae60;
+            font-size: 16px;
+        }
+        
+        @media (max-width: 768px) {
+            .demo-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .vs-badge {
+                position: static;
+                transform: none;
+                display: block;
+                text-align: center;
+                margin: 1rem 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center; color: white; margin-bottom: 2rem; font-size: 2rem;">
+        📱 Prima vs Dopo: Navigazione Mobile
+    </h1>
+    
+    <div class="demo-container">
+        <!-- SISTEMA TRADIZIONALE -->
+        <div class="demo-section">
+            <div class="demo-title">❌ PRIMA (Sistema Tradizionale)</div>
+            
+            <div class="phone-frame">
+                <div class="phone-screen">
+                    <div class="traditional-header">
+                        <h3 style="margin-bottom: 0.5rem; color: #333;">Gestione Diagnosi</h3>
+                        <button class="traditional-back-btn">
+                            <span class="material-icons">arrow_back</span>
+                            Torna al Menu
+                        </button>
+                    </div>
+                    
+                    <div class="traditional-content">
+                        <div class="content-card">
+                            <h4>Problemi:</h4>
+                            <p>• Il pulsante occupa spazio prezioso</p>
+                            <p>• Layout meno pulito</p>
+                            <p>• Ripetuto in ogni vista</p>
+                        </div>
+                        
+                        <div class="content-card">
+                            <h4>Form Diagnosi</h4>
+                            <input type="text" placeholder="Nome diagnosi" style="width: 100%; padding: 0.5rem; margin-bottom: 1rem; border: 1px solid #ddd; border-radius: 5px;">
+                            <button style="width: 100%; padding: 0.75rem; background: #3498db; color: white; border: none; border-radius: 5px;">Aggiungi Diagnosi</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="advantages">
+                <h3>❌ Svantaggi</h3>
+                <ul>
+                    <li><span class="material-icons check-icon" style="color: #e74c3c;">close</span> Occupa spazio nell'header</li>
+                    <li><span class="material-icons check-icon" style="color: #e74c3c;">close</span> Meno contenuto visibile</li>
+                    <li><span class="material-icons check-icon" style="color: #e74c3c;">close</span> Design ripetitivo</li>
+                    <li><span class="material-icons check-icon" style="color: #e74c3c;">close</span> Non sempre accessibile</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- SISTEMA NUOVO -->
+        <div class="demo-section">
+            <div class="demo-title">✅ DOPO (Sistema Innovativo)</div>
+            
+            <div class="phone-frame">
+                <div class="phone-screen">
+                    <div class="new-breadcrumb">
+                        <div class="breadcrumb-item">
+                            <span class="material-icons">home</span>
+                        </div>
+                        <span>›</span>
+                        <div class="breadcrumb-item current">
+                            <span class="material-icons">medical_information</span>
+                            <span>Diagnosi</span>
+                        </div>
+                    </div>
+                    
+                    <div class="new-content">
+                        <div class="content-card">
+                            <h4>Vantaggi:</h4>
+                            <p>• Più spazio per contenuto</p>
+                            <p>• FAB sempre accessibile</p>
+                            <p>• Design moderno</p>
+                        </div>
+                        
+                        <div class="content-card">
+                            <h4>Form Diagnosi</h4>
+                            <input type="text" placeholder="Nome diagnosi" style="width: 100%; padding: 0.75rem; margin-bottom: 1rem; border: 1px solid #ddd; border-radius: 8px;">
+                            <button style="width: 100%; padding: 0.875rem; background: #3498db; color: white; border: none; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                                <span class="material-icons">add</span>
+                                Aggiungi Diagnosi
+                            </button>
+                        </div>
+                        
+                        <div class="content-card">
+                            <h4>Più contenuto visibile!</h4>
+                            <p>Con il FAB abbiamo più spazio per mostrare informazioni utili all'utente.</p>
+                        </div>
+                    </div>
+                    
+                    <button class="new-fab">
+                        <span class="material-icons">home</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="advantages">
+                <h3>✅ Vantaggi</h3>
+                <ul>
+                    <li><span class="material-icons check-icon">check_circle</span> Più spazio per contenuto</li>
+                    <li><span class="material-icons check-icon">check_circle</span> FAB sempre raggiungibile</li>
+                    <li><span class="material-icons check-icon">check_circle</span> Breadcrumb informativo</li>
+                    <li><span class="material-icons check-icon">check_circle</span> Design moderno</li>
+                    <li><span class="material-icons check-icon">check_circle</span> Menu azioni rapide</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="vs-badge">VS</div>
+    
+    <div style="background: white; margin: 2rem auto; max-width: 800px; padding: 2rem; border-radius: 15px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);">
+        <h2 style="text-align: center; color: #333; margin-bottom: 1.5rem;">🔧 Come Funziona Tecnicamente</h2>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+            <div>
+                <h3 style="color: #e74c3c; margin-bottom: 1rem;">CSS - Nasconde Pulsanti Vecchi</h3>
+                <pre style="background: #f8f9fa; padding: 1rem; border-radius: 8px; font-size: 0.8rem; overflow-x: auto;"><code>@media (max-width: 768px) {
+    .btn-back-menu {
+        display: none !important;
+    }
+}</code></pre>
+            </div>
+            
+            <div>
+                <h3 style="color: #27ae60; margin-bottom: 1rem;">JavaScript - Aggiunge FAB</h3>
+                <pre style="background: #f8f9fa; padding: 1rem; border-radius: 8px; font-size: 0.8rem; overflow-x: auto;"><code>if (window.innerWidth <= 768) {
+    // Crea FAB automaticamente
+    this.createFAB();
+    this.createBreadcrumb();
+}</code></pre>
+            </div>
+        </div>
+        
+        <div style="margin-top: 2rem; padding: 1rem; background: #e8f4fd; border-radius: 8px; border-left: 4px solid #3498db;">
+            <h3 style="color: #2980b9; margin-bottom: 0.5rem;">🎯 Risultato</h3>
+            <p style="margin: 0; color: #34495e;">Su <strong>desktop</strong> mantieni i pulsanti tradizionali. Su <strong>mobile</strong> li sostituisco automaticamente con FAB + breadcrumb. Zero configurazione richiesta!</p>
+        </div>
+    </div>
+</body>
+</html>

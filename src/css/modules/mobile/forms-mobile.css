@@ -145,7 +145,137 @@
        CUSTOM SELECT MOBILE SUPPORT
        =================================== */
     
-    /* CustomSelect Mobile Optimizations */
+    /* ===================================
+       CUSTOM SELECT MOBILE - MODAL ESTERNO
+       =================================== */
+    
+    /* Modal mobile completamente esterno al form */
+    .custom-select-mobile-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 999999 !important; /* Z-index massimo */
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .custom-select-mobile-modal.show {
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    /* Overlay di sfondo */
+    .custom-select-mobile-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(4px);
+    }
+    
+    /* Contenuto del modal */
+    .custom-select-mobile-content {
+        position: absolute;
+        top: 50vh;
+        left: 50vw;
+        transform: translate(-50%, -50%);
+        width: 90vw;
+        max-width: 400px;
+        max-height: 70vh;
+        background: var(--bg-primary);
+        border-radius: 1rem;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        overflow: hidden;
+        border: 3px solid red; /* DEBUG: border rosso */
+        /* Forza centratura reale */
+        margin: auto;
+    }
+    
+    /* Header del modal */
+    .custom-select-mobile-header {
+        background: var(--primary-color);
+        color: white;
+        padding: 1rem 1.25rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        /* Protegge il header dall'interferenza di elementi sottostanti */
+        position: relative;
+        z-index: 10000001;
+        pointer-events: auto;
+    }
+    
+    .custom-select-mobile-header h3 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 600;
+    }
+    
+    .custom-select-mobile-close {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: white;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        transition: all 0.2s ease;
+        /* Massimo z-index per evitare interferenze */
+        position: relative;
+        z-index: 10000002;
+        /* Blocca completamente l'interazione con elementi sottostanti */
+        pointer-events: auto;
+    }
+    
+    .custom-select-mobile-close:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: scale(1.1);
+    }
+    
+    /* Lista opzioni */
+    .custom-select-mobile-options {
+        max-height: calc(70vh - 80px);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .custom-select-mobile-option {
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        color: var(--text-primary);
+        font-size: 1rem;
+        min-height: 56px;
+        display: flex;
+        align-items: center;
+    }
+    
+    .custom-select-mobile-option:last-child {
+        border-bottom: none;
+    }
+    
+    .custom-select-mobile-option:hover,
+    .custom-select-mobile-option:active {
+        background: var(--primary-color);
+        color: white;
+    }
+    
+    /* Nasconde il dropdown normale su mobile */
+    .custom-select-dropdown {
+        display: none !important;
+    }
+    
+    /* Wrapper ottimizzazioni per mobile */
     .custom-select-wrapper {
         position: relative;
         margin-bottom: 1rem;
@@ -166,98 +296,21 @@
         transition: transform 0.1s ease;
     }
     
-    .custom-select-dropdown {
-        position: fixed !important; /* Fixed positioning per mobile */
-        top: auto !important;
-        left: 1rem !important;
-        right: 1rem !important;
-        bottom: 20% !important;
-        max-height: 50vh !important;
-        z-index: 9999 !important; /* Massima priorità */
-        border-radius: 1rem;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-        backdrop-filter: blur(20px);
-        border: 2px solid var(--primary-color);
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
+    /* Dark mode per modal mobile esterno */
+    [data-bs-theme="dark"] .custom-select-mobile-content {
+        background: var(--dark-bg);
+        border-color: var(--primary-color);
     }
     
-    .custom-select-options {
-        padding: 0.5rem 0;
+    [data-bs-theme="dark"] .custom-select-mobile-option {
+        color: var(--text-primary-dark);
+        border-bottom-color: var(--border-color-dark);
     }
     
-    .custom-select-option {
-        min-height: 48px; /* Touch target size */
-        padding: 0.875rem 1.25rem;
-        font-size: 1rem;
-        display: flex;
-        align-items: center;
-        cursor: pointer;
-        -webkit-tap-highlight-color: transparent;
-        touch-action: manipulation;
-        position: relative;
-    }
-    
-    .custom-select-option:active {
-        background-color: rgba(var(--primary-rgb), 0.2);
-        transform: scale(0.98);
-        transition: all 0.1s ease;
-    }
-    
-    .custom-select-option:hover,
-    .custom-select-option.focused {
-        background-color: rgba(var(--primary-rgb), 0.15);
-        color: var(--primary-color);
-    }
-    
-    /* Feedback visivo per touch */
-    .custom-select-option::before {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 0;
-        height: 0;
-        border-radius: 50%;
-        background: rgba(var(--primary-rgb), 0.3);
-        transform: translate(-50%, -50%);
-        transition: width 0.3s ease, height 0.3s ease;
-        pointer-events: none;
-        z-index: 0;
-    }
-    
-    .custom-select-option:active::before {
-        width: 100%;
-        height: 100%;
-    }
-    
-    /* Animazione apertura dropdown mobile */
-    .custom-select-wrapper.open .custom-select-dropdown {
-        animation: slideUpMobile 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-    }
-    
-    @keyframes slideUpMobile {
-        from {
-            opacity: 0;
-            transform: translateY(100%) scale(0.9);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-        }
-    }
-    
-    /* Overlay per chiudere dropdown */
-    .custom-select-wrapper.open::before {
-        content: '';
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 9998;
-        backdrop-filter: blur(4px);
+    [data-bs-theme="dark"] .custom-select-mobile-option:hover,
+    [data-bs-theme="dark"] .custom-select-mobile-option:active {
+        background: var(--primary-color);
+        color: white;
     }
     
     /* Scroll smooth su iOS */
@@ -288,20 +341,23 @@
 }
 
 /* ===================================
-   SMALL MOBILE - Layout compatto
+   SMALL MOBILE - Modal ancora più ottimizzato
    =================================== */
 @media (max-width: 480px) {
     .custom-select-dropdown {
-        left: 0.5rem !important;
-        right: 0.5rem !important;
-        bottom: 15% !important;
-        max-height: 60vh !important;
-        border-radius: 0.75rem;
+        width: 95% !important;
+        max-height: 75vh !important;
+    }
+    
+    .custom-select-dropdown::before {
+        padding: 0.875rem 1rem;
+        font-size: 0.95rem;
     }
     
     .custom-select-option {
-        padding: 1rem 1rem;
-        font-size: 0.95rem;
+        min-height: 52px !important;
+        padding: 0.875rem 1.25rem !important;
+        font-size: 0.95rem !important;
     }
 }
 
@@ -310,13 +366,36 @@
    =================================== */
 @media (max-width: 767px) {
     [data-bs-theme="dark"] .custom-select-dropdown {
-        background: rgba(var(--dark-bg-rgb), 0.95);
+        background: var(--dark-bg) !important; /* Background solido scuro */
         border-color: var(--primary-color);
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+    }
+    
+    [data-bs-theme="dark"] .custom-select-dropdown::before {
+        background: var(--primary-color);
     }
     
     [data-bs-theme="dark"] .custom-select-wrapper.open::before {
         background: rgba(0, 0, 0, 0.7);
+    }
+}
+
+/* ===================================
+   VIEWPORT BASSO (landscape mobile) - Modal ottimizzato
+   =================================== */
+@media (max-width: 767px) and (max-height: 500px) {
+    .custom-select-dropdown {
+        max-height: 60vh !important; /* Modal più compatto in landscape */
+    }
+    
+    .custom-select-option {
+        min-height: 44px !important; /* Opzioni più compatte */
+        padding: 0.75rem 1rem !important;
+    }
+    
+    .custom-select-dropdown::before {
+        padding: 0.75rem 1rem; /* Header più compatto */
+        font-size: 0.9rem;
     }
 }
 

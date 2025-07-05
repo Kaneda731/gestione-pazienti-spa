@@ -4,6 +4,14 @@
 export const appContainer = document.getElementById('app-container');
 export const authContainer = document.getElementById('auth-container');
 
+// Controllo di sicurezza per gli elementi DOM
+if (!appContainer) {
+    console.error('Elemento app-container non trovato nel DOM');
+}
+if (!authContainer) {
+    console.error('Elemento auth-container non trovato nel DOM');
+}
+
 // --- TEMPLATES ---
 export const templates = {
     home: document.getElementById('view-home'),
@@ -16,6 +24,13 @@ export const templates = {
     login: document.getElementById('auth-login'),
     logout: document.getElementById('auth-logout'),
 };
+
+// Controllo di sicurezza per i templates
+Object.keys(templates).forEach(key => {
+    if (!templates[key]) {
+        console.warn(`Template '${key}' non trovato nel DOM`);
+    }
+});
 
 /**
  * Mostra un messaggio all'utente.

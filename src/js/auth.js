@@ -31,6 +31,84 @@ function getEnvironmentType() {
 }
 
 /**
+ * Rileva se siamo su dispositivo mobile
+ */
+function isMobileDevice() {
+    return window.innerWidth <= 767 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+}
+
+/**
+ * Ottimizza il viewport per mobile quando si apre il modal
+ */
+function optimizeModalForMobile() {
+    if (!isMobileDevice()) return;
+    
+    // Salva la posizione di scroll corrente
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    sessionStorage.setItem('modal.scroll.position', scrollTop.toString());
+    
+    // Prevent body scroll su mobile
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollTop}px`;
+    document.body.style.width = '100%';
+    
+    // Aggiungi meta viewport specifico per il modal se necessario
+    const viewport = document.querySelector('meta[name="viewport"]');
+    if (viewport) {
+        sessionStorage.setItem('modal.original.viewport', viewport.content);
+        viewport.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
+    }
+}
+
+/**
+ * Ripristina le impostazioni mobile quando si chiude il modal
+ */
+function restoreMobileSettings() {
+    if (!isMobileDevice()) return;
+    
+    // Ripristina body scroll
+    document.body.style.overflow = '';
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.width = '';
+    
+    // Ripristina posizione scroll
+    const savedScrollTop = sessionStorage.getItem('modal.scroll.position');
+    if (savedScrollTop) {
+        window.scrollTo(0, parseInt(savedScrollTop, 10));
+        sessionStorage.removeItem('modal.scroll.position');
+    }
+    
+    // Ripristina viewport originale
+    const originalViewport = sessionStorage.getItem('modal.original.viewport');
+    if (originalViewport) {
+        const viewport = document.querySelector('meta[name="viewport"]');
+        if (viewport) {
+            viewport.content = originalViewport;
+        }
+        sessionStorage.removeItem('modal.original.viewport');
+    }
+}
+
+/**
+ * Gestisce il focus su mobile per migliore accessibilità
+ */
+function manageMobileFocus(modal) {
+    if (!isMobileDevice()) return;
+    
+    // Imposta focus sul primo campo input quando il modal è mostrato
+    const firstInput = modal.querySelector('input[type="email"], input[type="text"]');
+    if (firstInput) {
+        // Delay per permettere al modal di essere completamente renderizzato
+        setTimeout(() => {
+            firstInput.focus();
+            firstInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 300);
+    }
+}
+
+/**
  * Pulisce i parametri OAuth dall'URL dopo il login
  */
 function cleanOAuthParamsFromURL() {
@@ -152,10 +230,10 @@ function autoEnableLocalhostBypass() {
 // ===================================
 
 /**
- * Login con email e password
+ * Login con email e password con gestione clock skew
  */
 export async function signInWithEmail(email, password) {
-    try {
+    const attemptLogin = async () => {
         const { data, error } = await supabase.auth.signInWithPassword({
             email: email,
             password: password
@@ -163,17 +241,31 @@ export async function signInWithEmail(email, password) {
         
         if (error) throw error;
         return { success: true, data };
+    };
+
+    try {
+        return await attemptLogin();
     } catch (error) {
+        // Gestione specifica per errori di clock skew
+        if (isClockSkewError(error)) {
+            try {
+                return await handleClockSkewError(error, attemptLogin);
+            } catch (clockError) {
+                console.error('Errore login email (clock skew non risolto):', clockError);
+                return { success: false, error: clockError.message };
+            }
+        }
+        
         console.error('Errore login email:', error);
         return { success: false, error: error.message };
     }
 }
 
 /**
- * Registrazione con email e password
+ * Registrazione con email e password con gestione clock skew
  */
 export async function signUpWithEmail(email, password) {
-    try {
+    const attemptSignup = async () => {
         const { data, error } = await supabase.auth.signUp({
             email: email,
             password: password
@@ -181,7 +273,21 @@ export async function signUpWithEmail(email, password) {
         
         if (error) throw error;
         return { success: true, data };
+    };
+
+    try {
+        return await attemptSignup();
     } catch (error) {
+        // Gestione specifica per errori di clock skew
+        if (isClockSkewError(error)) {
+            try {
+                return await handleClockSkewError(error, attemptSignup);
+            } catch (clockError) {
+                console.error('Errore registrazione (clock skew non risolto):', clockError);
+                return { success: false, error: clockError.message };
+            }
+        }
+        
         console.error('Errore registrazione email:', error);
         return { success: false, error: error.message };
     }
@@ -474,11 +580,96 @@ function createSignupForm() {
  * Configura tutti gli event listener del modal
  */
 function setupModalEventListeners() {
+    const modal = document.getElementById('auth-modal');
+    
+    // Event listeners standard
     setupEmailLoginHandler();
     setupGoogleLoginHandler();
     setupBypassHandlers();
     setupToggleHandlers();
     setupSignupHandler();
+    
+    // Validazione in tempo reale
+    setupRealTimeValidation();
+    
+    // Event listeners per ottimizzazioni mobile
+    if (modal) {
+        // Quando il modal si apre
+        modal.addEventListener('show.bs.modal', () => {
+            optimizeModalForMobile();
+        });
+        
+        // Quando il modal è completamente mostrato
+        modal.addEventListener('shown.bs.modal', () => {
+            manageMobileFocus(modal);
+        });
+        
+        // Quando il modal si chiude
+        modal.addEventListener('hidden.bs.modal', () => {
+            restoreMobileSettings();
+            
+            // Pulisci eventuali messaggi di errore/successo
+            const alerts = modal.querySelectorAll('.auth-alert');
+            alerts.forEach(alert => alert.remove());
+            
+            // Reset form fields
+            const forms = modal.querySelectorAll('form');
+            forms.forEach(form => form.reset());
+            
+            // Reset to login view if showing signup
+            const loginContent = document.getElementById('login-content');
+            const signupContent = document.getElementById('signup-content');
+            const modalTitle = document.getElementById('modal-title');
+            
+            if (loginContent && signupContent && modalTitle) {
+                loginContent.style.display = 'block';
+                signupContent.style.display = 'none';
+                modalTitle.innerHTML = '<i class="material-icons me-2">security</i>Accesso al Sistema';
+            }
+        });
+        
+        // Gestione migliorata del touch su mobile
+        if (isMobileDevice()) {
+            modal.addEventListener('touchstart', (e) => {
+                // Previeni il bounce scroll su iOS
+                if (e.target.closest('.modal-content')) {
+                    e.stopPropagation();
+                }
+            });
+            
+            // Chiudi modal con swipe down (solo su mobile)
+            let touchStartY = 0;
+            let touchEndY = 0;
+            
+            modal.addEventListener('touchstart', (e) => {
+                touchStartY = e.changedTouches[0].screenY;
+            });
+            
+            modal.addEventListener('touchend', (e) => {
+                touchEndY = e.changedTouches[0].screenY;
+                handleSwipeGesture(modal, touchStartY, touchEndY);
+            });
+        }
+    }
+}
+
+/**
+ * Gestisce il gesture di swipe per chiudere il modal
+ */
+function handleSwipeGesture(modal, startY, endY) {
+    const swipeThreshold = 100; // pixel
+    const swipeDistance = startY - endY;
+    
+    // Swipe down per chiudere (solo se siamo nella parte superiore del modal)
+    if (swipeDistance < -swipeThreshold) {
+        const modalContent = modal.querySelector('.modal-content');
+        const scrollTop = modalContent.scrollTop;
+        
+        // Chiudi solo se siamo in cima al modal
+        if (scrollTop <= 10) {
+            bootstrap.Modal.getInstance(modal).hide();
+        }
+    }
 }
 
 /**
@@ -492,6 +683,11 @@ function setupEmailLoginHandler() {
         const email = document.getElementById('modal-login-email').value;
         const password = document.getElementById('modal-login-password').value;
         const submitBtn = emailForm.querySelector('button[type="submit"]');
+        
+        // Validazione client-side
+        if (!validateLoginForm(email, password)) {
+            return;
+        }
         
         setButtonLoading(submitBtn, 'Accesso...');
         
@@ -579,13 +775,13 @@ function setupSignupHandler() {
         const email = document.getElementById('modal-signup-email').value;
         const password = document.getElementById('modal-signup-password').value;
         const passwordConfirm = document.getElementById('modal-signup-password-confirm').value;
+        const submitBtn = signupForm.querySelector('button[type="submit"]');
         
-        if (password !== passwordConfirm) {
-            showModalError('Le password non coincidono');
+        // Validazione client-side
+        if (!validateSignupForm(email, password, passwordConfirm)) {
             return;
         }
         
-        const submitBtn = signupForm.querySelector('button[type="submit"]');
         setButtonLoading(submitBtn, 'Registrazione...');
         
         const result = await signUpWithEmail(email, password);
@@ -603,6 +799,260 @@ function setupSignupHandler() {
         
         resetButton(submitBtn, 'Crea Account');
     });
+}
+
+/**
+ * Configura validazione in tempo reale per i campi del modal
+ */
+function setupRealTimeValidation() {
+    // Validazione email login
+    const loginEmail = document.getElementById('modal-login-email');
+    if (loginEmail) {
+        loginEmail.addEventListener('blur', () => {
+            const email = loginEmail.value;
+            if (email && !validateEmail(email)) {
+                showFieldError('modal-login-email', 'Inserisci un\'email valida');
+            } else if (email) {
+                clearFieldError('modal-login-email');
+            }
+        });
+        
+        loginEmail.addEventListener('input', () => {
+            if (loginEmail.classList.contains('is-invalid')) {
+                const email = loginEmail.value;
+                if (validateEmail(email)) {
+                    clearFieldError('modal-login-email');
+                }
+            }
+        });
+    }
+    
+    // Validazione password login
+    const loginPassword = document.getElementById('modal-login-password');
+    if (loginPassword) {
+        loginPassword.addEventListener('blur', () => {
+            const password = loginPassword.value;
+            if (password && !validatePassword(password)) {
+                showFieldError('modal-login-password', 'La password deve essere di almeno 6 caratteri');
+            } else if (password) {
+                clearFieldError('modal-login-password');
+            }
+        });
+        
+        loginPassword.addEventListener('input', () => {
+            if (loginPassword.classList.contains('is-invalid')) {
+                const password = loginPassword.value;
+                if (validatePassword(password)) {
+                    clearFieldError('modal-login-password');
+                }
+            }
+        });
+    }
+    
+    // Validazione email registrazione
+    const signupEmail = document.getElementById('modal-signup-email');
+    if (signupEmail) {
+        signupEmail.addEventListener('blur', () => {
+            const email = signupEmail.value;
+            if (email && !validateEmail(email)) {
+                showFieldError('modal-signup-email', 'Inserisci un\'email valida');
+            } else if (email) {
+                clearFieldError('modal-signup-email');
+            }
+        });
+        
+        signupEmail.addEventListener('input', () => {
+            if (signupEmail.classList.contains('is-invalid')) {
+                const email = signupEmail.value;
+                if (validateEmail(email)) {
+                    clearFieldError('modal-signup-email');
+                }
+            }
+        });
+    }
+    
+    // Validazione password registrazione
+    const signupPassword = document.getElementById('modal-signup-password');
+    if (signupPassword) {
+        signupPassword.addEventListener('blur', () => {
+            const password = signupPassword.value;
+            if (password && !validatePassword(password)) {
+                showFieldError('modal-signup-password', 'La password deve essere di almeno 6 caratteri');
+            } else if (password) {
+                clearFieldError('modal-signup-password');
+            }
+        });
+        
+        signupPassword.addEventListener('input', () => {
+            if (signupPassword.classList.contains('is-invalid')) {
+                const password = signupPassword.value;
+                if (validatePassword(password)) {
+                    clearFieldError('modal-signup-password');
+                }
+            }
+        });
+    }
+    
+    // Validazione conferma password
+    const signupPasswordConfirm = document.getElementById('modal-signup-password-confirm');
+    if (signupPasswordConfirm && signupPassword) {
+        signupPasswordConfirm.addEventListener('blur', () => {
+            const password = signupPassword.value;
+            const passwordConfirm = signupPasswordConfirm.value;
+            if (passwordConfirm && password !== passwordConfirm) {
+                showFieldError('modal-signup-password-confirm', 'Le password non coincidono');
+            } else if (passwordConfirm) {
+                clearFieldError('modal-signup-password-confirm');
+            }
+        });
+        
+        signupPasswordConfirm.addEventListener('input', () => {
+            if (signupPasswordConfirm.classList.contains('is-invalid')) {
+                const password = signupPassword.value;
+                const passwordConfirm = signupPasswordConfirm.value;
+                if (password === passwordConfirm) {
+                    clearFieldError('modal-signup-password-confirm');
+                }
+            }
+        });
+    }
+}
+
+// ===================================
+// VALIDAZIONE FORM
+// ===================================
+
+/**
+ * Validazione email mobile-friendly
+ */
+function validateEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
+
+/**
+ * Validazione password mobile-friendly
+ */
+function validatePassword(password) {
+    return password.length >= 6;
+}
+
+/**
+ * Mostra errore di validazione su campo specifico
+ */
+function showFieldError(fieldId, message) {
+    const field = document.getElementById(fieldId);
+    if (!field) return;
+    
+    // Rimuovi errori precedenti
+    clearFieldError(fieldId);
+    
+    // Aggiungi classe di errore
+    field.classList.add('is-invalid');
+    
+    // Crea elemento errore
+    const errorElement = document.createElement('div');
+    errorElement.className = 'invalid-feedback';
+    errorElement.textContent = message;
+    errorElement.id = `${fieldId}-error`;
+    
+    // Inserisci dopo il campo
+    field.parentNode.insertBefore(errorElement, field.nextSibling);
+    
+    // Su mobile, fai scroll al campo con errore
+    if (isMobileDevice()) {
+        setTimeout(() => {
+            field.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            field.focus();
+        }, 100);
+    }
+}
+
+/**
+ * Rimuove errore di validazione da campo specifico
+ */
+function clearFieldError(fieldId) {
+    const field = document.getElementById(fieldId);
+    if (!field) return;
+    
+    field.classList.remove('is-invalid');
+    
+    const errorElement = document.getElementById(`${fieldId}-error`);
+    if (errorElement) {
+        errorElement.remove();
+    }
+}
+
+/**
+ * Valida form di login
+ */
+function validateLoginForm(email, password) {
+    let isValid = true;
+    
+    // Reset errori precedenti
+    clearFieldError('modal-login-email');
+    clearFieldError('modal-login-password');
+    
+    // Valida email
+    if (!email) {
+        showFieldError('modal-login-email', 'L\'email è obbligatoria');
+        isValid = false;
+    } else if (!validateEmail(email)) {
+        showFieldError('modal-login-email', 'Inserisci un\'email valida');
+        isValid = false;
+    }
+    
+    // Valida password
+    if (!password) {
+        showFieldError('modal-login-password', 'La password è obbligatoria');
+        isValid = false;
+    } else if (!validatePassword(password)) {
+        showFieldError('modal-login-password', 'La password deve essere di almeno 6 caratteri');
+        isValid = false;
+    }
+    
+    return isValid;
+}
+
+/**
+ * Valida form di registrazione
+ */
+function validateSignupForm(email, password, passwordConfirm) {
+    let isValid = true;
+    
+    // Reset errori precedenti
+    clearFieldError('modal-signup-email');
+    clearFieldError('modal-signup-password');
+    clearFieldError('modal-signup-password-confirm');
+    
+    // Valida email
+    if (!email) {
+        showFieldError('modal-signup-email', 'L\'email è obbligatoria');
+        isValid = false;
+    } else if (!validateEmail(email)) {
+        showFieldError('modal-signup-email', 'Inserisci un\'email valida');
+        isValid = false;
+    }
+    
+    // Valida password
+    if (!password) {
+        showFieldError('modal-signup-password', 'La password è obbligatoria');
+        isValid = false;
+    } else if (!validatePassword(password)) {
+        showFieldError('modal-signup-password', 'La password deve essere di almeno 6 caratteri');
+        isValid = false;
+    }
+    
+    // Valida conferma password
+    if (!passwordConfirm) {
+        showFieldError('modal-signup-password-confirm', 'Conferma la password');
+        isValid = false;
+    } else if (password !== passwordConfirm) {
+        showFieldError('modal-signup-password-confirm', 'Le password non coincidono');
+        isValid = false;
+    }
+    
+    return isValid;
 }
 
 // ===================================
@@ -727,3 +1177,69 @@ export function initAuth(onAuthStateChange) {
         }
     });
 }
+
+// ===================================
+// GESTIONE CLOCK SKEW SUPABASE
+// ===================================
+
+/**
+ * Rileva se un errore è relativo al clock skew
+ * @param {Error} error - L'errore da analizzare
+ * @returns {boolean} - True se è un errore di clock skew
+ */
+function isClockSkewError(error) {
+    if (!error) return false;
+    
+    const errorMessage = error.message?.toLowerCase() || '';
+    const clockSkewIndicators = [
+        'issued in the future',
+        'clock skew',
+        'time difference',
+        'timestamp',
+        'invalid time'
+    ];
+    
+    return clockSkewIndicators.some(indicator => 
+        errorMessage.includes(indicator)
+    );
+}
+
+/**
+ * Gestisce automaticamente gli errori di clock skew con retry
+ * @param {Error} error - L'errore di clock skew
+ * @param {Function} retryFunction - Funzione da riprovare
+ * @param {number} attempt - Numero tentativo corrente
+ * @returns {Promise} - Risultato del retry o errore
+ */
+async function handleClockSkewError(error, retryFunction, attempt = 1) {
+    const maxRetries = 3;
+    const retryDelay = 1000; // 1 secondo
+    
+    console.warn(`Clock skew rilevato (tentativo ${attempt}/${maxRetries}):`, error.message);
+    
+    if (attempt >= maxRetries) {
+        console.error('Max tentativi raggiunti per clock skew');
+        
+        // Mostra notifica all'utente
+        if (window.confirm(`Rilevato problema di sincronizzazione orario.\n\nQuesto può causare problemi di autenticazione.\nVerifica che l'orario del tuo dispositivo sia corretto.\n\nVuoi ricaricare la pagina per riprovare?`)) {
+            window.location.reload();
+        }
+        
+        throw error;
+    }
+    
+    // Aspetta prima del retry
+    await new Promise(resolve => setTimeout(resolve, retryDelay * attempt));
+    
+    try {
+        console.log(`Retry automatico per clock skew (${attempt + 1}/${maxRetries})...`);
+        return await retryFunction();
+    } catch (retryError) {
+        if (isClockSkewError(retryError)) {
+            return handleClockSkewError(retryError, retryFunction, attempt + 1);
+        }
+        throw retryError;
+    }
+}
+
+

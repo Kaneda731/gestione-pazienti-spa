@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Completo Autenticazione e Clock Skew</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            line-height: 1.6;
+        }
+        .test-section { 
+            border: 1px solid #ddd; 
+            padding: 15px; 
+            margin: 10px 0; 
+            border-radius: 5px; 
+        }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button { 
+            padding: 10px 15px; 
+            margin: 5px; 
+            border: none; 
+            border-radius: 3px; 
+            cursor: pointer; 
+        }
+        .btn-primary { background-color: #007bff; color: white; }
+        .btn-secondary { background-color: #6c757d; color: white; }
+        .btn-danger { background-color: #dc3545; color: white; }
+        #results { 
+            white-space: pre-wrap; 
+            background: #f8f9fa; 
+            padding: 10px; 
+            border-radius: 3px; 
+            margin-top: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .timestamp { color: #666; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Completo Autenticazione e Clock Skew Handler</h1>
+    
+    <div class="test-section info">
+        <h3>📋 Status dei Moduli</h3>
+        <div id="module-status">Caricamento moduli in corso...</div>
+    </div>
+
+    <div class="test-section">
+        <h3>🔍 Test di Caricamento Funzioni</h3>
+        <button class="btn-primary" onclick="testModuleLoading()">Test Caricamento Moduli</button>
+        <button class="btn-secondary" onclick="testClockSkewDetection()">Test Rilevamento Clock Skew</button>
+        <div id="loading-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>🔐 Test Autenticazione</h3>
+        <button class="btn-primary" onclick="testValidLogin()">Test Login Valido</button>
+        <button class="btn-secondary" onclick="testInvalidLogin()">Test Login Non Valido</button>
+        <button class="btn-danger" onclick="testClockSkewScenario()">Simula Clock Skew</button>
+        <div id="auth-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>📱 Test UI Mobile</h3>
+        <button class="btn-primary" onclick="testMobileUI()">Test Responsive Login</button>
+        <button class="btn-secondary" onclick="testNotificationSystem()">Test Notifiche</button>
+        <div id="ui-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>📊 Risultati Completi</h3>
+        <button class="btn-secondary" onclick="clearResults()">Pulisci Log</button>
+        <div id="results"></div>
+    </div>
+
+    <script type="module">
+        // Import delle funzioni da testare
+        let authFunctions = {};
+        
+        try {
+            const authModule = await import('./src/js/auth.js');
+            authFunctions = authModule;
+            
+            // Verifica che le funzioni principali siano disponibili
+            const requiredFunctions = [
+                'signInWithEmail', 
+                'signUpWithEmail', 
+                'isClockSkewError', 
+                'handleClockSkewError',
+                'initAuth',
+                'updateAuthUI'
+            ];
+            
+            const loadedFunctions = Object.keys(authFunctions);
+            const missingFunctions = requiredFunctions.filter(fn => !loadedFunctions.includes(fn));
+            
+            if (missingFunctions.length === 0) {
+                document.getElementById('module-status').innerHTML = 
+                    '✅ Tutti i moduli caricati correttamente<br>' +
+                    `📦 Funzioni disponibili: ${loadedFunctions.length}<br>` +
+                    `🔧 Funzioni richieste: ${requiredFunctions.join(', ')}`;
+                document.getElementById('module-status').parentElement.className = 'test-section success';
+            } else {
+                throw new Error(`Funzioni mancanti: ${missingFunctions.join(', ')}`);
+            }
+            
+        } catch (error) {
+            document.getElementById('module-status').innerHTML = 
+                `❌ Errore caricamento moduli: ${error.message}`;
+            document.getElementById('module-status').parentElement.className = 'test-section error';
+            logResult('❌ ERRORE CRITICO', `Impossibile caricare i moduli: ${error.message}`);
+        }
+
+        // Utility per logging
+        function logResult(category, message, data = null) {
+            const timestamp = new Date().toLocaleTimeString();
+            const results = document.getElementById('results');
+            let logMessage = `[${timestamp}] ${category}: ${message}`;
+            
+            if (data) {
+                logMessage += `\n   📄 Dettagli: ${JSON.stringify(data, null, 2)}`;
+            }
+            
+            results.textContent += logMessage + '\n\n';
+            results.scrollTop = results.scrollHeight;
+        }
+
+        // Test delle funzioni specifiche
+        window.testModuleLoading = function() {
+            const loadingDiv = document.getElementById('loading-results');
+            
+            try {
+                const tests = [
+                    { name: 'signInWithEmail', fn: authFunctions.signInWithEmail },
+                    { name: 'signUpWithEmail', fn: authFunctions.signUpWithEmail },
+                    { name: 'isClockSkewError', fn: authFunctions.isClockSkewError },
+                    { name: 'handleClockSkewError', fn: authFunctions.handleClockSkewError },
+                    { name: 'initAuth', fn: authFunctions.initAuth },
+                    { name: 'updateAuthUI', fn: authFunctions.updateAuthUI }
+                ];
+                
+                let results = '📋 Verifica Funzioni:\n';
+                let allPassed = true;
+                
+                tests.forEach(test => {
+                    const status = typeof test.fn === 'function' ? '✅' : '❌';
+                    const type = typeof test.fn;
+                    results += `${status} ${test.name}: ${type}\n`;
+                    if (typeof test.fn !== 'function') allPassed = false;
+                });
+                
+                loadingDiv.innerHTML = `<pre>${results}</pre>`;
+                loadingDiv.className = allPassed ? 'success' : 'error';
+                
+                logResult('🔍 TEST MODULI', allPassed ? 'Tutti i moduli caricati correttamente' : 'Alcuni moduli mancanti', { tests: tests.map(t => ({ name: t.name, type: typeof t.fn })) });
+                
+            } catch (error) {
+                loadingDiv.innerHTML = `❌ Errore durante il test: ${error.message}`;
+                loadingDiv.className = 'error';
+                logResult('❌ ERRORE TEST', error.message);
+            }
+        };
+
+        window.testClockSkewDetection = function() {
+            const loadingDiv = document.getElementById('loading-results');
+            
+            try {
+                // Test di rilevamento clock skew con errori simulati
+                const clockSkewErrors = [
+                    { message: 'Session as retrieved from URL was issued in the future? Check the device clock for skew' },
+                    { message: 'Invalid session: issued in the future' },
+                    { message: 'clock skew detected' },
+                    { message: 'normal authentication error' }
+                ];
+                
+                let results = '🕐 Test Rilevamento Clock Skew:\n';
+                
+                clockSkewErrors.forEach((error, index) => {
+                    const isClockSkew = authFunctions.isClockSkewError(error);
+                    const expected = index < 3; // I primi 3 dovrebbero essere riconosciuti come clock skew
+                    const status = isClockSkew === expected ? '✅' : '❌';
+                    results += `${status} "${error.message}": ${isClockSkew ? 'RILEVATO' : 'NON RILEVATO'}\n`;
+                });
+                
+                loadingDiv.innerHTML += `<pre>${results}</pre>`;
+                logResult('🕐 TEST CLOCK SKEW', 'Test rilevamento completato', { results });
+                
+            } catch (error) {
+                loadingDiv.innerHTML += `❌ Errore test clock skew: ${error.message}`;
+                logResult('❌ ERRORE CLOCK SKEW', error.message);
+            }
+        };
+
+        window.testValidLogin = async function() {
+            const authDiv = document.getElementById('auth-results');
+            authDiv.innerHTML = '🔄 Testing login valido...';
+            
+            try {
+                // Nota: questo test fallirà con credenziali fake, ma testerà il flusso
+                const result = await authFunctions.signInWithEmail('user@test.com', 'password123');
+                
+                authDiv.innerHTML = `📊 Risultato Login:\n${JSON.stringify(result, null, 2)}`;
+                authDiv.className = result.success ? 'success' : 'info';
+                
+                logResult('🔐 LOGIN TEST', 'Test login completato', result);
+                
+            } catch (error) {
+                authDiv.innerHTML = `❌ Errore durante login: ${error.message}`;
+                authDiv.className = 'error';
+                logResult('❌ LOGIN ERROR', error.message);
+            }
+        };
+
+        window.testInvalidLogin = async function() {
+            const authDiv = document.getElementById('auth-results');
+            authDiv.innerHTML = '🔄 Testing login non valido...';
+            
+            try {
+                const result = await authFunctions.signInWithEmail('invalid@email.com', 'wrongpassword');
+                
+                authDiv.innerHTML += `\n📊 Risultato Login Non Valido:\n${JSON.stringify(result, null, 2)}`;
+                authDiv.className = 'info';
+                
+                logResult('🔐 INVALID LOGIN', 'Test login non valido completato', result);
+                
+            } catch (error) {
+                authDiv.innerHTML += `\n❌ Errore durante login non valido: ${error.message}`;
+                logResult('❌ INVALID LOGIN ERROR', error.message);
+            }
+        };
+
+        window.testClockSkewScenario = function() {
+            const authDiv = document.getElementById('auth-results');
+            
+            try {
+                // Simula un errore di clock skew
+                const mockClockSkewError = {
+                    message: 'Session as retrieved from URL was issued in the future? Check the device clock for skew',
+                    code: 'invalid_session'
+                };
+                
+                // Testa la funzione di rilevamento
+                const isDetected = authFunctions.isClockSkewError(mockClockSkewError);
+                
+                authDiv.innerHTML += `\n🕐 Simulazione Clock Skew:\n` +
+                                   `Errore: ${mockClockSkewError.message}\n` +
+                                   `Rilevato: ${isDetected ? '✅ SI' : '❌ NO'}\n`;
+                
+                logResult('🕐 CLOCK SKEW SIM', 'Simulazione completata', { error: mockClockSkewError, detected: isDetected });
+                
+            } catch (error) {
+                authDiv.innerHTML += `\n❌ Errore simulazione clock skew: ${error.message}`;
+                logResult('❌ CLOCK SKEW ERROR', error.message);
+            }
+        };
+
+        window.testMobileUI = function() {
+            const uiDiv = document.getElementById('ui-results');
+            
+            try {
+                // Verifica la presenza di elementi UI per mobile
+                const mobileElements = [
+                    'auth-modal',
+                    'mobile-login-form', 
+                    'mobile-menu',
+                    'notification-container'
+                ];
+                
+                let results = '📱 Verifica Elementi Mobile UI:\n';
+                
+                mobileElements.forEach(elementId => {
+                    const element = document.getElementById(elementId);
+                    const exists = element !== null;
+                    results += `${exists ? '✅' : '❌'} #${elementId}: ${exists ? 'PRESENTE' : 'MANCANTE'}\n`;
+                });
+                
+                // Test viewport mobile
+                const isSmallScreen = window.innerWidth <= 768;
+                results += `📱 Viewport Mobile: ${isSmallScreen ? '✅ SI' : '🖥️ DESKTOP'} (${window.innerWidth}px)\n`;
+                
+                uiDiv.innerHTML = `<pre>${results}</pre>`;
+                logResult('📱 UI MOBILE', 'Test UI mobile completato', { viewport: window.innerWidth, mobile: isSmallScreen });
+                
+            } catch (error) {
+                uiDiv.innerHTML = `❌ Errore test UI mobile: ${error.message}`;
+                logResult('❌ UI MOBILE ERROR', error.message);
+            }
+        };
+
+        window.testNotificationSystem = function() {
+            const uiDiv = document.getElementById('ui-results');
+            
+            try {
+                // Test del sistema di notifiche se disponibile
+                if (typeof window.showNotification === 'function') {
+                    window.showNotification('Test notifica clock skew', 'info', 3000);
+                    uiDiv.innerHTML += '\n✅ Sistema notifiche testato';
+                    logResult('🔔 NOTIFICHE', 'Sistema notifiche funzionante');
+                } else {
+                    uiDiv.innerHTML += '\n⚠️ Sistema notifiche non caricato';
+                    logResult('⚠️ NOTIFICHE', 'Sistema notifiche non disponibile');
+                }
+                
+            } catch (error) {
+                uiDiv.innerHTML += `\n❌ Errore test notifiche: ${error.message}`;
+                logResult('❌ NOTIFICHE ERROR', error.message);
+            }
+        };
+
+        window.clearResults = function() {
+            document.getElementById('results').textContent = '';
+        };
+
+        // Auto-esegui test di base al caricamento
+        setTimeout(() => {
+            if (Object.keys(authFunctions).length > 0) {
+                testModuleLoading();
+                logResult('🚀 AVVIO', 'Test automatici avviati');
+            }
+        }, 1000);
+
+    </script>
+</body>
+</html>

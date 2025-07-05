@@ -209,8 +209,8 @@
     
     /* Header del modal */
     .custom-select-mobile-header {
-        background: #343a40; /* Grigio scuro elegante */
-        color: #f8f9fa;
+        background: #212529; /* Nero più scuro per maggior contrasto */
+        color: #ffffff; /* Bianco puro per massimo contrasto */
         padding: 1rem 1.25rem;
         display: flex;
         justify-content: space-between;
@@ -219,18 +219,22 @@
         position: relative;
         z-index: 10000001;
         pointer-events: auto;
+        /* Bordo inferiore per definire meglio la separazione */
+        border-bottom: 1px solid #495057;
     }
     
     .custom-select-mobile-header h3 {
         margin: 0;
-        font-size: 1rem;
-        font-weight: 600;
+        font-size: 1.1rem; /* Leggermente più grande */
+        font-weight: 700; /* Più pesante per maggior contrasto */
+        color: #ffffff; /* Bianco puro esplicito */
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3); /* Sottile ombra per definizione */
     }
     
     .custom-select-mobile-close {
-        background: rgba(248, 249, 250, 0.2);
-        border: none;
-        color: #f8f9fa;
+        background: rgba(255, 255, 255, 0.15); /* Background più contrastato */
+        border: 1px solid rgba(255, 255, 255, 0.2); /* Bordo sottile per definizione */
+        color: #ffffff; /* Bianco puro */
         width: 32px;
         height: 32px;
         border-radius: 50%;
@@ -238,18 +242,24 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.2rem;
+        font-size: 1.3rem; /* Leggermente più grande */
+        font-weight: 700; /* Più pesante */
         transition: all 0.2s ease;
         /* Massimo z-index per evitare interferenze */
         position: relative;
         z-index: 10000002;
         /* Blocca completamente l'interazione con elementi sottostanti */
         pointer-events: auto;
+        /* Ombra per maggiore definizione */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
     }
     
-    .custom-select-mobile-close:hover {
-        background: rgba(248, 249, 250, 0.3);
-        transform: scale(1.1);
+    .custom-select-mobile-close:hover,
+    .custom-select-mobile-close:active {
+        background: rgba(255, 255, 255, 0.25);
+        border-color: rgba(255, 255, 255, 0.4);
+        transform: scale(1.05);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
     }
     
     /* Lista opzioni */
@@ -405,6 +415,30 @@
     
     [data-bs-theme="dark"] .custom-select-wrapper.open::before {
         background: rgba(0, 0, 0, 0.7);
+    }
+    
+    /* Modal mobile header in dark mode */
+    [data-bs-theme="dark"] .custom-select-mobile-header {
+        background: #000000; /* Nero assoluto per massimo contrasto */
+        color: #ffffff;
+        border-bottom: 1px solid #6c757d;
+    }
+    
+    [data-bs-theme="dark"] .custom-select-mobile-header h3 {
+        color: #ffffff;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5); /* Ombra più marcata in dark mode */
+    }
+    
+    [data-bs-theme="dark"] .custom-select-mobile-close {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.3);
+        color: #ffffff;
+    }
+    
+    [data-bs-theme="dark"] .custom-select-mobile-close:hover,
+    [data-bs-theme="dark"] .custom-select-mobile-close:active {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.5);
     }
 }
 

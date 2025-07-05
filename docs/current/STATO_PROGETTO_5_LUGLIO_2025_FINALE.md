@@ -57,7 +57,8 @@ docs/             # Documentazione tecnica
 - **v2.1.0**: Refactoring modulare iniziale
 - **v2.1.1**: Versione minimal snellita  
 - **v2.1.2-stable**: Logging ottimizzato
-- **v2.2.0-organized**: 🎯 **VERSIONE ATTUALE** - Struttura riorganizzata
+- **v2.2.0-organized**: Struttura riorganizzata
+- **v2.2.1-hotfix**: 🎯 **VERSIONE ATTUALE** - Fix Google Login nel modal
 
 ## 🚀 PRONTO PER PRODUZIONE
 
@@ -85,5 +86,20 @@ Il progetto è ora:
 - [x] Cleanup file obsoleti
 - [x] Git commit e tagging versioni
 - [x] Verifica funzionamento post-riorganizzazione
+- [x] Fix Google Login button nel modal di autenticazione
 
 **PROGETTO COMPLETATO E PRONTO PER USO IN PRODUZIONE** 🎉
+
+## 🔧 BUG FIX POST-RIORGANIZZAZIONE
+
+### v2.2.1-hotfix - Google Login Mancante
+**Problema rilevato**: Nel refactoring minimal del modal di autenticazione era stato omesso il pulsante "Accedi con Google".
+
+**Soluzione implementata**:
+- ✅ Aggiunto pulsante "Accedi con Google" nel modal
+- ✅ Aggiunto separatore visivo "oppure" tra le opzioni
+- ✅ Implementato loading state per Google OAuth
+- ✅ Creato test specifico (`test-google-login.html`)
+- ✅ Mantenuta compatibilità con funzionalità esistenti
+
+**Risultato**: Modal ora completo con entrambe le opzioni di login (email + Google)

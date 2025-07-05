@@ -111,7 +111,7 @@
     
     .card.card-list-compact .card-meta {
         font-size: 0.8rem !important;
-        color: var(--text-secondary) !important;
+        color: var(--secondary-dark) !important; /* Contrasto migliorato per leggibilità */
         text-align: right !important;
         margin: 0 !important;
     }
@@ -468,7 +468,7 @@
     
     .card.card-list-compact .card-meta {
         font-size: 0.8rem !important;
-        color: var(--text-secondary) !important;
+        color: var(--secondary-dark) !important; /* Contrasto migliorato per leggibilità */
         margin: 0 !important;
         opacity: 0.85 !important;
         line-height: 1.1 !important;

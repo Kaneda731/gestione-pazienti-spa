@@ -27,6 +27,7 @@ src/
     ├── ui.js             # Utilità per interfaccia utente
     ├── utils.js          # Utilità generali
     ├── mobile-cards-examples.js  # Esempi per mobile cards
+    ├── mobile-navigation.js      # Sistema navigazione mobile innovativo (v2.3.0)
     ├── components/       # Componenti JavaScript riutilizzabili
     │   └── CustomSelect.js
     └── views/            # Viste dell'applicazione
@@ -37,7 +38,24 @@ src/
         └── diagnosi.js   # Vista diagnosi
 ```
 
-### `/docs/` - Documentazione
+### `/tests/` - File di test e sviluppo
+```
+tests/
+├── test-auth-complete.html     # Test completo autenticazione
+├── test-auth-minimal.html      # Test autenticazione minimale
+├── test-google-login.html      # Test specifico Google OAuth
+├── test-login.html            # Test login base
+├── test-mobile-login.html     # Test login mobile
+└── test-mobile-navigation.html # Demo navigazione mobile innovativa
+```
+
+### `/archive/` - Backup e versioni precedenti
+```
+archive/
+├── js-backup/          # Backup file JavaScript
+├── css-backup/         # Backup file CSS
+└── test-reports/       # Report di test precedenti
+```
 ```
 docs/
 ├── MOBILE_CARDS_GUIDE.md    # Guida per mobile cards
@@ -90,6 +108,14 @@ archive/
 - Sistema di routing client-side
 - Gestione navigazione tra viste
 - Controllo accesso autenticato
+- Integrazione con navigazione mobile
+
+### `mobile-navigation.js` (v2.3.0)
+- Sistema navigazione mobile innovativo
+- FAB (Floating Action Button) con menu espandibile
+- Breadcrumb mobile compatto con glassmorphism
+- Integrazione automatica con router
+- Nasconde pulsanti tradizionali su mobile
 
 ### Viste (`views/`)
 - Ogni file gestisce una specifica funzionalità dell'app

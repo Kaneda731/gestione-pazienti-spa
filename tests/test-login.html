@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Login - Gestione Pazienti</title>
+</head>
+<body>
+    <h1>Test Login - Clock Skew Handler</h1>
+    <div id="status">Caricamento moduli...</div>
+    <button id="test-login" onclick="testLogin()" disabled>Test Login</button>
+    
+    <script type="module">
+        import { signInWithEmail, isClockSkewError, handleClockSkewError } from './src/js/auth.js';
+        
+        window.testLogin = async function() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = 'Testing login with invalid credentials...';
+            
+            try {
+                const result = await signInWithEmail('test@test.com', 'wrong_password');
+                statusDiv.innerHTML = `Test completato: ${JSON.stringify(result, null, 2)}`;
+            } catch (error) {
+                statusDiv.innerHTML = `Errore durante il test: ${error.message}`;
+            }
+        };
+        
+        // Test che le funzioni siano caricate correttamente
+        if (typeof signInWithEmail === 'function' && 
+            typeof isClockSkewError === 'function' && 
+            typeof handleClockSkewError === 'function') {
+            document.getElementById('status').innerHTML = '✅ Tutti i moduli caricati correttamente!';
+            document.getElementById('test-login').disabled = false;
+        } else {
+            document.getElementById('status').innerHTML = '❌ Errore nel caricamento dei moduli!';
+        }
+    </script>
+</body>
+</html>

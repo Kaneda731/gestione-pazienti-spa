@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Navigazione Mobile Innovativa</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --warning-color: #fd7e14;
+            --danger-color: #dc3545;
+            --dark-color: #212529;
+            --light-color: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 1rem;
+            padding-bottom: 80px; /* Spazio per FAB e bottom nav */
+        }
+
+        .demo-section {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 2rem;
+            font-size: 1.5rem;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .demo-description {
+            color: #666;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        /* ===================================
+           OPZIONE 1: FAB (Floating Action Button)
+           =================================== */
+        .fab-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .fab {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), #2980b9);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 16px rgba(52, 152, 219, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .fab:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.6);
+        }
+
+        .fab:active {
+            transform: scale(0.95);
+        }
+
+        .fab .material-icons {
+            font-size: 24px;
+            transition: transform 0.3s ease;
+        }
+
+        .fab.pulse {
+            animation: fabPulse 2s infinite;
+        }
+
+        @keyframes fabPulse {
+            0% { box-shadow: 0 4px 16px rgba(52, 152, 219, 0.4); }
+            50% { box-shadow: 0 4px 16px rgba(52, 152, 219, 0.8); }
+            100% { box-shadow: 0 4px 16px rgba(52, 152, 219, 0.4); }
+        }
+
+        /* ===================================
+           OPZIONE 2: Bottom Navigation Bar
+           =================================== */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid #e9ecef;
+            box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.1);
+            display: flex;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0.75rem 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-item:hover {
+            background: #f8f9fa;
+        }
+
+        .nav-item.active {
+            color: var(--primary-color);
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--primary-color);
+        }
+
+        .nav-item .material-icons {
+            font-size: 22px;
+            margin-bottom: 0.25rem;
+        }
+
+        .nav-item .nav-label {
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+
+        /* ===================================
+           OPZIONE 3: Breadcrumb Mobile + Quick Actions
+           =================================== */
+        .mobile-breadcrumb {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            padding: 0.5rem 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .breadcrumb-item {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .breadcrumb-item:hover {
+            background: rgba(52, 152, 219, 0.1);
+            color: var(--primary-color);
+        }
+
+        .breadcrumb-item.current {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .breadcrumb-separator {
+            color: #999;
+            font-size: 0.8rem;
+        }
+
+        /* ===================================
+           OPZIONE 4: Swipe Indicator
+           =================================== */
+        .swipe-indicator {
+            position: fixed;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(52, 152, 219, 0.9);
+            color: white;
+            padding: 1rem 0.5rem;
+            border-radius: 0 15px 15px 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .swipe-indicator.hidden {
+            transform: translateY(-50%) translateX(-80%);
+            opacity: 0.3;
+        }
+
+        .swipe-indicator:hover {
+            transform: translateY(-50%) translateX(5px);
+            background: var(--primary-color);
+        }
+
+        .swipe-indicator .material-icons {
+            font-size: 18px;
+            display: block;
+        }
+
+        .swipe-text {
+            writing-mode: vertical-lr;
+            font-size: 0.7rem;
+            margin-top: 0.5rem;
+        }
+
+        /* ===================================
+           OPZIONE 5: Contextual Action Bar
+           =================================== */
+        .contextual-bar {
+            position: sticky;
+            top: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 0 0 20px 20px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
+
+        .context-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .context-btn {
+            background: none;
+            border: 1px solid #dee2e6;
+            border-radius: 20px;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.85rem;
+        }
+
+        .context-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .context-btn .material-icons {
+            font-size: 16px;
+        }
+
+        /* Demo Content */
+        .demo-content {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 2rem;
+            margin: 1rem 0;
+            text-align: center;
+            color: #666;
+        }
+
+        .demo-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-list li {
+            padding: 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .feature-list .material-icons {
+            color: var(--success-color);
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🚀 Navigazione Mobile Innovativa</h1>
+
+    <!-- OPZIONE 1: FAB -->
+    <div class="demo-section">
+        <h2>1. FAB (Floating Action Button)</h2>
+        <p class="demo-description">
+            Pulsante circolare fisso sempre visibile, non invadente ma facilmente accessibile.
+        </p>
+        <div class="demo-content">
+            <div class="demo-card">
+                <h3>Vantaggi</h3>
+                <ul class="feature-list">
+                    <li><span class="material-icons">check_circle</span> Sempre accessibile</li>
+                    <li><span class="material-icons">check_circle</span> Non occupa spazio layout</li>
+                    <li><span class="material-icons">check_circle</span> Design Material moderno</li>
+                    <li><span class="material-icons">check_circle</span> Animazioni fluide</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- OPZIONE 2: Bottom Navigation -->
+    <div class="demo-section">
+        <h2>2. Bottom Navigation Bar</h2>
+        <p class="demo-description">
+            Barra di navigazione fissa in basso con azioni principali, tipica delle app native.
+        </p>
+        <div class="demo-content">
+            <div class="demo-card">
+                <h3>Vantaggi</h3>
+                <ul class="feature-list">
+                    <li><span class="material-icons">check_circle</span> Navigazione rapida</li>
+                    <li><span class="material-icons">check_circle</span> Familiarità utenti mobile</li>
+                    <li><span class="material-icons">check_circle</span> Più azioni disponibili</li>
+                    <li><span class="material-icons">check_circle</span> Indicatori di stato</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- OPZIONE 3: Breadcrumb Mobile -->
+    <div class="demo-section">
+        <h2>3. Breadcrumb Mobile + Quick Actions</h2>
+        <div class="mobile-breadcrumb">
+            <div class="breadcrumb-item">
+                <span class="material-icons" style="font-size: 18px;">home</span>
+            </div>
+            <span class="breadcrumb-separator">›</span>
+            <div class="breadcrumb-item current">
+                <span class="material-icons" style="font-size: 16px;">medical_information</span>
+                <span>Diagnosi</span>
+            </div>
+        </div>
+        <p class="demo-description">
+            Breadcrumb compatto che mostra il percorso e permette navigazione rapida.
+        </p>
+        <div class="demo-content">
+            <div class="demo-card">
+                <h3>Vantaggi</h3>
+                <ul class="feature-list">
+                    <li><span class="material-icons">check_circle</span> Contesto chiaro</li>
+                    <li><span class="material-icons">check_circle</span> Navigazione diretta</li>
+                    <li><span class="material-icons">check_circle</span> Effetto glassmorphism</li>
+                    <li><span class="material-icons">check_circle</span> Compatto e elegante</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- OPZIONE 4: Swipe Indicator -->
+    <div class="demo-section">
+        <h2>4. Swipe Gesture + Visual Indicator</h2>
+        <p class="demo-description">
+            Indicatore visivo per swipe laterale, più moderno e intuitivo per utenti mobile.
+        </p>
+        <div class="demo-content">
+            <div class="demo-card">
+                <h3>Vantaggi</h3>
+                <ul class="feature-list">
+                    <li><span class="material-icons">check_circle</span> Gesture natural</li>
+                    <li><span class="material-icons">check_circle</span> Indicazione visiva</li>
+                    <li><span class="material-icons">check_circle</span> Spazio massimo per contenuto</li>
+                    <li><span class="material-icons">check_circle</span> UX moderna</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- OPZIONE 5: Contextual Bar -->
+    <div class="demo-section">
+        <h2>5. Contextual Action Bar</h2>
+        <div class="contextual-bar">
+            <div class="context-actions">
+                <button class="context-btn">
+                    <span class="material-icons">arrow_back</span>
+                    <span>Home</span>
+                </button>
+                <button class="context-btn">
+                    <span class="material-icons">refresh</span>
+                </button>
+            </div>
+            <h3 style="margin: 0; color: var(--primary-color);">Gestione Diagnosi</h3>
+        </div>
+        <p class="demo-description">
+            Barra contestuale sticky che combina navigazione con il titolo della sezione.
+        </p>
+        <div class="demo-content">
+            <div class="demo-card">
+                <h3>Vantaggi</h3>
+                <ul class="feature-list">
+                    <li><span class="material-icons">check_circle</span> Azioni contestuali</li>
+                    <li><span class="material-icons">check_circle</span> Sempre visibile</li>
+                    <li><span class="material-icons">check_circle</span> Titolo integrato</li>
+                    <li><span class="material-icons">check_circle</span> Effetto glassmorphism</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAB Implementation -->
+    <div class="fab-container">
+        <button class="fab pulse" onclick="goHome()">
+            <span class="material-icons">home</span>
+        </button>
+    </div>
+
+    <!-- Bottom Navigation Implementation -->
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="goHome()">
+            <span class="material-icons">home</span>
+            <span class="nav-label">Home</span>
+        </div>
+        <div class="nav-item" onclick="goBack()">
+            <span class="material-icons">arrow_back</span>
+            <span class="nav-label">Indietro</span>
+        </div>
+        <div class="nav-item" onclick="refresh()">
+            <span class="material-icons">refresh</span>
+            <span class="nav-label">Aggiorna</span>
+        </div>
+        <div class="nav-item" onclick="openMenu()">
+            <span class="material-icons">menu</span>
+            <span class="nav-label">Menu</span>
+        </div>
+    </div>
+
+    <!-- Swipe Indicator Implementation -->
+    <div class="swipe-indicator" onclick="goHome()">
+        <span class="material-icons">chevron_right</span>
+        <div class="swipe-text">HOME</div>
+    </div>
+
+    <script>
+        // Demo functions
+        function goHome() {
+            alert('🏠 Navigazione verso Home!');
+        }
+
+        function goBack() {
+            alert('⬅️ Navigazione Indietro!');
+        }
+
+        function refresh() {
+            alert('🔄 Refresh della pagina!');
+        }
+
+        function openMenu() {
+            alert('📱 Apertura Menu!');
+        }
+
+        // FAB animation on scroll
+        let lastScrollTop = 0;
+        window.addEventListener('scroll', function() {
+            const fab = document.querySelector('.fab');
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            if (scrollTop > lastScrollTop) {
+                // Scrolling down
+                fab.style.transform = 'scale(0.8)';
+            } else {
+                // Scrolling up
+                fab.style.transform = 'scale(1)';
+            }
+            lastScrollTop = scrollTop;
+        });
+
+        // Swipe indicator auto-hide
+        setTimeout(function() {
+            document.querySelector('.swipe-indicator').classList.add('hidden');
+        }, 5000);
+
+        // Show swipe indicator on mouse near left edge
+        document.addEventListener('mousemove', function(e) {
+            const swipeIndicator = document.querySelector('.swipe-indicator');
+            if (e.clientX < 50) {
+                swipeIndicator.classList.remove('hidden');
+            } else if (e.clientX > 150) {
+                swipeIndicator.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

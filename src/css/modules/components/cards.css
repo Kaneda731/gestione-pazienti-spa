@@ -1,5 +1,5 @@
 /* ===================================
-   CARD STYLES
+   CARD STYLES DESKTOP/TABLET
    =================================== */
 
 .card {
@@ -73,4 +73,40 @@
 
 .elevation-5 {
     box-shadow: 0 24px 48px rgba(0, 0, 0, 0.2), 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+/* ===================================
+   CARD STYLES DESKTOP/TABLET
+   =================================== */
+
+/* === RESPONSIVE DESKTOP/TABLET === */
+@media (min-width: 768px) {
+    .card-header {
+        padding: 1.5rem;
+        font-size: 1.125rem;
+    }
+    
+    .card-body {
+        padding: 1.5rem;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+    }
+}
+
+@media (min-width: 1200px) {
+    .card-header {
+        padding: 2rem;
+        font-size: 1.25rem;
+    }
+    
+    .card-body {
+        padding: 2rem;
+    }
+    
+    .card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-xl);
+    }
 }

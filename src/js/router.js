@@ -1,5 +1,6 @@
 // src/js/router.js
 import { supabase } from './supabase.js';
+import { checkDevelopmentBypass } from './auth.js';
 import { appContainer, templates } from './ui.js';
 import { initInserimentoView } from './views/form.js';
 import { initDimissioneView } from './views/dimissione.js';
@@ -74,6 +75,17 @@ export async function renderView() {
             });
         }
     }
+    
+    // Integrazione con navigazione mobile
+    if (window.mobileNav) {
+        window.mobileNav.setCurrentView(viewToRender);
+    }
+    
+    // Emetti evento per aggiornare navigazione mobile
+    const viewChangeEvent = new CustomEvent('viewChanged', {
+        detail: { view: viewToRender, params: urlParams }
+    });
+    document.dispatchEvent(viewChangeEvent);
     
     // Inizializza custom select per tutte le viste (fallback)
     setTimeout(() => {

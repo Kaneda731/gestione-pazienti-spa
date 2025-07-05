@@ -1,0 +1,178 @@
+/* ===================================
+   NAVBAR MOBILE
+   =================================== */
+
+/* === LAYOUT MOBILE OTTIMIZZATO === */
+@media (max-width: 767px) {
+    .navbar {
+        padding: 0.5rem 1rem !important; /* Allineato con layout-mobile */
+        min-height: 52px; /* Allineato con layout-mobile */
+    }
+    
+    .navbar-brand {
+        font-size: 1.1rem !important;
+        padding: 0.25rem 0 !important;
+    }
+    
+    .navbar-brand span {
+        font-size: 1rem !important;
+        margin-left: 0.5rem;
+    }
+    
+    .navbar-brand .material-icons {
+        width: 32px !important;
+        height: 32px !important;
+        padding: 6px !important;
+        margin-right: 8px !important;
+        font-size: 1.25rem !important;
+    }
+}
+
+/* === THEME TOGGLE MOBILE === */
+@media (max-width: 767px) {
+    #theme-toggle {
+        padding: 0.375rem !important;
+        min-width: 40px !important;
+        min-height: 40px !important;
+        border-radius: 50% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        touch-action: manipulation;
+    }
+    
+    #theme-toggle .material-icons {
+        font-size: 1.125rem !important;
+        margin: 0 !important;
+    }
+    
+    #theme-toggle:active {
+        transform: scale(0.95) !important;
+        background: rgba(255, 255, 255, 0.4) !important;
+    }
+}
+
+/* === AUTH CONTAINER MOBILE === */
+@media (max-width: 767px) {
+    #auth-container {
+        gap: 0.5rem !important;
+    }
+    
+    #auth-container .btn {
+        padding: 0.375rem 0.75rem !important;
+        font-size: 0.875rem !important;
+        min-height: 40px !important;
+        touch-action: manipulation;
+        border-radius: var(--border-radius) !important;
+    }
+    
+    #auth-container .btn-light,
+    #auth-container .btn-outline-light {
+        min-width: 80px !important;
+        white-space: nowrap;
+    }
+    
+    /* Touch feedback */
+    #auth-container .btn:active {
+        transform: scale(0.98) !important;
+    }
+}
+
+/* === NAVBAR COLLAPSE MOBILE === */
+@media (max-width: 767px) {
+    /* Se usiamo navbar collapse in futuro */
+    .navbar-toggler {
+        border: 1px solid rgba(255, 255, 255, 0.3) !important;
+        padding: 0.375rem !important;
+        min-width: 40px !important;
+        min-height: 40px !important;
+        touch-action: manipulation;
+    }
+    
+    .navbar-toggler:focus {
+        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3) !important;
+    }
+    
+    .navbar-toggler-icon {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+    }
+}
+
+/* === LAYOUT COMPATTO SU SMALL MOBILE === */
+@media (max-width: 480px) {
+    .navbar {
+        padding: 0.375rem 0.75rem !important;
+    }
+    
+    .navbar-brand {
+        font-size: 1rem !important;
+    }
+    
+    .navbar-brand span {
+        display: none; /* Nascondi testo su schermi molto piccoli */
+    }
+    
+    .navbar-brand .material-icons {
+        margin-right: 0 !important;
+        width: 28px !important;
+        height: 28px !important;
+        padding: 4px !important;
+    }
+    
+    #theme-toggle {
+        min-width: 36px !important;
+        min-height: 36px !important;
+        padding: 0.25rem !important;
+    }
+    
+    #auth-container .btn {
+        padding: 0.25rem 0.5rem !important;
+        font-size: 0.75rem !important;
+        min-height: 36px !important;
+        min-width: 70px !important;
+    }
+}
+
+/* === ACCESSIBILITÀ MOBILE === */
+@media (max-width: 767px) {
+    /* Focus migliorato per navigation via tastiera */
+    .navbar-brand:focus,
+    #theme-toggle:focus,
+    #auth-container .btn:focus {
+        outline: 2px solid rgba(255, 255, 255, 0.8) !important;
+        outline-offset: 2px !important;
+    }
+    
+    /* Prevenzione del double-tap zoom */
+    .navbar {
+        touch-action: manipulation;
+    }
+    
+    /* Miglioramento leggibilità su mobile */
+    .navbar-brand,
+    #auth-container .btn {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+}
+
+/* === PERFORMANCE MOBILE === */
+@media (max-width: 767px) {
+    /* Hardware acceleration per smooth interactions */
+    .navbar-brand,
+    #theme-toggle,
+    #auth-container .btn {
+        will-change: transform;
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
+    }
+    
+    /* Riduci animazioni complesse su mobile */
+    @media (prefers-reduced-motion: reduce) {
+        .navbar-brand,
+        #theme-toggle,
+        #auth-container .btn {
+            transition: none !important;
+        }
+    }
+}

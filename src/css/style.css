@@ -19,6 +19,7 @@
 @import url('./modules/components/buttons.css');
 @import url('./modules/components/forms.css');
 @import url('./modules/components/tables.css');
+@import url('./modules/components/modals.css');
 
 /* 4. Layout e responsive */
 @import url('./modules/layout/responsive.css');
@@ -29,8 +30,15 @@
 
 /* 6. Mobile ottimizzazioni (separati per performance) */
 @import url('./modules/mobile/layout-mobile.css');
+@import url('./modules/mobile/navbar-mobile.css');
 @import url('./modules/mobile/menu-cards-mobile.css');
+@import url('./modules/mobile/cards-mobile.css');
 @import url('./modules/mobile/tables-mobile.css');
+@import url('./modules/mobile/pagination-mobile.css');
+@import url('./modules/mobile/buttons-mobile.css');
+@import url('./modules/mobile/forms-mobile.css');
+@import url('./modules/mobile/modals-mobile.css');
+@import url('./modules/mobile/navigation-mobile.css');
 @import url('./modules/mobile/dark-mode-mobile.css');
 
 /* =============================================

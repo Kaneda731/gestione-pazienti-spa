@@ -15,6 +15,8 @@ export const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY,
         storage: sessionStorage,
         autoRefreshToken: true,
         persistSession: true,
-        detectSessionInUrl: true
+        detectSessionInUrl: true,
+        // Configurazione redirect per localhost
+        redirectTo: window.location.origin
     }
 });

@@ -10,17 +10,17 @@
         font-size: 16px; /* Previene zoom su iOS */
     }
     
-    /* Container principale mobile */
+    /* Container principale mobile - spazio ottimizzato */
     main#app-container {
-        padding-top: 1rem;
-        padding-bottom: 2rem;
+        padding-top: 0.25rem; /* Ridotto da 1rem a 0.25rem */
+        padding-bottom: 1rem; /* Ridotto da 2rem a 1rem */
         margin: 0;
     }
     
-    /* Navbar mobile */
+    /* Navbar mobile - più compatta */
     .navbar {
-        padding: 0.75rem 1rem;
-        min-height: 60px;
+        padding: 0.5rem 1rem; /* Ridotto da 0.75rem */
+        min-height: 52px; /* Ridotto da 60px */
     }
     
     .navbar-brand {
@@ -40,10 +40,10 @@
         border-radius: 8px;
     }
     
-    /* Card generiche mobile */
+    /* Card generiche mobile - spaziatura ottimizzata */
     .card {
         border-radius: 12px;
-        margin-bottom: 1rem;
+        margin-bottom: 0.75rem; /* Ridotto da 1rem */
     }
     
     .card-header {
@@ -78,21 +78,21 @@
         font-size: 0.9rem;
     }
     
-    /* Spacing mobile ridotto */
+    /* Spacing mobile ottimizzato per maggiore densità */
     .mt-5, .my-5 {
-        margin-top: 2rem !important;
+        margin-top: 1rem !important; /* Ridotto da 2rem */
     }
     
     .mb-5, .my-5 {
-        margin-bottom: 2rem !important;
+        margin-bottom: 1rem !important; /* Ridotto da 2rem */
     }
     
     .pt-5, .py-5 {
-        padding-top: 2rem !important;
+        padding-top: 1rem !important; /* Ridotto da 2rem */
     }
     
     .pb-5, .py-5 {
-        padding-bottom: 2rem !important;
+        padding-bottom: 1rem !important; /* Ridotto da 2rem */
     }
     
     /* Nascondi elementi non essenziali su mobile */
@@ -114,5 +114,18 @@
     main,
     .overflow-auto {
         -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Riduzione spazio tra navbar e contenuto principale */
+    .navbar + main,
+    .navbar + .container-fluid,
+    .navbar ~ * {
+        margin-top: 0 !important;
+    }
+    
+    /* Contenitori principali più compatti */
+    .container-fluid {
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
     }
 }

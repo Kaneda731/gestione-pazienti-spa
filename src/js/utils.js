@@ -43,12 +43,6 @@ export function convertToCSV(data) {
  */
 export async function populateFilter(columnName, selectElement) {
     try {
-        // Verifica che l'elemento select esista
-        if (!selectElement) {
-            console.warn(`Elemento select non trovato per ${columnName}`);
-            return;
-        }
-
         const { data, error } = await supabase.from('pazienti').select(columnName);
         if (error) throw error;
         
@@ -58,13 +52,8 @@ export async function populateFilter(columnName, selectElement) {
         uniqueValues.forEach(value => {
             selectElement.innerHTML += `<option value="${value}">${value}</option>`;
         });
-        
-        console.log(`✅ Filtro ${columnName} popolato con ${uniqueValues.length} opzioni`);
     } catch (error) {
-        console.error(`❌ Errore durante il popolamento del filtro ${columnName}:`, error);
-        if (selectElement) {
-            selectElement.innerHTML = `<option value="">Errore nel caricamento</option>`;
-        }
-        throw error; // Re-throw per permettere alla Promise.all di gestire l'errore
+        console.error(`Errore durante il popolamento del filtro ${columnName}:`, error);
+        selectElement.innerHTML = `<option value="">Errore nel caricamento</option>`;
     }
 }

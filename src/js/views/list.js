@@ -439,7 +439,12 @@ function setupEventListeners() {
         fetchAndRenderPazienti();
     };
 
+    // Ascolta sia eventi input che change per supportare custom select
     domElements.filterContainer.addEventListener('input', e => {
+        if (e.target.matches('input, select')) handleFilterChange();
+    });
+    
+    domElements.filterContainer.addEventListener('change', e => {
         if (e.target.matches('input, select')) handleFilterChange();
     });
 

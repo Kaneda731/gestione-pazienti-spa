@@ -191,7 +191,6 @@ class CustomSelect {
     }
     
     selectOption(value, text) {
-        console.log('selectOption chiamato:', value, text);
         this.selectedValue = value;
         this.selectedText = text;
         
@@ -199,12 +198,10 @@ class CustomSelect {
         const label = this.wrapper.querySelector('.custom-select-label');
         if (label) {
             label.textContent = text;
-            console.log('Label aggiornata con:', text);
         }
         
         // Aggiorna la select originale
         this.selectElement.value = value;
-        console.log('Select element value impostato a:', value);
         
         // Dispatch change event
         const changeEvent = new Event('change', { bubbles: true });
@@ -236,7 +233,6 @@ class CustomSelect {
         if (window.innerWidth <= 767) {
             this.disableOtherCustomSelects();
             this.createMobileModal();
-            console.log('CustomSelect: Modal mobile esterno creato');
         } else {
             // Desktop: mantieni il bel design esistente
             this.wrapper.querySelector('.custom-select-dropdown').style.display = 'block';
@@ -309,8 +305,6 @@ class CustomSelect {
         setTimeout(() => {
             this.mobileModal.classList.add('show');
         }, 10);
-        
-        console.log('CustomSelect: Modal mobile aggiunto al body');
     }
     
     getMobileOptionsHTML() {
@@ -395,7 +389,6 @@ class CustomSelect {
                 e.stopPropagation();
                 const value = option.dataset.value;
                 const text = option.textContent.trim();
-                console.log('Modal mobile: Selezione opzione', value, text);
                 
                 // Seleziona l'opzione
                 this.selectOption(value, text);
@@ -412,7 +405,6 @@ class CustomSelect {
                 e.stopPropagation();
                 const value = option.dataset.value;
                 const text = option.textContent.trim();
-                console.log('Modal mobile touch: Selezione opzione', value, text);
                 
                 // Seleziona l'opzione
                 this.selectOption(value, text);
@@ -445,7 +437,6 @@ class CustomSelect {
             this.removeMobileModal();
             // Riabilita tutti gli altri custom select
             this.enableOtherCustomSelects();
-            console.log('CustomSelect: Modal mobile esterno rimosso');
         } else {
             // Desktop: mantieni il comportamento esistente
             this.wrapper.querySelector('.custom-select-dropdown').style.display = 'none';

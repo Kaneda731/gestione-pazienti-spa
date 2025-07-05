@@ -3,6 +3,12 @@
    =================================== */
 
 @media (max-width: 767px) {
+    /* Nascondi completamente i pulsanti "Torna al Menu" su mobile */
+    .btn-back-menu {
+        display: none !important;
+        visibility: hidden !important;
+    }
+    
     /* Tutti i pulsanti mobile */
     .btn {
         min-height: 44px; /* Touch area iOS/Android */
@@ -35,29 +41,6 @@
         padding: 1rem 2rem;
         font-size: 1.1rem;
         border-radius: 10px;
-    }
-    
-    /* Pulsanti "Torna al Menu" mobile */
-    .btn-back-menu {
-        background: linear-gradient(135deg, var(--secondary-color), #495057);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        color: white;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-        width: 100%;
-        margin-bottom: 1rem;
-    }
-    
-    .btn-back-menu:hover,
-    .btn-back-menu:active {
-        background: linear-gradient(135deg, #5a6268, var(--secondary-color));
-        transform: scale(0.98);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        color: white;
-    }
-    
-    /* Rimuovi effetti shine su mobile per performance */
-    .btn-back-menu::before {
-        display: none;
     }
     
     /* Pulsanti primari mobile */

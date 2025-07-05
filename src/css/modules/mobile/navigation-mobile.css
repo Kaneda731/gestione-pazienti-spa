@@ -1,0 +1,247 @@
+/* ===================================
+   NAVIGAZIONE MOBILE INNOVATIVA
+   =================================== */
+
+/* FAB (Floating Action Button) per mobile */
+@media (max-width: 768px) {
+    /* Nasconde i pulsanti "Torna al Menu" tradizionali su mobile */
+    .btn-back-menu {
+        display: none !important;
+    }
+    
+    /* FAB Container */
+    .mobile-fab-container {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1050;
+    }
+    
+    .mobile-fab {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary-color), #2980b9);
+        color: white;
+        border: none;
+        box-shadow: 0 4px 16px rgba(52, 152, 219, 0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .mobile-fab:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(52, 152, 219, 0.6);
+    }
+    
+    .mobile-fab:active {
+        transform: scale(0.95);
+    }
+    
+    .mobile-fab .material-icons {
+        font-size: 24px;
+        transition: transform 0.3s ease;
+    }
+    
+    /* Animazione pulse per attirare attenzione */
+    .mobile-fab.pulse {
+        animation: fabPulse 2s infinite;
+    }
+    
+    @keyframes fabPulse {
+        0% { box-shadow: 0 4px 16px rgba(52, 152, 219, 0.4); }
+        50% { box-shadow: 0 4px 16px rgba(52, 152, 219, 0.8); }
+        100% { box-shadow: 0 4px 16px rgba(52, 152, 219, 0.4); }
+    }
+    
+    /* Breadcrumb Mobile Compatto */
+    .mobile-breadcrumb {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 25px;
+        padding: 0.5rem 1rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        position: sticky;
+        top: 10px;
+        z-index: 100;
+    }
+    
+    .breadcrumb-item {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        padding: 0.25rem 0.5rem;
+        border-radius: 15px;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+        gap: 0.25rem;
+    }
+    
+    .breadcrumb-item:hover {
+        background: rgba(52, 152, 219, 0.1);
+        color: var(--primary-color);
+    }
+    
+    .breadcrumb-item.current {
+        background: var(--primary-color);
+        color: white;
+    }
+    
+    .breadcrumb-separator {
+        color: #999;
+        font-size: 0.8rem;
+        user-select: none;
+    }
+    
+    /* FAB che cambia icona in base al contesto */
+    .mobile-fab[data-action="home"] .material-icons::before {
+        content: "home";
+    }
+    
+    .mobile-fab[data-action="back"] .material-icons::before {
+        content: "arrow_back";
+    }
+    
+    /* Effetto scroll per FAB */
+    .mobile-fab.scroll-hidden {
+        transform: translateY(100px);
+        opacity: 0;
+    }
+    
+    /* Haptic feedback simulation */
+    .mobile-fab:active::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.5);
+        transform: translate(-50%, -50%);
+        animation: ripple 0.3s ease-out;
+    }
+    
+    @keyframes ripple {
+        to {
+            width: 60px;
+            height: 60px;
+            opacity: 0;
+        }
+    }
+    
+    /* Quick Actions Menu (espandibile dal FAB) */
+    .fab-menu {
+        position: absolute;
+        bottom: 70px;
+        right: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(20px);
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    .fab-menu.show {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+    
+    .fab-mini {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.9);
+        color: var(--primary-color);
+        border: none;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+    }
+    
+    .fab-mini:hover {
+        background: white;
+        transform: scale(1.1);
+    }
+    
+    .fab-mini .material-icons {
+        font-size: 20px;
+    }
+    
+    /* Overlay per chiudere menu */
+    .fab-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: transparent;
+        z-index: 1049;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .fab-overlay.show {
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    /* Badge notification sul FAB */
+    .mobile-fab .notification-badge {
+        position: absolute;
+        top: -2px;
+        right: -2px;
+        background: var(--danger-color);
+        color: white;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        font-size: 0.7rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        border: 2px solid white;
+    }
+    
+    /* Stile dark mode per FAB */
+    [data-bs-theme="dark"] .mobile-fab {
+        background: linear-gradient(135deg, #4dabf7, var(--primary-color));
+        box-shadow: 0 4px 16px rgba(77, 171, 247, 0.4);
+    }
+    
+    [data-bs-theme="dark"] .mobile-breadcrumb {
+        background: rgba(33, 37, 41, 0.95);
+        color: white;
+    }
+    
+    [data-bs-theme="dark"] .breadcrumb-item:hover {
+        background: rgba(77, 171, 247, 0.2);
+        color: #4dabf7;
+    }
+}
+
+/* Desktop: mantieni i pulsanti tradizionali */
+@media (min-width: 769px) {
+    .mobile-fab-container,
+    .mobile-breadcrumb {
+        display: none !important;
+    }
+}

@@ -76,6 +76,17 @@ export async function renderView() {
         }
     }
     
+    // Integrazione con navigazione mobile
+    if (window.mobileNav) {
+        window.mobileNav.setCurrentView(viewToRender);
+    }
+    
+    // Emetti evento per aggiornare navigazione mobile
+    const viewChangeEvent = new CustomEvent('viewChanged', {
+        detail: { view: viewToRender, params: urlParams }
+    });
+    document.dispatchEvent(viewChangeEvent);
+    
     // Inizializza custom select per tutte le viste (fallback)
     setTimeout(() => {
         if (window.initCustomSelects) {

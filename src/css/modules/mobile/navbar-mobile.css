@@ -120,16 +120,16 @@
     }
     
     #theme-toggle {
-        min-width: 36px !important;
-        min-height: 36px !important;
-        padding: 0.25rem !important;
+        min-width: 44px !important; /* Standard touch area iOS/Android */
+        min-height: 44px !important; /* Standard touch area iOS/Android */
+        padding: 0.5rem !important; /* Aumentato per migliore usabilità */
     }
     
     #auth-container .btn {
-        padding: 0.25rem 0.5rem !important;
+        padding: 0.375rem 0.75rem !important; /* Aumentato per touch area */
         font-size: 0.75rem !important;
-        min-height: 36px !important;
-        min-width: 70px !important;
+        min-height: 44px !important; /* Standard touch area iOS/Android */
+        min-width: 80px !important; /* Larghezza minima per leggibilità */
     }
 }
 

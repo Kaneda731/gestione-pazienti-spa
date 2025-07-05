@@ -15,6 +15,8 @@ class CustomSelect {
         this.isOpen = false;
         this.selectedValue = '';
         this.selectedText = '';
+        this.mobileModal = null;
+        this.mobileOverlayHandler = null;
         
         this.init();
     }
@@ -64,10 +66,10 @@ class CustomSelect {
         
         optionsContainer.innerHTML = '';
         
-        selectOptions.forEach((option, index) => {
-            if (option.value === '') {
-                return; // Skip placeholder option
-            }
+        let validOptionsCount = 0;
+        selectOptions.forEach(option => {
+            if (option.value === '') return; // Skip placeholder option
+            validOptionsCount++;
             
             const optionElement = document.createElement('div');
             optionElement.className = 'custom-select-option';
@@ -91,6 +93,11 @@ class CustomSelect {
             
             optionsContainer.appendChild(optionElement);
         });
+        
+        // Aggiungi indicatore se ci sono molte opzioni (più di 4)
+        if (validOptionsCount > 4) {
+            this.addScrollIndicator();
+        }
     }
     
     bindEvents() {
@@ -114,7 +121,7 @@ class CustomSelect {
             this.toggle();
         }, { passive: false });
         
-        // Close on outside click/touch - IMPORTANTE: su mobile gestisce il click sull'overlay
+        // Close on outside click/touch
         document.addEventListener('click', (e) => {
             if (!this.wrapper.contains(e.target)) {
                 this.close();
@@ -126,20 +133,6 @@ class CustomSelect {
                 this.close();
             }
         }, { passive: true });
-        
-        // Gestione chiusura con pulsante X su mobile
-        dropdown.addEventListener('click', (e) => {
-            // Se il click è sul pulsante chiudi (::after pseudo-element)
-            const rect = dropdown.getBoundingClientRect();
-            const clickX = e.clientX - rect.left;
-            const clickY = e.clientY - rect.top;
-            
-            // Area approssimativa del pulsante chiudi (in alto a destra)
-            if (clickX > rect.width - 50 && clickY < 50) {
-                e.stopPropagation();
-                this.close();
-            }
-        });
         
         // Keyboard navigation
         this.wrapper.addEventListener('keydown', (e) => {
@@ -198,29 +191,34 @@ class CustomSelect {
     }
     
     selectOption(value, text) {
+        console.log('selectOption chiamato:', value, text);
         this.selectedValue = value;
         this.selectedText = text;
         
         // Aggiorna l'interfaccia
         const label = this.wrapper.querySelector('.custom-select-label');
-        label.textContent = text;
+        if (label) {
+            label.textContent = text;
+            console.log('Label aggiornata con:', text);
+        }
         
         // Aggiorna la select originale
         this.selectElement.value = value;
+        console.log('Select element value impostato a:', value);
         
         // Dispatch change event
         const changeEvent = new Event('change', { bubbles: true });
         this.selectElement.dispatchEvent(changeEvent);
         
-        // Rimuovi focus da tutte le opzioni
+        // Rimuovi focus da tutte le opzioni desktop
         this.wrapper.querySelectorAll('.custom-select-option').forEach(opt => {
             opt.classList.remove('focused');
         });
         
-        // Chiudi automaticamente dopo selezione (UX mobile migliorata)
-        this.close();
-        
-        console.log('CustomSelect: Opzione selezionata:', value, '-', text);
+        // Chiudi solo se non siamo in modalità mobile modal
+        if (!this.mobileModal) {
+            this.close();
+        }
     }
     
     setValue(value) {
@@ -236,12 +234,11 @@ class CustomSelect {
         
         // Su mobile, crea un modal completamente esterno al DOM del form
         if (window.innerWidth <= 767) {
-            // Disabilita tutti gli altri custom select per evitare interferenze
             this.disableOtherCustomSelects();
             this.createMobileModal();
             console.log('CustomSelect: Modal mobile esterno creato');
         } else {
-            // Desktop: usa dropdown normale
+            // Desktop: mantieni il bel design esistente
             this.wrapper.querySelector('.custom-select-dropdown').style.display = 'block';
             
             // Focus sul primo elemento se nessuno è selezionato
@@ -256,7 +253,7 @@ class CustomSelect {
     
     disableOtherCustomSelects() {
         // Disabilita temporaneamente tutti gli altri custom select per evitare interferenze
-        const allCustomSelects = document.querySelectorAll('.custom-select');
+        const allCustomSelects = document.querySelectorAll('.custom-select-wrapper');
         allCustomSelects.forEach(select => {
             if (select !== this.wrapper) {
                 select.style.pointerEvents = 'none';
@@ -266,45 +263,54 @@ class CustomSelect {
     
     enableOtherCustomSelects() {
         // Riabilita tutti i custom select
-        const allCustomSelects = document.querySelectorAll('.custom-select');
+        const allCustomSelects = document.querySelectorAll('.custom-select-wrapper');
         allCustomSelects.forEach(select => {
             select.style.pointerEvents = 'auto';
         });
     }
-    }
-    
+
     createMobileModal() {
         // Rimuovi modal esistente se presente
         this.removeMobileModal();
         
-        // Crea modal completamente esterno
+        // Crea modal come elemento completamente esterno al form
         this.mobileModal = document.createElement('div');
         this.mobileModal.className = 'custom-select-mobile-modal';
+        
+        // Genera HTML delle opzioni
+        const optionsHTML = this.getMobileOptionsHTML();
+        
         this.mobileModal.innerHTML = `
             <div class="custom-select-mobile-overlay"></div>
             <div class="custom-select-mobile-content">
                 <div class="custom-select-mobile-header">
-                    <h3>Seleziona opzione</h3>
+                    <h3>Seleziona ${this.selectElement.getAttribute('data-label') || 'Opzione'}</h3>
                     <button type="button" class="custom-select-mobile-close">✕</button>
                 </div>
                 <div class="custom-select-mobile-options">
-                    ${this.getMobileOptionsHTML()}
+                    ${optionsHTML}
                 </div>
             </div>
         `;
         
-        // Aggiungi direttamente al body (NON al wrapper del form)
+        // Inserisci direttamente nel body (completamente esterno al form)
         document.body.appendChild(this.mobileModal);
-        document.body.classList.add('custom-select-modal-open');
-        document.body.style.overflow = 'hidden';
         
-        // Bind eventi del modal mobile
+        // Aggiungi classe al body per nascondere scroll e bloccare interazioni
+        document.body.classList.add('custom-select-modal-open');
+        
+        // Aggiungi listener globale per bloccare tutti i click esterni al modal
+        this.addGlobalClickBlocker();
+        
+        // Bind eventi
         this.bindMobileModalEvents();
         
-        // Animazione di entrata
-        requestAnimationFrame(() => {
+        // Mostra il modal con delay per evitare conflitti
+        setTimeout(() => {
             this.mobileModal.classList.add('show');
-        });
+        }, 10);
+        
+        console.log('CustomSelect: Modal mobile aggiunto al body');
     }
     
     getMobileOptionsHTML() {
@@ -314,9 +320,14 @@ class CustomSelect {
         selectOptions.forEach(option => {
             if (option.value === '') return; // Skip placeholder
             
-            html += `<div class="custom-select-mobile-option" data-value="${option.value}">
-                ${option.textContent}
-            </div>`;
+            const isSelected = option.value === this.selectedValue;
+            const selectedClass = isSelected ? ' selected' : '';
+            
+            html += `
+                <div class="custom-select-mobile-option${selectedClass}" data-value="${option.value}">
+                    ${option.textContent}
+                </div>
+            `;
         });
         
         return html;
@@ -347,18 +358,70 @@ class CustomSelect {
         overlay.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
+            e.stopImmediatePropagation();
             this.close();
         });
         
+        // Blocca completamente eventi touch sull'overlay
+        overlay.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+        }, { passive: false });
+        
+        overlay.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            this.close();
+        }, { passive: false });
+        
+        // Blocca scroll e altre interazioni sull'overlay
+        overlay.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+        }, { passive: false });
+        
+        overlay.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+        }, { passive: false });
+        
         // Seleziona opzioni
         options.forEach(option => {
+            // Click normale
             option.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 const value = option.dataset.value;
-                const text = option.textContent;
+                const text = option.textContent.trim();
+                console.log('Modal mobile: Selezione opzione', value, text);
+                
+                // Seleziona l'opzione
                 this.selectOption(value, text);
+                
+                // Chiudi il modal dopo la selezione
+                setTimeout(() => {
+                    this.close();
+                }, 100);
             });
+            
+            // Touch events per mobile
+            option.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const value = option.dataset.value;
+                const text = option.textContent.trim();
+                console.log('Modal mobile touch: Selezione opzione', value, text);
+                
+                // Seleziona l'opzione
+                this.selectOption(value, text);
+                
+                // Chiudi il modal dopo la selezione
+                setTimeout(() => {
+                    this.close();
+                }, 100);
+            }, { passive: false });
         });
     }
     
@@ -367,62 +430,10 @@ class CustomSelect {
             this.mobileModal.remove();
             this.mobileModal = null;
         }
+        
+        // Rimuovi classe dal body e blocchi globali
         document.body.classList.remove('custom-select-modal-open');
-        document.body.style.overflow = '';
-    }
-    
-    adjustMobilePosition() {
-        const triggerRect = this.wrapper.getBoundingClientRect();
-        const viewportHeight = window.innerHeight;
-        const spaceBelow = viewportHeight - triggerRect.bottom;
-        const spaceAbove = triggerRect.top;
-        
-        // Calcola altezza stimata dropdown in base al viewport
-        let estimatedDropdownHeight;
-        if (viewportHeight <= 500) {
-            // Viewport basso (landscape mobile)
-            estimatedDropdownHeight = Math.min(viewportHeight * 0.25, 150);
-        } else {
-            estimatedDropdownHeight = Math.min(viewportHeight * 0.4, 300);
-        }
-        
-        // Considera anche l'header fisso (assumiamo 60-90px)
-        const headerOffset = 90;
-        const effectiveSpaceAbove = Math.max(0, spaceAbove - headerOffset);
-        
-        // Se c'è più spazio sopra che sotto e poco spazio sotto, 
-        // apri verso l'alto (ma solo se c'è spazio sufficiente sopra)
-        if (spaceBelow < estimatedDropdownHeight && 
-            effectiveSpaceAbove > spaceBelow && 
-            effectiveSpaceAbove >= estimatedDropdownHeight * 0.8) {
-            
-            this.wrapper.classList.add('dropdown-up');
-            console.log('CustomSelect: Apertura verso l\'alto - spazio sotto:', spaceBelow, 
-                       'spazio sopra (effettivo):', effectiveSpaceAbove, 
-                       'altezza stimata:', estimatedDropdownHeight);
-        } else {
-            this.wrapper.classList.remove('dropdown-up');
-            console.log('CustomSelect: Apertura verso il basso - spazio sotto:', spaceBelow, 
-                       'spazio sopra (effettivo):', effectiveSpaceAbove,
-                       'altezza stimata:', estimatedDropdownHeight);
-        }
-    }
-    
-    addMobileOverlayListener() {
-        // Listener per chiudere quando si clicca sull'overlay mobile
-        const overlay = this.wrapper.querySelector('::before');
-        this.mobileOverlayHandler = (e) => {
-            const dropdown = this.wrapper.querySelector('.custom-select-dropdown');
-            if (!dropdown.contains(e.target) && this.wrapper.classList.contains('open')) {
-                this.close();
-            }
-        };
-        
-        // Aggiungi listener al wrapper per intercettare click sull'overlay
-        setTimeout(() => {
-            document.addEventListener('click', this.mobileOverlayHandler);
-            document.addEventListener('touchstart', this.mobileOverlayHandler);
-        }, 100);
+        this.removeGlobalClickBlocker();
     }
     
     close() {
@@ -436,7 +447,7 @@ class CustomSelect {
             this.enableOtherCustomSelects();
             console.log('CustomSelect: Modal mobile esterno rimosso');
         } else {
-            // Desktop: nascondi dropdown normale
+            // Desktop: mantieni il comportamento esistente
             this.wrapper.querySelector('.custom-select-dropdown').style.display = 'none';
             
             // Rimuovi focus da tutte le opzioni
@@ -445,12 +456,15 @@ class CustomSelect {
             });
         }
         
-        // Rimuovi listener mobile overlay (se esistenti)
+        // Rimuovi listener mobile overlay
         if (this.mobileOverlayHandler) {
             document.removeEventListener('click', this.mobileOverlayHandler);
             document.removeEventListener('touchstart', this.mobileOverlayHandler);
             this.mobileOverlayHandler = null;
         }
+        
+        // Rimuovi blocco click/touch globale
+        this.removeGlobalClickBlocker();
     }
     
     toggle() {
@@ -470,6 +484,109 @@ class CustomSelect {
         
         this.wrapper.remove();
         this.selectElement.style.display = '';
+    }
+    
+    addScrollIndicator() {
+        const dropdown = this.wrapper.querySelector('.custom-select-dropdown');
+        
+        // Rimuovi indicatore esistente se presente
+        const existingIndicator = dropdown.querySelector('.scroll-indicator-dot');
+        if (existingIndicator) {
+            existingIndicator.remove();
+        }
+        
+        // Crea indicatore elegante ma visibile
+        const scrollIndicator = document.createElement('div');
+        scrollIndicator.className = 'scroll-indicator-dot';
+        
+        dropdown.appendChild(scrollIndicator);
+        
+        // Gestisci comportamento durante lo scroll
+        dropdown.addEventListener('scroll', () => {
+            const isAtBottom = dropdown.scrollTop + dropdown.clientHeight >= dropdown.scrollHeight - 5;
+            const hasScrolled = dropdown.scrollTop > 0;
+            
+            if (isAtBottom) {
+                // Nasconde quando arrivi in fondo
+                scrollIndicator.style.opacity = '0';
+            } else if (hasScrolled) {
+                // Rimuove l'animazione dopo il primo scroll e lo rende più discreto
+                scrollIndicator.style.animation = 'none';
+                scrollIndicator.style.opacity = '0.5';
+            } else {
+                // Stato iniziale con animazione
+                scrollIndicator.style.opacity = '0.8';
+            }
+        });
+    }
+    
+    addGlobalClickBlocker() {
+        // Blocca tutti i click/touch globali quando il modal è aperto
+        this.globalClickBlocker = (e) => {
+            // Se il click non è all'interno del modal, bloccalo
+            if (!this.mobileModal || !this.mobileModal.contains(e.target)) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                return false;
+            }
+        };
+        
+        this.globalTouchBlocker = (e) => {
+            // Se il touch non è all'interno del modal, bloccalo
+            if (!this.mobileModal || !this.mobileModal.contains(e.target)) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                return false;
+            }
+        };
+        
+        // Aggiungi listener con capture per intercettare prima di tutto
+        document.addEventListener('click', this.globalClickBlocker, { 
+            capture: true, 
+            passive: false 
+        });
+        document.addEventListener('touchstart', this.globalTouchBlocker, { 
+            capture: true, 
+            passive: false 
+        });
+        document.addEventListener('touchend', this.globalTouchBlocker, { 
+            capture: true, 
+            passive: false 
+        });
+        
+        // Blocca anche scroll e wheel events
+        this.globalScrollBlocker = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        };
+        
+        document.addEventListener('wheel', this.globalScrollBlocker, { 
+            capture: true, 
+            passive: false 
+        });
+        document.addEventListener('touchmove', this.globalScrollBlocker, { 
+            capture: true, 
+            passive: false 
+        });
+    }
+    
+    removeGlobalClickBlocker() {
+        if (this.globalClickBlocker) {
+            document.removeEventListener('click', this.globalClickBlocker, { capture: true });
+            document.removeEventListener('touchstart', this.globalTouchBlocker, { capture: true });
+            document.removeEventListener('touchend', this.globalTouchBlocker, { capture: true });
+            this.globalClickBlocker = null;
+            this.globalTouchBlocker = null;
+        }
+        
+        if (this.globalScrollBlocker) {
+            document.removeEventListener('wheel', this.globalScrollBlocker, { capture: true });
+            document.removeEventListener('touchmove', this.globalScrollBlocker, { capture: true });
+            this.globalScrollBlocker = null;
+        }
     }
 }
 

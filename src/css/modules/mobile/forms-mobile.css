@@ -160,6 +160,12 @@
         opacity: 0;
         visibility: hidden;
         transition: all 0.3s ease;
+        /* Blocca completamente ogni interazione con elementi sottostanti */
+        pointer-events: auto;
+        touch-action: none;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
     }
     
     .custom-select-mobile-modal.show {
@@ -174,8 +180,13 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(0, 0, 0, 0.8);
-        backdrop-filter: blur(4px);
+        background: rgba(33, 37, 41, 0.85); /* Grigio scuro più elegante */
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        /* Blocca completamente ogni interazione */
+        pointer-events: auto;
+        touch-action: none;
+        cursor: pointer;
     }
     
     /* Contenuto del modal */
@@ -187,19 +198,19 @@
         width: 90vw;
         max-width: 400px;
         max-height: 70vh;
-        background: var(--bg-primary);
+        background: #f8f9fa; /* Grigio chiaro elegante */
         border-radius: 1rem;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
         overflow: hidden;
-        border: 3px solid red; /* DEBUG: border rosso */
+        border: 1px solid #e9ecef; /* Bordo sottile */
         /* Forza centratura reale */
         margin: auto;
     }
     
     /* Header del modal */
     .custom-select-mobile-header {
-        background: var(--primary-color);
-        color: white;
+        background: #343a40; /* Grigio scuro elegante */
+        color: #f8f9fa;
         padding: 1rem 1.25rem;
         display: flex;
         justify-content: space-between;
@@ -217,9 +228,9 @@
     }
     
     .custom-select-mobile-close {
-        background: rgba(255, 255, 255, 0.2);
+        background: rgba(248, 249, 250, 0.2);
         border: none;
-        color: white;
+        color: #f8f9fa;
         width: 32px;
         height: 32px;
         border-radius: 50%;
@@ -237,7 +248,7 @@
     }
     
     .custom-select-mobile-close:hover {
-        background: rgba(255, 255, 255, 0.3);
+        background: rgba(248, 249, 250, 0.3);
         transform: scale(1.1);
     }
     
@@ -250,14 +261,15 @@
     
     .custom-select-mobile-option {
         padding: 1rem 1.5rem;
-        border-bottom: 1px solid var(--border-color);
+        border-bottom: 1px solid #dee2e6;
         cursor: pointer;
         transition: all 0.2s ease;
-        color: var(--text-primary);
+        color: #495057; /* Grigio scuro elegante */
         font-size: 1rem;
         min-height: 56px;
         display: flex;
         align-items: center;
+        background: transparent;
     }
     
     .custom-select-mobile-option:last-child {
@@ -266,8 +278,14 @@
     
     .custom-select-mobile-option:hover,
     .custom-select-mobile-option:active {
-        background: var(--primary-color);
+        background: #6c757d; /* Grigio medio elegante */
         color: white;
+    }
+    
+    .custom-select-mobile-option.selected {
+        background: #343a40; /* Grigio scuro per selezione */
+        color: #f8f9fa;
+        font-weight: 600;
     }
     
     /* Nasconde il dropdown normale su mobile */
@@ -294,23 +312,6 @@
         background-color: rgba(var(--primary-rgb), 0.1);
         transform: scale(0.98);
         transition: transform 0.1s ease;
-    }
-    
-    /* Dark mode per modal mobile esterno */
-    [data-bs-theme="dark"] .custom-select-mobile-content {
-        background: var(--dark-bg);
-        border-color: var(--primary-color);
-    }
-    
-    [data-bs-theme="dark"] .custom-select-mobile-option {
-        color: var(--text-primary-dark);
-        border-bottom-color: var(--border-color-dark);
-    }
-    
-    [data-bs-theme="dark"] .custom-select-mobile-option:hover,
-    [data-bs-theme="dark"] .custom-select-mobile-option:active {
-        background: var(--primary-color);
-        color: white;
     }
     
     /* Scroll smooth su iOS */
@@ -425,4 +426,25 @@
         font-size: 0.9rem;
         min-height: 48px;
     }
+}
+
+/* ===================================
+   BODY BLOCKING WHEN MODAL OPEN
+   =================================== */
+body.custom-select-modal-open {
+    overflow: hidden !important;
+    position: fixed !important;
+    width: 100% !important;
+    height: 100% !important;
+    touch-action: none !important;
+    -webkit-overflow-scrolling: none !important;
+}
+
+/* Disabilita tutti gli elementi della pagina quando il modal è aperto */
+body.custom-select-modal-open > *:not(.custom-select-mobile-modal) {
+    pointer-events: none !important;
+    touch-action: none !important;
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
+    user-select: none !important;
 }

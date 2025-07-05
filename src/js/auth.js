@@ -380,7 +380,10 @@ export function initAuth(onAuthStateChange) {
     window.onAuthStateChangeCallback = onAuthStateChange;
     
     supabase.auth.onAuthStateChange(async (event, session) => {
-        console.log('Auth state change:', event, session);
+        // Log solo eventi importanti, non sessioni di routine
+        if (event !== 'INITIAL_SESSION') {
+            console.log('Auth state change:', event, session?.user?.email || 'no user');
+        }
         
         updateAuthUI(session);
         

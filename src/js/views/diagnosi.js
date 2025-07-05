@@ -54,11 +54,11 @@ function renderDiagnosiTable(diagnosi) {
             <td data-label="Nome Diagnosi">${d.nome}</td>
             <td data-label="Azioni">
                 <button class="btn btn-sm btn-warning edit-btn" data-id="${d.id}" data-name="${d.nome}" title="Modifica diagnosi">
-                    <span class="material-icons" style="font-size: 18px;">edit</span>
+                    <span class="material-icons">edit</span>
                     <span class="btn-text">Modifica</span>
                 </button>
                 <button class="btn btn-sm btn-danger delete-btn" data-id="${d.id}" title="Elimina diagnosi">
-                    <span class="material-icons" style="font-size: 18px;">delete</span>
+                    <span class="material-icons">delete</span>
                     <span class="btn-text">Elimina</span>
                 </button>
             </td>

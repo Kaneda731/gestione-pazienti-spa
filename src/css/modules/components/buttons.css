@@ -149,3 +149,88 @@
 #export-csv-btn:hover::before {
     left: 100%;
 }
+
+/* ===================================
+   ALLINEAMENTO PULSANTI CON ICONE
+   =================================== */
+
+/* Miglioramento allineamento per pulsanti con icone Material Icons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem; /* 6px - spazio tra icona e testo */
+    text-align: center;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+/* Icone Material Icons nei pulsanti */
+.btn .material-icons {
+    font-size: 1.1em !important;
+    line-height: 1 !important;
+    vertical-align: middle !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    margin: 0 !important;
+}
+
+/* Specifico per il pulsante "Aggiungi Diagnosi" */
+#save-diagnosi-btn {
+    min-height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    padding: 0.5rem 1rem;
+    white-space: nowrap;
+}
+
+#save-diagnosi-btn .material-icons {
+    font-size: 1.1em !important;
+    line-height: 1 !important;
+    margin-right: 0 !important;
+    vertical-align: middle !important;
+}
+
+/* Input group con pulsante */
+.input-group .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+/* Pulsanti piccoli nelle tabelle */
+.btn-sm {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.25rem !important;
+    padding: 0.25rem 0.5rem !important;
+    min-height: 32px !important;
+    font-size: 0.875rem !important;
+}
+
+.btn-sm .material-icons {
+    font-size: 1em !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+}
+
+/* Nascondere testo su schermi molto piccoli per pulsanti azione */
+@media (max-width: 576px) {
+    .btn-sm .btn-text {
+        display: none;
+    }
+    
+    .btn-sm {
+        min-width: 36px;
+        padding: 0.375rem !important;
+    }
+    
+    .btn-sm .material-icons {
+        font-size: 1.1em !important;
+    }
+}

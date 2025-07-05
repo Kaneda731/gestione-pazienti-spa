@@ -335,8 +335,17 @@ function createAuthModal() {
                             <div class="mb-3">
                                 <input type="password" class="form-control" id="login-password" placeholder="Password" required>
                             </div>
-                            <button type="submit" class="btn btn-primary w-100">Accedi</button>
+                            <button type="submit" class="btn btn-primary w-100 mb-3">Accedi</button>
                         </form>
+                        
+                        <div class="text-center mb-3">
+                            <span class="text-muted">oppure</span>
+                        </div>
+                        
+                        <button id="google-login-btn" class="btn btn-outline-danger w-100">
+                            <i class="material-icons me-2" style="font-size: 1.2em;">account_circle</i>
+                            Accedi con Google
+                        </button>
                         
                         <div id="auth-error" class="alert alert-danger mt-3" style="display: none;"></div>
                     </div>
@@ -359,6 +368,31 @@ function createAuthModal() {
             bootstrap.Modal.getInstance(document.getElementById('auth-modal')).hide();
             window.location.reload();
         } else {
+            const errorDiv = document.getElementById('auth-error');
+            errorDiv.textContent = result.error;
+            errorDiv.style.display = 'block';
+        }
+    });
+    
+    // Google login handler
+    document.getElementById('google-login-btn').addEventListener('click', async () => {
+        const googleBtn = document.getElementById('google-login-btn');
+        const originalText = googleBtn.innerHTML;
+        
+        // Stato loading
+        googleBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Connessione...';
+        googleBtn.disabled = true;
+        
+        const result = await signInWithGoogle();
+        
+        if (result.success) {
+            // Il redirect di Google gestirà il resto
+            googleBtn.innerHTML = '<i class="material-icons me-2">check</i>Reindirizzamento...';
+        } else {
+            // Ripristina pulsante e mostra errore
+            googleBtn.innerHTML = originalText;
+            googleBtn.disabled = false;
+            
             const errorDiv = document.getElementById('auth-error');
             errorDiv.textContent = result.error;
             errorDiv.style.display = 'block';

@@ -256,7 +256,34 @@
     .custom-select-mobile-options {
         max-height: calc(70vh - 80px);
         overflow-y: auto;
+        overflow-x: hidden;
         -webkit-overflow-scrolling: touch;
+        /* Garantisce scroll fluido su iOS e Android */
+        scroll-behavior: smooth;
+        /* Permette interazioni touch all'interno */
+        pointer-events: auto;
+        touch-action: pan-y; /* Permette solo scroll verticale */
+        /* Scrollbar visibile su mobile per chiarezza */
+        scrollbar-width: thin;
+        scrollbar-color: #6c757d #f8f9fa;
+    }
+    
+    /* Scrollbar personalizzata webkit (iOS/Safari/Chrome) */
+    .custom-select-mobile-options::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .custom-select-mobile-options::-webkit-scrollbar-track {
+        background: #f8f9fa;
+    }
+    
+    .custom-select-mobile-options::-webkit-scrollbar-thumb {
+        background: #6c757d;
+        border-radius: 3px;
+    }
+    
+    .custom-select-mobile-options::-webkit-scrollbar-thumb:hover {
+        background: #495057;
     }
     
     .custom-select-mobile-option {

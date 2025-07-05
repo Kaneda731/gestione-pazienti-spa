@@ -547,8 +547,23 @@ class CustomSelect {
             passive: false 
         });
         
-        // Blocca anche scroll e wheel events
+        // Blocca scroll e wheel events SOLO FUORI dal modal
         this.globalScrollBlocker = (e) => {
+            // Permetti scroll DENTRO il modal (specialmente nella zona opzioni)
+            if (this.mobileModal && this.mobileModal.contains(e.target)) {
+                // Se siamo nella zona delle opzioni del modal, permetti lo scroll
+                const optionsContainer = this.mobileModal.querySelector('.custom-select-mobile-options');
+                if (optionsContainer && optionsContainer.contains(e.target)) {
+                    return; // Non bloccare lo scroll interno
+                }
+                // Se siamo nel content del modal ma non nelle opzioni, permetti comunque
+                const modalContent = this.mobileModal.querySelector('.custom-select-mobile-content');
+                if (modalContent && modalContent.contains(e.target)) {
+                    return; // Non bloccare lo scroll interno del modal
+                }
+            }
+            
+            // Solo se siamo FUORI dal modal, blocca lo scroll
             e.preventDefault();
             e.stopPropagation();
             return false;

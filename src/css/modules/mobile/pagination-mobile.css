@@ -32,6 +32,8 @@
         border-radius: var(--border-radius);
         border: 1px solid var(--border-color);
         order: 2;
+        color: var(--secondary-dark) !important; /* Testo più scuro per contrasto */
+        font-weight: 600 !important; /* Grassetto per migliorare leggibilità */
     }
     
     /* Ordine ottimizzato per mobile */
@@ -71,6 +73,8 @@
         background: var(--glass-bg);
         border-radius: var(--border-radius);
         border: 1px solid var(--border-color);
+        color: var(--secondary-dark) !important; /* Testo più scuro per contrasto */
+        font-weight: 600 !important; /* Grassetto per migliorare leggibilità */
     }
 }
 
@@ -100,6 +104,7 @@
     #page-info {
         font-weight: 600 !important;
         letter-spacing: 0.025em;
+        color: var(--secondary-dark) !important; /* Assicura contrasto consistente */
     }
 }
 

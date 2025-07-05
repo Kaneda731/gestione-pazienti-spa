@@ -7,34 +7,25 @@ import { navigateTo } from '../router.js';
 const dom = {};
 
 async function loadDiagnosiOptions() {
-    try {
-        const { data, error } = await supabase
-            .from('diagnosi')
-            .select('nome')
-            .order('nome', { ascending: true });
+    const { data, error } = await supabase
+        .from('diagnosi')
+        .select('nome')
+        .order('nome', { ascending: true });
 
-        if (error) throw error;
-
-        const diagnosiSelect = dom.form.querySelector('#diagnosi');
-        if (!diagnosiSelect) {
-            console.warn('Elemento select diagnosi non trovato');
-            return;
-        }
-
-        diagnosiSelect.innerHTML = '<option value="">Seleziona diagnosi...</option>';
-        data.forEach(d => {
-            const option = document.createElement('option');
-            option.value = d.nome;
-            option.textContent = d.nome;
-            diagnosiSelect.appendChild(option);
-        });
-        
-        console.log(`✅ Opzioni diagnosi caricate: ${data.length} elementi`);
-    } catch (error) {
-        console.error('❌ Errore durante il caricamento delle opzioni di diagnosi:', error.message);
+    if (error) {
+        console.error('Error loading diagnosi options:', error.message);
         mostraMessaggio('Errore durante il caricamento delle opzioni di diagnosi.', 'danger');
-        throw error; // Re-throw per gestire l'errore nel chiamante
+        return;
     }
+
+    const diagnosiSelect = dom.form.querySelector('#diagnosi');
+    diagnosiSelect.innerHTML = '<option value="">Seleziona diagnosi...</option>';
+    data.forEach(d => {
+        const option = document.createElement('option');
+        option.value = d.nome;
+        option.textContent = d.nome;
+        diagnosiSelect.appendChild(option);
+    });
 }
 
 /**
@@ -169,30 +160,19 @@ export async function initInserimentoView() {
 
     const editId = sessionStorage.getItem('editPazienteId');
 
-    try {
-        // Carica le opzioni delle diagnosi prima di tutto
-        await loadDiagnosiOptions();
-        
-        // Setup del form dopo aver caricato le opzioni
-        if (editId) {
-            await populateFormForEdit(editId);
-        } else {
-            setupFormForInsert();
-        }
+    if (editId) {
+        await populateFormForEdit(editId);
+    } else {
+        setupFormForInsert();
+    }
 
-        setupFormEventListeners(editId);
-        
-        // Inizializza i custom select dopo aver caricato le opzioni
+    await loadDiagnosiOptions();
+    setupFormEventListeners(editId);
+    
+    // Inizializza i custom select dopo aver caricato le opzioni
+    setTimeout(() => {
         if (window.initCustomSelects) {
             window.initCustomSelects();
         }
-        
-        // Refresh per assicurarsi che le opzioni dinamiche siano caricate
-        if (window.refreshCustomSelects) {
-            window.refreshCustomSelects();
-        }
-    } catch (error) {
-        console.error('Errore durante l\'inizializzazione del form:', error);
-        mostraMessaggio('Errore durante il caricamento del form. Riprova.', 'danger');
-    }
+    }, 100);
 }

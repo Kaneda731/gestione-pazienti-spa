@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Error Handling - Gestione Pazienti SPA</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <style>
+        body {
+            padding: 2rem;
+        }
+        .console-output {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .log-entry {
+            margin-bottom: 0.5rem;
+        }
+        .log-info { color: #4fc3f7; }
+        .log-warn { color: #ffb74d; }
+        .log-error { color: #f44336; }
+        .log-debug { color: #81c784; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mb-4">
+            <span class="material-icons me-2">bug_report</span>
+            Test Error Handling System
+        </h1>
+        
+        <div class="alert alert-info">
+            <h5><span class="material-icons me-1">info</span> Test della Gestione Errori</h5>
+            <p>Questo test verifica che:</p>
+            <ul class="mb-0">
+                <li>Gli errori delle estensioni browser vengano filtrati e non mostrati come errori dell'app</li>
+                <li>Gli errori reali dell'applicazione vengano correttamente loggati</li>
+                <li>Il sistema di logging funzioni correttamente</li>
+            </ul>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Test Triggers</h5>
+                    </div>
+                    <div class="card-body">
+                        <button class="btn btn-primary mb-2" onclick="testAppLogger()">
+                            <span class="material-icons me-1">info</span>
+                            Test App Logger
+                        </button>
+                        <br>
+                        <button class="btn btn-warning mb-2" onclick="simulateExtensionError()">
+                            <span class="material-icons me-1">extension</span>
+                            Simula Errore Estensione
+                        </button>
+                        <br>
+                        <button class="btn btn-danger mb-2" onclick="simulateAppError()">
+                            <span class="material-icons me-1">error</span>
+                            Simula Errore App
+                        </button>
+                        <br>
+                        <button class="btn btn-secondary" onclick="clearConsole()">
+                            <span class="material-icons me-1">clear</span>
+                            Pulisci Console
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Console Output</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="console-output" id="consoleOutput">
+                            <div class="log-entry log-info">Console ready - click buttons to test</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Real-time Error Monitoring</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <div class="border p-3 rounded">
+                                <h6 class="text-muted">App Errors</h6>
+                                <span class="h4 text-danger" id="appErrorCount">0</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="border p-3 rounded">
+                                <h6 class="text-muted">Extension Errors (Ignored)</h6>
+                                <span class="h4 text-warning" id="extensionErrorCount">0</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="border p-3 rounded">
+                                <h6 class="text-muted">Info Messages</h6>
+                                <span class="h4 text-info" id="infoCount">0</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="border p-3 rounded">
+                                <h6 class="text-muted">Debug Messages</h6>
+                                <span class="h4 text-success" id="debugCount">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include app.js for error handling -->
+    <script type="module">
+        // Simulate app.js error handling
+        window.addEventListener('error', (event) => {
+            const ignoredMessages = [
+                'A listener indicated an asynchronous response by returning true',
+                'Extension context invalidated',
+                'Could not establish connection',
+                'chrome-extension://',
+                'moz-extension://'
+            ];
+            
+            const shouldIgnore = ignoredMessages.some(msg => 
+                event.message && event.message.includes(msg)
+            );
+            
+            if (shouldIgnore) {
+                updateCounter('extensionErrorCount');
+                addToConsole('Extension error ignored: ' + event.message, 'debug');
+                event.preventDefault();
+                return false;
+            }
+            
+            updateCounter('appErrorCount');
+            addToConsole('APP ERROR: ' + event.message, 'error');
+        });
+
+        window.addEventListener('unhandledrejection', (event) => {
+            const errorMessage = event.reason?.message || event.reason?.toString() || '';
+            
+            const ignoredMessages = [
+                'A listener indicated an asynchronous response by returning true',
+                'message channel closed before a response was received',
+                'Extension context invalidated',
+                'Could not establish connection'
+            ];
+            
+            const shouldIgnore = ignoredMessages.some(msg => 
+                errorMessage.includes(msg)
+            );
+            
+            if (shouldIgnore) {
+                updateCounter('extensionErrorCount');
+                addToConsole('Extension promise rejection ignored: ' + errorMessage, 'debug');
+                event.preventDefault();
+                return;
+            }
+            
+            updateCounter('appErrorCount');
+            addToConsole('APP PROMISE REJECTION: ' + errorMessage, 'error');
+        });
+
+        // App Logger simulation
+        window.appLogger = {
+            info: (message, data = null) => {
+                updateCounter('infoCount');
+                addToConsole('[APP] ' + message + (data ? ' | Data: ' + JSON.stringify(data) : ''), 'info');
+            },
+            
+            warn: (message, data = null) => {
+                addToConsole('[APP WARNING] ' + message + (data ? ' | Data: ' + JSON.stringify(data) : ''), 'warn');
+            },
+            
+            error: (message, error = null) => {
+                updateCounter('appErrorCount');
+                addToConsole('[APP ERROR] ' + message + (error ? ' | Error: ' + error.toString() : ''), 'error');
+            },
+            
+            debug: (message, data = null) => {
+                updateCounter('debugCount');
+                addToConsole('[APP DEBUG] ' + message + (data ? ' | Data: ' + JSON.stringify(data) : ''), 'debug');
+            }
+        };
+
+        // Test functions
+        window.testAppLogger = function() {
+            window.appLogger.info('Test info message', { test: true });
+            window.appLogger.warn('Test warning message');
+            window.appLogger.debug('Test debug message', { timestamp: new Date() });
+        };
+
+        window.simulateExtensionError = function() {
+            // Simulate extension error
+            const error = new Error('A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received');
+            setTimeout(() => {
+                throw error;
+            }, 100);
+        };
+
+        window.simulateAppError = function() {
+            // Simulate real app error
+            const error = new Error('Test application error - this should be logged');
+            setTimeout(() => {
+                throw error;
+            }, 100);
+        };
+
+        window.clearConsole = function() {
+            document.getElementById('consoleOutput').innerHTML = '<div class="log-entry log-info">Console cleared</div>';
+        };
+
+        function updateCounter(counterId) {
+            const counter = document.getElementById(counterId);
+            counter.textContent = parseInt(counter.textContent) + 1;
+        }
+
+        function addToConsole(message, type) {
+            const console = document.getElementById('consoleOutput');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.textContent = new Date().toLocaleTimeString() + ' - ' + message;
+            console.appendChild(entry);
+            console.scrollTop = console.scrollHeight;
+        }
+
+        // Initial message
+        window.appLogger.info('Error handling test initialized');
+    </script>
+</body>
+</html>

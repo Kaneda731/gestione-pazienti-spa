@@ -183,10 +183,10 @@
         background: rgba(33, 37, 41, 0.85); /* Grigio scuro più elegante */
         backdrop-filter: blur(8px);
         -webkit-backdrop-filter: blur(8px);
-        /* Blocca completamente ogni interazione */
+        /* IMPORTANTE: overlay deve solo ricevere eventi diretti, non da figli */
         pointer-events: auto;
-        touch-action: none;
         cursor: pointer;
+        /* Rimuovi touch-action: none per permettere scroll sui figli */
     }
     
     /* Contenuto del modal */
@@ -205,6 +205,9 @@
         border: 1px solid #e9ecef; /* Bordo sottile */
         /* Forza centratura reale */
         margin: auto;
+        /* IMPORTANTE: Il content deve intercettare tutti gli eventi e non propagarli */
+        pointer-events: auto;
+        touch-action: pan-y; /* Permetti scroll verticale naturale */
     }
     
     /* Header del modal */
@@ -283,8 +286,10 @@
         /* Performance */
         -webkit-transform: translate3d(0,0,0);
         transform: translate3d(0,0,0);
-        touch-action: pan-y;
+        touch-action: pan-y; /* Permetti solo scroll verticale */
         will-change: scroll-position;
+        /* IMPORTANTE: Le opzioni devono intercettare eventi touch per scroll */
+        pointer-events: auto;
     }
     
     /* Zona scroll dedicata laterale */

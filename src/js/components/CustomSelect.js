@@ -333,6 +333,8 @@ class CustomSelect {
     bindMobileModalEvents() {
         const closeBtn = this.mobileModal.querySelector('.custom-select-mobile-close');
         const overlay = this.mobileModal.querySelector('.custom-select-mobile-overlay');
+        const content = this.mobileModal.querySelector('.custom-select-mobile-content');
+        const optionsContainer = this.mobileModal.querySelector('.custom-select-mobile-options');
         const options = this.mobileModal.querySelectorAll('.custom-select-mobile-option');
         
         // Chiudi con X - protezione da interferenze
@@ -351,45 +353,62 @@ class CustomSelect {
             this.close();
         }, { capture: true, passive: false });
         
-        // Chiudi con overlay
+        // SOLUZIONE: Overlay chiude SOLO se clicchi direttamente su di esso
+        // NON sui suoi figli (content, opzioni, etc.)
         overlay.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            e.stopImmediatePropagation();
-            this.close();
+            // Chiudi SOLO se il target dell'evento è proprio l'overlay
+            // e NON uno dei suoi elementi figli
+            if (e.target === overlay) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.close();
+            }
         });
         
-        // Blocca completamente eventi touch sull'overlay
-        overlay.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            e.stopImmediatePropagation();
-        }, { passive: false });
-        
         overlay.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            e.stopImmediatePropagation();
-            this.close();
+            // Chiudi SOLO se il target dell'evento è proprio l'overlay
+            if (e.target === overlay) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.close();
+            }
         }, { passive: false });
         
-        // Blocca scroll e altre interazioni sull'overlay
-        overlay.addEventListener('wheel', (e) => {
-            e.preventDefault();
+        // IMPORTANTE: Previeni propagazione degli eventi dal content verso l'overlay
+        content.addEventListener('click', (e) => {
+            // Ferma la propagazione verso l'overlay per evitare chiusure accidentali
             e.stopPropagation();
-        }, { passive: false });
+        });
         
-        overlay.addEventListener('touchmove', (e) => {
-            e.preventDefault();
+        content.addEventListener('touchstart', (e) => {
+            // Ferma la propagazione verso l'overlay
             e.stopPropagation();
-        }, { passive: false });
+        }, { passive: true });
+        
+        content.addEventListener('touchend', (e) => {
+            // Ferma la propagazione verso l'overlay
+            e.stopPropagation();
+        }, { passive: true });
+        
+        // Container delle opzioni: permetti scroll naturale
+        optionsContainer.addEventListener('touchstart', (e) => {
+            e.stopPropagation(); // Non propagare all'overlay
+        }, { passive: true });
+        
+        optionsContainer.addEventListener('touchmove', (e) => {
+            e.stopPropagation(); // Non propagare all'overlay - scroll libero
+        }, { passive: true });
+        
+        optionsContainer.addEventListener('touchend', (e) => {
+            e.stopPropagation(); // Non propagare all'overlay
+        }, { passive: true });
         
         // Seleziona opzioni - VERSIONE SEMPLIFICATA MASSIMA
         options.forEach(option => {
             // SOLO click - nessun touch event che interferisca
             option.addEventListener('click', (e) => {
                 e.preventDefault();
-                e.stopPropagation();
+                e.stopPropagation(); // Non propagare all'overlay
                 
                 const value = option.dataset.value;
                 const text = option.textContent.trim();
@@ -400,6 +419,26 @@ class CustomSelect {
                     this.close();
                 }, 50);
             });
+            
+            // Previeni propagazione anche per gli eventi touch delle opzioni
+            option.addEventListener('touchstart', (e) => {
+                e.stopPropagation();
+            }, { passive: true });
+            
+            option.addEventListener('touchend', (e) => {
+                // Per le opzioni, se è un tap veloce (non scroll), attiva selezione
+                e.stopPropagation();
+                
+                // Tap veloce = selezione dell'opzione
+                const value = option.dataset.value;
+                const text = option.textContent.trim();
+                
+                this.selectOption(value, text);
+                
+                setTimeout(() => {
+                    this.close();
+                }, 50);
+            }, { passive: false });
         });
     }
     

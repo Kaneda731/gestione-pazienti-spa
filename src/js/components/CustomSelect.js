@@ -83,19 +83,53 @@ class CustomSelect {
             optionElement.dataset.value = option.value;
             optionElement.textContent = option.textContent;
             
+            // Gestione touch migliorata per mobile
+            let touchStartData = null;
+            
             optionElement.addEventListener('click', () => {
                 this.selectOption(option.value, option.textContent);
             });
             
-            // Supporto touch su mobile per le opzioni
+            // Touch events con rilevamento scroll
             optionElement.addEventListener('touchstart', (e) => {
+                touchStartData = {
+                    x: e.touches[0].clientX,
+                    y: e.touches[0].clientY,
+                    time: Date.now()
+                };
+                e.stopPropagation();
+            }, { passive: true });
+            
+            optionElement.addEventListener('touchmove', (e) => {
+                // Permetti scroll, non bloccare
                 e.stopPropagation();
             }, { passive: true });
             
             optionElement.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                this.selectOption(option.value, option.textContent);
+                if (!touchStartData) return;
+                
+                const touchEndData = {
+                    x: e.changedTouches[0].clientX,
+                    y: e.changedTouches[0].clientY,
+                    time: Date.now()
+                };
+                
+                const deltaX = Math.abs(touchEndData.x - touchStartData.x);
+                const deltaY = Math.abs(touchEndData.y - touchStartData.y);
+                const deltaTime = touchEndData.time - touchStartData.time;
+                
+                // È un tap se:
+                // - movimento minimo (< 10px)
+                // - durata breve (< 300ms)
+                const isTap = deltaX < 10 && deltaY < 10 && deltaTime < 300;
+                
+                if (isTap) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.selectOption(option.value, option.textContent);
+                }
+                
+                touchStartData = null;
             }, { passive: false });
             
             optionsContainer.appendChild(optionElement);
@@ -111,21 +145,47 @@ class CustomSelect {
         const trigger = this.wrapper.querySelector('.custom-select-trigger');
         const dropdown = this.wrapper.querySelector('.custom-select-dropdown');
         
-        // Toggle dropdown - Supporto touch mobile
+        // Toggle dropdown - gestione migliorata per touch
+        let triggerTouchStart = null;
+        
         trigger.addEventListener('click', (e) => {
             e.stopPropagation();
             this.toggle();
         });
         
-        // Supporto touch su mobile
+        // Gestione touch migliorata per trigger
         trigger.addEventListener('touchstart', (e) => {
+            triggerTouchStart = {
+                x: e.touches[0].clientX,
+                y: e.touches[0].clientY,
+                time: Date.now()
+            };
             e.stopPropagation();
         }, { passive: true });
-        
+
         trigger.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            this.toggle();
+            if (!triggerTouchStart) return;
+            
+            const touchEndData = {
+                x: e.changedTouches[0].clientX,
+                y: e.changedTouches[0].clientY,
+                time: Date.now()
+            };
+            
+            const deltaX = Math.abs(touchEndData.x - triggerTouchStart.x);
+            const deltaY = Math.abs(touchEndData.y - triggerTouchStart.y);
+            const deltaTime = touchEndData.time - triggerTouchStart.time;
+            
+            // È un tap se movimento minimo e durata breve
+            const isTap = deltaX < 10 && deltaY < 10 && deltaTime < 300;
+            
+            if (isTap) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.toggle();
+            }
+            
+            triggerTouchStart = null;
         }, { passive: false });
         
         // Close on outside click/touch

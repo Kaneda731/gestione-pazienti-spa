@@ -159,8 +159,8 @@ class MobileCardManager {
         document.querySelectorAll('.card').forEach(card => {
             // Previene double-tap zoom solo sulle card, non sui pulsanti
             card.addEventListener('touchend', (e) => {
-                // Non interferire con i pulsanti e link
-                if (e.target.closest('button, a, input, select')) {
+                // Non interferire con pulsanti, link e custom select
+                if (e.target.closest('button, a, input, select, .custom-select-wrapper, .custom-select-trigger')) {
                     return; // Lascia il comportamento normale
                 }
                 e.preventDefault();
@@ -169,8 +169,8 @@ class MobileCardManager {
             
             // Feedback tattile (solo se supportato e dopo prima interazione utente)
             card.addEventListener('touchstart', (e) => {
-                // Solo se non è un pulsante
-                if (!e.target.closest('button, a, input, select')) {
+                // Solo se non è un pulsante o custom select
+                if (!e.target.closest('button, a, input, select, .custom-select-wrapper, .custom-select-trigger')) {
                     try {
                         // Controlla se la vibrazione è supportata e se l'utente ha già interagito
                         if ('vibrate' in navigator && MobileCardManager.userHasInteracted) {

@@ -110,6 +110,11 @@ class CustomSelect {
         // Toggle dropdown
         trigger.addEventListener('click', (e) => {
             e.stopPropagation();
+            window.appLogger?.debug('CustomSelect trigger clicked', { 
+                isOpen: this.isOpen, 
+                selectId: this.selectElement.id,
+                isMobile: window.innerWidth <= 767 
+            });
             this.toggle();
         });
         
@@ -121,8 +126,14 @@ class CustomSelect {
         };
         
         this.outsideTouchHandler = (e) => {
-            if (!this.wrapper.contains(e.target) && !this.mobileModal?.contains(e.target)) {
-                this.close();
+            // Su mobile, chiudi solo se tocchi fuori E non è il primo touch dell'apertura
+            if (this.isOpen && !this.wrapper.contains(e.target) && !this.mobileModal?.contains(e.target)) {
+                // Aggiungi un piccolo delay per evitare chiusure immediate
+                setTimeout(() => {
+                    if (this.isOpen) {
+                        this.close();
+                    }
+                }, 50);
             }
         };
         
@@ -221,6 +232,12 @@ class CustomSelect {
     }
     
     open() {
+        window.appLogger?.debug('CustomSelect opening', { 
+            selectId: this.selectElement.id, 
+            isMobile: window.innerWidth <= 767,
+            currentState: this.isOpen 
+        });
+        
         this.isOpen = true;
         this.wrapper.classList.add('open');
         
@@ -491,6 +508,12 @@ class CustomSelect {
     }
     
     close() {
+        window.appLogger?.debug('CustomSelect closing', { 
+            selectId: this.selectElement.id, 
+            hasMobileModal: !!this.mobileModal,
+            currentState: this.isOpen 
+        });
+        
         this.isOpen = false;
         this.wrapper.classList.remove('open');
         

@@ -1,0 +1,8 @@
+<!-- Favicon semplice SVG per evitare 404 -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <circle cx="32" cy="32" r="30" fill="#0d6efd"/>
+  <path d="M20 28h24v8H20z" fill="white"/>
+  <circle cx="26" cy="22" r="4" fill="white"/>
+  <circle cx="38" cy="22" r="4" fill="white"/>
+  <path d="M26 40c0 6 6 12 6 12s6-6 6-12" fill="white"/>
+</svg>

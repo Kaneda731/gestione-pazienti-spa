@@ -1,0 +1,236 @@
+/* ===================================
+   PULSANTI
+   =================================== */
+
+/* Pulsanti "Torna al Menu" */
+.btn-back-menu {
+    /* Usa variabili CSS per valori comuni */
+    border-radius: var(--btn-border-radius);
+    padding: var(--btn-padding);
+    font-size: var(--btn-font-size);
+    font-weight: var(--btn-font-weight);
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    border: var(--btn-border);
+    color: white;
+    /* Specifico per btn-back-menu */
+    background: linear-gradient(135deg, var(--secondary-color), #495057);
+}
+
+.btn-back-menu::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: var(--btn-shine-transition);
+    z-index: 1;
+}
+
+.btn-back-menu:hover {
+    transform: var(--btn-transform-hover);
+    box-shadow: var(--btn-shadow-hover);
+    color: white;
+    border-color: var(--btn-border-hover);
+    background: linear-gradient(135deg, #5a6268, var(--secondary-color));
+}
+
+.btn-back-menu:hover::before {
+    left: 100%;
+}
+
+.btn-back-menu:active {
+    transform: var(--btn-transform-active);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-back-menu .material-icons {
+    font-size: 1.1em;
+    transition: transform 0.3s ease;
+}
+
+.btn-back-menu:hover .material-icons {
+    transform: translateX(-2px);
+}
+
+/* Pulsanti paginazione - usano variabili comuni */
+#prev-page-btn,
+#next-page-btn {
+    /* Usa variabili CSS per valori comuni */
+    border-radius: var(--btn-border-radius);
+    padding: var(--btn-padding);
+    font-size: var(--btn-font-size);
+    font-weight: var(--btn-font-weight);
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    border: var(--btn-border);
+    color: white;
+    /* Specifico per paginazione */
+    background: linear-gradient(135deg, var(--secondary-color), #495057);
+    min-width: 120px;
+}
+
+#prev-page-btn::before,
+#next-page-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: var(--btn-shine-transition);
+    z-index: 1;
+}
+
+#prev-page-btn:hover,
+#next-page-btn:hover {
+    transform: var(--btn-transform-hover);
+    box-shadow: var(--btn-shadow-hover);
+    color: white;
+    border-color: var(--btn-border-hover);
+    background: linear-gradient(135deg, #5a6268, var(--secondary-color));
+}
+
+#prev-page-btn:hover::before,
+#next-page-btn:hover::before {
+    left: 100%;
+}
+
+#prev-page-btn:active,
+#next-page-btn:active {
+    transform: var(--btn-transform-active);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Pulsante esporta CSV */
+#export-csv-btn {
+    /* Usa variabili CSS per valori comuni */
+    border-radius: var(--btn-border-radius);
+    font-size: var(--btn-font-size);
+    font-weight: var(--btn-font-weight);
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    border: var(--btn-border);
+    color: white;
+    /* Specifico per export CSV */
+    background: linear-gradient(135deg, var(--success-color), #0f5132);
+    padding: 0.5rem 1rem;
+    min-width: 140px;
+}
+
+#export-csv-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: var(--btn-shine-transition);
+    z-index: 1;
+}
+
+#export-csv-btn:hover {
+    background: linear-gradient(135deg, #157347, var(--success-color));
+    transform: var(--btn-transform-hover);
+    box-shadow: var(--btn-shadow-hover);
+    color: white;
+}
+
+#export-csv-btn:hover::before {
+    left: 100%;
+}
+
+/* ===================================
+   ALLINEAMENTO PULSANTI CON ICONE
+   =================================== */
+
+/* Miglioramento allineamento per pulsanti con icone Material Icons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem; /* 6px - spazio tra icona e testo */
+    text-align: center;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+/* Icone Material Icons nei pulsanti */
+.btn .material-icons {
+    font-size: 1.1em !important;
+    line-height: 1 !important;
+    vertical-align: middle !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    margin: 0 !important;
+}
+
+/* Specifico per il pulsante "Aggiungi Diagnosi" */
+#save-diagnosi-btn {
+    min-height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    padding: 0.5rem 1rem;
+    white-space: nowrap;
+}
+
+#save-diagnosi-btn .material-icons {
+    font-size: 1.1em !important;
+    line-height: 1 !important;
+    margin-right: 0 !important;
+    vertical-align: middle !important;
+}
+
+/* Input group con pulsante */
+.input-group .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+/* Pulsanti piccoli nelle tabelle */
+.btn-sm {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.25rem !important;
+    padding: 0.25rem 0.5rem !important;
+    min-height: 32px !important;
+    font-size: 0.875rem !important;
+}
+
+.btn-sm .material-icons {
+    font-size: 1em !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+}
+
+/* Nascondere testo su schermi molto piccoli per pulsanti azione */
+@media (max-width: 576px) {
+    .btn-sm .btn-text {
+        display: none;
+    }
+    
+    .btn-sm {
+        min-width: 36px;
+        padding: 0.375rem !important;
+    }
+    
+    .btn-sm .material-icons {
+        font-size: 1.1em !important;
+    }
+}

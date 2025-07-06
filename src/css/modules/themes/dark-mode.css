@@ -1,0 +1,334 @@
+/* ===================================
+   TEMA SCURO
+   =================================== */
+
+/* Variabili per il tema scuro */
+[data-bs-theme="dark"] {
+    --body-bg: linear-gradient(135deg, #1a1d29, #1e2330);
+    --card-bg: #252a3a;
+    --bg-primary: #1e2330;
+    --bg-secondary: #252a3a;
+    --bg-tertiary: #2a3045;
+    --text-primary: #f8f9fa;
+    --text-secondary: #cbd5e1;
+    --text-muted: #94a3b8;
+    --primary-color: #4dabf7;
+    --secondary-color: #adb5bd;
+    --light-color: #3d4454;
+    --dark-color: #f8f9fa;
+    --border-color: #495057;
+    --input-bg: #3d4454;
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
+/* Body nel tema scuro */
+[data-bs-theme="dark"] body {
+    background: var(--body-bg);
+    color: var(--text-primary);
+    margin: 0;
+    padding: 0;
+}
+
+/* Assicura che il background copra tutto in dark mode */
+[data-bs-theme="dark"] html {
+    background: var(--body-bg);
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 100%;
+}
+
+/* Main container nel tema scuro - rimuove gap */
+[data-bs-theme="dark"] main#app-container {
+    background: transparent;
+    min-height: calc(100vh - 76px); /* Altezza navbar circa 76px */
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+/* Fix per le animazioni delle menu-card in dark mode */
+[data-bs-theme="dark"] #view-home {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+[data-bs-theme="dark"] .menu-cards-grid {
+    padding: 3rem 1rem;
+}
+
+/* Navbar nel tema scuro */
+[data-bs-theme="dark"] .navbar {
+    background: linear-gradient(135deg, #1a1d29 0%, #1e2330 30%, #252a3a 70%, #2a3045 100%) !important;
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 4px 16px rgba(0, 0, 0, 0.4), 0 0 20px rgba(77, 171, 247, 0.2);
+}
+
+[data-bs-theme="dark"] .navbar-brand,
+[data-bs-theme="dark"] .navbar-brand span {
+    color: var(--text-primary) !important;
+}
+
+[data-bs-theme="dark"] .navbar-brand .material-icons {
+    background: rgba(77, 171, 247, 0.1);
+    color: var(--primary-color);
+}
+
+[data-bs-theme="dark"] #theme-toggle {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+[data-bs-theme="dark"] #theme-toggle:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: var(--primary-color);
+}
+
+/* Card nel tema scuro */
+[data-bs-theme="dark"] .card {
+    background: var(--card-bg);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+[data-bs-theme="dark"] .card-header {
+    background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+    border-bottom-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+/* Form controls nel tema scuro */
+[data-bs-theme="dark"] .form-control,
+[data-bs-theme="dark"] .form-select {
+    background-color: var(--input-bg);
+    border-color: var(--border-color);
+    color: var(--dark-color);
+}
+
+[data-bs-theme="dark"] .form-control:focus,
+[data-bs-theme="dark"] .form-select:focus {
+    background-color: var(--input-bg);
+    border-color: var(--primary-color);
+    color: var(--dark-color);
+}
+
+/* Tabelle nel tema scuro */
+[data-bs-theme="dark"] .table {
+    background: var(--card-bg);
+    color: var(--text-primary);
+}
+
+[data-bs-theme="dark"] .table th {
+    background: linear-gradient(135deg, var(--primary-color), #339af0);
+    color: white;
+    border-color: var(--border-color);
+}
+
+[data-bs-theme="dark"] .table td {
+    border-color: var(--border-color);
+    background: var(--card-bg);
+}
+
+[data-bs-theme="dark"] .table-hover tbody tr:hover {
+    background-color: rgba(77, 171, 247, 0.1);
+}
+
+[data-bs-theme="dark"] .table-responsive {
+    background: var(--card-bg);
+}
+
+/* Scrollbar per tabelle responsive nel tema scuro */
+[data-bs-theme="dark"] .table-responsive::-webkit-scrollbar {
+    height: 8px;
+}
+
+[data-bs-theme="dark"] .table-responsive::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+    border-radius: 4px;
+}
+
+[data-bs-theme="dark"] .table-responsive::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 4px;
+}
+
+[data-bs-theme="dark"] .table-responsive::-webkit-scrollbar-thumb:hover {
+    background: #339af0;
+}
+
+/* Menu cards nel tema scuro */
+[data-bs-theme="dark"] .menu-card {
+    background: linear-gradient(145deg, #252a3a, #2a3045);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6), 
+                0 4px 10px rgba(30, 35, 48, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(77, 171, 247, 0.1);
+}
+
+[data-bs-theme="dark"] .menu-card:hover {
+    background: linear-gradient(145deg, #2a3045, #2f3555);
+    box-shadow: 0 25px 50px rgba(77, 171, 247, 0.35), 
+                0 15px 35px rgba(77, 171, 247, 0.25),
+                0 8px 20px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    border-color: rgba(77, 171, 247, 0.3);
+}
+
+[data-bs-theme="dark"] .menu-card::before {
+    background: linear-gradient(135deg, rgba(77, 171, 247, 0.12), rgba(119, 184, 252, 0.08));
+}
+
+[data-bs-theme="dark"] .menu-card::after {
+    background: radial-gradient(circle at center, rgba(77, 171, 247, 0.25) 0%, transparent 70%);
+}
+
+[data-bs-theme="dark"] .icon-wrapper {
+    background: linear-gradient(135deg, #4dabf7, #339af0);
+    box-shadow: 0 12px 30px rgba(77, 171, 247, 0.5),
+                0 8px 20px rgba(77, 171, 247, 0.3),
+                inset 0 2px 4px rgba(255, 255, 255, 0.15),
+                inset 0 -2px 4px rgba(0, 0, 0, 0.3);
+}
+
+[data-bs-theme="dark"] .menu-card:hover .icon-wrapper {
+    box-shadow: 0 20px 45px rgba(77, 171, 247, 0.5),
+                0 15px 30px rgba(77, 171, 247, 0.3),
+                0 8px 20px rgba(0, 0, 0, 0.15),
+                inset 0 3px 6px rgba(255, 255, 255, 0.2),
+                inset 0 -3px 6px rgba(0, 0, 0, 0.1);
+}
+
+[data-bs-theme="dark"] .icon-wrapper::before {
+    background: radial-gradient(circle, rgba(77, 171, 247, 0.25) 0%, transparent 70%);
+}
+
+/* Dark mode specifico per pulsanti back */
+[data-bs-theme="dark"] .btn-back-menu {
+    background: linear-gradient(135deg, #3d4454, #495057);
+    border-color: rgba(77, 171, 247, 0.2);
+    color: #e9ecef;
+}
+
+[data-bs-theme="dark"] .btn-back-menu:hover {
+    background: linear-gradient(135deg, #495057, #5a6268);
+    border-color: rgba(77, 171, 247, 0.4);
+    color: white;
+    box-shadow: 0 4px 15px rgba(77, 171, 247, 0.3);
+}
+
+[data-bs-theme="dark"] .btn-back-menu::before {
+    background: linear-gradient(90deg, transparent, rgba(77, 171, 247, 0.3), transparent);
+}
+
+/* Custom select nel tema scuro */
+[data-bs-theme="dark"] .custom-select-trigger {
+    background-color: var(--input-bg);
+    border-color: var(--border-color);
+    color: var(--dark-color);
+}
+
+[data-bs-theme="dark"] .custom-select-trigger:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(77, 171, 247, 0.15);
+}
+
+[data-bs-theme="dark"] .custom-select-dropdown {
+    background-color: var(--input-bg);
+    border-color: var(--border-color);
+    border-top-color: var(--primary-color);
+}
+
+[data-bs-theme="dark"] .custom-select-option {
+    color: var(--dark-color);
+}
+
+[data-bs-theme="dark"] .custom-select-option:hover,
+[data-bs-theme="dark"] .custom-select-option.focused {
+    background: rgba(77, 171, 247, 0.2);
+    color: var(--primary-color);
+}
+
+[data-bs-theme="dark"] .custom-select-arrow {
+    color: var(--primary-color);
+}
+
+/* Pulsanti di paginazione nel tema scuro - stile coerente con btn-back-menu */
+[data-bs-theme="dark"] #prev-page-btn,
+[data-bs-theme="dark"] #next-page-btn {
+    background: linear-gradient(135deg, #3d4454, #495057);
+    border-color: rgba(77, 171, 247, 0.2);
+    color: #e9ecef;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+[data-bs-theme="dark"] #prev-page-btn::before,
+[data-bs-theme="dark"] #next-page-btn::before {
+    background: linear-gradient(90deg, transparent, rgba(77, 171, 247, 0.3), transparent);
+}
+
+[data-bs-theme="dark"] #prev-page-btn:hover,
+[data-bs-theme="dark"] #next-page-btn:hover {
+    background: linear-gradient(135deg, #495057, #5a6268);
+    border-color: rgba(77, 171, 247, 0.4);
+    color: white;
+    box-shadow: 0 4px 15px rgba(77, 171, 247, 0.3);
+}
+
+[data-bs-theme="dark"] #prev-page-btn:hover::before,
+[data-bs-theme="dark"] #next-page-btn:hover::before {
+    left: 100%;
+}
+
+[data-bs-theme="dark"] #prev-page-btn:active,
+[data-bs-theme="dark"] #next-page-btn:active {
+    transform: translateY(0) scale(0.98);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+[data-bs-theme="dark"] #page-info {
+    color: var(--text-secondary);
+}
+
+/* ===================================
+   DARK MODE MOBILE OPTIMIZATIONS
+   =================================== */
+
+/* Mobile menu cards nel tema scuro */
+@media (max-width: 767px) {
+    [data-bs-theme="dark"] .menu-cards-grid {
+        padding: 1.5rem 1rem;
+    }
+    
+    [data-bs-theme="dark"] .menu-card {
+        background: linear-gradient(145deg, #252a3a, #2a3045);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4), 
+                    0 2px 8px rgba(30, 35, 48, 0.3),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+    
+    [data-bs-theme="dark"] .menu-card:hover {
+        background: linear-gradient(145deg, #2a3045, #2f3555);
+        box-shadow: 0 8px 20px rgba(77, 171, 247, 0.25), 
+                    0 4px 12px rgba(77, 171, 247, 0.15),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+    
+    /* Mobile table cards nel tema scuro */
+    [data-bs-theme="dark"] .table tbody tr {
+        background: var(--card-bg);
+        border-color: var(--border-color);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+    
+    [data-bs-theme="dark"] .table tbody td {
+        border-bottom-color: var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    [data-bs-theme="dark"] .table tbody td:before {
+        color: var(--primary-color);
+    }
+}

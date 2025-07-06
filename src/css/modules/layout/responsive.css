@@ -1,0 +1,159 @@
+/* ===================================
+   RESPONSIVE & LAYOUT
+   =================================== */
+
+/* Prevenzione overflow globale */
+html {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+}
+
+body {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+    margin: 0;
+    padding: 0;
+}
+
+.container,
+.container-fluid {
+    overflow-x: hidden !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* Prevent any element from causing horizontal overflow */
+.row {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    max-width: 100% !important;
+}
+
+.col,
+[class*="col-"] {
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+    max-width: 100% !important;
+}
+
+/* Responsive breakpoints */
+@media (max-width: 768px) {
+    .container {
+        padding: 0 0.5rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .card-header {
+        padding: 1rem;
+    }
+    
+    h1, h2, h3 {
+        font-size: 1.5rem;
+    }
+    
+    .btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .card-body {
+        padding: 0.75rem;
+    }
+    
+    .form-section {
+        padding: 1rem;
+    }
+    
+    .section-title {
+        font-size: 1.1rem;
+    }
+}
+
+/* Fix per evitare scroll orizzontale */
+* {
+    box-sizing: border-box;
+/* ===================================
+   RESPONSIVE DESKTOP/TABLET LAYOUT
+   =================================== */
+
+/* Base responsive */
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* === DESKTOP/TABLET BREAKPOINTS === */
+@media (min-width: 768px) {
+    .container {
+        padding: 0 1.5rem;
+        max-width: 1200px;
+    }
+    
+    .card-body {
+        padding: 1.5rem;
+    }
+    
+    .card-header {
+        padding: 1.5rem;
+    }
+}
+
+@media (min-width: 1200px) {
+    .container {
+        padding: 0 2rem;
+        max-width: 1400px;
+    }
+    
+    .card-body {
+        padding: 2rem;
+    }
+    
+    .card-header {
+        padding: 2rem;
+    }
+    
+    h1, h2, h3 {
+        font-size: 2rem;
+    }
+    
+    .btn {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+    }
+}
+
+@media (min-width: 1600px) {
+    .container {
+        max-width: 1600px;
+    }
+    
+    h1, h2, h3 {
+        font-size: 2.25rem;
+    }
+}
+
+/* === UTILITY CLASSES === */
+.d-mobile-none {
+    display: none !important;
+}
+
+@media (min-width: 768px) {
+    .d-mobile-none {
+        display: block !important;
+    }
+}
+
+.d-mobile-only {
+    display: block !important;
+}
+
+@media (min-width: 768px) {
+    .d-mobile-only {
+        display: none !important;
+    }
+}

@@ -1,0 +1,45 @@
+<div class="view">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3><span class="material-icons me-2">event_available</span>Dimissione Paziente</h3>
+                    <button class="btn btn-sm btn-back-menu" data-view="home">
+                        <span class="material-icons me-1" style="vertical-align: text-bottom;">arrow_back</span>Torna al Menu
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div id="messaggio-container-dimissione" class="mb-3"></div>
+                    <!-- Sezione di Ricerca -->
+                    <div class="mb-4">
+                        <label for="search-paziente" class="form-label">Cerca Paziente (per cognome)</label>
+                        <div class="input-group">
+                            <input type="text" id="search-paziente" class="form-control" placeholder="Inserisci il cognome e premi Invio...">
+                            <button id="search-button" class="btn btn-outline-secondary" type="button">
+                                <span class="material-icons" style="vertical-align: middle;">search</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Risultati Ricerca -->
+                    <div id="search-results" class="list-group mb-4">
+                        <!-- I risultati della ricerca verranno mostrati qui -->
+                    </div>
+
+                    <!-- Modulo di Dimissione (visibile dopo aver selezionato un paziente) -->
+                    <form id="form-dimissione" class="d-none">
+                        <h5 class="mb-3">Dettagli Paziente Selezionato</h5>
+                        <p><strong>Paziente:</strong> <span id="selected-paziente-nome"></span></p>
+                        <p><strong>Data Ricovero:</strong> <span id="selected-paziente-ricovero"></span></p>
+                        
+                        <div class="mb-3">
+                            <label for="data_dimissione" class="form-label">Data di Dimissione</label>
+                            <input type="date" id="data_dimissione" name="data_dimissione" class="form-control" required>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">
+                            <span class="material-icons me-1" style="vertical-align: middle;">check_circle</span>
+                            Conferma Dimissione
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>

@@ -1,0 +1,76 @@
+<div class="view">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3><span class="material-icons me-2">list_alt</span>Elenco Pazienti</h3>
+                    <button class="btn btn-sm btn-back-menu" data-view="home">
+                        <span class="material-icons me-1" style="vertical-align: text-bottom;">arrow_back</span>Torna al Menu
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="filters-container row g-3 mb-3">
+                        <div class="col-md-3">
+                            <label for="list-filter-reparto" class="form-label">Reparto</label>
+                            <select id="list-filter-reparto" class="form-select form-select-sm" data-custom="true">
+                                <!-- Popolato dinamicamente -->
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="list-filter-diagnosi" class="form-label">Diagnosi</label>
+                            <select id="list-filter-diagnosi" class="form-select form-select-sm" data-custom="true">
+                                <!-- Popolato dinamicamente -->
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="list-filter-stato" class="form-label">Stato</label>
+                            <select id="list-filter-stato" class="form-select form-select-sm" data-custom="true">
+                                <option value="">Tutti</option>
+                                <option value="attivo">Attivo</option>
+                                <option value="dimesso">Dimesso</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="list-search" class="form-label">Cerca</label>
+                            <input type="text" id="list-search" class="form-control form-control-sm" placeholder="Per nome o cognome...">
+                        </div>
+                    </div>
+                    
+                    <!-- Vista Tabella (Solo Desktop XL) -->
+                    <div class="table-responsive d-none d-xl-block">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th data-sort="cognome">Cognome <span class="sort-indicator"></span></th>
+                                    <th data-sort="nome">Nome <span class="sort-indicator"></span></th>
+                                    <th data-sort="data_ricovero">Data Ricovero <span class="sort-indicator"></span></th>
+                                    <th>Diagnosi</th>
+                                    <th>Reparto</th>
+                                    <th>Stato</th>
+                                    <th>Azioni</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pazienti-table-body">
+                                <!-- Le righe verranno popolate dinamicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Barra azioni sotto tabella -->
+                    <div class="d-flex justify-content-end align-items-center mt-3 mb-3">
+                        <button id="export-csv-btn" class="btn btn-outline-success">
+                            <span class="material-icons me-1" style="vertical-align: text-bottom;">download</span>Esporta CSV
+                        </button>
+                    </div>
+                    
+                    <!-- Vista Card (Mobile, Tablet, Desktop) -->
+                    <div class="d-xl-none" id="pazienti-cards-container">
+                        <!-- Le card verranno generate dinamicamente -->
+                    </div>
+                    <!-- Controlli di Paginazione -->
+                    <div id="pagination-controls" class="d-flex justify-content-between align-items-center mt-3">
+                        <button id="prev-page-btn" class="btn btn-outline-secondary">&laquo; Precedente</button>
+                        <span id="page-info"></span>
+                        <button id="next-page-btn" class="btn btn-outline-secondary">Successivo &raquo;</button>
+                    </div>
+                </div>
+            </div>
+        </div>

@@ -1,0 +1,39 @@
+<div class="view">
+            <div class="card elevation-3">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0">
+                        <span class="material-icons me-2" style="vertical-align: text-bottom;">medical_information</span>
+                        Gestione Diagnosi
+                    </h3>
+                    <button class="btn btn-back-menu btn-sm" data-view="home">
+                        <span class="material-icons me-1" style="vertical-align: text-bottom;">arrow_back</span>
+                        Torna al Menu
+                    </button>
+                </div>
+                <div class="card-body">
+                    <form id="diagnosi-form" class="mb-4 modern-form">
+                        <div class="input-group">
+                            <input type="text" id="diagnosi-name" class="form-control" placeholder="Nome nuova diagnosi" required>
+                            <button type="submit" id="save-diagnosi-btn" class="btn btn-primary">
+                                <span class="material-icons">add</span>
+                                <span>Aggiungi Diagnosi</span>
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Nome Diagnosi</th>
+                                    <th class="text-end">Azioni</th>
+                                </tr>
+                            </thead>
+                            <tbody id="diagnosi-table-body">
+                                <!-- Le diagnosi verranno caricate qui -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>

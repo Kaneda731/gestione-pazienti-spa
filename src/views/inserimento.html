@@ -1,0 +1,94 @@
+<div class="view">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 id="inserimento-title"><span class="material-icons me-2">person_add</span>Inserimento Nuovo Paziente</h3>
+                    <button class="btn btn-sm btn-back-menu" data-view="home">
+                        <span class="material-icons me-1" style="vertical-align: text-bottom;">arrow_back</span>Torna al Menu
+                    </button>
+                </div>
+                <div class="card-body">
+                    <form id="form-inserimento">
+                        <input type="hidden" id="paziente-id" name="id">
+                        <div id="messaggio-container" class="mb-3"></div>
+                        <div class="row g-3">
+                            <!-- Dati Anagrafici -->
+                            <div class="col-md-6">
+                                <label for="nome" class="form-label">Nome</label>
+                                <input type="text" class="form-control" id="nome" name="nome" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="cognome" class="form-label">Cognome</label>
+                                <input type="text" class="form-control" id="cognome" name="cognome" required>
+                            </div>
+
+                            <!-- Dati Ricovero -->
+                            <div class="col-md-6">
+                                <label for="data_ricovero" class="form-label">Data di Ricovero</label>
+                                <input type="date" class="form-control" id="data_ricovero" name="data_ricovero" required>
+                            </div>
+                            <div class="col-md-6" id="data-dimissione-container" style="display: none;">
+                                <label for="data_dimissione" class="form-label">Data di Dimissione</label>
+                                <input type="date" class="form-control" id="data_dimissione" name="data_dimissione">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="diagnosi" class="form-label">Diagnosi</label>
+                                <select class="form-select" id="diagnosi" name="diagnosi" required data-custom="true">
+                                    <option value="">Seleziona diagnosi...</option>
+                                    <option value="Politrauma">Politrauma</option>
+                                    <option value="Frattura_Femore">Frattura Femore</option>
+                                    <option value="Frattura_Gamba">Frattura Gamba</option>
+                                    <option value="Gonartrosi">Gonartrosi</option>
+                                    <option value="Frattura_Bacino">Frattura Bacino</option>
+                                    <option value="Frattura_Spalla">Frattura Spalla</option>
+                                    <option value="NeoFormazione Cute">NeoFormazione Cute</option>
+                                    <option value="Frattura_Mano">Frattura Mano</option>
+                                    <option value="Frattura_Polso">Frattura Polso</option>
+                                    <option value="Ulcera">Ulcera</option>
+                                    <option value="Deiescenza_Ferita">Deiescenza Ferita</option>
+                                    <option value="Artrosi_Spalla">Artrosi Spalla</option>
+                                    <option value="Lesione_Tendinea">Lesione Tendinea</option>
+                                    <option value="Frattura_Periprotesica">Frattura Periprotesica</option>
+                                    <option value="FLC">FLC</option>
+                                    <option value="Protesi_Mammaria">Protesi Mammaria</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="reparto_appartenenza" class="form-label">Reparto Appartenenza</label>
+                                <select class="form-select" id="reparto_appartenenza" name="reparto_appartenenza" required data-custom="true">
+                                    <option value="">Seleziona...</option>
+                                    <option value="Ortopedia">Ortopedia</option>
+                                    <option value="Chirurgia Arti">Chirurgia Arti</option>
+                                    <option value="Plastica">Plastica</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="reparto_provenienza" class="form-label">Reparto Provenienza</label>
+                                <select class="form-select" id="reparto_provenienza" name="reparto_provenienza" data-custom="true">
+                                    <option value="">Seleziona...</option>
+                                    <option value="AR">AR</option>
+                                    <option value="PO">PO</option>
+                                    <option value="CO">CO</option>
+                                    <option value="CR">CR</option>
+                                    <option value="PS">PS</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="livello_assistenza" class="form-label">Livello Assistenza</label>
+                                <select class="form-select" id="livello_assistenza" name="livello_assistenza" required data-custom="true">
+                                    <option value="">Seleziona...</option>
+                                    <option value="Bassa">Bassa</option>
+                                    <option value="Media">Media</option>
+                                    <option value="Alta">Alta</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mt-4 text-center">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <span class="material-icons me-1" style="vertical-align: middle;">save</span>
+                                Salva Paziente
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>

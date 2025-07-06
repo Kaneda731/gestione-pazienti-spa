@@ -158,6 +158,9 @@ export async function initInserimentoView() {
     dom.idInput = document.getElementById('paziente-id');
     dom.dataDimissioneContainer = document.getElementById('data-dimissione-container');
 
+    // Carica le opzioni delle diagnosi in parallelo con il setup del form
+    await loadDiagnosiOptions();
+
     const editId = sessionStorage.getItem('editPazienteId');
 
     if (editId) {
@@ -166,13 +169,13 @@ export async function initInserimentoView() {
         setupFormForInsert();
     }
 
-    await loadDiagnosiOptions();
+    // A questo punto, il form è stato popolato (in caso di modifica)
+    // e le opzioni delle diagnosi sono state caricate.
+    // Ora è sicuro inizializzare i custom select.
+    if (window.initCustomSelects) {
+        // Inizializza tutti i select custom nel form
+        window.initCustomSelects('#form-inserimento [data-custom="true"]');
+    }
+
     setupFormEventListeners(editId);
-    
-    // Inizializza i custom select dopo aver caricato le opzioni
-    setTimeout(() => {
-        if (window.initCustomSelects) {
-            window.initCustomSelects();
-        }
-    }, 100);
 }

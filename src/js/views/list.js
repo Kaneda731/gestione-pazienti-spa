@@ -570,50 +570,33 @@ export async function initListView(urlParams) {
     const viewContainer = document.querySelector('#app-container .view');
     if (!viewContainer) return;
 
-    // Inizializzazione ListView
-    
     cacheDOMElements(viewContainer);
-    
-    // FORZA la vista corretta immediatamente al caricamento
     ensureCorrectView();
-    
-    // Seconda chiamata dopo un breve delay per assicurarsi che tutto sia renderizzato
     setTimeout(ensureCorrectView, 100);
 
     try {
-        // Inizio caricamento filtri
-        // Attendere il caricamento dei filtri prima di procedere
+        // 1. Popola i filtri in modo asincrono
         await Promise.all([
             populateFilter('reparto_appartenenza', domElements.repartoFilter),
             populateFilter('diagnosi', domElements.diagnosiFilter)
         ]);
 
-        // Filtri caricati
+        // 2. Applica i valori salvati (da URL o sessionStorage) ai select
+        loadPersistedFilters(urlParams);
 
-        // Inizializza i custom select per tutti i filtri (incluso quello di stato che ha opzioni statiche)
-        setTimeout(() => {
-            if (window.initCustomSelects) {
-                // Inizializzazione custom selects
-                window.initCustomSelects();
-            }
-        }, 100);
-
-        // Forza un refresh dei custom select per assicurarsi che le opzioni dinamiche siano caricate
-        if (window.refreshCustomSelects) {
-            // Refresh custom selects con nuove opzioni
-            window.refreshCustomSelects();
-            // Custom selects refreshed
+        // 3. SOLO ORA, inizializza i custom select, che adesso hanno le opzioni e i valori corretti
+        if (window.initCustomSelects) {
+            window.initCustomSelects('#list-filter-reparto, #list-filter-diagnosi, #list-filter-stato');
         }
 
-        loadPersistedFilters(urlParams);
+        // 4. Carica i dati dei pazienti e imposta gli event listener
         fetchAndRenderPazienti();
         setupEventListeners();
         
-        // Terza chiamata dopo il rendering dei dati
         setTimeout(ensureCorrectView, 200);
     } catch (error) {
         console.error('❌ Errore durante l\'inizializzazione della lista:', error);
-        // Continua anche in caso di errore nel caricamento filtri
+        // Fallback in caso di errore
         loadPersistedFilters(urlParams);
         fetchAndRenderPazienti();
         setupEventListeners();

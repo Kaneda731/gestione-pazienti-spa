@@ -89,21 +89,25 @@ export async function initGraficoView() {
     dom.applyButton = document.getElementById('apply-filters-btn');
     dom.backButton = view.querySelector('button[data-view="home"]');
 
-    // Carica Google Charts e popola i filtri in parallelo
-    google.charts.load('current', { 'packages': ['corechart'] });
-    google.charts.setOnLoadCallback(async () => {
+    // Funzione per inizializzare la vista dopo il caricamento delle dipendenze
+    const initialize = async () => {
+        // 1. Popola i filtri in modo asincrono
         await Promise.all([
             populateFilter('reparto_appartenenza', dom.repartoFilter),
             populateFilter('reparto_provenienza', dom.provenienzaFilter),
             populateFilter('diagnosi', dom.diagnosiFilter)
         ]);
-        
-        // Inizializza i custom select dopo aver caricato le opzioni
-        setTimeout(() => {
-            if (window.initCustomSelects) {
-                window.initCustomSelects();
-            }
-            setupEventListeners();
-        }, 100);
-    });
+
+        // 2. Inizializza i custom select ora che le opzioni sono caricate
+        if (window.initCustomSelects) {
+            window.initCustomSelects('#filter-reparto, #filter-provenienza, #filter-diagnosi, #filter-assistenza');
+        }
+
+        // 3. Imposta gli event listener
+        setupEventListeners();
+    };
+
+    // Carica Google Charts e, una volta pronto, esegui la logica di inizializzazione
+    google.charts.load('current', { 'packages': ['corechart'] });
+    google.charts.setOnLoadCallback(initialize);
 }

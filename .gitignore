@@ -1,73 +1,11 @@
-# Dependency directories
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# Ignora tutto
+/*
 
-# Build output
-dist/
-build/
-out/
+# Ma includi src/ e netlify.toml
+!src/
+!netlify.toml
 
-# Environment variables
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# IDE files
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# Temporary files
-*.tmp
-*.temp
-.temp/
-temp/
-
-
-# Cartelle di archivio e backup da NON includere su GitHub
-archive/
-tests/archiviati/
-docs/
-tests/
-
-# Test files (optional - comment out if you want to track them)
-# tests/test-*.html
-test-contrasto-modal.html
-test-custom-select-scroll.html
-
-# Test approvati - ignorati per evitare bloat del repository
-tests/approvati/
-!tests/approvati/README.md
-
-# Logs
-*.log
-
-# Local development
-.netlify/
-.env.netlify
-
-# Backup files
-*-backup*
-*.bak
-
-# Coverage directory used by tools like istanbul
-coverage/
-
-# Dependency lock files (if using npm)
-package-lock.json
-yarn.lock
+# (Opzionale) Includi README e LICENSE se vuoi
+!README.md
+!LICENSE
+```

@@ -265,20 +265,22 @@
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
     }
     
-    /* Container per opzioni + zona scroll */
+    /* Container per opzioni - semplificato senza barra scroll laterale */
     .custom-select-mobile-container {
         display: flex;
         height: 100%;
         overflow: hidden;
+        /* Container rimosso - non più necessario */
     }
     
-    /* Zona delle opzioni - ridotta per fare spazio alla barra scroll */
+    /* Zona delle opzioni - ora occupa tutto lo spazio */
     .custom-select-mobile-options {
         flex: 1;
+        width: 100%;
         overflow-y: auto;
         overflow-x: hidden;
         padding: 0;
-        margin-right: 50px; /* Spazio per la zona scroll */
+        max-height: calc(70vh - 80px); /* Spazio per header */
         /* Scroll nativo ottimizzato */
         -webkit-overflow-scrolling: touch;
         overscroll-behavior: contain;
@@ -290,88 +292,7 @@
         will-change: scroll-position;
         /* IMPORTANTE: Le opzioni devono intercettare eventi touch per scroll */
         pointer-events: auto;
-    }
-    
-    /* Zona scroll dedicata laterale */
-    .custom-select-mobile-scrollbar {
-        position: absolute;
-        top: 0;
-        right: 0;
-        width: 50px;
-        height: 100%;
-        background: rgba(108, 117, 125, 0.1);
-        border-left: 2px solid rgba(108, 117, 125, 0.2);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 10px 0;
-    }
-    
-    .scroll-zone {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        height: 100%;
-        width: 100%;
-        touch-action: pan-y;
-        cursor: grab;
-    }
-    
-    .scroll-zone:active {
-        cursor: grabbing;
-    }
-    
-    .scroll-handle {
-        width: 6px;
-        height: 60px;
-        background: #6c757d;
-        border-radius: 3px;
-        margin-bottom: 10px;
-        opacity: 0.7;
-        transition: opacity 0.2s ease;
-    }
-    
-    .scroll-zone:hover .scroll-handle,
-    .scroll-zone:active .scroll-handle {
-        opacity: 1;
-    }
-    
-    .scroll-instructions {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        opacity: 0.6;
-        font-size: 0.75rem;
-        color: #6c757d;
-        text-align: center;
-        line-height: 1.2;
-    }
-    
-    .scroll-instructions span {
-        font-size: 1.2rem;
-        margin-bottom: 2px;
-    }
-    
-    /* Lista opzioni */
-    .custom-select-mobile-options {
-        max-height: calc(70vh - 80px);
-        overflow-y: auto;
-        overflow-x: hidden;
-        /* Scroll nativo ottimizzato per mobile */
-        -webkit-overflow-scrolling: touch;
-        overscroll-behavior: contain;
-        scroll-behavior: smooth;
-        /* Migliore momentum scrolling */
-        -webkit-transform: translate3d(0,0,0);
-        transform: translate3d(0,0,0);
-        /* Riduce la latenza touch e migliora performance */
-        touch-action: pan-y; /* Permette solo scroll verticale */
-        will-change: scroll-position;
-        /* Permette interazioni touch all'interno */
-        pointer-events: auto;
-        /* Scrollbar visibile su mobile per chiarezza */
+        /* Scrollbar visibile e gradevole */
         scrollbar-width: thin;
         scrollbar-color: #6c757d #f8f9fa;
     }

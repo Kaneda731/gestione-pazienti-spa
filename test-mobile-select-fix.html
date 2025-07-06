@@ -78,11 +78,11 @@
 <body>
     <div class="test-container">
         <div class="test-info">
-            <h3>🔧 Test Fix Mobile Select</h3>
+            <h3>🔧 Test Fix Mobile Select v2</h3>
             <p>
-                <strong>Problema:</strong> Il modal delle custom select si chiude appena si tocca su mobile.<br>
-                <strong>Fix implementato:</strong> Eventi overlay migliorati + propagazione corretta.<br>
-                <strong>Test:</strong> Tocca la select sotto e prova a scrollare le opzioni senza che si chiuda.
+                <strong>Problema risolto:</strong> Distinzione TAP vs SCROLL.<br>
+                <strong>Fix v2:</strong> Touch tracking + rimozione barra scroll inutile.<br>
+                <strong>Test:</strong> Scroll senza selezioni accidentali, TAP per selezionare.
             </p>
         </div>
         
@@ -121,12 +121,13 @@
         </form>
         
         <div style="margin-top: 20px; font-size: 12px; color: #666;">
-            <strong>Istruzioni test:</strong><br>
+            <strong>Istruzioni test v2:</strong><br>
             1. Tocca la select sopra per aprire il modal<br>
-            2. Prova a scrollare le opzioni con il dito<br>
-            3. Il modal NON deve chiudersi durante lo scroll<br>
-            4. Deve chiudersi solo toccando fuori dalle opzioni<br>
-            5. Selezionare un'opzione deve funzionare correttamente
+            2. <strong>SCROLL:</strong> Poggia il dito su un'opzione e scorri verso l'alto/basso<br>
+            3. Quando sollevi il dito dopo lo scroll, NON deve selezionare<br>
+            4. <strong>TAP:</strong> Tocca velocemente un'opzione senza muovere il dito<br>
+            5. Il TAP deve selezionare l'opzione e chiudere il modal<br>
+            6. Il modal deve chiudersi solo toccando fuori dalle opzioni
         </div>
     </div>
 

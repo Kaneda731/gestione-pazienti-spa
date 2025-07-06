@@ -275,19 +275,8 @@ class CustomSelect {
                     <h3>Seleziona ${this.selectElement.getAttribute('data-label') || 'Opzione'}</h3>
                     <button type="button" class="custom-select-mobile-close">✕</button>
                 </div>
-                <div class="custom-select-mobile-container">
-                    <div class="custom-select-mobile-options">
-                        ${optionsHTML}
-                    </div>
-                    <div class="custom-select-mobile-scrollbar">
-                        <div class="scroll-zone">
-                            <div class="scroll-handle"></div>
-                            <div class="scroll-instructions">
-                                <span>📱</span>
-                                <small>Scroll</small>
-                            </div>
-                        </div>
-                    </div>
+                <div class="custom-select-mobile-options">
+                    ${optionsHTML}
                 </div>
             </div>
         `;
@@ -336,6 +325,9 @@ class CustomSelect {
         const content = this.mobileModal.querySelector('.custom-select-mobile-content');
         const optionsContainer = this.mobileModal.querySelector('.custom-select-mobile-options');
         const options = this.mobileModal.querySelectorAll('.custom-select-mobile-option');
+        
+        // Variabili per tracciare il touch e distinguere tap da scroll
+        let touchStartData = null;
         
         // Chiudi con X - protezione da interferenze
         closeBtn.addEventListener('click', (e) => {
@@ -403,9 +395,9 @@ class CustomSelect {
             e.stopPropagation(); // Non propagare all'overlay
         }, { passive: true });
         
-        // Seleziona opzioni - VERSIONE SEMPLIFICATA MASSIMA
+        // Seleziona opzioni con distinzione TAP vs SCROLL
         options.forEach(option => {
-            // SOLO click - nessun touch event che interferisca
+            // Click per desktop e touch devices senza movimento
             option.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation(); // Non propagare all'overlay
@@ -420,24 +412,62 @@ class CustomSelect {
                 }, 50);
             });
             
-            // Previeni propagazione anche per gli eventi touch delle opzioni
+            // Touch start: registra posizione iniziale
             option.addEventListener('touchstart', (e) => {
                 e.stopPropagation();
+                
+                const touch = e.touches[0];
+                touchStartData = {
+                    startX: touch.clientX,
+                    startY: touch.clientY,
+                    startTime: Date.now(),
+                    target: option,
+                    scrollTop: optionsContainer.scrollTop
+                };
             }, { passive: true });
             
+            // Touch end: distingui TAP da SCROLL
             option.addEventListener('touchend', (e) => {
-                // Per le opzioni, se è un tap veloce (non scroll), attiva selezione
                 e.stopPropagation();
                 
-                // Tap veloce = selezione dell'opzione
-                const value = option.dataset.value;
-                const text = option.textContent.trim();
+                if (!touchStartData || touchStartData.target !== option) {
+                    touchStartData = null;
+                    return;
+                }
                 
-                this.selectOption(value, text);
+                const touch = e.changedTouches[0];
+                const endX = touch.clientX;
+                const endY = touch.clientY;
+                const endTime = Date.now();
+                const currentScrollTop = optionsContainer.scrollTop;
                 
-                setTimeout(() => {
-                    this.close();
-                }, 50);
+                // Calcola la distanza di movimento
+                const deltaX = Math.abs(endX - touchStartData.startX);
+                const deltaY = Math.abs(endY - touchStartData.startY);
+                const deltaTime = endTime - touchStartData.startTime;
+                const deltaScroll = Math.abs(currentScrollTop - touchStartData.scrollTop);
+                
+                // È un TAP se:
+                // 1. Movimento minimo (< 10px in qualsiasi direzione)
+                // 2. Tempo breve (< 300ms)  
+                // 3. Nessun scroll del container
+                const isTap = deltaX < 10 && deltaY < 10 && deltaTime < 300 && deltaScroll < 5;
+                
+                if (isTap) {
+                    // È un tap veloce - seleziona l'opzione
+                    const value = option.dataset.value;
+                    const text = option.textContent.trim();
+                    
+                    this.selectOption(value, text);
+                    
+                    setTimeout(() => {
+                        this.close();
+                    }, 50);
+                }
+                // Se non è un tap, non fare nulla (era uno scroll)
+                
+                // Reset dei dati
+                touchStartData = null;
             }, { passive: false });
         });
     }

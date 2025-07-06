@@ -38,13 +38,21 @@ Thumbs.db
 .temp/
 temp/
 
-# Archive directory (keep structure but ignore in future commits if desired)
-# archive/
+
+# Cartelle di archivio e backup da NON includere su GitHub
+archive/
+tests/archiviati/
+docs/
+tests/
 
 # Test files (optional - comment out if you want to track them)
 # tests/test-*.html
 test-contrasto-modal.html
 test-custom-select-scroll.html
+
+# Test approvati - ignorati per evitare bloat del repository
+tests/approvati/
+!tests/approvati/README.md
 
 # Logs
 *.log

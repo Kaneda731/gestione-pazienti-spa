@@ -83,53 +83,77 @@ class CustomSelect {
             optionElement.dataset.value = option.value;
             optionElement.textContent = option.textContent;
             
-            // Gestione touch migliorata per mobile
-            let touchStartData = null;
+            // Gestione touch migliorata per mobile - Versione 2.0
+            let touchData = {
+                startX: 0,
+                startY: 0,
+                startTime: 0,
+                hasMoved: false,
+                isScrolling: false
+            };
             
-            optionElement.addEventListener('click', () => {
-                this.selectOption(option.value, option.textContent);
+            optionElement.addEventListener('click', (e) => {
+                // Solo su desktop o quando non è touch
+                if (!touchData.isScrolling) {
+                    this.selectOption(option.value, option.textContent);
+                }
             });
             
-            // Touch events con rilevamento scroll
+            // Touch events ottimizzati per scroll
             optionElement.addEventListener('touchstart', (e) => {
-                touchStartData = {
-                    x: e.touches[0].clientX,
-                    y: e.touches[0].clientY,
-                    time: Date.now()
+                touchData = {
+                    startX: e.touches[0].clientX,
+                    startY: e.touches[0].clientY,
+                    startTime: Date.now(),
+                    hasMoved: false,
+                    isScrolling: false
                 };
-                e.stopPropagation();
+                // NON stopPropagation per permettere scroll nativo
             }, { passive: true });
             
             optionElement.addEventListener('touchmove', (e) => {
-                // Permetti scroll, non bloccare
-                e.stopPropagation();
+                if (!touchData.startTime) return;
+                
+                const currentX = e.touches[0].clientX;
+                const currentY = e.touches[0].clientY;
+                const deltaX = Math.abs(currentX - touchData.startX);
+                const deltaY = Math.abs(currentY - touchData.startY);
+                
+                // Se c'è movimento significativo, è scroll
+                if (deltaX > 5 || deltaY > 5) {
+                    touchData.hasMoved = true;
+                    touchData.isScrolling = true;
+                }
+                // NON interferire con lo scroll nativo
             }, { passive: true });
             
             optionElement.addEventListener('touchend', (e) => {
-                if (!touchStartData) return;
+                if (!touchData.startTime) return;
                 
-                const touchEndData = {
-                    x: e.changedTouches[0].clientX,
-                    y: e.changedTouches[0].clientY,
-                    time: Date.now()
-                };
+                const deltaTime = Date.now() - touchData.startTime;
+                const deltaX = Math.abs(e.changedTouches[0].clientX - touchData.startX);
+                const deltaY = Math.abs(e.changedTouches[0].clientY - touchData.startY);
                 
-                const deltaX = Math.abs(touchEndData.x - touchStartData.x);
-                const deltaY = Math.abs(touchEndData.y - touchStartData.y);
-                const deltaTime = touchEndData.time - touchStartData.time;
+                // È un tap pulito se:
+                // - NO movimento significativo (< 5px)
+                // - durata ragionevole (< 500ms)
+                // - non ha fatto scroll
+                const isCleanTap = !touchData.hasMoved && 
+                                  deltaX < 5 && 
+                                  deltaY < 5 && 
+                                  deltaTime < 500 && 
+                                  !touchData.isScrolling;
                 
-                // È un tap se:
-                // - movimento minimo (< 10px)
-                // - durata breve (< 300ms)
-                const isTap = deltaX < 10 && deltaY < 10 && deltaTime < 300;
-                
-                if (isTap) {
+                if (isCleanTap) {
                     e.preventDefault();
                     e.stopPropagation();
                     this.selectOption(option.value, option.textContent);
                 }
                 
-                touchStartData = null;
+                // Reset dopo un po' per permettere nuovi tap
+                setTimeout(() => {
+                    touchData.isScrolling = false;
+                }, 100);
             }, { passive: false });
             
             optionsContainer.appendChild(optionElement);

@@ -267,12 +267,18 @@
         max-height: calc(70vh - 80px);
         overflow-y: auto;
         overflow-x: hidden;
+        /* Scroll nativo ottimizzato per mobile */
         -webkit-overflow-scrolling: touch;
         overscroll-behavior: contain;
         scroll-behavior: smooth;
+        /* Migliore momentum scrolling */
+        -webkit-transform: translate3d(0,0,0);
+        transform: translate3d(0,0,0);
+        /* Riduce la latenza touch e migliora performance */
+        touch-action: pan-y; /* Permette solo scroll verticale */
+        will-change: scroll-position;
         /* Permette interazioni touch all'interno */
         pointer-events: auto;
-        touch-action: pan-y; /* Permette solo scroll verticale */
         /* Scrollbar visibile su mobile per chiarezza */
         scrollbar-width: thin;
         scrollbar-color: #6c757d #f8f9fa;
@@ -302,18 +308,23 @@
         padding: 1rem 1.5rem;
         border-bottom: 1px solid #dee2e6;
         cursor: pointer;
-        transition: all 0.2s ease;
-        color: #495057; /* Grigio scuro elegante */
+        transition: background-color 0.15s ease;
+        color: #495057;
         font-size: 1rem;
         min-height: 56px;
         display: flex;
         align-items: center;
         background: transparent;
+        /* Ottimizzazioni touch per scroll fluido */
         touch-action: manipulation;
         -webkit-tap-highlight-color: transparent;
         user-select: none;
         -webkit-user-select: none;
         -webkit-touch-callout: none;
+        /* Performance migliorata */
+        will-change: background-color;
+        /* Non interferire con scroll */
+        pointer-events: auto;
     }
     
     .custom-select-mobile-option:last-child {

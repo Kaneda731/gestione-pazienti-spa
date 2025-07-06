@@ -83,78 +83,13 @@ class CustomSelect {
             optionElement.dataset.value = option.value;
             optionElement.textContent = option.textContent;
             
-            // Gestione touch migliorata per mobile - Versione 2.0
-            let touchData = {
-                startX: 0,
-                startY: 0,
-                startTime: 0,
-                hasMoved: false,
-                isScrolling: false
-            };
-            
+            // SOLO gestione desktop - NO touch events per evitare interferenze con modal mobile
             optionElement.addEventListener('click', (e) => {
-                // Solo su desktop o quando non è touch
-                if (!touchData.isScrolling) {
+                // Solo su desktop (> 767px)
+                if (window.innerWidth > 767) {
                     this.selectOption(option.value, option.textContent);
                 }
             });
-            
-            // Touch events ottimizzati per scroll
-            optionElement.addEventListener('touchstart', (e) => {
-                touchData = {
-                    startX: e.touches[0].clientX,
-                    startY: e.touches[0].clientY,
-                    startTime: Date.now(),
-                    hasMoved: false,
-                    isScrolling: false
-                };
-                // NON stopPropagation per permettere scroll nativo
-            }, { passive: true });
-            
-            optionElement.addEventListener('touchmove', (e) => {
-                if (!touchData.startTime) return;
-                
-                const currentX = e.touches[0].clientX;
-                const currentY = e.touches[0].clientY;
-                const deltaX = Math.abs(currentX - touchData.startX);
-                const deltaY = Math.abs(currentY - touchData.startY);
-                
-                // Se c'è movimento significativo, è scroll
-                if (deltaX > 5 || deltaY > 5) {
-                    touchData.hasMoved = true;
-                    touchData.isScrolling = true;
-                }
-                // NON interferire con lo scroll nativo
-            }, { passive: true });
-            
-            optionElement.addEventListener('touchend', (e) => {
-                if (!touchData.startTime) return;
-                
-                const deltaTime = Date.now() - touchData.startTime;
-                const deltaX = Math.abs(e.changedTouches[0].clientX - touchData.startX);
-                const deltaY = Math.abs(e.changedTouches[0].clientY - touchData.startY);
-                
-                // È un tap pulito se:
-                // - NO movimento significativo (< 5px)
-                // - durata ragionevole (< 500ms)
-                // - non ha fatto scroll
-                const isCleanTap = !touchData.hasMoved && 
-                                  deltaX < 5 && 
-                                  deltaY < 5 && 
-                                  deltaTime < 500 && 
-                                  !touchData.isScrolling;
-                
-                if (isCleanTap) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    this.selectOption(option.value, option.textContent);
-                }
-                
-                // Reset dopo un po' per permettere nuovi tap
-                setTimeout(() => {
-                    touchData.isScrolling = false;
-                }, 100);
-            }, { passive: false });
             
             optionsContainer.appendChild(optionElement);
         });
@@ -169,48 +104,11 @@ class CustomSelect {
         const trigger = this.wrapper.querySelector('.custom-select-trigger');
         const dropdown = this.wrapper.querySelector('.custom-select-dropdown');
         
-        // Toggle dropdown - gestione migliorata per touch
-        let triggerTouchStart = null;
-        
+        // Toggle dropdown - SOLO desktop
         trigger.addEventListener('click', (e) => {
             e.stopPropagation();
             this.toggle();
         });
-        
-        // Gestione touch migliorata per trigger
-        trigger.addEventListener('touchstart', (e) => {
-            triggerTouchStart = {
-                x: e.touches[0].clientX,
-                y: e.touches[0].clientY,
-                time: Date.now()
-            };
-            e.stopPropagation();
-        }, { passive: true });
-
-        trigger.addEventListener('touchend', (e) => {
-            if (!triggerTouchStart) return;
-            
-            const touchEndData = {
-                x: e.changedTouches[0].clientX,
-                y: e.changedTouches[0].clientY,
-                time: Date.now()
-            };
-            
-            const deltaX = Math.abs(touchEndData.x - triggerTouchStart.x);
-            const deltaY = Math.abs(touchEndData.y - triggerTouchStart.y);
-            const deltaTime = touchEndData.time - triggerTouchStart.time;
-            
-            // È un tap se movimento minimo e durata breve
-            const isTap = deltaX < 10 && deltaY < 10 && deltaTime < 300;
-            
-            if (isTap) {
-                e.preventDefault();
-                e.stopPropagation();
-                this.toggle();
-            }
-            
-            triggerTouchStart = null;
-        }, { passive: false });
         
         // Close on outside click/touch
         document.addEventListener('click', (e) => {
@@ -486,66 +384,21 @@ class CustomSelect {
             e.stopPropagation();
         }, { passive: false });
         
-        // Seleziona opzioni - SOLO con tap precisi, no touch events
+        // Seleziona opzioni - VERSIONE SEMPLIFICATA MASSIMA
         options.forEach(option => {
-            let touchStartData = null;
-            
-            // Touch start - solo per tracking
-            option.addEventListener('touchstart', (e) => {
-                touchStartData = {
-                    x: e.touches[0].clientX,
-                    y: e.touches[0].clientY,
-                    time: Date.now()
-                };
-                // NO preventDefault - permetti scroll nativo
-            }, { passive: true });
-            
-            // Touch end - solo se è un tap pulito
-            option.addEventListener('touchend', (e) => {
-                if (!touchStartData) return;
-                
-                const deltaX = Math.abs(e.changedTouches[0].clientX - touchStartData.x);
-                const deltaY = Math.abs(e.changedTouches[0].clientY - touchStartData.y);
-                const deltaTime = Date.now() - touchStartData.time;
-                
-                // È un tap solo se MOLTO preciso: < 3px movimento, < 200ms
-                const isPreciseTap = deltaX < 3 && deltaY < 3 && deltaTime < 200;
-                
-                if (isPreciseTap) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    const value = option.dataset.value;
-                    const text = option.textContent.trim();
-                    
-                    // Seleziona l'opzione
-                    this.selectOption(value, text);
-                    
-                    // Chiudi il modal
-                    setTimeout(() => {
-                        this.close();
-                    }, 50);
-                }
-                
-                touchStartData = null;
-            }, { passive: false });
-            
-            // Click per desktop (non interferisce con mobile)
+            // SOLO click - nessun touch event che interferisca
             option.addEventListener('click', (e) => {
-                // Solo se non c'è stato un touch event recente
-                if (!touchStartData) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    const value = option.dataset.value;
-                    const text = option.textContent.trim();
-                    
-                    this.selectOption(value, text);
-                    
-                    setTimeout(() => {
-                        this.close();
-                    }, 50);
-                }
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const value = option.dataset.value;
+                const text = option.textContent.trim();
+                
+                this.selectOption(value, text);
+                
+                setTimeout(() => {
+                    this.close();
+                }, 50);
             });
         });
     }
@@ -648,68 +501,18 @@ class CustomSelect {
     }
     
     addGlobalClickBlocker() {
-        // Blocca tutti i click/touch globali quando il modal è aperto
+        // Versione semplificata - blocca SOLO click esterni, NON touch/scroll
         this.globalClickBlocker = (e) => {
             // Se il click non è all'interno del modal, bloccalo
             if (!this.mobileModal || !this.mobileModal.contains(e.target)) {
                 e.preventDefault();
                 e.stopPropagation();
-                e.stopImmediatePropagation();
                 return false;
             }
         };
         
-        this.globalTouchBlocker = (e) => {
-            // Se il touch non è all'interno del modal, bloccalo
-            if (!this.mobileModal || !this.mobileModal.contains(e.target)) {
-                e.preventDefault();
-                e.stopPropagation();
-                e.stopImmediatePropagation();
-                return false;
-            }
-        };
-        
-        // Aggiungi listener con capture per intercettare prima di tutto
+        // SOLO click, nessun touch/scroll blocking
         document.addEventListener('click', this.globalClickBlocker, { 
-            capture: true, 
-            passive: false 
-        });
-        document.addEventListener('touchstart', this.globalTouchBlocker, { 
-            capture: true, 
-            passive: false 
-        });
-        document.addEventListener('touchend', this.globalTouchBlocker, { 
-            capture: true, 
-            passive: false 
-        });
-        
-        // Blocca scroll e wheel events SOLO FUORI dal modal
-        this.globalScrollBlocker = (e) => {
-            // Permetti scroll DENTRO il modal (specialmente nella zona opzioni)
-            if (this.mobileModal && this.mobileModal.contains(e.target)) {
-                // Se siamo nella zona delle opzioni del modal, permetti lo scroll
-                const optionsContainer = this.mobileModal.querySelector('.custom-select-mobile-options');
-                if (optionsContainer && optionsContainer.contains(e.target)) {
-                    return; // Non bloccare lo scroll interno
-                }
-                // Se siamo nel content del modal ma non nelle opzioni, permetti comunque
-                const modalContent = this.mobileModal.querySelector('.custom-select-mobile-content');
-                if (modalContent && modalContent.contains(e.target)) {
-                    return; // Non bloccare lo scroll interno del modal
-                }
-            }
-            
-            // Solo se siamo FUORI dal modal, blocca lo scroll
-            e.preventDefault();
-            e.stopPropagation();
-            return false;
-        };
-        
-        document.addEventListener('wheel', this.globalScrollBlocker, { 
-            capture: true, 
-            passive: false 
-        });
-        document.addEventListener('touchmove', this.globalScrollBlocker, { 
             capture: true, 
             passive: false 
         });
@@ -718,16 +521,7 @@ class CustomSelect {
     removeGlobalClickBlocker() {
         if (this.globalClickBlocker) {
             document.removeEventListener('click', this.globalClickBlocker, { capture: true });
-            document.removeEventListener('touchstart', this.globalTouchBlocker, { capture: true });
-            document.removeEventListener('touchend', this.globalTouchBlocker, { capture: true });
             this.globalClickBlocker = null;
-            this.globalTouchBlocker = null;
-        }
-        
-        if (this.globalScrollBlocker) {
-            document.removeEventListener('wheel', this.globalScrollBlocker, { capture: true });
-            document.removeEventListener('touchmove', this.globalScrollBlocker, { capture: true });
-            this.globalScrollBlocker = null;
         }
     }
     

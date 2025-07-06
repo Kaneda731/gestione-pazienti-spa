@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Test Custom Select Gestione Pazienti</title>
-    <link rel="stylesheet" href="/src/css/style.css">
+    <link rel="stylesheet" href="./src/css/style.css">
     <style>
         body {
             padding: 20px;
@@ -129,9 +129,28 @@
         <div id="init-status">Initializing...</div>
     </div>
 
-    <script src="/src/js/mobile-card-manager.js"></script>
-    <script src="/src/js/components/CustomSelect.js"></script>
+    <script src="./src/js/mobile-card-manager.js"></script>
+    <script src="./src/js/components/CustomSelect.js"></script>
     <script>
+        // Mock logger per evitare errori
+        window.appLogger = {
+            debug: (...args) => console.log('[DEBUG]', ...args),
+            error: (...args) => console.error('[ERROR]', ...args),
+            info: (...args) => console.info('[INFO]', ...args)
+        };
+
+        // Debug caricamento script
+        console.log('Scripts loaded, checking what is available...');
+        console.log('window.CustomSelect:', typeof window.CustomSelect);
+        console.log('window.initCustomSelects:', typeof window.initCustomSelects);
+        console.log('window.MobileCardManager:', typeof window.MobileCardManager);
+        
+        // Controlla se ci sono errori nella console
+        window.addEventListener('error', (e) => {
+            console.error('JavaScript Error:', e.error);
+            document.getElementById('init-status').innerHTML += '<br>❌ JavaScript Error: ' + e.message;
+        });
+
         // Aggiorna le info di debug
         function updateDebugInfo() {
             document.getElementById('viewport-width').textContent = window.innerWidth + 'px';
@@ -145,7 +164,9 @@
 
         // Inizializza le custom select e monitora errori
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('DOM loaded, initializing custom selects...');
+            console.log('DOM loaded, checking again...');
+            console.log('window.initCustomSelects:', typeof window.initCustomSelects);
+            console.log('CustomSelect class:', typeof CustomSelect);
             
             try {
                 if (window.initCustomSelects) {
@@ -156,7 +177,29 @@
                     `;
                     console.log('Custom selects init result:', result);
                 } else {
-                    document.getElementById('init-status').textContent = '❌ window.initCustomSelects not found';
+                    document.getElementById('init-status').innerHTML = `
+                        ❌ window.initCustomSelects not found<br>
+                        Available on window: ${Object.keys(window).filter(k => k.includes('Custom') || k.includes('init')).join(', ')}
+                    `;
+                    
+                    // Prova inizializzazione manuale
+                    console.log('Trying manual initialization...');
+                    if (typeof CustomSelect !== 'undefined') {
+                        const selects = document.querySelectorAll('.form-select[data-custom="true"]');
+                        console.log('Found selects for manual init:', selects.length);
+                        let success = 0;
+                        selects.forEach(select => {
+                            try {
+                                if (!select.customSelectInstance) {
+                                    select.customSelectInstance = new CustomSelect(select);
+                                    success++;
+                                }
+                            } catch (error) {
+                                console.error('Manual init error:', error);
+                            }
+                        });
+                        document.getElementById('init-status').innerHTML += `<br>🔧 Manual init: ${success} selects`;
+                    }
                 }
             } catch (error) {
                 document.getElementById('init-status').textContent = '❌ Error during initialization: ' + error.message;
@@ -176,7 +219,7 @@
                         console.log(`Custom select ${index} clicked:`, e);
                     });
                 });
-            }, 500);
+            }, 1000);
         });
 
         // Aggiorna debug info su resize

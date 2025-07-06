@@ -1,6 +1,7 @@
 /**
  * CustomSelect - Componente per dropdown personalizzati
  * Risolve i problemi di styling dei dropdown nativi del browser
+ * v2.1.0 - Con gestione errori migliorata
  */
 
 class CustomSelect {
@@ -18,7 +19,13 @@ class CustomSelect {
         this.mobileModal = null;
         this.mobileOverlayHandler = null;
         
-        this.init();
+        try {
+            this.init();
+            window.appLogger?.debug('CustomSelect inizializzato', { element: selectElement.id || 'unnamed' });
+        } catch (error) {
+            window.appLogger?.error('Errore inizializzazione CustomSelect', error);
+            throw error;
+        }
     }
     
     init() {
@@ -237,6 +244,9 @@ class CustomSelect {
             // Desktop: mantieni il bel design esistente
             this.wrapper.querySelector('.custom-select-dropdown').style.display = 'block';
             
+            // Forza overflow visibile sui contenitori parent per risolvere problemi di clipping
+            this.forceOverflowVisible();
+            
             // Focus sul primo elemento se nessuno è selezionato
             if (this.selectedValue === '') {
                 const firstOption = this.wrapper.querySelector('.custom-select-option');
@@ -441,6 +451,9 @@ class CustomSelect {
             // Desktop: mantieni il comportamento esistente
             this.wrapper.querySelector('.custom-select-dropdown').style.display = 'none';
             
+            // Ripristina gli stili di overflow originali su desktop
+            this.restoreOverflow();
+            
             // Rimuovi focus da tutte le opzioni
             this.wrapper.querySelectorAll('.custom-select-option').forEach(opt => {
                 opt.classList.remove('focused');
@@ -594,16 +607,105 @@ class CustomSelect {
             this.globalScrollBlocker = null;
         }
     }
+    
+    /**
+     * Forza overflow visibile sui contenitori parent per risolvere problemi di clipping
+     */
+    forceOverflowVisible() {
+        // Salva gli stili originali per ripristinarli dopo
+        this.originalOverflowStyles = [];
+        
+        // Trova tutti i contenitori parent che potrebbero tagliare il dropdown
+        let element = this.wrapper.parentElement;
+        while (element && element !== document.body) {
+            const computedStyle = window.getComputedStyle(element);
+            
+            // Salva lo stile originale
+            this.originalOverflowStyles.push({
+                element: element,
+                overflow: element.style.overflow,
+                overflowX: element.style.overflowX,
+                overflowY: element.style.overflowY
+            });
+            
+            // Se l'elemento ha overflow: hidden, forzalo a visible
+            if (computedStyle.overflow === 'hidden' || 
+                computedStyle.overflowX === 'hidden' || 
+                computedStyle.overflowY === 'hidden') {
+                
+                element.style.setProperty('overflow', 'visible', 'important');
+                element.style.setProperty('overflow-x', 'visible', 'important');
+                element.style.setProperty('overflow-y', 'visible', 'important');
+            }
+            
+            element = element.parentElement;
+        }
+    }
+    
+    /**
+     * Ripristina gli stili di overflow originali
+     */
+    restoreOverflow() {
+        if (this.originalOverflowStyles) {
+            this.originalOverflowStyles.forEach(style => {
+                if (style.overflow !== undefined) {
+                    if (style.overflow === '') {
+                        style.element.style.removeProperty('overflow');
+                    } else {
+                        style.element.style.overflow = style.overflow;
+                    }
+                }
+                
+                if (style.overflowX !== undefined) {
+                    if (style.overflowX === '') {
+                        style.element.style.removeProperty('overflow-x');
+                    } else {
+                        style.element.style.overflowX = style.overflowX;
+                    }
+                }
+                
+                if (style.overflowY !== undefined) {
+                    if (style.overflowY === '') {
+                        style.element.style.removeProperty('overflow-y');
+                    } else {
+                        style.element.style.overflowY = style.overflowY;
+                    }
+                }
+            });
+            
+            this.originalOverflowStyles = null;
+        }
+    }
 }
 
 // Utility function per inizializzare automaticamente le custom select
 window.initCustomSelects = function(selector = '.form-select[data-custom="true"]') {
-    const selects = document.querySelectorAll(selector);
-    selects.forEach(select => {
-        if (!select.customSelectInstance) {
-            select.customSelectInstance = new CustomSelect(select);
+    try {
+        const selects = document.querySelectorAll(selector);
+        let successCount = 0;
+        let errorCount = 0;
+        
+        selects.forEach(select => {
+            try {
+                if (!select.customSelectInstance) {
+                    select.customSelectInstance = new CustomSelect(select);
+                    successCount++;
+                }
+            } catch (error) {
+                errorCount++;
+                window.appLogger?.error(`Errore inizializzazione custom select per elemento ${select.id || 'unnamed'}`, error);
+            }
+        });
+        
+        if (successCount > 0) {
+            window.appLogger?.debug(`Custom selects inizializzate: ${successCount} successi, ${errorCount} errori`);
         }
-    });
+        
+        return { success: successCount, errors: errorCount };
+    } catch (error) {
+        window.appLogger?.error('Errore inizializzazione globale custom selects', error);
+        return { success: 0, errors: 1 };
+    }
 };
 
 // Auto-inizializzazione quando il DOM è pronto

@@ -2,6 +2,65 @@
 import { initAuth } from './auth.js';
 import { renderView, navigateTo } from './router.js';
 
+// --- GESTIONE ERRORI GLOBALE ---
+
+// Gestore per errori non catturati (inclusi quelli delle estensioni browser)
+window.addEventListener('error', (event) => {
+    // Filtra errori comuni delle estensioni browser che non impattano l'app
+    const ignoredMessages = [
+        'A listener indicated an asynchronous response by returning true',
+        'Extension context invalidated',
+        'Could not establish connection',
+        'chrome-extension://',
+        'moz-extension://'
+    ];
+    
+    const shouldIgnore = ignoredMessages.some(msg => 
+        event.message && event.message.includes(msg)
+    );
+    
+    if (shouldIgnore) {
+        console.debug('Browser extension error ignored:', event.message);
+        event.preventDefault();
+        return false;
+    }
+    
+    // Log solo errori reali dell'applicazione
+    console.error('Application error:', {
+        message: event.message,
+        filename: event.filename,
+        lineno: event.lineno,
+        colno: event.colno,
+        error: event.error
+    });
+});
+
+// Gestore per promise rejection non catturate
+window.addEventListener('unhandledrejection', (event) => {
+    // Filtra errori comuni delle estensioni browser
+    const errorMessage = event.reason?.message || event.reason?.toString() || '';
+    
+    const ignoredMessages = [
+        'A listener indicated an asynchronous response by returning true',
+        'message channel closed before a response was received',
+        'Extension context invalidated',
+        'Could not establish connection'
+    ];
+    
+    const shouldIgnore = ignoredMessages.some(msg => 
+        errorMessage.includes(msg)
+    );
+    
+    if (shouldIgnore) {
+        console.debug('Browser extension promise rejection ignored:', errorMessage);
+        event.preventDefault();
+        return;
+    }
+    
+    // Log solo promise rejection reali dell'applicazione
+    console.error('Unhandled promise rejection:', event.reason);
+});
+
 // --- INIZIALIZZAZIONE GLOBALE ---
 
 // Gestione del tema (dark/light mode)
@@ -101,4 +160,41 @@ window.addEventListener('load', () => {
             renderView();
         }
     });
+});
+
+// --- UTILITY DI LOGGING ---
+
+/**
+ * Sistema di logging migliorato per l'applicazione
+ * Evita spam di log da estensioni browser e fornisce informazioni utili per debug
+ */
+window.appLogger = {
+    info: (message, data = null) => {
+        console.log(`[APP] ${message}`, data || '');
+    },
+    
+    warn: (message, data = null) => {
+        console.warn(`[APP WARNING] ${message}`, data || '');
+    },
+    
+    error: (message, error = null) => {
+        console.error(`[APP ERROR] ${message}`, error || '');
+        
+        // In produzione, qui potresti inviare l'errore a un servizio di monitoring
+        // come Sentry, LogRocket, etc.
+    },
+    
+    debug: (message, data = null) => {
+        // Solo in ambiente di sviluppo
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            console.debug(`[APP DEBUG] ${message}`, data || '');
+        }
+    }
+};
+
+// Log di inizializzazione app completata
+window.appLogger.info('Gestione Pazienti SPA inizializzata correttamente', {
+    version: '2.2.1',
+    environment: window.location.hostname === 'localhost' ? 'development' : 'production',
+    timestamp: new Date().toISOString()
 });

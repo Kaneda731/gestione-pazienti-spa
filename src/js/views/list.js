@@ -59,39 +59,66 @@ function buildQuery() {
     return query;
 }
 
-function applyFiltersFromURL(urlParams) {
-    domElements.searchInput.value = urlParams.get('search') || '';
-    domElements.repartoFilter.value = urlParams.get('reparto') || '';
-    domElements.diagnosiFilter.value = urlParams.get('diagnosi') || '';
-    domElements.statoFilter.value = urlParams.get('stato') || '';
+function loadPersistedFilters(urlParams) {
+    let filters = {};
+    const urlHasParams = urlParams.toString() !== '';
     
-    state.currentPage = parseInt(urlParams.get('page') || '0', 10);
-    state.sortColumn = urlParams.get('sort') || 'cognome';
-    state.sortDirection = urlParams.get('dir') || 'asc';
+    if (urlHasParams) {
+        // Priorità 1: Parametri dall'URL (per condivisione)
+        filters = {
+            search: urlParams.get('search') || '',
+            reparto: urlParams.get('reparto') || '',
+            diagnosi: urlParams.get('diagnosi') || '',
+            stato: urlParams.get('stato') || '',
+            page: parseInt(urlParams.get('page') || '0', 10),
+            sort: urlParams.get('sort') || 'cognome',
+            dir: urlParams.get('dir') || 'asc',
+        };
+    } else {
+        // Priorità 2: Filtri da sessionStorage
+        const storedFilters = sessionStorage.getItem('listFilters');
+        if (storedFilters) {
+            filters = JSON.parse(storedFilters);
+        }
+    }
+
+    // Applica i filtri trovati (o i default)
+    domElements.searchInput.value = filters.search || '';
+    domElements.repartoFilter.value = filters.reparto || '';
+    domElements.diagnosiFilter.value = filters.diagnosi || '';
+    domElements.statoFilter.value = filters.stato || '';
+    
+    state.currentPage = filters.page || 0;
+    state.sortColumn = filters.sort || 'cognome';
+    state.sortDirection = filters.dir || 'asc';
 }
 
-function updateURLWithFilters() {
+function persistFilters() {
+    const filterState = {
+        search: domElements.searchInput.value.trim(),
+        reparto: domElements.repartoFilter.value,
+        diagnosi: domElements.diagnosiFilter.value,
+        stato: domElements.statoFilter.value,
+        page: state.currentPage,
+        sort: state.sortColumn,
+        dir: state.sortDirection,
+    };
+
+    // 1. Salva in sessionStorage
+    sessionStorage.setItem('listFilters', JSON.stringify(filterState));
+
+    // 2. Aggiorna l'URL (utile per condivisione)
     const params = new URLSearchParams();
-    
-    const searchTerm = domElements.searchInput.value.trim();
-    if (searchTerm) params.set('search', searchTerm);
-
-    const reparto = domElements.repartoFilter.value;
-    if (reparto) params.set('reparto', reparto);
-
-    const diagnosi = domElements.diagnosiFilter.value;
-    if (diagnosi) params.set('diagnosi', diagnosi);
-
-    const stato = domElements.statoFilter.value;
-    if (stato) params.set('stato', stato);
-
-    if (state.currentPage > 0) params.set('page', state.currentPage);
-    if (state.sortColumn !== 'cognome') params.set('sort', state.sortColumn);
-    if (state.sortDirection !== 'asc') params.set('dir', state.sortDirection);
+    if (filterState.search) params.set('search', filterState.search);
+    if (filterState.reparto) params.set('reparto', filterState.reparto);
+    if (filterState.diagnosi) params.set('diagnosi', filterState.diagnosi);
+    if (filterState.stato) params.set('stato', filterState.stato);
+    if (filterState.page > 0) params.set('page', filterState.page);
+    if (filterState.sort !== 'cognome') params.set('sort', filterState.sort);
+    if (filterState.dir !== 'asc') params.set('dir', filterState.dir);
 
     const queryString = params.toString();
     const newUrl = queryString ? `#list?${queryString}` : '#list';
-    
     history.replaceState(null, '', newUrl);
 }
 
@@ -435,7 +462,7 @@ async function handleStatusChange(pazienteId, isDimissione) {
 function setupEventListeners() {
     const handleFilterChange = () => {
         state.currentPage = 0;
-        updateURLWithFilters();
+        persistFilters();
         fetchAndRenderPazienti();
     };
 
@@ -453,14 +480,14 @@ function setupEventListeners() {
     domElements.prevButton.addEventListener('click', () => {
         if (state.currentPage > 0) {
             state.currentPage--;
-            updateURLWithFilters();
+            persistFilters();
             fetchAndRenderPazienti();
         }
     });
 
     domElements.nextButton.addEventListener('click', () => {
         state.currentPage++;
-        updateURLWithFilters();
+        persistFilters();
         fetchAndRenderPazienti();
     });
 
@@ -474,7 +501,7 @@ function setupEventListeners() {
                 state.sortDirection = 'asc';
             }
             state.currentPage = 0;
-            updateURLWithFilters();
+            persistFilters();
             fetchAndRenderPazienti();
         });
     });
@@ -497,7 +524,11 @@ function setupEventListeners() {
         });
     }
 
-    domElements.backButton.addEventListener('click', () => navigateTo('home'));
+    domElements.backButton.addEventListener('click', () => {
+        // Pulisci i filtri salvati quando torni al menu principale
+        sessionStorage.removeItem('listFilters');
+        navigateTo('home');
+    });
     
     // Event listener per ridimensionamento finestra - rimuovi eventuali listener precedenti
     window.removeEventListener('resize', ensureCorrectView);
@@ -574,7 +605,7 @@ export async function initListView(urlParams) {
             // Custom selects refreshed
         }
 
-        applyFiltersFromURL(urlParams);
+        loadPersistedFilters(urlParams);
         fetchAndRenderPazienti();
         setupEventListeners();
         
@@ -583,7 +614,7 @@ export async function initListView(urlParams) {
     } catch (error) {
         console.error('❌ Errore durante l\'inizializzazione della lista:', error);
         // Continua anche in caso di errore nel caricamento filtri
-        applyFiltersFromURL(urlParams);
+        loadPersistedFilters(urlParams);
         fetchAndRenderPazienti();
         setupEventListeners();
         setTimeout(ensureCorrectView, 200);

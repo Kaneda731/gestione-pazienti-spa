@@ -17,7 +17,6 @@ class CustomSelect {
         this.selectedValue = '';
         this.selectedText = '';
         this.mobileModal = null;
-        this.mobileOverlayHandler = null;
         
         try {
             this.init();
@@ -534,13 +533,6 @@ class CustomSelect {
             });
         }
         
-        // Rimuovi listener mobile overlay
-        if (this.mobileOverlayHandler) {
-            document.removeEventListener('click', this.mobileOverlayHandler);
-            document.removeEventListener('touchstart', this.mobileOverlayHandler);
-            this.mobileOverlayHandler = null;
-        }
-        
         // Rimuovi blocco click/touch globale
         this.removeGlobalClickBlocker();
     }
@@ -554,12 +546,6 @@ class CustomSelect {
     }
     
     destroy() {
-        // Pulisci listener mobile se presenti
-        if (this.mobileOverlayHandler) {
-            document.removeEventListener('click', this.mobileOverlayHandler);
-            document.removeEventListener('touchstart', this.mobileOverlayHandler);
-        }
-        
         // Pulisci listener outside click/touch specifici
         if (this.outsideClickHandler) {
             document.removeEventListener('click', this.outsideClickHandler);

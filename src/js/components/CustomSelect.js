@@ -83,12 +83,15 @@ class CustomSelect {
             optionElement.dataset.value = option.value;
             optionElement.textContent = option.textContent;
             
-            // SOLO gestione desktop - NO touch events per evitare interferenze con modal mobile
+            // Gestione click opzioni - funziona sempre TRANNE quando siamo nel modal mobile
             optionElement.addEventListener('click', (e) => {
-                // Solo su desktop (> 767px)
-                if (window.innerWidth > 767) {
-                    this.selectOption(option.value, option.textContent);
+                // Blocca solo se il modal mobile è effettivamente attivo
+                if (this.mobileModal) {
+                    return; // Non fare nulla, lascia gestire al modal mobile
                 }
+                
+                // Altrimenti funziona normalmente (desktop o mobile dropdown normale)
+                this.selectOption(option.value, option.textContent);
             });
             
             optionsContainer.appendChild(optionElement);
@@ -104,24 +107,27 @@ class CustomSelect {
         const trigger = this.wrapper.querySelector('.custom-select-trigger');
         const dropdown = this.wrapper.querySelector('.custom-select-dropdown');
         
-        // Toggle dropdown - SOLO desktop
+        // Toggle dropdown
         trigger.addEventListener('click', (e) => {
             e.stopPropagation();
             this.toggle();
         });
         
-        // Close on outside click/touch
-        document.addEventListener('click', (e) => {
-            if (!this.wrapper.contains(e.target)) {
+        // Close on outside click/touch - usa listener specifici per questa istanza
+        this.outsideClickHandler = (e) => {
+            if (!this.wrapper.contains(e.target) && !this.mobileModal?.contains(e.target)) {
                 this.close();
             }
-        });
+        };
         
-        document.addEventListener('touchstart', (e) => {
-            if (!this.wrapper.contains(e.target)) {
+        this.outsideTouchHandler = (e) => {
+            if (!this.wrapper.contains(e.target) && !this.mobileModal?.contains(e.target)) {
                 this.close();
             }
-        }, { passive: true });
+        };
+        
+        document.addEventListener('click', this.outsideClickHandler);
+        document.addEventListener('touchstart', this.outsideTouchHandler, { passive: true });
         
         // Keyboard navigation
         this.wrapper.addEventListener('keydown', (e) => {
@@ -218,12 +224,13 @@ class CustomSelect {
         this.isOpen = true;
         this.wrapper.classList.add('open');
         
-        // Su mobile, crea un modal completamente esterno al DOM del form
+        // Su mobile usa sempre il modal mobile per migliore UX
+        // Su desktop usa il dropdown normale
         if (window.innerWidth <= 767) {
             this.disableOtherCustomSelects();
             this.createMobileModal();
         } else {
-            // Desktop: mantieni il bel design esistente
+            // Desktop: dropdown normale
             this.wrapper.querySelector('.custom-select-dropdown').style.display = 'block';
             
             // Forza overflow visibile sui contenitori parent per risolvere problemi di clipping
@@ -487,13 +494,12 @@ class CustomSelect {
         this.isOpen = false;
         this.wrapper.classList.remove('open');
         
-        // Su mobile, rimuovi modal esterno
+        // Su mobile, rimuovi modal se presente
         if (window.innerWidth <= 767) {
             this.removeMobileModal();
-            // Riabilita tutti gli altri custom select
             this.enableOtherCustomSelects();
         } else {
-            // Desktop: mantieni il comportamento esistente
+            // Desktop: dropdown normale
             this.wrapper.querySelector('.custom-select-dropdown').style.display = 'none';
             
             // Ripristina gli stili di overflow originali su desktop
@@ -530,6 +536,17 @@ class CustomSelect {
             document.removeEventListener('click', this.mobileOverlayHandler);
             document.removeEventListener('touchstart', this.mobileOverlayHandler);
         }
+        
+        // Pulisci listener outside click/touch specifici
+        if (this.outsideClickHandler) {
+            document.removeEventListener('click', this.outsideClickHandler);
+        }
+        if (this.outsideTouchHandler) {
+            document.removeEventListener('touchstart', this.outsideTouchHandler);
+        }
+        
+        // Rimuovi modal mobile se presente
+        this.removeMobileModal();
         
         this.wrapper.remove();
         this.selectElement.style.display = '';

@@ -6,7 +6,26 @@
  * Esempi di utilizzo dei nuovi layout per card mobile
  */
 
-// Esempio 1: Card orizzontali compatte per lista pazienti
+// Esempio 1: Card orizzontali compatte per lista pazienti============================
+   ESEMPIO USO CARD MOBILE MODERNE
+   =================================== */
+
+/**
+ * Esempi di utilizzo dei nuovi layout per card             // Feedback tattile (solo se supportato e dopo interazione utente)
+            card.addEventListener('touchstart', (e) => {
+                // Solo se non è un pulsante
+                if (!e.target.closest('button, a, input, select')) {
+                    try {
+                        // Controlla se la vibrazione è supportata e se l'utente ha già interagito
+                        if ('vibrate' in navigator && MobileCardManager.userHasInteracted) {
+                            navigator.vibrate(10); // Vibrazione leggera
+                        }
+                    } catch (e) {
+                        // Ignora silenziosamente errori di vibrazione
+                        console.debug('Vibrazione non disponibile:', e.message);
+                    }
+                }
+            }, { passive: true }); // Può essere passive, non usa preventDefault()Esempio 1: Card orizzontali compatte per lista pazienti
 function createHorizontalPatientCard(patient) {
     return `
         <div class="card card-horizontal">
@@ -84,7 +103,7 @@ function createDepartmentScroll(departments) {
 // Funzioni helper per gestire le interazioni mobile
 class MobileCardManager {
     
-    // Traccia se l'utente ha già interagito con la pagina per la vibrazione
+    // Traccia se l'utente ha già interagito con la pagina
     static userHasInteracted = false;
     
     // Inizializza il tracking dell'interazione utente
@@ -167,13 +186,13 @@ class MobileCardManager {
                 card.click();
             }, { passive: false }); // Deve essere false per usare preventDefault()
             
-            // Feedback tattile (solo se supportato e dopo prima interazione utente)
+            // Feedback tattile (solo se supportato e dopo interazione utente)
             card.addEventListener('touchstart', (e) => {
                 // Solo se non è un pulsante
                 if (!e.target.closest('button, a, input, select')) {
                     try {
                         // Controlla se la vibrazione è supportata e se l'utente ha già interagito
-                        if ('vibrate' in navigator && MobileCardManager.userHasInteracted) {
+                        if ('vibrate' in navigator && document.hasFocus && document.hasFocus() && this.userHasInteracted) {
                             navigator.vibrate(10); // Vibrazione leggera
                         }
                     } catch (e) {
@@ -189,8 +208,8 @@ class MobileCardManager {
 // Auto-inizializzazione per mobile
 if (window.innerWidth <= 767) {
     document.addEventListener('DOMContentLoaded', () => {
-        MobileCardManager.initTouchOptimizations();
         MobileCardManager.initUserInteractionTracking();
+        MobileCardManager.initTouchOptimizations();
         
         // Gestisci resize per layout responsivo
         window.addEventListener('resize', () => {

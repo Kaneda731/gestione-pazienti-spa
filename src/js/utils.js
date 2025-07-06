@@ -43,15 +43,35 @@ export function convertToCSV(data) {
  */
 export async function populateFilter(columnName, selectElement) {
     try {
-        const { data, error } = await supabase.from('pazienti').select(columnName);
-        if (error) throw error;
+        let data, error;
         
-        const uniqueValues = [...new Set(data.map(item => item[columnName]).filter(Boolean))].sort();
-        
-        selectElement.innerHTML = `<option value="">Tutti</option>`;
-        uniqueValues.forEach(value => {
-            selectElement.innerHTML += `<option value="${value}">${value}</option>`;
-        });
+        // Caso speciale per le diagnosi: carica dalla tabella 'diagnosi'
+        if (columnName === 'diagnosi') {
+            const result = await supabase.from('diagnosi').select('nome').order('nome', { ascending: true });
+            data = result.data;
+            error = result.error;
+            
+            if (error) throw error;
+            
+            selectElement.innerHTML = `<option value="">Tutti</option>`;
+            data.forEach(item => {
+                selectElement.innerHTML += `<option value="${item.nome}">${item.nome}</option>`;
+            });
+        } else {
+            // Comportamento normale per altri filtri (es. reparto_appartenenza)
+            const result = await supabase.from('pazienti').select(columnName);
+            data = result.data;
+            error = result.error;
+            
+            if (error) throw error;
+            
+            const uniqueValues = [...new Set(data.map(item => item[columnName]).filter(Boolean))].sort();
+            
+            selectElement.innerHTML = `<option value="">Tutti</option>`;
+            uniqueValues.forEach(value => {
+                selectElement.innerHTML += `<option value="${value}">${value}</option>`;
+            });
+        }
     } catch (error) {
         console.error(`Errore durante il popolamento del filtro ${columnName}:`, error);
         selectElement.innerHTML = `<option value="">Errore nel caricamento</option>`;

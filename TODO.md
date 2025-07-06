@@ -38,6 +38,11 @@
   - [x] Test touch areas e usabilità
   - [ ] Verifica accessibilità su dispositivi reali
 
+- [ ] **Refactoring Nomi File JavaScript**
+  - Rinominato `mobile-cards-examples.js` in `mobile-card-manager.js` per chiarezza.
+  - Aggiornato `index.html` per riflettere la modifica.
+  - Migliorata la manutenibilità del codice senza impattare la funzionalità.
+
 - [ ] **Ottimizzazione Performance**
   - Analisi bundle size CSS
   - Minificazione automatica per produzione

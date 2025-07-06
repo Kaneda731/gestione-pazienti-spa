@@ -36,7 +36,7 @@
 - [x] **Controllo generale UX mobile** - ✅ COMPLETATO AL 66%
   - [x] Scan automatico contrasto CSS mobile 
   - [x] Test touch areas e usabilità
-  - [ ] Verifica accessibilità su dispositivi reali
+  - [x] Verifica accessibilità su dispositivi reali
 
 - [ ] **Refactoring Nomi File JavaScript**
   - Rinominato `mobile-cards-examples.js` in `mobile-card-manager.js` per chiarezza.

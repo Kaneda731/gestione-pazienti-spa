@@ -377,8 +377,19 @@ class CustomSelect {
                     <h3>Seleziona ${this.selectElement.getAttribute('data-label') || 'Opzione'}</h3>
                     <button type="button" class="custom-select-mobile-close">✕</button>
                 </div>
-                <div class="custom-select-mobile-options">
-                    ${optionsHTML}
+                <div class="custom-select-mobile-container">
+                    <div class="custom-select-mobile-options">
+                        ${optionsHTML}
+                    </div>
+                    <div class="custom-select-mobile-scrollbar">
+                        <div class="scroll-zone">
+                            <div class="scroll-handle"></div>
+                            <div class="scroll-instructions">
+                                <span>📱</span>
+                                <small>Scroll</small>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         `;
@@ -475,39 +486,67 @@ class CustomSelect {
             e.stopPropagation();
         }, { passive: false });
         
-        // Seleziona opzioni
+        // Seleziona opzioni - SOLO con tap precisi, no touch events
         options.forEach(option => {
-            // Click normale
-            option.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                const value = option.dataset.value;
-                const text = option.textContent.trim();
-                
-                // Seleziona l'opzione
-                this.selectOption(value, text);
-                
-                // Chiudi il modal dopo la selezione
-                setTimeout(() => {
-                    this.close();
-                }, 100);
-            });
+            let touchStartData = null;
             
-            // Touch events per mobile
+            // Touch start - solo per tracking
+            option.addEventListener('touchstart', (e) => {
+                touchStartData = {
+                    x: e.touches[0].clientX,
+                    y: e.touches[0].clientY,
+                    time: Date.now()
+                };
+                // NO preventDefault - permetti scroll nativo
+            }, { passive: true });
+            
+            // Touch end - solo se è un tap pulito
             option.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                const value = option.dataset.value;
-                const text = option.textContent.trim();
+                if (!touchStartData) return;
                 
-                // Seleziona l'opzione
-                this.selectOption(value, text);
+                const deltaX = Math.abs(e.changedTouches[0].clientX - touchStartData.x);
+                const deltaY = Math.abs(e.changedTouches[0].clientY - touchStartData.y);
+                const deltaTime = Date.now() - touchStartData.time;
                 
-                // Chiudi il modal dopo la selezione
-                setTimeout(() => {
-                    this.close();
-                }, 100);
+                // È un tap solo se MOLTO preciso: < 3px movimento, < 200ms
+                const isPreciseTap = deltaX < 3 && deltaY < 3 && deltaTime < 200;
+                
+                if (isPreciseTap) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const value = option.dataset.value;
+                    const text = option.textContent.trim();
+                    
+                    // Seleziona l'opzione
+                    this.selectOption(value, text);
+                    
+                    // Chiudi il modal
+                    setTimeout(() => {
+                        this.close();
+                    }, 50);
+                }
+                
+                touchStartData = null;
             }, { passive: false });
+            
+            // Click per desktop (non interferisce con mobile)
+            option.addEventListener('click', (e) => {
+                // Solo se non c'è stato un touch event recente
+                if (!touchStartData) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const value = option.dataset.value;
+                    const text = option.textContent.trim();
+                    
+                    this.selectOption(value, text);
+                    
+                    setTimeout(() => {
+                        this.close();
+                    }, 50);
+                }
+            });
         });
     }
     

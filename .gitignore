@@ -43,6 +43,8 @@ temp/
 
 # Test files (optional - comment out if you want to track them)
 # tests/test-*.html
+test-contrasto-modal.html
+test-custom-select-scroll.html
 
 # Logs
 *.log

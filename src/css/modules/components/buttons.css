@@ -234,3 +234,42 @@
         font-size: 1.1em !important;
     }
 }
+
+/* Pulsante Custom Info (per Reset Filtri) */
+.btn-custom-info {
+    border-radius: var(--btn-border-radius);
+    font-size: var(--btn-font-size);
+    font-weight: var(--btn-font-weight);
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    border: var(--btn-border);
+    color: white;
+    background: linear-gradient(135deg, var(--info-color), #0c5460);
+    padding: 0.5rem 1rem;
+    min-width: 140px;
+}
+
+.btn-custom-info::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: var(--btn-shine-transition);
+    z-index: 1;
+}
+
+.btn-custom-info:hover {
+    background: linear-gradient(135deg, #17a2b8, var(--info-color));
+    transform: var(--btn-transform-hover);
+    box-shadow: var(--btn-shadow-hover);
+    color: white;
+}
+
+.btn-custom-info:hover::before {
+    left: 100%;
+}

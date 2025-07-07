@@ -58,7 +58,7 @@ export async function renderView() {
     let viewHtml;
 
     if (protectedViews.includes(requestedViewName) && !session) {
-        localStorage.setItem('redirectUrl', hash);
+        sessionStorage.setItem('redirectUrl', hash);
         viewToRender = 'login-required';
     }
     

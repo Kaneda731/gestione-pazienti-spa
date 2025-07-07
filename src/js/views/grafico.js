@@ -6,7 +6,24 @@ import { populateFilter } from '../utils.js';
 // Caching degli elementi del DOM
 const dom = {};
 
-
+/**
+ * Resetta tutti i filtri ai loro valori di default.
+ */
+function resetFilters() {
+    const filterIds = ['filter-reparto', 'filter-provenienza', 'filter-diagnosi', 'filter-assistenza'];
+    filterIds.forEach(id => {
+        const select = document.getElementById(id);
+        if (select) {
+            select.value = '';
+            if (select.customSelectInstance) {
+                select.customSelectInstance.setValue('');
+            }
+        }
+    });
+    dom.startDateFilter.value = '';
+    dom.endDateFilter.value = '';
+    dom.chartContainer.innerHTML = '<p class="text-muted text-center mt-5">Seleziona i filtri e clicca "Applica" per visualizzare il grafico.</p>';
+}
 
 /**
  * Costruisce la query a Supabase basandosi sui filtri selezionati.
@@ -68,6 +85,7 @@ async function drawChart() {
  */
 function setupEventListeners() {
     dom.applyButton.addEventListener('click', drawChart);
+    dom.resetButton.addEventListener('click', resetFilters);
     dom.backButton.addEventListener('click', () => navigateTo('home'));
 }
 
@@ -87,6 +105,7 @@ export async function initGraficoView() {
     dom.startDateFilter = document.getElementById('filter-start-date');
     dom.endDateFilter = document.getElementById('filter-end-date');
     dom.applyButton = document.getElementById('apply-filters-btn');
+    dom.resetButton = document.getElementById('reset-filters-btn');
     dom.backButton = view.querySelector('button[data-view="home"]');
 
     // Funzione per inizializzare la vista dopo il caricamento delle dipendenze

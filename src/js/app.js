@@ -148,8 +148,8 @@ window.addEventListener('load', () => {
     initBackToMenuButtons();
     
     initAuth(session => {
-        const redirectUrl = localStorage.getItem('redirectUrl');
-        localStorage.removeItem('redirectUrl'); // Rimuovi sempre l'URL dopo averlo letto
+        const redirectUrl = sessionStorage.getItem('redirectUrl');
+        sessionStorage.removeItem('redirectUrl'); // Rimuovi sempre l'URL dopo averlo letto
 
         if (session && redirectUrl) {
             // Se l'utente si è appena loggato e c'era un URL di destinazione,

@@ -1,0 +1,34 @@
+<div class="modal fade" id="auth-modal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Accesso</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="auth-bypass-alert" class="alert alert-info" style="display: none;">Modalità sviluppo - Bypass attivo</div>
+                
+                <form id="login-form">
+                    <div class="mb-3">
+                        <input type="email" class="form-control" id="login-email" placeholder="Email" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="password" class="form-control" id="login-password" placeholder="Password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 mb-3">Accedi</button>
+                </form>
+                
+                <div class="text-center mb-3">
+                    <span class="text-muted">oppure</span>
+                </div>
+                
+                <button id="google-login-btn" class="btn btn-outline-danger w-100">
+                    <i class="material-icons me-2" style="font-size: 1.2em;">account_circle</i>
+                    Accedi con Google
+                </button>
+                
+                <div id="auth-error" class="alert alert-danger mt-3" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+</div>

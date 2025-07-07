@@ -6,9 +6,10 @@ import { vi } from 'vitest';
 export const supabase = {
   auth: {
     getSession: vi.fn(() => Promise.resolve({ data: { session: null } })),
+    refreshSession: vi.fn(() => Promise.resolve({ data: { session: null } })),
     onAuthStateChange: vi.fn(() => ({ data: { subscription: { unsubscribe: vi.fn() } } })),
     signInWithOAuth: vi.fn(),
-    signOut: vi.fn(),
+    signOut: vi.fn(() => Promise.resolve({ error: null })),
   },
   from: vi.fn(() => ({
     select: vi.fn(() => ({

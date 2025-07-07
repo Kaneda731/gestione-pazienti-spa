@@ -2,6 +2,7 @@
 import { supabase } from '../supabase.js';
 import { navigateTo } from '../router.js';
 import { populateFilter } from '../utils.js';
+import { initCustomSelects } from '../components/CustomSelect.js';
 
 // Caching degli elementi del DOM
 const dom = {};
@@ -118,9 +119,7 @@ export async function initGraficoView() {
         ]);
 
         // 2. Inizializza i custom select ora che le opzioni sono caricate
-        if (window.initCustomSelects) {
-            window.initCustomSelects('#filter-reparto, #filter-provenienza, #filter-diagnosi, #filter-assistenza');
-        }
+        initCustomSelects('#filter-reparto, #filter-provenienza, #filter-diagnosi, #filter-assistenza');
 
         // 3. Imposta gli event listener
         setupEventListeners();

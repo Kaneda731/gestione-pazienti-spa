@@ -3,7 +3,7 @@
  * Solo FAB per tornare alla home, niente breadcrumb o altri elementi
  */
 
-class MobileNavigation {
+export class MobileNavigation {
     constructor() {
         this.currentView = 'home';
         this.fabElement = null;
@@ -145,7 +145,9 @@ let mobileNav = null;
 
 function initMobileNavigation() {
     if (window.innerWidth <= 768) {
-        mobileNav = new MobileNavigation();
+        if (!mobileNav) { // Controlla se già inizializzato
+            mobileNav = new MobileNavigation();
+        }
     }
 }
 
@@ -162,10 +164,6 @@ window.addEventListener('resize', () => {
 // Auto-init
 document.addEventListener('DOMContentLoaded', initMobileNavigation);
 
-// Esponi globalmente per integrazione con router
-window.mobileNav = mobileNav;
-window.initMobileNavigation = initMobileNavigation;
-
 // Gestione eventi di navigazione globali
 document.addEventListener('navigateToHome', () => {
     if (window.navigateTo) {
@@ -175,7 +173,6 @@ document.addEventListener('navigateToHome', () => {
     }
 });
 
-// Export per uso in altri moduli
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { MobileNavigation, initMobileNavigation };
-}
+export { initMobileNavigation };
+// Esponi istanza per uso globale se necessario (es. dal router)
+export let mobileNavInstance = mobileNav;

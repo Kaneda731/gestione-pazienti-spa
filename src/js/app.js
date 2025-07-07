@@ -1,6 +1,9 @@
 // src/js/app.js
 import { initAuth } from './auth.js';
 import { renderView, navigateTo } from './router.js';
+import './mobile-card-manager.js'; // Importa per l'auto-inizializzazione
+import './components/CustomSelect.js'; // Importa per l'auto-inizializzazione
+import './mobile-navigation.js'; // Importa per l'auto-inizializzazione
 
 // --- GESTIONE ERRORI GLOBALE ---
 

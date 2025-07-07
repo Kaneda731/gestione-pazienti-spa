@@ -4,7 +4,7 @@
  * v2.1.0 - Con gestione errori migliorata
  */
 
-class CustomSelect {
+export class CustomSelect {
     constructor(selectElement, options = {}) {
         this.selectElement = selectElement;
         this.options = {
@@ -602,7 +602,7 @@ class CustomSelect {
 }
 
 // Utility function per inizializzare automaticamente le custom select
-window.initCustomSelects = function(selector = '.form-select[data-custom="true"]') {
+export function initCustomSelects(selector = '.form-select[data-custom="true"]') {
     try {
         const selects = document.querySelectorAll(selector);
         let successCount = 0;
@@ -633,10 +633,5 @@ window.initCustomSelects = function(selector = '.form-select[data-custom="true"]
 
 // Auto-inizializzazione quando il DOM è pronto
 document.addEventListener('DOMContentLoaded', () => {
-    window.initCustomSelects();
+    initCustomSelects();
 });
-
-// Export per uso in moduli
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = CustomSelect;
-}

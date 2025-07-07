@@ -4,6 +4,7 @@ import { populateFilter } from '../utils.js';
 import { state, domElements, cacheDOMElements, loadPersistedFilters, persistFilters, resetFilters } from './list-state.js';
 import { fetchPazienti, exportPazientiToCSV, updatePazienteStatus, deletePaziente } from './list-api.js';
 import { renderPazienti, showLoading, showError, updateSortIndicators } from './list-renderer.js';
+import { initCustomSelects } from '../components/CustomSelect.js';
 
 async function fetchAndRender() {
     showLoading();
@@ -123,9 +124,7 @@ export async function initListView(urlParams) {
     ]);
 
     // 2. Inizializza i custom select
-    if (window.initCustomSelects) {
-            window.initCustomSelects('#list-filter-reparto, #list-filter-diagnosi, #list-filter-stato');
-        }
+    initCustomSelects('#list-filter-reparto, #list-filter-diagnosi, #list-filter-stato');
 
     // 3. Ora che tutti gli elementi sono pronti, fai la cache
     cacheDOMElements(viewContainer);

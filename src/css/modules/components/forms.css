@@ -30,11 +30,14 @@
 
 /* Filtri elenco pazienti - uniformità altezza */
 .filters-container .form-control,
-.filters-container .form-select {
+.filters-container .form-select,
+.filters-container .custom-select-trigger {
     height: 3rem;
-    padding: 1rem;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
     font-size: 0.9rem;
 }
+
 
 .filters-container .form-control-sm,
 .filters-container .form-select-sm {

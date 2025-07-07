@@ -96,8 +96,8 @@ export class MobileNavigation {
         this.currentView = newView;
         
         // Gestione FAB in base alla vista
-        if (newView === 'home') {
-            // Nella home, nascondi FAB
+        if (newView === 'home' || newView === 'inserimento') {
+            // Nascondi FAB nella home e nella pagina di inserimento/modifica
             this.hideFAB();
         } else {
             // Nelle altre viste, mostra FAB

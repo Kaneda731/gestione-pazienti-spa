@@ -4,9 +4,34 @@ export const state = {
     currentPage: 0,
     sortColumn: 'cognome',
     sortDirection: 'asc',
+    filters: {
+        search: '',
+        reparto: '',
+        diagnosi: '',
+        stato: '',
+    },
 };
 
 export const domElements = {};
+
+// Funzione helper per aggiornare il DOM dallo stato
+function updateDOMFromState() {
+    if (domElements.searchInput) domElements.searchInput.value = state.filters.search;
+    if (domElements.repartoFilter) domElements.repartoFilter.value = state.filters.reparto;
+    if (domElements.diagnosiFilter) domElements.diagnosiFilter.value = state.filters.diagnosi;
+    if (domElements.statoFilter) domElements.statoFilter.value = state.filters.stato;
+
+    // Aggiorna i custom select se esistono
+    if (domElements.repartoFilter?.customSelectInstance) {
+        domElements.repartoFilter.customSelectInstance.setValue(state.filters.reparto);
+    }
+    if (domElements.diagnosiFilter?.customSelectInstance) {
+        domElements.diagnosiFilter.customSelectInstance.setValue(state.filters.diagnosi);
+    }
+    if (domElements.statoFilter?.customSelectInstance) {
+        domElements.statoFilter.customSelectInstance.setValue(state.filters.stato);
+    }
+}
 
 export function cacheDOMElements(viewContainer) {
     domElements.repartoFilter = document.getElementById('list-filter-reparto');
@@ -25,95 +50,79 @@ export function cacheDOMElements(viewContainer) {
 }
 
 export function resetFilters() {
-    // Resetta i valori degli elementi del DOM
-    domElements.searchInput.value = '';
-    domElements.repartoFilter.value = '';
-    domElements.diagnosiFilter.value = '';
-    domElements.statoFilter.value = '';
-    
-    // Resetta lo stato della paginazione e dell'ordinamento
+    // Resetta lo stato logico
     state.currentPage = 0;
     state.sortColumn = 'cognome';
     state.sortDirection = 'asc';
-
-    // Resetta esplicitamente i CustomSelect per aggiornare la UI
-    if (domElements.repartoFilter.customSelectInstance) {
-        domElements.repartoFilter.customSelectInstance.setValue('');
-    }
-    if (domElements.diagnosiFilter.customSelectInstance) {
-        domElements.diagnosiFilter.customSelectInstance.setValue('');
-    }
-    if (domElements.statoFilter.customSelectInstance) {
-        domElements.statoFilter.customSelectInstance.setValue('');
-    }
-
+    state.filters = {
+        search: '',
+        reparto: '',
+        diagnosi: '',
+        stato: '',
+    };
+    
+    // Aggiorna il DOM per riflettere lo stato resettato
+    updateDOMFromState();
+    
     // Pulisce i filtri salvati e l'URL
     persistFilters();
 }
 
 export function loadPersistedFilters(urlParams) {
-    let filters = {};
     const urlHasParams = urlParams.toString() !== '';
-    
+    let loadedState = {};
+
     if (urlHasParams) {
-        filters = {
-            search: urlParams.get('search') || '',
-            reparto: urlParams.get('reparto') || '',
-            diagnosi: urlParams.get('diagnosi') || '',
-            stato: urlParams.get('stato') || '',
-            page: parseInt(urlParams.get('page') || '0', 10),
-            sort: urlParams.get('sort') || 'cognome',
-            dir: urlParams.get('dir') || 'asc',
+        loadedState = {
+            filters: {
+                search: urlParams.get('search') || '',
+                reparto: urlParams.get('reparto') || '',
+                diagnosi: urlParams.get('diagnosi') || '',
+                stato: urlParams.get('stato') || '',
+            },
+            currentPage: parseInt(urlParams.get('page') || '0', 10),
+            sortColumn: urlParams.get('sort') || 'cognome',
+            sortDirection: urlParams.get('dir') || 'asc',
         };
-        // Salva i filtri dall'URL a sessionStorage per coerenza
-        sessionStorage.setItem('listFilters', JSON.stringify(filters));
+        sessionStorage.setItem('listFilters', JSON.stringify(loadedState));
     } else {
-        // Se non ci sono parametri URL, resetta tutto
-        sessionStorage.removeItem('listFilters');
-        filters = {
-            search: '',
-            reparto: '',
-            diagnosi: '',
-            stato: '',
-            page: 0,
-            sort: 'cognome',
-            dir: 'asc',
-        };
+        const fromSession = sessionStorage.getItem('listFilters');
+        if (fromSession) {
+            loadedState = JSON.parse(fromSession);
+        }
     }
 
-    domElements.searchInput.value = filters.search || '';
-    domElements.repartoFilter.value = filters.reparto || '';
-    domElements.diagnosiFilter.value = filters.diagnosi || '';
-    domElements.statoFilter.value = filters.stato || '';
-    
-    state.currentPage = filters.page || 0;
-    state.sortColumn = filters.sort || 'cognome';
-    state.sortDirection = filters.dir || 'asc';
+    // Applica lo stato caricato allo stato globale
+    Object.assign(state, loadedState);
+
+    // Aggiorna il DOM per riflettere lo stato caricato
+    updateDOMFromState();
 }
 
 export function persistFilters() {
-    const filterState = {
-        search: domElements.searchInput.value.trim(),
-        reparto: domElements.repartoFilter.value,
-        diagnosi: domElements.diagnosiFilter.value,
-        stato: domElements.statoFilter.value,
-        page: state.currentPage,
-        sort: state.sortColumn,
-        dir: state.sortDirection,
+    const stateToPersist = {
+        currentPage: state.currentPage,
+        sortColumn: state.sortColumn,
+        sortDirection: state.sortDirection,
+        filters: state.filters,
     };
 
-    sessionStorage.setItem('listFilters', JSON.stringify(filterState));
+    sessionStorage.setItem('listFilters', JSON.stringify(stateToPersist));
 
     const params = new URLSearchParams();
-    if (filterState.search) params.set('search', filterState.search);
-    if (filterState.reparto) params.set('reparto', filterState.reparto);
-    if (filterState.diagnosi) params.set('diagnosi', filterState.diagnosi);
-    if (filterState.stato) params.set('stato', filterState.stato);
-    if (filterState.page > 0) params.set('page', filterState.page);
-    if (filterState.sort !== 'cognome') params.set('sort', filterState.sort);
-    if (filterState.dir !== 'asc') params.set('dir', filterState.dir);
+    if (state.filters.search) params.set('search', state.filters.search);
+    if (state.filters.reparto) params.set('reparto', state.filters.reparto);
+    if (state.filters.diagnosi) params.set('diagnosi', state.filters.diagnosi);
+    if (state.filters.stato) params.set('stato', state.filters.stato);
+    if (state.currentPage > 0) params.set('page', state.currentPage);
+    if (state.sortColumn !== 'cognome') params.set('sort', state.sortColumn);
+    if (state.sortDirection !== 'asc') params.set('dir', state.sortDirection);
 
     const queryString = params.toString();
     const newUrl = queryString ? `#list?${queryString}` : '#list';
-    history.replaceState(null, '', newUrl);
+    
+    // Evita di manipolare la history in ambiente di test
+    if (typeof window.history.replaceState === 'function') {
+        history.replaceState(null, '', newUrl);
+    }
 }

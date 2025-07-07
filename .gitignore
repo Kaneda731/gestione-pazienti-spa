@@ -41,5 +41,5 @@ Thumbs.db
 temp/
 
 # Dependency lock files
-package-lock.json
+# package-lock.json
 yarn.lock

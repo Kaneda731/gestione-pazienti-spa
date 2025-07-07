@@ -1,6 +1,6 @@
 // src/js/views/list.js
 import { navigateTo } from '../router.js';
-import { populateFilter } from '../utils.js';
+import { getFilterOptions, populateSelectWithOptions } from '../utils.js';
 import { state, domElements, cacheDOMElements, loadPersistedFilters, persistFilters, resetFilters } from './list-state.js';
 import { fetchPazienti, exportPazientiToCSV, updatePazienteStatus, deletePaziente } from './list-api.js';
 import { renderPazienti, showLoading, showError, updateSortIndicators } from './list-renderer.js';
@@ -117,27 +117,32 @@ export async function initListView(urlParams) {
     const viewContainer = document.querySelector('#app-container .view');
     if (!viewContainer) return;
 
-    // 1. Popola i filtri prima di fare qualsiasi altra cosa
-    await Promise.all([
-        populateFilter('reparto_appartenenza', document.getElementById('list-filter-reparto')),
-        populateFilter('diagnosi', document.getElementById('list-filter-diagnosi'))
-    ]);
-
-    // 2. Inizializza i custom select
-    initCustomSelects('#list-filter-reparto, #list-filter-diagnosi, #list-filter-stato');
-
-    // 3. Ora che tutti gli elementi sono pronti, fai la cache
+    // 1. Esegui la cache degli elementi DOM statici
     cacheDOMElements(viewContainer);
 
+    // 2. Recupera i dati per i filtri in parallelo
+    const [repartoOptions, diagnosiOptions] = await Promise.all([
+        getFilterOptions('reparto_appartenenza'),
+        getFilterOptions('diagnosi')
+    ]);
+
+    // 3. Popola i select con i dati ottenuti
+    populateSelectWithOptions(domElements.repartoFilter, repartoOptions);
+    populateSelectWithOptions(domElements.diagnosiFilter, diagnosiOptions);
+
     // 4. Carica i filtri salvati (da URL o sessionStorage)
+    // Questo ripristinerà i valori dei select se necessario
     loadPersistedFilters(urlParams);
 
-    // 5. Imposta gli event listener
+    // 5. Ora che il DOM è stabile e popolato, inizializza i custom select
+    initCustomSelects('#list-filter-reparto, #list-filter-diagnosi, #list-filter-stato');
+
+    // 6. Imposta gli event listener
     setupEventListeners();
     
-    // 6. Esegui il fetch e il render iniziali
+    // 7. Esegui il fetch e il render iniziali
     fetchAndRender();
     
-    // 7. Aggiorna gli indicatori di ordinamento e la vista
+    // 8. Aggiorna gli indicatori di ordinamento e la vista
     updateSortIndicators();
 }

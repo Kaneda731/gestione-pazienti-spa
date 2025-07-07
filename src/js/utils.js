@@ -37,43 +37,55 @@ export function convertToCSV(data) {
 }
 
 /**
- * Popola un elemento <select> con valori unici da una colonna del database.
- * @param {string} columnName - Il nome della colonna da cui prendere i valori.
- * @param {HTMLSelectElement} selectElement - L'elemento select da popolare.
+ * Recupera le opzioni uniche per un filtro.
+ * Gestisce casi speciali come la tabella 'diagnosi'.
+ * @param {string} filterName - Il nome del filtro (es. 'reparto_appartenenza', 'diagnosi').
+ * @returns {Promise<string[]>} - Una promise che risolve in un array di stringhe.
  */
-export async function populateFilter(columnName, selectElement) {
+export async function getFilterOptions(filterName) {
     try {
         let data, error;
-        
-        // Caso speciale per le diagnosi: carica dalla tabella 'diagnosi'
-        if (columnName === 'diagnosi') {
-            const result = await supabase.from('diagnosi').select('nome').order('nome', { ascending: true });
-            data = result.data;
-            error = result.error;
-            
+
+        if (filterName === 'diagnosi') {
+            // Caso speciale: carica dalla tabella 'diagnosi'
+            ({ data, error } = await supabase.from('diagnosi').select('nome').order('nome', { ascending: true }));
             if (error) throw error;
-            
-            selectElement.innerHTML = `<option value="">Tutti</option>`;
-            data.forEach(item => {
-                selectElement.innerHTML += `<option value="${item.nome}">${item.nome}</option>`;
-            });
+            return data.map(item => item.nome);
         } else {
-            // Comportamento normale per altri filtri (es. reparto_appartenenza)
-            const result = await supabase.from('pazienti').select(columnName);
-            data = result.data;
-            error = result.error;
-            
+            // Comportamento standard: carica valori unici dalla tabella 'pazienti'
+            ({ data, error } = await supabase.from('pazienti').select(filterName));
             if (error) throw error;
-            
-            const uniqueValues = [...new Set(data.map(item => item[columnName]).filter(Boolean))].sort();
-            
-            selectElement.innerHTML = `<option value="">Tutti</option>`;
-            uniqueValues.forEach(value => {
-                selectElement.innerHTML += `<option value="${value}">${value}</option>`;
-            });
+            return [...new Set(data.map(item => item[filterName]).filter(Boolean))].sort();
         }
+
     } catch (error) {
-        console.error(`Errore durante il popolamento del filtro ${columnName}:`, error);
-        selectElement.innerHTML = `<option value="">Errore nel caricamento</option>`;
+        console.error(`Errore durante il recupero delle opzioni per ${filterName}:`, error);
+        return []; // Restituisce un array vuoto in caso di errore
     }
 }
+
+/**
+ * Popola un elemento <select> con le opzioni fornite.
+ * @param {HTMLSelectElement} selectElement - L'elemento select da popolare.
+ * @param {string[]} options - L'array di opzioni (stringhe).
+ * @param {string} [defaultOptionText='Tutti'] - Il testo per l'opzione di default.
+ */
+export function populateSelectWithOptions(selectElement, options, defaultOptionText = 'Tutti') {
+    if (!selectElement) return;
+
+    const currentValue = selectElement.value; // Salva il valore corrente se presente
+    selectElement.innerHTML = `<option value="">${defaultOptionText}</option>`;
+    
+    options.forEach(value => {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = value;
+        selectElement.appendChild(option);
+    });
+
+    // Ripristina il valore precedente se è ancora valido
+    if (options.includes(currentValue)) {
+        selectElement.value = currentValue;
+    }
+}
+

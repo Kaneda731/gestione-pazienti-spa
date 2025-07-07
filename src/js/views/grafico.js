@@ -1,7 +1,7 @@
 // src/js/views/grafico.js
 import { supabase } from '../supabase.js';
 import { navigateTo } from '../router.js';
-import { populateFilter } from '../utils.js';
+import { getFilterOptions, populateSelectWithOptions } from '../utils.js';
 import { initCustomSelects } from '../components/CustomSelect.js';
 
 // Caching degli elementi del DOM
@@ -109,23 +109,26 @@ export async function initGraficoView() {
     dom.resetButton = document.getElementById('reset-filters-btn');
     dom.backButton = view.querySelector('button[data-view="home"]');
 
-    // Funzione per inizializzare la vista dopo il caricamento delle dipendenze
     const initialize = async () => {
-        // 1. Popola i filtri in modo asincrono
-        await Promise.all([
-            populateFilter('reparto_appartenenza', dom.repartoFilter),
-            populateFilter('reparto_provenienza', dom.provenienzaFilter),
-            populateFilter('diagnosi', dom.diagnosiFilter)
+        // 1. Recupera i dati per i filtri in parallelo
+        const [repartoOptions, provenienzaOptions, diagnosiOptions] = await Promise.all([
+            getFilterOptions('reparto_appartenenza'),
+            getFilterOptions('reparto_provenienza'),
+            getFilterOptions('diagnosi')
         ]);
 
-        // 2. Inizializza i custom select ora che le opzioni sono caricate
+        // 2. Popola i select con i dati ottenuti
+        populateSelectWithOptions(dom.repartoFilter, repartoOptions);
+        populateSelectWithOptions(dom.provenienzaFilter, provenienzaOptions);
+        populateSelectWithOptions(dom.diagnosiFilter, diagnosiOptions);
+
+        // 3. Inizializza i custom select
         initCustomSelects('#filter-reparto, #filter-provenienza, #filter-diagnosi, #filter-assistenza');
 
-        // 3. Imposta gli event listener
+        // 4. Imposta gli event listener
         setupEventListeners();
     };
 
-    // Carica Google Charts e, una volta pronto, esegui la logica di inizializzazione
     google.charts.load('current', { 'packages': ['corechart'] });
     google.charts.setOnLoadCallback(initialize);
 }

@@ -68,20 +68,11 @@
 
     /* === ELEVATION SYSTEM MOBILE === */
     
-    /* Riduci le elevation su mobile per performance */
-    .elevation-1 {
+    .elevation-1, .elevation-2 {
         box-shadow: var(--shadow-sm) !important;
     }
     
-    .elevation-2 {
-        box-shadow: var(--shadow-sm) !important;
-    }
-    
-    .elevation-3 {
-        box-shadow: var(--shadow-md) !important;
-    }
-    
-    .elevation-4 {
+    .elevation-3, .elevation-4 {
         box-shadow: var(--shadow-md) !important;
     }
     
@@ -91,14 +82,18 @@
 
     /* === ACCESSIBILITÀ E PERFORMANCE === */
 
-    /* Touch areas ottimizzate */
-    .card, .btn {
+    /* Touch areas ottimizzate e prevenzione double-tap zoom */
+    .card, .btn, .modal-content, a {
         touch-action: manipulation;
     }
 
     /* Focus migliorato per navigation via tastiera */
-    .card:focus, .btn:focus {
-        outline: 2px solid var(--primary-color) !important;
+    .card:focus, 
+    .btn:focus,
+    .form-control:focus,
+    .btn-close:focus,
+    a:focus {
+        outline: 3px solid var(--primary-color) !important;
         outline-offset: 2px !important;
     }
 
@@ -113,8 +108,8 @@
         backdrop-filter: none !important;
     }
 
-    /* Hardware acceleration per smooth scrolling */
-    .card, .btn {
+    /* Hardware acceleration per smooth scrolling e interazioni */
+    .card, .btn, .modal-content, .form-control {
         will-change: transform;
         -webkit-transform: translateZ(0);
         transform: translateZ(0);
@@ -122,7 +117,7 @@
 
     /* Riduci animazioni complesse su mobile */
     @media (prefers-reduced-motion: reduce) {
-        .card, .btn {
+        .card, .btn, .modal.fade .modal-dialog {
             transition: none !important;
         }
     }

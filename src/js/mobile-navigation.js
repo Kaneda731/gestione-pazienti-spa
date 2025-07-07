@@ -47,29 +47,32 @@ export class MobileNavigation {
     
     setupEventListeners() {
         let lastScrollY = window.scrollY;
-        const scrollThreshold = 10; // Minima distanza di scroll per attivare l'effetto
+        let ticking = false;
+        const scrollThreshold = 10;
 
-        window.addEventListener('scroll', () => {
-            if (!this.fabElement) return;
-
+        const handleScroll = () => {
             const currentScrollY = window.scrollY;
             const scrollDifference = currentScrollY - lastScrollY;
 
-            // Se lo scroll supera la soglia
             if (Math.abs(scrollDifference) > scrollThreshold) {
                 if (scrollDifference > 0) {
-                    // Scorrimento verso il basso: nascondi FAB
-                    this.fabElement.classList.add('fab-hidden');
+                    this.fabElement?.classList.add('fab-hidden');
                 } else {
-                    // Scorrimento verso l'alto: mostra FAB
-                    this.fabElement.classList.remove('fab-hidden');
+                    this.fabElement?.classList.remove('fab-hidden');
                 }
             }
             
             lastScrollY = currentScrollY;
+            ticking = false;
+        };
+
+        window.addEventListener('scroll', () => {
+            if (!ticking) {
+                window.requestAnimationFrame(handleScroll);
+                ticking = true;
+            }
         }, { passive: true });
         
-        // Aggiorna navigazione quando cambia vista
         document.addEventListener('viewChanged', (e) => {
             this.updateView(e.detail.view);
         });

@@ -82,8 +82,8 @@ function setupFormForInsert() {
  * @param {Event} e - L'evento di submit.
  * @param {string|null} editId - L'ID del paziente se in modalità modifica, altrimenti null.
  */
-async function handleFormSubmit(e, editId) {
-    e.preventDefault();
+async function handleFormSubmit(editId) {
+    // e.preventDefault(); // Non più necessario qui
     if (!dom.form.checkValidity()) {
         mostraMessaggio('Per favore, compila tutti i campi obbligatori.', 'error');
         return;
@@ -136,7 +136,12 @@ async function handleFormSubmit(e, editId) {
  * @param {string|null} editId - L'ID del paziente se in modalità modifica.
  */
 function setupFormEventListeners(editId) {
-    dom.form.onsubmit = (e) => handleFormSubmit(e, editId);
+    // Rimuoviamo l'handler onsubmit e usiamo un click listener sul pulsante
+    dom.submitButton.addEventListener('click', (e) => {
+        // Preveniamo qualsiasi comportamento di default, anche se non è più un submit
+        e.preventDefault();
+        handleFormSubmit(editId);
+    });
 
     dom.backButton.addEventListener('click', () => {
         sessionStorage.removeItem('editPazienteId');
@@ -155,7 +160,7 @@ export async function initInserimentoView() {
     dom.form = formElement;
     dom.backButton = formElement.closest('.card').querySelector('button[data-view="home"]');
     dom.title = document.getElementById('inserimento-title');
-    dom.submitButton = formElement.querySelector('button[type="submit"]');
+    dom.submitButton = document.getElementById('save-patient-btn');
     dom.idInput = document.getElementById('paziente-id');
     dom.dataDimissioneContainer = document.getElementById('data-dimissione-container');
 

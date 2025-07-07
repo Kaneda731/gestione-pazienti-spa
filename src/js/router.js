@@ -6,8 +6,6 @@ import { initGraficoView } from './views/grafico.js';
 import { initListView } from './views/list.js';
 import { initDiagnosiView } from './views/diagnosi.js';
 
-const appContainer = document.getElementById('app-container');
-
 const viewInitializers = {
     inserimento: initInserimentoView,
     dimissione: initDimissioneView,
@@ -16,7 +14,6 @@ const viewInitializers = {
     diagnosi: initDiagnosiView,
 };
 
-// Cache per i template delle viste per evitare fetch multipli
 const viewCache = new Map();
 
 async function fetchView(viewName) {
@@ -33,7 +30,6 @@ async function fetchView(viewName) {
         return text;
     } catch (error) {
         console.error(`Errore nel caricamento della vista ${viewName}:`, error);
-        // Fallback alla vista home se una vista non viene trovata
         return await fetchView('home');
     }
 }
@@ -43,7 +39,12 @@ export function navigateTo(viewName) {
 }
 
 export async function renderView() {
-    // Failsafe per garantire che lo scroll del body non sia mai bloccato
+    const appContainer = document.getElementById('app-container');
+    if (!appContainer) {
+        console.error("Fatal: #app-container non trovato. L'app non può essere renderizzata.");
+        return;
+    }
+
     document.body.classList.remove('custom-select-modal-open');
 
     const hash = window.location.hash.substring(1) || 'home';
@@ -57,34 +58,23 @@ export async function renderView() {
     let viewToRender = requestedViewName;
     let viewHtml;
 
-    // Se l'utente non è loggato e cerca di accedere a una vista protetta,
-    // o se l'utente è sulla home page dopo un logout, ricarica la pagina.
-    if ((protectedViews.includes(requestedViewName) && !session) || 
-        (requestedViewName === 'home' && localStorage.getItem('user.manual.logout') === 'true')) {
-        
-        localStorage.removeItem('user.manual.logout'); // Pulisci il flag
-        
-        // Se non siamo loggati, salva l'URL di destinazione e mostra il login.
-        if (!session) {
-            sessionStorage.setItem('redirectUrl', hash);
-            viewToRender = 'login-required';
-        } else {
-            // Se siamo loggati ma eravamo sulla home dopo un logout, ricarica.
-            window.location.reload();
-            return;
-        }
+    if (protectedViews.includes(requestedViewName) && !session) {
+        sessionStorage.setItem('redirectUrl', hash);
+        viewToRender = 'login-required';
+    } else if (requestedViewName === 'home' && localStorage.getItem('user.manual.logout') === 'true') {
+        localStorage.removeItem('user.manual.logout');
+        window.location.reload();
+        return;
     }
     
-    // Carica l'HTML della vista
     viewHtml = await fetchView(viewToRender);
-
     appContainer.innerHTML = viewHtml;
+
     const viewDiv = appContainer.querySelector('.view');
     if (viewDiv) {
         viewDiv.classList.add('active');
     }
 
-    // Inizializza la logica specifica della vista
     const initializer = viewInitializers[viewToRender];
     if (initializer) {
         initializer(urlParams);
@@ -107,7 +97,6 @@ export async function renderView() {
         }
     }
     
-    // Emetti evento per aggiornare la UI (es. navigazione mobile)
     const viewChangeEvent = new CustomEvent('viewChanged', {
         detail: { view: viewToRender, params: urlParams }
     });

@@ -240,19 +240,11 @@ class CustomSelect {
         this.isOpen = true;
         this.wrapper.classList.add('open');
         
-        // Su mobile usa sempre il modal mobile per migliore UX
-        // Su desktop usa il dropdown normale
         if (window.innerWidth <= 767) {
             this.disableOtherCustomSelects();
             this.createMobileModal();
         } else {
-            // Desktop: dropdown normale
             this.wrapper.querySelector('.custom-select-dropdown').style.display = 'block';
-            
-            // Forza overflow visibile sui contenitori parent per risolvere problemi di clipping
-            this.forceOverflowVisible();
-            
-            // Focus sul primo elemento se nessuno è selezionato
             if (this.selectedValue === '') {
                 const firstOption = this.wrapper.querySelector('.custom-select-option');
                 if (firstOption) {
@@ -507,41 +499,21 @@ class CustomSelect {
     }
     
     close() {
-        // Esegui solo se il select è aperto, per evitare azioni e log inutili
-        if (!this.isOpen) {
-            return;
-        }
-
-        window.appLogger?.debug('CustomSelect closing', { 
-            selectId: this.selectElement.id, 
-            hasMobileModal: !!this.mobileModal,
-            currentState: this.isOpen 
-        });
-        
-        // Assicura la rimozione della classe dal body in ogni caso
-        document.body.classList.remove('custom-select-modal-open');
-
+        if (!this.isOpen) return;
         this.isOpen = false;
         this.wrapper.classList.remove('open');
-        
-        // Su mobile, rimuovi modal se presente
-        if (window.innerWidth <= 767) {
+
+        if (this.mobileModal) {
             this.removeMobileModal();
             this.enableOtherCustomSelects();
         } else {
-            // Desktop: dropdown normale
             this.wrapper.querySelector('.custom-select-dropdown').style.display = 'none';
-            
-            // Ripristina gli stili di overflow originali su desktop
-            this.restoreOverflow();
-            
-            // Rimuovi focus da tutte le opzioni
             this.wrapper.querySelectorAll('.custom-select-option').forEach(opt => {
                 opt.classList.remove('focused');
             });
         }
         
-        // Rimuovi blocco click/touch globale
+        document.body.classList.remove('custom-select-modal-open');
         this.removeGlobalClickBlocker();
     }
     
@@ -625,75 +597,6 @@ class CustomSelect {
         if (this.globalClickBlocker) {
             document.removeEventListener('click', this.globalClickBlocker, { capture: true });
             this.globalClickBlocker = null;
-        }
-    }
-    
-    /**
-     * Forza overflow visibile sui contenitori parent per risolvere problemi di clipping
-     */
-    forceOverflowVisible() {
-        // Salva gli stili originali per ripristinarli dopo
-        this.originalOverflowStyles = [];
-        
-        // Trova tutti i contenitori parent che potrebbero tagliare il dropdown
-        let element = this.wrapper.parentElement;
-        while (element && element !== document.body) {
-            const computedStyle = window.getComputedStyle(element);
-            
-            // Salva lo stile originale
-            this.originalOverflowStyles.push({
-                element: element,
-                overflow: element.style.overflow,
-                overflowX: element.style.overflowX,
-                overflowY: element.style.overflowY
-            });
-            
-            // Se l'elemento ha overflow: hidden, forzalo a visible
-            if (computedStyle.overflow === 'hidden' || 
-                computedStyle.overflowX === 'hidden' || 
-                computedStyle.overflowY === 'hidden') {
-                
-                element.style.setProperty('overflow', 'visible', 'important');
-                element.style.setProperty('overflow-x', 'visible', 'important');
-                element.style.setProperty('overflow-y', 'visible', 'important');
-            }
-            
-            element = element.parentElement;
-        }
-    }
-    
-    /**
-     * Ripristina gli stili di overflow originali
-     */
-    restoreOverflow() {
-        if (this.originalOverflowStyles) {
-            this.originalOverflowStyles.forEach(style => {
-                if (style.overflow !== undefined) {
-                    if (style.overflow === '') {
-                        style.element.style.removeProperty('overflow');
-                    } else {
-                        style.element.style.overflow = style.overflow;
-                    }
-                }
-                
-                if (style.overflowX !== undefined) {
-                    if (style.overflowX === '') {
-                        style.element.style.removeProperty('overflow-x');
-                    } else {
-                        style.element.style.overflowX = style.overflowX;
-                    }
-                }
-                
-                if (style.overflowY !== undefined) {
-                    if (style.overflowY === '') {
-                        style.element.style.removeProperty('overflow-y');
-                    } else {
-                        style.element.style.overflowY = style.overflowY;
-                    }
-                }
-            });
-            
-            this.originalOverflowStyles = null;
         }
     }
 }

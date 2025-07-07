@@ -48,6 +48,28 @@
         </div>
     </nav>
 
+    <!-- Navbar Mobile - nascosta di default, CSS la mostrerà solo su mobile -->
+    <nav class="mobile-navbar d-none">
+        <div class="mobile-navbar-container">
+            <!-- Theme Toggle Button - SINISTRA -->
+            <button class="mobile-nav-btn" id="mobile-theme-toggle" type="button" title="Cambia tema">
+                <span class="material-icons" id="mobile-theme-icon">dark_mode</span>
+            </button>
+            
+            <!-- Home Button - CENTRO -->
+            <a href="#home" class="mobile-nav-btn mobile-nav-center" data-action="home" title="Home">
+                <span class="material-icons">home</span>
+            </a>
+            
+            <!-- Auth Button - DESTRA -->
+            <div class="mobile-nav-btn" id="mobile-auth-wrapper" title="Accesso">
+                <div id="mobile-auth-container" tabindex="-1">
+                    <!-- Il sistema esistente popolerà questo -->
+                </div>
+            </div>
+        </div>
+    </nav>
+
     <main class="container mt-5" id="app-container">
         <!-- Le viste verranno caricate dinamicamente qui dal router -->
     </main>

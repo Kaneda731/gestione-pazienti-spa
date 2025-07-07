@@ -1,0 +1,75 @@
+/* ===================================
+   MOBILE TAB BAR
+   =================================== */
+
+/* La media query è lg (992px) per allinearla a d-lg-none di Bootstrap */
+@media (max-width: 991.98px) {
+
+    /* Contenitore principale della barra */
+    #mobile-tab-bar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        background: var(--navbar-bg, rgba(var(--card-bg-rgb), 0.75));
+        backdrop-filter: var(--glass-blur, blur(12px));
+        -webkit-backdrop-filter: var(--glass-blur, blur(12px));
+        border-bottom: 1px solid rgba(var(--border-color-rgb, 255, 255, 255), 0.2);
+        box-shadow: var(--navbar-shadow, 0 2px 10px rgba(0, 0, 0, 0.1));
+        display: flex;
+        justify-content: space-around;
+        align-items: stretch; /* Allunga i figli per tutta l'altezza */
+        z-index: 1050;
+    }
+
+    /* Stile per ogni pulsante/sezione */
+    .tab-bar-btn,
+    #auth-container-mobile {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        flex-grow: 1;
+        height: 100%;
+        transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out;
+    }
+
+    /* Stile specifico per i pulsanti dentro il contenitore auth */
+    #auth-container-mobile .tab-bar-btn {
+        width: 100%; /* Occupa tutto lo spazio del suo contenitore */
+    }
+
+    .tab-bar-btn:hover {
+        color: var(--primary-color);
+        background-color: rgba(var(--primary-rgb), 0.1);
+    }
+
+    .tab-bar-btn .material-icons {
+        font-size: 1.5rem;
+        margin-bottom: 2px;
+    }
+    
+    /* Stile per il pulsante attivo */
+    .tab-bar-btn.active {
+        color: var(--primary-color);
+        font-weight: 600;
+    }
+
+    /* Assicura che il contenuto principale non venga coperto dalla barra */
+    body {
+        padding-top: 60px;
+    }
+}
+
+/* Stile specifico per il tema scuro */
+[data-bs-theme="dark"] #mobile-tab-bar {
+    background: linear-gradient(135deg, #1a1d29 0%, #1e2330 30%, #252a3a 70%, #2a3045 100%);
+    border-bottom-color: var(--border-color);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 4px 16px rgba(0, 0, 0, 0.4), 0 0 20px rgba(77, 171, 247, 0.2);
+}

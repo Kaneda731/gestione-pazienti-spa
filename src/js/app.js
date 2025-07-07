@@ -150,6 +150,14 @@ window.addEventListener('load', () => {
     // Inizializza la gestione dei pulsanti "Torna al Menu"
     initBackToMenuButtons();
     
+    // Inizializza la navbar mobile
+    try {
+        initMobileNavbar();
+        initMobileThemeToggle();
+    } catch (error) {
+        console.error('Errore nell\'inizializzazione della navbar mobile:', error);
+    }
+    
     initAuth(session => {
         const redirectUrl = sessionStorage.getItem('redirectUrl');
         sessionStorage.removeItem('redirectUrl'); // Rimuovi sempre l'URL dopo averlo letto
@@ -201,3 +209,139 @@ window.appLogger.info('Gestione Pazienti SPA inizializzata correttamente', {
     environment: window.location.hostname === 'localhost' ? 'development' : 'production',
     timestamp: new Date().toISOString()
 });
+
+// === GESTIONE NAVBAR MOBILE === 
+// Funzione sicura per sincronizzare il pulsante auth mobile
+function syncMobileAuth() {
+    const authContainer = document.getElementById('auth-container');
+    const mobileAuthContainer = document.getElementById('mobile-auth-container');
+    
+    if (!authContainer || !mobileAuthContainer) return;
+    
+    // Controlla se c'è un pulsante login o logout (selettori corretti)
+    const loginBtn = authContainer.querySelector('#login-modal-trigger'); // Selettore corretto!
+    const logoutBtn = authContainer.querySelector('#logout-button');
+    
+    if (loginBtn) {
+        // Utente non loggato - mostra login
+        mobileAuthContainer.innerHTML = `
+            <span class="material-icons">login</span>
+        `;
+        
+        // Usa la stessa logica semplice del logout
+        mobileAuthContainer.onclick = (event) => {
+            event.preventDefault();
+            loginBtn.click();
+        };
+        
+    } else if (logoutBtn) {
+        // Utente loggato - mostra logout
+        mobileAuthContainer.innerHTML = `
+            <span class="material-icons">logout</span>
+        `;
+        
+        // Stessa logica semplice che funziona
+        mobileAuthContainer.onclick = (event) => {
+            event.preventDefault();
+            logoutBtn.click();
+        };
+    } else {
+        // Stato indefinito
+        mobileAuthContainer.innerHTML = `
+            <span class="material-icons">login</span>
+        `;
+        
+        mobileAuthContainer.onclick = null;
+    }
+}
+
+// Osserva i cambiamenti al container auth e sincronizza
+if (document.getElementById('auth-container')) {
+    const observer = new MutationObserver(syncMobileAuth);
+    observer.observe(document.getElementById('auth-container'), {
+        childList: true,
+        subtree: true
+    });
+    
+    // Sincronizzazione iniziale
+    setTimeout(syncMobileAuth, 100);
+}
+
+// === GESTIONE NAVBAR MOBILE ===
+function initMobileNavbar() {
+    console.log('Inizializzando navbar mobile...');
+    
+    // Inizializza il sistema di sincronizzazione auth
+    const authContainer = document.getElementById('auth-container');
+    if (authContainer) {
+        const observer = new MutationObserver(syncMobileAuth);
+        observer.observe(authContainer, {
+            childList: true,
+            subtree: true
+        });
+        
+        // Sincronizzazione iniziale
+        setTimeout(syncMobileAuth, 100);
+    }
+}
+
+// === GESTIONE THEME TOGGLE MOBILE ===
+function initMobileThemeToggle() {
+    const mobileThemeToggle = document.getElementById('mobile-theme-toggle');
+    const mobileThemeIcon = document.getElementById('mobile-theme-icon');
+    
+    if (!mobileThemeToggle || !mobileThemeIcon) {
+        console.log('Mobile theme toggle non trovato');
+        return;
+    }
+    
+    console.log('Inizializzando mobile theme toggle...');
+    
+    // Sincronizza l'icona mobile con lo stato attuale
+    function syncMobileThemeIcon() {
+        const currentTheme = document.documentElement.getAttribute('data-bs-theme') || 'light';
+        console.log('Sincronizzando tema mobile:', currentTheme);
+        
+        if (currentTheme === 'dark') {
+            mobileThemeIcon.textContent = 'light_mode';
+            mobileThemeToggle.setAttribute('title', 'Modalità chiara');
+        } else {
+            mobileThemeIcon.textContent = 'dark_mode';
+            mobileThemeToggle.setAttribute('title', 'Modalità scura');
+        }
+    }
+    
+    // Funzione per cambiare tema (stessa logica del desktop)
+    function setTheme(theme) {
+        console.log('Impostando tema:', theme);
+        document.documentElement.setAttribute('data-bs-theme', theme);
+        localStorage.setItem('theme', theme);
+        syncMobileThemeIcon();
+    }
+    
+    // Click sul toggle mobile - gestione diretta
+    mobileThemeToggle.addEventListener('click', (event) => {
+        event.preventDefault();
+        console.log('Click su mobile theme toggle');
+        
+        const currentTheme = document.documentElement.getAttribute('data-bs-theme') || 'light';
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        
+        console.log('Cambiando da', currentTheme, 'a', newTheme);
+        setTheme(newTheme);
+    });
+    
+    // Osserva i cambiamenti al tema per sincronizzare l'icona mobile
+    const observer = new MutationObserver(() => {
+        console.log('Tema cambiato, sincronizzando...');
+        syncMobileThemeIcon();
+    });
+    observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['data-bs-theme']
+    });
+    
+    // Sincronizzazione iniziale
+    syncMobileThemeIcon();
+    console.log('Mobile theme toggle inizializzato');
+}

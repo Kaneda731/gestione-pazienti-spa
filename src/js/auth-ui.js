@@ -107,4 +107,26 @@ function setupModalEventListeners() {
             errorDiv.style.display = 'block';
         }
     });
+    
+    // Fix per l'accessibilità: gestisce correttamente il focus quando il modal si chiude
+    const modal = document.getElementById('auth-modal');
+    modal.addEventListener('hidden.bs.modal', () => {
+        // Rimuove il focus da qualsiasi elemento interno quando il modal è chiuso
+        const focusedElement = modal.querySelector(':focus');
+        if (focusedElement) {
+            focusedElement.blur();
+        }
+        
+        // Riporta il focus all'elemento che ha aperto il modal (se mobile)
+        const mobileAuthContainer = document.getElementById('mobile-auth-container');
+        const loginTrigger = document.getElementById('login-modal-trigger');
+        
+        if (window.innerWidth <= 767 && mobileAuthContainer) {
+            // Su mobile, riporta focus al container mobile
+            mobileAuthContainer.focus();
+        } else if (loginTrigger) {
+            // Su desktop, riporta focus al trigger originale
+            loginTrigger.focus();
+        }
+    });
 }

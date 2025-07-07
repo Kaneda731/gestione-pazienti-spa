@@ -21,6 +21,7 @@
 @import url('./modules/components/tables.css');
 @import url('./modules/components/modals.css');
 @import url('./modules/components/custom-select-desktop.css');
+@import url('./modules/components/custom-select-mobile.css');
 
 /* 4. Layout e responsive */
 @import url('./modules/layout/responsive.css');

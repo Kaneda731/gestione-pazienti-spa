@@ -18,6 +18,8 @@ export class CustomSelect {
         this.selectedText = '';
         this.mobileModal = null;
         
+        this.isScrolling = false;
+        
         try {
             this.init();
             window.appLogger?.debug('CustomSelect inizializzato', { element: selectElement.id || 'unnamed' });
@@ -104,10 +106,24 @@ export class CustomSelect {
     
     bindEvents() {
         const trigger = this.wrapper.querySelector('.custom-select-trigger');
-        const dropdown = this.wrapper.querySelector('.custom-select-dropdown');
         
+        // Logica per distinguere scroll da tap
+        trigger.addEventListener('touchstart', () => {
+            this.isScrolling = false;
+        }, { passive: true });
+
+        trigger.addEventListener('touchmove', () => {
+            this.isScrolling = true;
+        }, { passive: true });
+
         // Toggle dropdown
         trigger.addEventListener('click', (e) => {
+            // Se il flag isScrolling è true, ignora il click e resetta il flag.
+            if (this.isScrolling) {
+                this.isScrolling = false;
+                return;
+            }
+            
             e.stopPropagation();
             window.appLogger?.debug('CustomSelect trigger clicked', { 
                 isOpen: this.isOpen, 

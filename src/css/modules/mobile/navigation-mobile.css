@@ -63,9 +63,10 @@
     /* Le icone vengono gestite direttamente nel JavaScript */
     
     /* Effetto scroll per FAB */
-    .mobile-fab.scroll-hidden {
-        transform: translateY(100px);
+    .mobile-fab.fab-hidden {
+        transform: translateY(100px) scale(0.7);
         opacity: 0;
+        pointer-events: none; /* Disabilita interazione quando nascosto */
     }
     
     /* Haptic feedback simulation */

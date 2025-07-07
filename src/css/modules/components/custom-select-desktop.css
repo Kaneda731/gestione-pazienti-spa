@@ -98,6 +98,11 @@
     .modal-body:focus-within {
         overflow: visible !important;
     }
+    /* Quando aperto, aumenta z-index per scavalcare altri elementi */
+    .custom-select-wrapper.open {
+        z-index: 1070 !important;
+    }
+
     /* Dropdown custom select con z-index alto per essere sempre visibile */
     .custom-select-dropdown {
         z-index: 1060 !important; /* Sopra modal Bootstrap (1055) */

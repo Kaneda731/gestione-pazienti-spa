@@ -124,8 +124,8 @@ export async function initListView(urlParams) {
 
     // 2. Inizializza i custom select
     if (window.initCustomSelects) {
-        window.initCustomSelects('#list-filter-reparto, #list-filter-diagnosi, #list-filter-stato');
-    }
+            window.initCustomSelects('#list-filter-reparto, #list-filter-diagnosi, #list-filter-stato');
+        }
 
     // 3. Ora che tutti gli elementi sono pronti, fai la cache
     cacheDOMElements(viewContainer);

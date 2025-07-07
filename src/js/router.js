@@ -57,9 +57,22 @@ export async function renderView() {
     let viewToRender = requestedViewName;
     let viewHtml;
 
-    if (protectedViews.includes(requestedViewName) && !session) {
-        sessionStorage.setItem('redirectUrl', hash);
-        viewToRender = 'login-required';
+    // Se l'utente non è loggato e cerca di accedere a una vista protetta,
+    // o se l'utente è sulla home page dopo un logout, ricarica la pagina.
+    if ((protectedViews.includes(requestedViewName) && !session) || 
+        (requestedViewName === 'home' && localStorage.getItem('user.manual.logout') === 'true')) {
+        
+        localStorage.removeItem('user.manual.logout'); // Pulisci il flag
+        
+        // Se non siamo loggati, salva l'URL di destinazione e mostra il login.
+        if (!session) {
+            sessionStorage.setItem('redirectUrl', hash);
+            viewToRender = 'login-required';
+        } else {
+            // Se siamo loggati ma eravamo sulla home dopo un logout, ricarica.
+            window.location.reload();
+            return;
+        }
     }
     
     // Carica l'HTML della vista

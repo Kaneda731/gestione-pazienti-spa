@@ -80,16 +80,22 @@ export async function signInWithGoogle() {
 
 export async function signOut() {
     try {
-        localStorage.setItem('user.manual.logout', 'true');
-        clearDevelopmentBypass();
-        sessionStorage.removeItem('supabase.auth.token');
+        // Forza l'aggiornamento della sessione prima del logout per risolvere problemi su mobile
+        await supabase.auth.refreshSession();
         
         const { error } = await supabase.auth.signOut();
         if (error) throw error;
         
         return { success: true };
     } catch (error) {
-        console.error('Errore logout:', error);
+        console.error('Errore durante il signOut:', error);
+        // Se anche il refresh fallisce, prova un logout forzato lato client
+        if (error.message.includes('Auth session missing')) {
+            sessionStorage.removeItem('supabase.auth.token');
+            localStorage.removeItem('supabase.auth.token');
+            window.location.reload();
+            return { success: true };
+        }
         return { success: false, error: error.message };
     }
 }

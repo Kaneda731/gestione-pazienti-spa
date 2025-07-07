@@ -29,14 +29,8 @@ export function updateAuthUI(session) {
         `;
         
         document.getElementById('logout-button').addEventListener('click', async () => {
-            const result = await signOut();
-            if (result.success) {
-                updateAuthUI(null);
-                if (window.onAuthStateChangeCallback) {
-                    window.onAuthStateChangeCallback(null);
-                }
-                setTimeout(() => window.location.reload(), 100);
-            }
+            await signOut();
+            // Non fare nulla qui. onAuthStateChange gestirà l'aggiornamento della UI.
         });
     } else {
         authContainer.innerHTML = `

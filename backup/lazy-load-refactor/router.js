@@ -1,12 +1,12 @@
 // src/js/router.js
 import { supabase } from './supabase.js';
+import { checkDevelopmentBypass } from './auth.js';
+import { appContainer, templates } from './ui.js';
 import { initInserimentoView } from './views/form.js';
 import { initDimissioneView } from './views/dimissione.js';
 import { initGraficoView } from './views/grafico.js';
 import { initListView } from './views/list.js';
 import { initDiagnosiView } from './views/diagnosi.js';
-
-const appContainer = document.getElementById('app-container');
 
 const viewInitializers = {
     inserimento: initInserimentoView,
@@ -16,36 +16,11 @@ const viewInitializers = {
     diagnosi: initDiagnosiView,
 };
 
-// Cache per i template delle viste per evitare fetch multipli
-const viewCache = new Map();
-
-async function fetchView(viewName) {
-    if (viewCache.has(viewName)) {
-        return viewCache.get(viewName);
-    }
-    try {
-        const response = await fetch(`views/${viewName}.html`);
-        if (!response.ok) {
-            throw new Error(`Vista non trovata: ${viewName}`);
-        }
-        const text = await response.text();
-        viewCache.set(viewName, text);
-        return text;
-    } catch (error) {
-        console.error(`Errore nel caricamento della vista ${viewName}:`, error);
-        // Fallback alla vista home se una vista non viene trovata
-        return await fetchView('home');
-    }
-}
-
 export function navigateTo(viewName) {
     window.location.hash = viewName;
 }
 
 export async function renderView() {
-    // Failsafe per garantire che lo scroll del body non sia mai bloccato
-    document.body.classList.remove('custom-select-modal-open');
-
     const hash = window.location.hash.substring(1) || 'home';
     const [requestedViewName, queryString] = hash.split('?');
     const urlParams = new URLSearchParams(queryString);
@@ -55,26 +30,33 @@ export async function renderView() {
     const { data: { session } } = await supabase.auth.getSession();
 
     let viewToRender = requestedViewName;
-    let viewHtml;
+    let template;
 
     if (protectedViews.includes(requestedViewName) && !session) {
-        localStorage.setItem('redirectUrl', hash);
-        viewToRender = 'login-required';
+        localStorage.setItem('redirectUrl', hash); // Salva l'URL desiderato
+        viewToRender = 'loginRequired';
+        template = templates.loginRequired;
+    } else {
+        template = templates[requestedViewName] || templates.home;
+        if (!templates[requestedViewName]) {
+            viewToRender = 'home';
+        }
     }
-    
-    // Carica l'HTML della vista
-    viewHtml = await fetchView(viewToRender);
 
-    appContainer.innerHTML = viewHtml;
-    const viewDiv = appContainer.querySelector('.view');
+    appContainer.innerHTML = '';
+    const viewContent = template.content.cloneNode(true);
+    
+    const viewDiv = viewContent.querySelector('.view');
     if (viewDiv) {
         viewDiv.classList.add('active');
     }
+    
+    appContainer.appendChild(viewContent);
 
-    // Inizializza la logica specifica della vista
+    // Inizializza la logica specifica della vista, passando i parametri URL
     const initializer = viewInitializers[viewToRender];
     if (initializer) {
-        initializer(urlParams);
+        initializer(urlParams); // Passa gli URLSearchParams alla funzione di init
     } else if (viewToRender === 'home') {
         document.querySelectorAll('.menu-card').forEach(card => {
             card.addEventListener('click', () => {
@@ -85,7 +67,7 @@ export async function renderView() {
                 navigateTo(view);
             });
         });
-    } else if (viewToRender === 'login-required') {
+    } else if (viewToRender === 'loginRequired') {
         const loginButton = document.getElementById('login-prompt-button');
         if (loginButton) {
             loginButton.addEventListener('click', () => {
@@ -94,9 +76,21 @@ export async function renderView() {
         }
     }
     
-    // Emetti evento per aggiornare la UI (es. navigazione mobile)
+    // Integrazione con navigazione mobile
+    if (window.mobileNav) {
+        window.mobileNav.setCurrentView(viewToRender);
+    }
+    
+    // Emetti evento per aggiornare navigazione mobile
     const viewChangeEvent = new CustomEvent('viewChanged', {
         detail: { view: viewToRender, params: urlParams }
     });
     document.dispatchEvent(viewChangeEvent);
+    
+    // Inizializza custom select per tutte le viste (fallback)
+    setTimeout(() => {
+        if (window.initCustomSelects) {
+            window.initCustomSelects();
+        }
+    }, 200);
 }

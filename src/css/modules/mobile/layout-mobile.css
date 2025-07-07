@@ -100,13 +100,7 @@
         display: none !important;
     }
     
-    /* Performance mobile */
-    * {
-        -webkit-transform: translateZ(0);
-        transform: translateZ(0);
-        -webkit-backface-visibility: hidden;
-        backface-visibility: hidden;
-    }
+    
     
     /* Scrolling ottimizzato */
     .table-responsive,

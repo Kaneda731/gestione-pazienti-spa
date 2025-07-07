@@ -208,22 +208,22 @@
         background: rgba(255, 255, 255, 0.3);
         border-color: rgba(255, 255, 255, 0.5);
     }
-}
 
-/* Stili per il blocco del body quando il modal è aperto */
-body.custom-select-modal-open {
-    overflow: hidden !important;
-    position: fixed !important;
-    width: 100% !important;
-    height: 100% !important;
-    touch-action: none !important;
-    -webkit-overflow-scrolling: none !important;
-}
+    /* Stili per il blocco del body quando il modal è aperto */
+    body.custom-select-modal-open {
+        overflow: hidden !important;
+        position: fixed !important;
+        width: 100% !important;
+        height: 100% !important;
+        touch-action: none !important;
+        -webkit-overflow-scrolling: none !important;
+    }
 
-body.custom-select-modal-open > *:not(.custom-select-mobile-modal) {
-    pointer-events: none !important;
-    touch-action: none !important;
-    -webkit-touch-callout: none !important;
-    -webkit-user-select: none !important;
-    user-select: none !important;
+    body.custom-select-modal-open > *:not(.custom-select-mobile-modal) {
+        pointer-events: none !important;
+        touch-action: none !important;
+        -webkit-touch-callout: none !important;
+        -webkit-user-select: none !important;
+        user-select: none !important;
+    }
 }

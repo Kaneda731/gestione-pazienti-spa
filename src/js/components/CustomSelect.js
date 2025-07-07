@@ -507,12 +507,20 @@ class CustomSelect {
     }
     
     close() {
+        // Esegui solo se il select è aperto, per evitare azioni e log inutili
+        if (!this.isOpen) {
+            return;
+        }
+
         window.appLogger?.debug('CustomSelect closing', { 
             selectId: this.selectElement.id, 
             hasMobileModal: !!this.mobileModal,
             currentState: this.isOpen 
         });
         
+        // Assicura la rimozione della classe dal body in ogni caso
+        document.body.classList.remove('custom-select-modal-open');
+
         this.isOpen = false;
         this.wrapper.classList.remove('open');
         

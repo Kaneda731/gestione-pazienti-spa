@@ -157,16 +157,6 @@ class MobileCardManager {
     // Ottimizza per touch
     static initTouchOptimizations() {
         document.querySelectorAll('.card').forEach(card => {
-            // Previene double-tap zoom solo sulle card, non sui pulsanti
-            card.addEventListener('touchend', (e) => {
-                // Non interferire con pulsanti, link e custom select
-                if (e.target.closest('button, a, input, select, .custom-select-wrapper, .custom-select-trigger')) {
-                    return; // Lascia il comportamento normale
-                }
-                e.preventDefault();
-                card.click();
-            }, { passive: false }); // Deve essere false per usare preventDefault()
-            
             // Feedback tattile (solo se supportato e dopo prima interazione utente)
             card.addEventListener('touchstart', (e) => {
                 // Solo se non è un pulsante o custom select

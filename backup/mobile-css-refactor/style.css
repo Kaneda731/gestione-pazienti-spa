@@ -1,0 +1,195 @@
+/* =============================================
+   GESTIONE PAZIENTI SPA - CSS MODULARE
+   =============================================
+   
+   File principale che importa tutti i moduli CSS.
+   Struttura organizzata per facilità di manutenzione.
+   ============================================= */
+
+/* 1. Variabili e configurazione base */
+@import url('./modules/variables.css');
+
+/* 2. Stili base e globali */
+@import url('./modules/base.css');
+
+/* 3. Componenti */
+@import url('./modules/components/navbar.css');
+@import url('./modules/components/menu-cards.css');
+@import url('./modules/components/cards.css');
+@import url('./modules/components/buttons.css');
+@import url('./modules/components/forms.css');
+@import url('./modules/components/tables.css');
+@import url('./modules/components/modals.css');
+@import url('./modules/components/custom-select-desktop.css');
+@import url('./modules/components/custom-select-mobile.css');
+
+/* 4. Layout e responsive */
+@import url('./modules/layout/responsive.css');
+@import url('./modules/layout/pagination.css');
+
+/* 5. Temi */
+@import url('./modules/themes/dark-mode.css');
+
+/* 6. Mobile ottimizzazioni (separati per performance) */
+@import url('./modules/mobile/layout-mobile.css');
+@import url('./modules/mobile/navbar-mobile.css');
+@import url('./modules/mobile/menu-cards-mobile.css');
+@import url('./modules/mobile/cards-mobile.css');
+@import url('./modules/mobile/tables-mobile.css');
+@import url('./modules/mobile/pagination-mobile.css');
+@import url('./modules/mobile/buttons-mobile.css');
+@import url('./modules/mobile/forms-mobile.css');
+@import url('./modules/mobile/modals-mobile.css');
+@import url('./modules/mobile/navigation-mobile.css');
+@import url('./modules/mobile/dark-mode-mobile.css');
+
+/* =============================================
+   OVERRIDE E STILI SPECIFICI RESIDUI
+   ============================================= */
+
+/* Stili specifici che non rientrano nei moduli */
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.status-badge.active {
+    background: var(--badge-success-bg);
+    color: var(--badge-success-color);
+    border: 1px solid var(--badge-success-border);
+}
+
+.status-badge.dismissed {
+    background: var(--badge-danger-bg);
+    color: var(--badge-danger-color);
+    border: 1px solid var(--badge-danger-border);
+}
+
+/* Chart container */
+#chart-container {
+    background: var(--bg-primary);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    position: relative;
+    overflow: hidden;
+}
+
+#chart-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--primary-color), var(--info-color), var(--success-color));
+}
+
+/* Alert styles */
+.alert {
+    border-radius: var(--border-radius);
+    border: none;
+    box-shadow: var(--shadow-sm);
+    padding: 1rem 1.5rem;
+}
+
+.alert-success {
+    background: var(--alert-success-bg);
+    color: var(--alert-success-color);
+    border: 1px solid var(--success-light);
+}
+
+.alert-danger {
+    background: var(--alert-danger-bg);
+    color: var(--alert-danger-color);
+    border: 1px solid var(--danger-light);
+}
+
+.alert-warning {
+    background: var(--alert-warning-bg);
+    color: var(--alert-warning-color);
+    border: 1px solid var(--warning-light);
+}
+
+/* =============================================
+   FIX SPECIFICI E OVERRIDE PRIORITARI
+   ============================================= */
+
+/* Fix per evitare gap/frame visibili */
+html, body {
+    overflow-x: hidden;
+}
+
+main#app-container {
+    background: transparent;
+    position: relative;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+/* Fix animazioni view per evitare problemi di overflow */
+.view {
+    background: transparent;
+    position: relative;
+    padding-top: 1rem;
+}
+
+/* Fix Border-radius per tutte le card - Priorità massima */
+.card,
+.card.elevation-1,
+.card.elevation-2, 
+.card.elevation-3,
+.card.elevation-4,
+.card.elevation-5 {
+    border-radius: var(--border-radius) !important;
+    overflow: hidden !important;
+}
+
+/* Fix specifico per card-header e card-body */
+.card .card-header {
+    border-radius: var(--border-radius) var(--border-radius) 0 0 !important;
+}
+
+.card .card-body:last-child {
+    border-radius: 0 0 var(--border-radius) var(--border-radius) !important;
+}
+
+.card .card-body:only-child {
+    border-radius: var(--border-radius) !important;
+}
+
+/* =============================================
+   LIGHT MODE - EFFETTI 3D MIGLIORATI
+   ============================================= */
+
+/* Migliora visibilità animazioni 3D in light mode */
+:root:not([data-bs-theme="dark"]) .menu-card:hover {
+    box-shadow: 0 32px 64px rgba(59, 130, 246, 0.3), 
+                0 16px 32px rgba(59, 130, 246, 0.25),
+                0 8px 16px rgba(0, 0, 0, 0.2),
+                0 4px 8px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.95) !important;
+    border: 2px solid rgba(59, 130, 246, 0.4) !important;
+}
+
+/* Migliora gli effetti pseudo-element in light mode */
+:root:not([data-bs-theme="dark"]) .menu-card::before {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(96, 165, 250, 0.1));
+}
+
+:root:not([data-bs-theme="dark"]) .menu-card::after {
+    background: radial-gradient(circle at center, rgba(59, 130, 246, 0.4) 0%, transparent 70%);
+}
+
+/* Migliora icon-wrapper in light mode */
+:root:not([data-bs-theme="dark"]) .menu-card:hover .icon-wrapper {
+    box-shadow: 0 20px 45px rgba(59, 130, 246, 0.5),
+                0 15px 30px rgba(59, 130, 246, 0.3),
+                0 8px 15px rgba(0, 0, 0, 0.2),
+                inset 0 3px 6px rgba(255, 255, 255, 0.3),
+                inset 0 -3px 6px rgba(59, 130, 246, 0.2) !important;
+}

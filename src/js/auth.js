@@ -29,31 +29,6 @@ function isMobileDevice() {
     return window.innerWidth <= 767 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 }
 
-function optimizeModalForMobile() {
-    if (!isMobileDevice()) return;
-    
-    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-    sessionStorage.setItem('modal.scroll.position', scrollTop.toString());
-    
-    document.body.style.position = 'fixed';
-    document.body.style.top = `-${scrollTop}px`;
-    document.body.style.width = '100%';
-}
-
-function restoreMobileSettings() {
-    if (!isMobileDevice()) return;
-    
-    document.body.style.position = '';
-    document.body.style.top = '';
-    document.body.style.width = '';
-    
-    const scrollTop = sessionStorage.getItem('modal.scroll.position');
-    if (scrollTop) {
-        window.scrollTo(0, parseInt(scrollTop));
-        sessionStorage.removeItem('modal.scroll.position');
-    }
-}
-
 function cleanOAuthParamsFromURL() {
     const url = new URL(window.location);
     let hasOAuthParams = false;
@@ -71,85 +46,32 @@ function cleanOAuthParamsFromURL() {
 }
 
 // ===================================
-// CLOCK SKEW ESSENZIALE (SOLO QUELLO CHE SERVE)
-// ===================================
-
-function isClockSkewError(error) {
-    if (!error) return false;
-    const errorMessage = error.message?.toLowerCase() || '';
-    return errorMessage.includes('issued in the future') || 
-           errorMessage.includes('clock skew');
-}
-
-async function handleClockSkewError(error, retryFunction) {
-    console.warn('Clock skew rilevato, tentativo automatico...');
-    
-    // Aspetta 1 secondo e riprova una volta
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    try {
-        return await retryFunction();
-    } catch (retryError) {
-        console.error('Clock skew non risolto:', retryError);
-        throw retryError;
-    }
-}
-
-// ===================================
 // AUTENTICAZIONE (ESISTENTI CON MINIMAL CLOCK SKEW)
 // ===================================
 
 export async function signInWithEmail(email, password) {
-    const attemptLogin = async () => {
+    try {
         const { data, error } = await supabase.auth.signInWithPassword({
             email: email,
             password: password
         });
-        
         if (error) throw error;
         return { success: true, data };
-    };
-
-    try {
-        return await attemptLogin();
     } catch (error) {
-        if (isClockSkewError(error)) {
-            try {
-                return await handleClockSkewError(error, attemptLogin);
-            } catch (clockError) {
-                console.error('Errore login email (clock skew non risolto):', clockError);
-                return { success: false, error: clockError.message };
-            }
-        }
-        
         console.error('Errore login email:', error);
         return { success: false, error: error.message };
     }
 }
 
 export async function signUpWithEmail(email, password) {
-    const attemptSignup = async () => {
+    try {
         const { data, error } = await supabase.auth.signUp({
             email: email,
             password: password
         });
-        
         if (error) throw error;
         return { success: true, data };
-    };
-
-    try {
-        return await attemptSignup();
     } catch (error) {
-        if (isClockSkewError(error)) {
-            try {
-                return await handleClockSkewError(error, attemptSignup);
-            } catch (clockError) {
-                console.error('Errore registrazione (clock skew non risolto):', clockError);
-                return { success: false, error: clockError.message };
-            }
-        }
-        
         console.error('Errore registrazione email:', error);
         return { success: false, error: error.message };
     }
@@ -244,18 +166,6 @@ export function clearDevelopmentBypass() {
     localStorage.removeItem('user.bypass.enabled');
     localStorage.removeItem('user.bypass.timestamp');
     localStorage.removeItem('supabase.auth.session');
-}
-
-function autoEnableLocalhostBypass() {
-    const env = getEnvironmentType();
-    
-    if (env.isLocalhost) {
-        const existingBypass = checkDevelopmentBypass();
-        if (!existingBypass) {
-            console.log('🏠 Localhost rilevato - Bypass sviluppo auto-abilitato');
-            enableDevelopmentBypass();
-        }
-    }
 }
 
 // ===================================
@@ -398,9 +308,6 @@ function createAuthModal() {
             errorDiv.style.display = 'block';
         }
     });
-    
-    document.getElementById('auth-modal').addEventListener('shown.bs.modal', optimizeModalForMobile);
-    document.getElementById('auth-modal').addEventListener('hidden.bs.modal', restoreMobileSettings);
 }
 
 // ===================================
@@ -409,7 +316,6 @@ function createAuthModal() {
 
 export function initAuth(onAuthStateChange) {
     cleanOAuthParamsFromURL();
-    autoEnableLocalhostBypass();
     
     window.onAuthStateChangeCallback = onAuthStateChange;
     

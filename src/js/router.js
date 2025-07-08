@@ -40,14 +40,32 @@ export function navigateTo(viewName) {
 }
 
 function updateUIVisibility() {
-    const gestioneDiagnosiCard = document.getElementById('gestione-diagnosi-card');
-    if (gestioneDiagnosiCard) {
-        if (currentUser.profile?.role !== 'admin') {
-            gestioneDiagnosiCard.style.display = 'none';
-        } else {
-            gestioneDiagnosiCard.style.display = 'block';
+    const userRole = currentUser.profile?.role;
+
+    // Definisci qui i permessi per ogni vista/card.
+    // Un utente può accedere a una vista se il suo ruolo è in questa lista.
+    const viewPermissions = {
+        'inserimento': ['admin', 'editor'],
+        'list': ['admin', 'editor', 'viewer'],
+        'grafico': ['admin', 'editor', 'viewer'],
+        'diagnosi': ['admin'],
+        'dimissione': ['admin', 'editor']
+    };
+
+    // Itera su tutte le card del menu e applica i permessi
+    document.querySelectorAll('.menu-card').forEach(card => {
+        const viewName = card.dataset.view;
+        
+        // Se la vista ha dei permessi definiti
+        if (viewPermissions[viewName]) {
+            // Controlla se il ruolo dell'utente è incluso nella lista dei permessi
+            if (viewPermissions[viewName].includes(userRole)) {
+                card.style.display = 'block'; // Mostra la card
+            } else {
+                card.style.display = 'none';  // Nascondi la card
+            }
         }
-    }
+    });
 }
 
 export async function renderView() {
@@ -70,16 +88,30 @@ export async function renderView() {
     const [requestedViewName, queryString] = hash.split('?');
     const urlParams = new URLSearchParams(queryString);
 
-    const protectedViews = ['inserimento', 'dimissione', 'grafico', 'list', 'diagnosi', 'home'];
+    // Definisci qui i permessi per coerenza con updateUIVisibility
+    const viewPermissions = {
+        'inserimento': ['admin', 'editor'],
+        'list': ['admin', 'editor', 'viewer'],
+        'grafico': ['admin', 'editor', 'viewer'],
+        'diagnosi': ['admin'],
+        'dimissione': ['admin', 'editor']
+    };
     
     const session = currentUser.session;
+    const userRole = currentUser.profile?.role;
 
     let viewToRender = requestedViewName;
     let viewHtml;
 
-    if (protectedViews.includes(requestedViewName) && !session) {
+    // Flusso di controllo accessi:
+    // 1. Se la vista è protetta e l'utente non è loggato -> vai a login-required
+    if (Object.keys(viewPermissions).includes(requestedViewName) && !session) {
         sessionStorage.setItem('redirectUrl', hash);
         viewToRender = 'login-required';
+    } 
+    // 2. Se l'utente è loggato ma il suo ruolo non ha accesso alla vista -> vai a access-denied
+    else if (viewPermissions[requestedViewName] && !viewPermissions[requestedViewName].includes(userRole)) {
+        viewToRender = 'access-denied';
     }
     
     viewHtml = await fetchView(viewToRender);

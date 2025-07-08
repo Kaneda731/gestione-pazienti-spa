@@ -1,5 +1,6 @@
 // src/js/views/list-renderer.js
 import { domElements, state } from './list-state.js';
+import { currentUser } from '../auth.js'; // Importa lo stato utente per i permessi
 
 const ITEMS_PER_PAGE = 10;
 
@@ -78,9 +79,22 @@ function renderTable(pazientiToRender) {
             ? `<span class="badge bg-secondary">Dimesso</span>`
             : `<span class="badge bg-success">Attivo</span>`;
 
-        const actionButton = isDimesso
-            ? `<button class="btn btn-sm btn-outline-success" data-action="riattiva" data-id="${p.id}" title="Riattiva Paziente"><span class="material-icons" style="font-size: 1.1em; pointer-events: none;">undo</span></button>`
-            : `<button class="btn btn-sm btn-outline-warning" data-action="dimetti" data-id="${p.id}" title="Dimetti Paziente"><span class="material-icons" style="font-size: 1.1em; pointer-events: none;">event_available</span></button>`;
+        // Logica per i pulsanti basata sui permessi
+        const userRole = currentUser.profile?.role;
+        const canEdit = userRole === 'admin' || userRole === 'editor';
+        let actionButtons = '';
+
+        if (canEdit) {
+            const actionButton = isDimesso
+                ? `<button class="btn btn-sm btn-outline-success" data-action="riattiva" data-id="${p.id}" title="Riattiva Paziente"><span class="material-icons" style="font-size: 1.1em; pointer-events: none;">undo</span></button>`
+                : `<button class="btn btn-sm btn-outline-warning" data-action="dimetti" data-id="${p.id}" title="Dimetti Paziente"><span class="material-icons" style="font-size: 1.1em; pointer-events: none;">event_available</span></button>`;
+            
+            actionButtons = `
+                <button class="btn btn-sm btn-outline-primary me-1" data-action="edit" data-id="${p.id}" title="Modifica"><span class="material-icons" style="font-size: 1.1em; pointer-events: none;">edit</span></button>
+                ${actionButton}
+                <button class="btn btn-sm btn-outline-danger ms-1" data-action="delete" data-id="${p.id}" title="Elimina"><span class="material-icons" style="font-size: 1.1em; pointer-events: none;">delete</span></button>
+            `;
+        }
 
         return `
             <tr>
@@ -91,9 +105,7 @@ function renderTable(pazientiToRender) {
                 <td data-label="Reparto">${p.reparto_appartenenza}</td>
                 <td data-label="Stato">${statusBadge}</td>
                 <td class="text-nowrap">
-                    <button class="btn btn-sm btn-outline-primary me-1" data-action="edit" data-id="${p.id}" title="Modifica"><span class="material-icons" style="font-size: 1.1em; pointer-events: none;">edit</span></button>
-                    ${actionButton}
-                    <button class="btn btn-sm btn-outline-danger ms-1" data-action="delete" data-id="${p.id}" title="Elimina"><span class="material-icons" style="font-size: 1.1em; pointer-events: none;">delete</span></button>
+                    ${actionButtons}
                 </td>
             </tr>
         `;
@@ -113,19 +125,35 @@ function renderCards(pazientiToRender) {
     
     const isMobile = window.innerWidth <= 767;
     
+    // Logica per i permessi
+    const userRole = currentUser.profile?.role;
+    const canEdit = userRole === 'admin' || userRole === 'editor';
+
     if (isMobile) {
         const cardsHtml = pazientiToRender.map(p => {
             const isDimesso = p.data_dimissione;
             const statusClass = isDimesso ? 'error' : 'success';
-            const statusText = isDimesso ? 'Dimesso' : 'Attivo';
             
-            const actionButton = isDimesso
-                ? `<button class="btn btn-sm btn-outline-success mobile-compact" data-action="riattiva" data-id="${p.id}" title="Riattiva">
-                     <span class="material-icons mobile-text-xs">undo</span>
-                   </button>`
-                : `<button class="btn btn-sm btn-outline-warning mobile-compact" data-action="dimetti" data-id="${p.id}" title="Dimetti">
-                     <span class="material-icons mobile-text-xs">event_available</span>
-                   </button>`;
+            let actionButtons = '';
+            if (canEdit) {
+                const dimissioneButton = isDimesso
+                    ? `<button class="btn btn-sm btn-outline-success mobile-compact" data-action="riattiva" data-id="${p.id}" title="Riattiva">
+                         <span class="material-icons mobile-text-xs">undo</span>
+                       </button>`
+                    : `<button class="btn btn-sm btn-outline-warning mobile-compact" data-action="dimetti" data-id="${p.id}" title="Dimetti">
+                         <span class="material-icons mobile-text-xs">event_available</span>
+                       </button>`;
+                
+                actionButtons = `
+                    <button class="btn btn-sm btn-outline-primary mobile-compact" data-action="edit" data-id="${p.id}" title="Modifica">
+                        <span class="material-icons mobile-text-xs">edit</span>
+                    </button>
+                    ${dimissioneButton}
+                    <button class="btn btn-sm btn-outline-danger mobile-compact" data-action="delete" data-id="${p.id}" title="Elimina">
+                        <span class="material-icons mobile-text-xs">delete</span>
+                    </button>
+                `;
+            }
 
             return `
                 <div class="card card-list-compact status-${statusClass}">
@@ -137,13 +165,7 @@ function renderCards(pazientiToRender) {
                             </div>
                         </div>
                         <div class="mobile-horizontal" style="gap: 0.25rem;">
-                            <button class="btn btn-sm btn-outline-primary mobile-compact" data-action="edit" data-id="${p.id}" title="Modifica">
-                                <span class="material-icons mobile-text-xs">edit</span>
-                            </button>
-                            ${actionButton}
-                            <button class="btn btn-sm btn-outline-danger mobile-compact" data-action="delete" data-id="${p.id}" title="Elimina">
-                                <span class="material-icons mobile-text-xs">delete</span>
-                            </button>
+                            ${actionButtons}
                         </div>
                     </div>
                 </div>
@@ -162,13 +184,26 @@ function renderCards(pazientiToRender) {
             const statusClass = isDimesso ? 'dimesso' : 'attivo';
             const statusText = isDimesso ? 'Dimesso' : 'Attivo';
             
-            const actionButton = isDimesso
-                ? `<button class="btn btn-outline-success" data-action="riattiva" data-id="${p.id}" title="Riattiva Paziente">
-                     <span class="material-icons me-1" style="font-size: 1em;">undo</span>Riattiva
-                   </button>`
-                : `<button class="btn btn-outline-warning" data-action="dimetti" data-id="${p.id}" title="Dimetti Paziente">
-                     <span class="material-icons me-1" style="font-size: 1em;">event_available</span>Dimetti
-                   </button>`;
+            let actionButtons = '';
+            if (canEdit) {
+                const dimissioneButton = isDimesso
+                    ? `<button class="btn btn-outline-success" data-action="riattiva" data-id="${p.id}" title="Riattiva Paziente">
+                         <span class="material-icons me-1" style="font-size: 1em;">undo</span>Riattiva
+                       </button>`
+                    : `<button class="btn btn-outline-warning" data-action="dimetti" data-id="${p.id}" title="Dimetti Paziente">
+                         <span class="material-icons me-1" style="font-size: 1em;">event_available</span>Dimetti
+                       </button>`;
+
+                actionButtons = `
+                    <button class="btn btn-outline-primary" data-action="edit" data-id="${p.id}">
+                        <span class="material-icons me-1" style="font-size: 1em;">edit</span>Modifica
+                    </button>
+                    ${dimissioneButton}
+                    <button class="btn btn-outline-danger" data-action="delete" data-id="${p.id}">
+                        <span class="material-icons me-1" style="font-size: 1em;">delete</span>Elimina
+                    </button>
+                `;
+            }
 
             return `
                 <div class="patient-card">
@@ -195,13 +230,7 @@ function renderCards(pazientiToRender) {
                         </div>
                     </div>
                     <div class="patient-actions">
-                        <button class="btn btn-outline-primary" data-action="edit" data-id="${p.id}">
-                            <span class="material-icons me-1" style="font-size: 1em;">edit</span>Modifica
-                        </button>
-                        ${actionButton}
-                        <button class="btn btn-outline-danger" data-action="delete" data-id="${p.id}">
-                            <span class="material-icons me-1" style="font-size: 1em;">delete</span>Elimina
-                        </button>
+                        ${actionButtons}
                     </div>
                 </div>
             `;

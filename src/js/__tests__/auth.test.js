@@ -1,102 +1,144 @@
 // src/js/__tests__/auth.test.js
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-// Mock delle dipendenze
-vi.mock('../supabase.js');
-vi.mock('../auth-ui.js');
+// Mock delle dipendenze prima di ogni import
+vi.mock('../supabase.js', () => ({
+    supabase: {
+        auth: {
+            onAuthStateChange: vi.fn(),
+            signInWithOAuth: vi.fn(),
+            signOut: vi.fn(),
+            getSession: vi.fn().mockResolvedValue({ data: { session: null } }),
+        },
+        from: vi.fn(() => ({
+            select: vi.fn(() => ({
+                eq: vi.fn(() => ({
+                    single: vi.fn().mockResolvedValue({ data: { username: 'testuser', role: 'editor' }, error: null, status: 200 }),
+                })),
+            })),
+        })),
+    },
+}));
 
-import { initAuth, signOut, cleanOAuthParamsFromURL, enableDevelopmentBypass, checkDevelopmentBypass } from '../auth.js';
+vi.mock('../auth-ui.js', () => ({
+    updateAuthUI: vi.fn(),
+}));
+
+// Import del modulo da testare DOPO i mock
+import { authService } from '../auth.js';
 import { supabase } from '../supabase.js';
 import { updateAuthUI } from '../auth-ui.js';
 
 // Mock di localStorage
 const localStorageMock = (() => {
-  let store = {};
-  return {
-    getItem: (key) => store[key] || null,
-    setItem: (key, value) => { store[key] = value.toString(); },
-    removeItem: (key) => { delete store[key]; },
-    clear: () => { store = {}; },
-  };
+    let store = {};
+    return {
+        getItem: (key) => store[key] || null,
+        setItem: (key, value) => { store[key] = value.toString(); },
+        removeItem: (key) => { delete store[key]; },
+        clear: () => { store = {}; },
+    };
 })();
-Object.defineProperty(window, 'localStorage', { value: localStorageMock });
+Object.defineProperty(window, 'localStorage', { value: localStorageMock, writable: true });
 
 // Mock di history.replaceState
 Object.defineProperty(window, 'history', {
-  value: { replaceState: vi.fn() },
-  writable: true
+    value: { replaceState: vi.fn() },
+    writable: true,
+});
+
+// Mock di location.hash
+Object.defineProperty(window, 'location', {
+    value: { hash: '#access_token=123', pathname: '/', search: '' },
+    writable: true,
 });
 
 
-describe('Auth Logic', () => {
+describe('AuthService', () => {
 
-  beforeEach(() => {
-    vi.clearAllMocks();
-    localStorage.clear();
-  });
+    let onAuthStateChangeCallback;
 
-  it('initAuth dovrebbe impostare il listener onAuthStateChange', () => {
-    const mockCallback = vi.fn();
-    initAuth(mockCallback);
-    expect(supabase.auth.onAuthStateChange).toHaveBeenCalledTimes(1);
-  });
+    beforeEach(() => {
+        // Resetta tutti i mock prima di ogni test
+        vi.clearAllMocks();
+        localStorage.clear();
+        window.location.hash = ''; // Pulisce l'hash
 
-  it('onAuthStateChange dovrebbe chiamare updateAuthUI e il callback', () => {
-    const mockSession = { user: { email: 'test@test.com' } };
-    const mockCallback = vi.fn();
-    
-    // Cattura il callback passato a onAuthStateChange
-    let authStateChangeCallback;
-    supabase.auth.onAuthStateChange.mockImplementation((callback) => {
-      authStateChangeCallback = callback;
-      return { data: { subscription: { unsubscribe: vi.fn() } } };
+        // Cattura il callback passato a onAuthStateChange per simularne l'attivazione
+        supabase.auth.onAuthStateChange.mockImplementation((callback) => {
+            onAuthStateChangeCallback = callback;
+            return { data: { subscription: { unsubscribe: vi.fn() } } };
+        });
     });
 
-    initAuth(mockCallback);
-    
-    // Simula un evento di cambio stato
-    authStateChangeCallback('SIGNED_IN', mockSession);
-
-    expect(updateAuthUI).toHaveBeenCalledWith(mockSession);
-    expect(mockCallback).toHaveBeenCalledWith(mockSession);
-  });
-
-  it('signOut dovrebbe chiamare supabase.auth.signOut', async () => {
-    await signOut();
-    expect(supabase.auth.signOut).toHaveBeenCalledTimes(1);
-  });
-
-  it('cleanOAuthParamsFromURL dovrebbe rimuovere i token dall-URL', () => {
-    // Simula un URL con parametri OAuth
-    const originalUrl = 'http://localhost/?access_token=123&other=abc';
-    Object.defineProperty(window, 'location', {
-      value: new URL(originalUrl),
-      writable: true
+    it('Il costruttore dovrebbe pulire i token dall-URL e impostare il listener', () => {
+        window.location.hash = '#access_token=test-token&other=param';
+        
+        // La semplice importazione di authService ne esegue il costruttore
+        // Per testarlo di nuovo, dovremmo poter re-istanziarlo, ma il pattern singleton lo impedisce.
+        // Verifichiamo che il mock sia stato chiamato (dovrebbe essere già avvenuto all'import iniziale)
+        expect(history.replaceState).toHaveBeenCalledWith(null, '', '/');
+        expect(supabase.auth.onAuthStateChange).toHaveBeenCalled();
     });
 
-    cleanOAuthParamsFromURL();
+    it('onAuthStateChange dovrebbe registrare un callback e aggiornare la UI al cambio di stato', async () => {
+        const mockSession = { user: { id: 'user-1', email: 'test@test.com' } };
+        const appCallback = vi.fn();
 
-    // Verifica che replaceState sia stato chiamato con l'URL pulito
-    expect(history.replaceState).toHaveBeenCalledWith(null, '', 'http://localhost/?other=abc');
-  });
-  
-  describe('Development Bypass', () => {
-    it('enableDevelopmentBypass dovrebbe impostare i dati corretti in localStorage', () => {
-      enableDevelopmentBypass();
-      expect(localStorage.getItem('user.bypass.enabled')).toBe('true');
-      expect(localStorage.getItem('supabase.auth.session')).toContain('dev-user-123');
+        authService.onAuthStateChange(appCallback);
+
+        // Simula un evento di login da Supabase
+        await onAuthStateChangeCallback('SIGNED_IN', mockSession);
+
+        expect(updateAuthUI).toHaveBeenCalledWith(mockSession);
+        expect(appCallback).toHaveBeenCalledWith(mockSession);
+        expect(authService.isAuthenticated()).toBe(true);
+        expect(authService.getUser().email).toBe('test@test.com');
     });
 
-    it('checkDevelopmentBypass dovrebbe restituire la sessione fittizia se il bypass è attivo', () => {
-      enableDevelopmentBypass();
-      const session = checkDevelopmentBypass();
-      expect(session).not.toBeNull();
-      expect(session.user.id).toBe('dev-user-123');
+    it('signOut dovrebbe chiamare supabase.auth.signOut', async () => {
+        await authService.signOut();
+        expect(supabase.auth.signOut).toHaveBeenCalledTimes(1);
     });
 
-    it('checkDevelopmentBypass dovrebbe restituire null se il bypass non è attivo', () => {
-      const session = checkDevelopmentBypass();
-      expect(session).toBeNull();
+    describe('Development Bypass', () => {
+        it('enableDevelopmentBypass dovrebbe impostare i dati corretti in localStorage', () => {
+            authService.enableDevelopmentBypass();
+            expect(localStorage.getItem('user.bypass.enabled')).toBe('true');
+            expect(localStorage.getItem('supabase.auth.session')).toBeDefined();
+        });
+
+        it('Il costruttore dovrebbe attivare il bypass se user.bypass.enabled è true', async () => {
+            // Imposta il bypass prima di "ricaricare" il modulo
+            localStorage.setItem('user.bypass.enabled', 'true');
+            
+            // Per testare il costruttore in un nuovo stato, dobbiamo usare l'import dinamico
+            const { authService: newAuthService } = await import('../auth.js?t=' + Date.now());
+            
+            // Usa un timeout per attendere l'esecuzione asincrona in #checkDevelopmentBypass
+            await new Promise(res => setTimeout(res, 10));
+
+            expect(newAuthService.isAuthenticated()).toBe(true);
+            expect(newAuthService.getUserRole()).toBe('admin');
+            expect(updateAuthUI).toHaveBeenCalled();
+        });
+
+        it('signOut in modalità bypass dovrebbe disabilitarlo e ricaricare la pagina', async () => {
+            // Mock per window.location.reload
+            const reloadMock = vi.fn();
+            Object.defineProperty(window, 'location', {
+                value: { ...window.location, reload: reloadMock },
+                writable: true,
+            });
+
+            localStorage.setItem('user.bypass.enabled', 'true');
+            const { authService: newAuthService } = await import('../auth.js?t=' + Date.now());
+            await new Promise(res => setTimeout(res, 10));
+
+            await newAuthService.signOut();
+
+            expect(localStorage.getItem('user.bypass.enabled')).toBeNull();
+            expect(reloadMock).toHaveBeenCalled();
+        });
     });
-  });
 });

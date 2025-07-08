@@ -39,6 +39,17 @@ export function navigateTo(viewName) {
     window.location.hash = viewName;
 }
 
+function updateUIVisibility() {
+    const gestioneDiagnosiCard = document.getElementById('gestione-diagnosi-card');
+    if (gestioneDiagnosiCard) {
+        if (currentUser.profile?.role !== 'admin') {
+            gestioneDiagnosiCard.style.display = 'none';
+        } else {
+            gestioneDiagnosiCard.style.display = 'block';
+        }
+    }
+}
+
 export async function renderView() {
     // Controllo di sicurezza: non renderizzare se lo stato utente non è ancora definito.
     // Il rendering corretto verrà triggerato dal callback di initAuth.
@@ -101,6 +112,10 @@ export async function renderView() {
         }
     }
     
+    if (viewToRender === 'home') {
+        updateUIVisibility();
+    }
+
     const viewChangeEvent = new CustomEvent('viewChanged', {
         detail: { view: viewToRender, params: urlParams }
     });

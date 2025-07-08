@@ -5,6 +5,7 @@ import { initDimissioneView } from './views/dimissione.js';
 import { initGraficoView } from './views/grafico.js';
 import { initListView } from './views/list.js';
 import { initDiagnosiView } from './views/diagnosi.js';
+import { currentUser } from './auth.js'; // Importa lo stato dell'utente
 
 const viewInitializers = {
     inserimento: initInserimentoView,
@@ -39,6 +40,13 @@ export function navigateTo(viewName) {
 }
 
 export async function renderView() {
+    // Controllo di sicurezza: non renderizzare se lo stato utente non è ancora definito.
+    // Il rendering corretto verrà triggerato dal callback di initAuth.
+    if (currentUser.session === undefined) {
+        console.log("Render interrotto: stato di autenticazione non ancora pronto.");
+        return;
+    }
+
     const appContainer = document.getElementById('app-container');
     if (!appContainer) {
         console.error("Fatal: #app-container non trovato. L'app non può essere renderizzata.");
@@ -51,9 +59,9 @@ export async function renderView() {
     const [requestedViewName, queryString] = hash.split('?');
     const urlParams = new URLSearchParams(queryString);
 
-    const protectedViews = ['inserimento', 'dimissione', 'grafico', 'list', 'diagnosi'];
+    const protectedViews = ['inserimento', 'dimissione', 'grafico', 'list', 'diagnosi', 'home'];
     
-    const { data: { session } } = await supabase.auth.getSession();
+    const session = currentUser.session;
 
     let viewToRender = requestedViewName;
     let viewHtml;
@@ -61,10 +69,6 @@ export async function renderView() {
     if (protectedViews.includes(requestedViewName) && !session) {
         sessionStorage.setItem('redirectUrl', hash);
         viewToRender = 'login-required';
-    } else if (requestedViewName === 'home' && localStorage.getItem('user.manual.logout') === 'true') {
-        localStorage.removeItem('user.manual.logout');
-        window.location.reload();
-        return;
     }
     
     viewHtml = await fetchView(viewToRender);

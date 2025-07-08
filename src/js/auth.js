@@ -4,7 +4,7 @@ import { updateAuthUI } from './auth-ui.js';
 
 // Esporta una variabile per contenere lo stato dell'utente e del suo profilo
 export let currentUser = {
-    session: null,
+    session: undefined, // Inizializza a undefined per il controllo iniziale
     profile: null
 };
 

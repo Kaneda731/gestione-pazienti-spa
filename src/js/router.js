@@ -16,19 +16,23 @@ const viewInitializers = {
 };
 
 const viewCache = new Map();
+const views = import.meta.glob('/src/views/*.html', { as: 'raw' });
 
 async function fetchView(viewName) {
     if (viewCache.has(viewName)) {
         return viewCache.get(viewName);
     }
+
+    const path = `/src/views/${viewName}.html`;
+    if (!views[path]) {
+        console.error(`Vista non trovata: ${viewName} (path cercato: ${path})`);
+        return await fetchView('home'); // Fallback alla home
+    }
+
     try {
-        const response = await fetch(`views/${viewName}.html`);
-        if (!response.ok) {
-            throw new Error(`Vista non trovata: ${viewName}`);
-        }
-        const text = await response.text();
-        viewCache.set(viewName, text);
-        return text;
+        const viewContent = await views[path]();
+        viewCache.set(viewName, viewContent);
+        return viewContent;
     } catch (error) {
         console.error(`Errore nel caricamento della vista ${viewName}:`, error);
         return await fetchView('home');
@@ -69,8 +73,23 @@ function updateUIVisibility() {
 }
 
 export async function renderView() {
+    // Controlla se siamo su localhost, se no redirecta
+    const currentUrl = window.location.origin;
+    if (!currentUrl.includes('localhost:5174') && currentUrl.includes('localhost')) {
+        console.log('Redirect da', currentUrl, 'a localhost:5174');
+        window.location.href = 'http://localhost:5174' + window.location.pathname + window.location.search + window.location.hash;
+        return;
+    }
+    
+    // Se l'hash contiene i token di autenticazione, è un redirect da Supabase.
+    // Il listener onAuthStateChange è la fonte di verità per gestire questo.
+    // Non facciamo nulla e aspettiamo che si attivi e chiami un render pulito.
+    if (window.location.hash.includes('access_token=') && window.location.hash.includes('refresh_token=')) {
+        console.log('Rilevato callback OAuth, aspetto che sia processato...');
+        return;
+    }
+
     // Controllo di sicurezza: non renderizzare se lo stato utente non è ancora definito.
-    // Il rendering corretto verrà triggerato dal callback di initAuth.
     if (currentUser.session === undefined) {
         console.log("Render interrotto: stato di autenticazione non ancora pronto.");
         return;

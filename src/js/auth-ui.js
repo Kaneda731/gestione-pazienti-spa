@@ -1,5 +1,8 @@
 // src/js/auth-ui.js
+import { Modal } from 'bootstrap';
 import { signInWithGoogle, signOut, currentUser } from './services/authService.js';
+import { syncMobileAuth } from './mobile/mobile-navigation.js';
+import authModalHtml from '../views/auth-modal.html?raw';
 
 export function updateAuthUI(session) {
     const authContainer = document.getElementById('auth-container');
@@ -36,6 +39,9 @@ export function updateAuthUI(session) {
             </button>
         `;
     }
+
+    // Forza la sincronizzazione della UI mobile ogni volta che quella desktop cambia
+    syncMobileAuth();
 }
 
 function initAuthEventListeners() {
@@ -45,7 +51,9 @@ function initAuthEventListeners() {
             await signOut();
         }
         if (event.target.closest('#login-modal-trigger')) {
-            createAuthModal();
+            console.log("DEBUG: Pulsante 'Accedi' cliccato. Tento il login con Google.");
+            // Chiamata diretta per vedere se funziona
+            signInWithGoogle(); 
         }
     });
 }
@@ -54,30 +62,22 @@ function initAuthEventListeners() {
 initAuthEventListeners();
 
 async function createAuthModal() {
-    const existingModal = document.getElementById('auth-modal');
-    if (existingModal) {
-        // Se esiste già un modale, non fare nulla o mostralo di nuovo
-        const modal = bootstrap.Modal.getInstance(existingModal);
-        if (modal) {
-            modal.show();
-        }
-        return;
-    }
-    
-    try {
-        const response = await fetch('views/auth-modal.html');
-        if (!response.ok) throw new Error('auth-modal.html non trovato');
-        
-        const modalHTML = await response.text();
-        document.body.insertAdjacentHTML('beforeend', modalHTML);
-        
-        setupModalEventListeners();
+    if (document.getElementById('auth-modal')) return;
 
-        const modalElement = document.getElementById('auth-modal');
-        const modal = new bootstrap.Modal(modalElement);
+    try {
+        document.body.insertAdjacentHTML('beforeend', authModalHtml);
         
-        // Assicura che il modale venga rimosso dal DOM quando è nascosto
+        const modalElement = document.getElementById('auth-modal');
+        if (!modalElement) {
+            throw new Error("Elemento modale non trovato nel DOM dopo l'inserimento.");
+        }
+
+        setupModalEventListeners();
+        
+        const modal = new Modal(modalElement);
+        
         modalElement.addEventListener('hidden.bs.modal', () => {
+            modal.dispose();
             modalElement.remove();
         });
 

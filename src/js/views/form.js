@@ -1,6 +1,6 @@
 // src/js/views/form.js
 import { supabase } from '../services/supabaseClient.js';
-import { mostraMessaggio } from '../ui.js';
+import { mostraMessaggio } from '../utils.js';
 import { navigateTo } from '../router.js';
 import { initCustomSelects } from '../components/CustomSelect.js';
 

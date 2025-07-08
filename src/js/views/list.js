@@ -113,7 +113,18 @@ async function handlePatientAction(action, id) {
     }
 }
 
+import { currentUser } from '../services/authService.js'; // Importa lo stato utente
+
+// ... (altro codice del file) ...
+
 export async function initListView(urlParams) {
+    // CONTROLLO DI SICUREZZA: Se l'utente non è loggato, non fare nulla.
+    // La vista 'login-required' verrà mostrata dal router.
+    if (!currentUser.session) {
+        console.log("Accesso a #list bloccato: utente non autenticato.");
+        return;
+    }
+
     const viewContainer = document.querySelector('#app-container .view');
     if (!viewContainer) return;
 
@@ -131,7 +142,6 @@ export async function initListView(urlParams) {
     populateSelectWithOptions(domElements.diagnosiFilter, diagnosiOptions);
 
     // 4. Carica i filtri salvati (da URL o sessionStorage)
-    // Questo ripristinerà i valori dei select se necessario
     loadPersistedFilters(urlParams);
 
     // 5. Ora che il DOM è stabile e popolato, inizializza i custom select

@@ -1,6 +1,7 @@
 // src/js/auth.js
 import { supabase } from './supabaseClient.js';
 import { updateAuthUI } from '../auth-ui.js';
+import { oauthManager } from './oauthService.js';
 
 // Esporta una variabile per contenere lo stato dell'utente e del suo profilo
 export let currentUser = {
@@ -39,14 +40,7 @@ export async function fetchUserProfile(user) {
 // ===================================
 
 export async function signInWithGoogle() {
-    try {
-        const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
-        if (error) throw error;
-        return { success: true };
-    } catch (error) {
-        console.error('Errore login Google:', error);
-        return { success: false, error: error.message };
-    }
+    return await oauthManager.signInWithGoogle();
 }
 
 export async function signOut() {
@@ -70,7 +64,18 @@ export async function signOut() {
 // ===================================
 
 export function initAuth(onAuthStateChange) {
+    // Inizializza l'OAuth manager
+    oauthManager.init();
+    
     supabase.auth.onAuthStateChange(async (event, session) => {
+        console.log('Auth event:', event, 'Session:', session); // <-- LOG DI DEBUG
+        
+        // Gestisce specificamente i problemi OAuth
+        if (event === 'SIGNED_OUT' && oauthManager.getAuthState().state === 'error') {
+            console.log('Logout dopo errore OAuth, pulisco stato...');
+            oauthManager.clearCorruptedState();
+        }
+
         if (session?.user) {
             // Utente loggato: recupera il profilo
             const profile = await fetchUserProfile(session.user);

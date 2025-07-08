@@ -15,8 +15,6 @@ export function convertToCSV(data) {
         const escape = (str) => {
             if (str === null || str === undefined) return '';
             const s = String(str);
-            // Se la stringa contiene virgolette, virgole o newline, la racchiude tra virgolette
-            // e raddoppia le virgolette esistenti.
             return s.search(/("|,|\n)/g) >= 0 ? `"${s.replace(/"/g, '""')}"` : s;
         };
 
@@ -38,21 +36,18 @@ export function convertToCSV(data) {
 
 /**
  * Recupera le opzioni uniche per un filtro.
- * Gestisce casi speciali come la tabella 'diagnosi'.
  * @param {string} filterName - Il nome del filtro (es. 'reparto_appartenenza', 'diagnosi').
  * @returns {Promise<string[]>} - Una promise che risolve in un array di stringhe.
  */
 export async function getFilterOptions(filterName) {
     try {
         let data, error;
-
+        console.log(`DEBUG: Chiamata getFilterOptions per ${filterName}`); // DEBUG
         if (filterName === 'diagnosi') {
-            // Caso speciale: carica dalla tabella 'diagnosi'
             ({ data, error } = await supabase.from('diagnosi').select('nome').order('nome', { ascending: true }));
             if (error) throw error;
             return data.map(item => item.nome);
         } else {
-            // Comportamento standard: carica valori unici dalla tabella 'pazienti'
             ({ data, error } = await supabase.from('pazienti').select(filterName));
             if (error) throw error;
             return [...new Set(data.map(item => item[filterName]).filter(Boolean))].sort();
@@ -60,7 +55,7 @@ export async function getFilterOptions(filterName) {
 
     } catch (error) {
         console.error(`Errore durante il recupero delle opzioni per ${filterName}:`, error);
-        return []; // Restituisce un array vuoto in caso di errore
+        return [];
     }
 }
 
@@ -73,7 +68,7 @@ export async function getFilterOptions(filterName) {
 export function populateSelectWithOptions(selectElement, options, defaultOptionText = 'Tutti') {
     if (!selectElement) return;
 
-    const currentValue = selectElement.value; // Salva il valore corrente se presente
+    const currentValue = selectElement.value;
     selectElement.innerHTML = `<option value="">${defaultOptionText}</option>`;
     
     options.forEach(value => {
@@ -83,9 +78,32 @@ export function populateSelectWithOptions(selectElement, options, defaultOptionT
         selectElement.appendChild(option);
     });
 
-    // Ripristina il valore precedente se è ancora valido
     if (options.includes(currentValue)) {
         selectElement.value = currentValue;
     }
 }
 
+/**
+ * Mostra un messaggio all'utente in un contenitore specifico.
+ * @param {string} message - Il testo del messaggio.
+ * @param {string} type - Il tipo di messaggio ('success', 'error', 'info').
+ * @param {string} containerId - L'ID del contenitore del messaggio.
+ */
+export function mostraMessaggio(message, type = 'info', containerId = 'messaggio-container') {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const alertType = type === 'error' ? 'danger' : type;
+    const icon = {
+        success: 'check_circle',
+        error: 'error',
+        info: 'info'
+    }[type];
+
+    container.innerHTML = `
+        <div class="alert alert-${alertType} d-flex align-items-center" role="alert">
+            <span class="material-icons me-2">${icon}</span>
+            <div>${message}</div>
+        </div>
+    `;
+}

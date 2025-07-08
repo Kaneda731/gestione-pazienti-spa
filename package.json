@@ -1,9 +1,18 @@
 {
   "scripts": {
-    "test": "vitest run"
+    "test": "vitest run",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "devDependencies": {
     "jsdom": "^26.1.0",
+    "vite": "^7.0.3",
     "vitest": "^1.6.0"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.50.3",
+    "bootstrap": "^5.3.7",
+    "google-charts": "^2.0.0"
   }
 }

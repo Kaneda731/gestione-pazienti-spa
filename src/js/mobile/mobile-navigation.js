@@ -27,7 +27,7 @@ export function initMobileUI() {
 /**
  * Gestisce la sincronizzazione del pulsante di autenticazione nella navbar mobile.
  */
-function syncMobileAuth() {
+export function syncMobileAuth() {
     const authContainer = document.getElementById('auth-container');
     const mobileAuthContainer = document.getElementById('mobile-auth-container');
     

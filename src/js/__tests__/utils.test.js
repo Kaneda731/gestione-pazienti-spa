@@ -3,7 +3,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { convertToCSV } from '../utils';
 
 // Diciamo a Vitest di usare il nostro mock per supabase.js
-vi.mock('../supabase.js');
+vi.mock('../services/supabaseClient.js');
 
 describe('convertToCSV', () => {
 

@@ -1,5 +1,5 @@
 // src/js/views/grafico.js
-import { supabase } from '../supabase.js';
+import { supabase } from '../services/supabaseClient.js';
 import { navigateTo } from '../router.js';
 import { getFilterOptions, populateSelectWithOptions } from '../utils.js';
 import { initCustomSelects } from '../components/CustomSelect.js';

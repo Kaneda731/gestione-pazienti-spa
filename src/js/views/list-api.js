@@ -1,5 +1,5 @@
 // src/js/views/list-api.js
-import { supabase } from '../supabase.js';
+import { supabase } from '../services/supabaseClient.js';
 import { state, domElements } from './list-state.js';
 import { convertToCSV } from '../utils.js';
 

@@ -1,11 +1,11 @@
 // src/js/router.js
-import { supabase } from './supabase.js';
+import { supabase } from './services/supabaseClient.js';
 import { initInserimentoView } from './views/form.js';
 import { initDimissioneView } from './views/dimissione.js';
 import { initGraficoView } from './views/grafico.js';
 import { initListView } from './views/list.js';
 import { initDiagnosiView } from './views/diagnosi.js';
-import { currentUser } from './auth.js'; // Importa lo stato dell'utente
+import { currentUser } from './services/authService.js'; // Importa lo stato dell'utente
 
 const viewInitializers = {
     inserimento: initInserimentoView,

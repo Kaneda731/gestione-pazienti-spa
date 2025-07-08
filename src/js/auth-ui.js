@@ -1,5 +1,5 @@
 // src/js/auth-ui.js
-import { signInWithGoogle, signOut, currentUser } from './auth.js';
+import { signInWithGoogle, signOut, currentUser } from './services/authService.js';
 
 export function updateAuthUI(session) {
     const authContainer = document.getElementById('auth-container');

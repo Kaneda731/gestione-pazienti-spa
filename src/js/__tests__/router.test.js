@@ -2,7 +2,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 // Mock delle dipendenze prima di importare il router
-vi.mock('../supabase.js');
+vi.mock('../services/supabaseClient.js');
 vi.mock('../views/form.js');
 vi.mock('../views/list.js');
 vi.mock('../views/grafico.js');
@@ -10,7 +10,7 @@ vi.mock('../views/dimissione.js');
 vi.mock('../views/diagnosi.js');
 
 import { renderView, navigateTo } from '../router.js';
-import { supabase } from '../supabase.js';
+import { supabase } from '../services/supabaseClient.js';
 import { initListView } from '../views/list.js';
 
 // Mock di fetch globale

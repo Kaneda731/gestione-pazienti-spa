@@ -1,6 +1,6 @@
 // src/js/auth.js
-import { supabase } from './supabase.js';
-import { updateAuthUI } from './auth-ui.js';
+import { supabase } from './supabaseClient.js';
+import { updateAuthUI } from '../auth-ui.js';
 
 // Esporta una variabile per contenere lo stato dell'utente e del suo profilo
 export let currentUser = {

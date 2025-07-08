@@ -2,7 +2,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 // Mock delle dipendenze prima di ogni import
-vi.mock('../supabase.js', () => ({
+vi.mock('../services/supabaseClient.js', () => ({
     supabase: {
         auth: {
             onAuthStateChange: vi.fn(),
@@ -26,7 +26,7 @@ vi.mock('../auth-ui.js', () => ({
 
 // Import del modulo da testare DOPO i mock
 import { authService } from '../auth.js';
-import { supabase } from '../supabase.js';
+import { supabase } from '../services/supabaseClient.js';
 import { updateAuthUI } from '../auth-ui.js';
 
 // Mock di localStorage

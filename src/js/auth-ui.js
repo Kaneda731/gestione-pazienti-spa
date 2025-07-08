@@ -1,132 +1,112 @@
 // src/js/auth-ui.js
-import { signInWithEmail, signInWithGoogle, signOut } from './auth.js';
-
-function getEnvironmentType() {
-    const hostname = window.location.hostname;
-    return {
-        isLocalhost: hostname === 'localhost' || hostname === '127.0.0.1' || hostname.includes('127.0.0.1'),
-    };
-}
+import { signInWithGoogle, signOut, currentUser } from './auth.js';
 
 export function updateAuthUI(session) {
     const authContainer = document.getElementById('auth-container');
     if (!authContainer) return;
 
-    authContainer.innerHTML = '';
-    
+    // Rimuovi vecchi listener clonando il nodo. È un modo semplice e robusto.
+    const newAuthContainer = authContainer.cloneNode(false);
+    authContainer.parentNode.replaceChild(newAuthContainer, authContainer);
+
     if (session) {
-        authContainer.innerHTML = `
-            <div class="d-flex align-items-center">
-                <span class="navbar-text me-2 text-light">
+        // Se c'è una sessione, il profilo dovrebbe essere in currentUser
+        const userRole = currentUser.profile?.role || 'caricamento...';
+        const userEmail = session.user.email;
+
+        newAuthContainer.innerHTML = `
+            <div class="d-flex align-items-center text-light">
+                <span class="navbar-text me-3" title="${userEmail}">
                     <i class="material-icons me-1" style="font-size: 1.1em; vertical-align: text-bottom;">account_circle</i>
-                    ${session.user.email}
+                    ${userEmail.split('@')[0]}
+                </span>
+                <span class="badge bg-info me-3 text-uppercase" style="font-size: 0.75em; padding: 0.4em 0.6em;">
+                    ${userRole}
                 </span>
                 <button id="logout-button" class="btn btn-outline-light btn-sm">
-                    <i class="material-icons me-1" style="font-size: 1em;">logout</i>
-                    Esci
+                    <i class="material-icons" style="font-size: 1em; vertical-align: middle;">logout</i>
                 </button>
             </div>
         `;
-        
-        document.getElementById('logout-button').addEventListener('click', async () => {
-            await signOut();
-            // Non fare nulla qui. onAuthStateChange gestirà l'aggiornamento della UI.
-        });
     } else {
-        authContainer.innerHTML = `
+        newAuthContainer.innerHTML = `
             <button id="login-modal-trigger" class="btn btn-outline-light">
                 <i class="material-icons me-1" style="font-size: 1em;">login</i>
                 Accedi
             </button>
         `;
-        
-        document.getElementById('login-modal-trigger').addEventListener('click', () => {
-            createAuthModal();
-        });
     }
 }
+
+function initAuthEventListeners() {
+    // Usa la delegazione di eventi sul body per gestire i click
+    document.body.addEventListener('click', async (event) => {
+        if (event.target.closest('#logout-button')) {
+            await signOut();
+        }
+        if (event.target.closest('#login-modal-trigger')) {
+            createAuthModal();
+        }
+    });
+}
+
+// Inizializza i listener globali una sola volta all'avvio del modulo
+initAuthEventListeners();
 
 async function createAuthModal() {
     const existingModal = document.getElementById('auth-modal');
     if (existingModal) {
-        existingModal.remove();
+        // Se esiste già un modale, non fare nulla o mostralo di nuovo
+        const modal = bootstrap.Modal.getInstance(existingModal);
+        if (modal) {
+            modal.show();
+        }
+        return;
     }
     
-    const response = await fetch('views/auth-modal.html');
-    const modalHTML = await response.text();
-    
-    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    try {
+        const response = await fetch('views/auth-modal.html');
+        if (!response.ok) throw new Error('auth-modal.html non trovato');
+        
+        const modalHTML = await response.text();
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        
+        setupModalEventListeners();
 
-    const env = getEnvironmentType();
-    if (env.isLocalhost) {
-        const alert = document.getElementById('auth-bypass-alert');
-        if(alert) alert.style.display = 'block';
+        const modalElement = document.getElementById('auth-modal');
+        const modal = new bootstrap.Modal(modalElement);
+        
+        // Assicura che il modale venga rimosso dal DOM quando è nascosto
+        modalElement.addEventListener('hidden.bs.modal', () => {
+            modalElement.remove();
+        });
+
+        modal.show();
+    } catch (error) {
+        console.error("Errore nella creazione del modale di autenticazione:", error);
     }
-    
-    setupModalEventListeners();
-
-    const modal = new bootstrap.Modal(document.getElementById('auth-modal'));
-    modal.show();
 }
 
 function setupModalEventListeners() {
-    document.getElementById('login-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('login-email').value;
-        const password = document.getElementById('login-password').value;
-        
-        const result = await signInWithEmail(email, password);
-        
-        if (result.success) {
-            bootstrap.Modal.getInstance(document.getElementById('auth-modal')).hide();
-            window.location.reload();
-        } else {
-            const errorDiv = document.getElementById('auth-error');
-            errorDiv.textContent = result.error;
-            errorDiv.style.display = 'block';
-        }
-    });
-    
-    document.getElementById('google-login-btn').addEventListener('click', async () => {
-        const googleBtn = document.getElementById('google-login-btn');
-        const originalText = googleBtn.innerHTML;
-        
-        googleBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Connessione...';
-        googleBtn.disabled = true;
-        
-        const result = await signInWithGoogle();
-        
-        if (result.success) {
-            googleBtn.innerHTML = '<i class="material-icons me-2">check</i>Reindirizzamento...';
-        } else {
-            googleBtn.innerHTML = originalText;
-            googleBtn.disabled = false;
+    const googleBtn = document.getElementById('google-login-btn');
+    if (googleBtn) {
+        googleBtn.addEventListener('click', async () => {
+            const originalText = googleBtn.innerHTML;
             
-            const errorDiv = document.getElementById('auth-error');
-            errorDiv.textContent = result.error;
-            errorDiv.style.display = 'block';
-        }
-    });
-    
-    // Fix per l'accessibilità: gestisce correttamente il focus quando il modal si chiude
-    const modal = document.getElementById('auth-modal');
-    modal.addEventListener('hidden.bs.modal', () => {
-        // Rimuove il focus da qualsiasi elemento interno quando il modal è chiuso
-        const focusedElement = modal.querySelector(':focus');
-        if (focusedElement) {
-            focusedElement.blur();
-        }
-        
-        // Riporta il focus all'elemento che ha aperto il modal (se mobile)
-        const mobileAuthContainer = document.getElementById('mobile-auth-container');
-        const loginTrigger = document.getElementById('login-modal-trigger');
-        
-        if (window.innerWidth <= 767 && mobileAuthContainer) {
-            // Su mobile, riporta focus al container mobile
-            mobileAuthContainer.focus();
-        } else if (loginTrigger) {
-            // Su desktop, riporta focus al trigger originale
-            loginTrigger.focus();
-        }
-    });
+            googleBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Connessione...';
+            googleBtn.disabled = true;
+            
+            const result = await signInWithGoogle();
+            
+            if (!result.success) {
+                googleBtn.innerHTML = originalText;
+                googleBtn.disabled = false;
+                const errorDiv = document.getElementById('auth-error');
+                if (errorDiv) {
+                    errorDiv.textContent = result.error;
+                    errorDiv.style.display = 'block';
+                }
+            }
+        });
+    }
 }

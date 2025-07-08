@@ -158,16 +158,15 @@ window.addEventListener('load', () => {
         console.error('Errore nell\'inizializzazione della navbar mobile:', error);
     }
     
+    // initAuth ora gestisce l'aggiornamento di currentUser internamente.
+    // Il callback serve solo a triggerare il rendering dopo che lo stato è cambiato.
     initAuth(session => {
         const redirectUrl = sessionStorage.getItem('redirectUrl');
-        sessionStorage.removeItem('redirectUrl'); // Rimuovi sempre l'URL dopo averlo letto
+        sessionStorage.removeItem('redirectUrl');
 
         if (session && redirectUrl) {
-            // Se l'utente si è appena loggato e c'era un URL di destinazione,
-            // vai a quell'URL.
             window.location.hash = redirectUrl;
         } else {
-            // Altrimenti, renderizza la vista corrente (o la home).
             renderView();
         }
     });

@@ -8,16 +8,12 @@ export function updateAuthUI(session) {
     const authContainer = document.getElementById('auth-container');
     if (!authContainer) return;
 
-    // Rimuovi vecchi listener clonando il nodo. È un modo semplice e robusto.
-    const newAuthContainer = authContainer.cloneNode(false);
-    authContainer.parentNode.replaceChild(newAuthContainer, authContainer);
-
     if (session) {
         // Se c'è una sessione, il profilo dovrebbe essere in currentUser
         const userRole = currentUser.profile?.role || 'caricamento...';
         const userEmail = session.user.email;
 
-        newAuthContainer.innerHTML = `
+        authContainer.innerHTML = `
             <div class="d-flex align-items-center text-light">
                 <span class="navbar-text me-3" title="${userEmail}">
                     <i class="material-icons me-1" style="font-size: 1.1em; vertical-align: text-bottom;">account_circle</i>
@@ -32,7 +28,7 @@ export function updateAuthUI(session) {
             </div>
         `;
     } else {
-        newAuthContainer.innerHTML = `
+        authContainer.innerHTML = `
             <button id="login-modal-trigger" class="btn btn-outline-light">
                 <i class="material-icons me-1" style="font-size: 1em;">login</i>
                 Accedi

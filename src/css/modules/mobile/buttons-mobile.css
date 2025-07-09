@@ -156,11 +156,13 @@
 #filter-actions-container .btn {
     flex-basis: 48%;
     text-align: center;
-    /* Reset per garantire dimensioni identiche */
-    padding: 0.5rem 1rem; /* Valori uniformi */
-    font-size: 0.9rem;    /* Valori uniformi */
-    line-height: 1.5;     /* Valori uniformi */
-    border-width: 1px;    /* Valori uniformi */
-    border-style: solid;
-    box-sizing: border-box; /* Assicura che padding e border siano inclusi nel calcolo della larghezza */
+    
+    /* Reset FORZATO per garantire dimensioni identiche */
+    padding: 0.5rem 1rem !important;
+    font-size: 0.9rem !important;
+    line-height: 1.5 !important;
+    height: 40px !important; /* Altezza fissa */
+    min-height: 40px !important; /* Altezza minima fissa */
+    box-sizing: border-box !important;
 }
+

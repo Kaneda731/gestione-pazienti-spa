@@ -1,8 +1,8 @@
 // src/js/views/form.js
-import { supabase } from '../services/supabaseClient.js';
-import { mostraMessaggio } from '../utils.js';
-import { navigateTo } from '../router.js';
-import { initCustomSelects } from '../components/CustomSelect.js';
+import { supabase } from '../core/services/supabaseClient.js';
+import { mostraMessaggio } from '../shared/utils/helpers.js';
+import { navigateTo } from '../app/router.js';
+import { initCustomSelects } from '../shared/components/forms/CustomSelect.js';
 
 // Oggetto per il caching degli elementi del DOM del form
 const dom = {};

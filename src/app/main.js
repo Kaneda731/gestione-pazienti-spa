@@ -30,7 +30,7 @@ import '../shared/components/forms/CustomSelect.js';
 
 // Mobile support
 import '../features/patients/components/mobile-card-manager.js';
-import { initMobileUI } from '../features/patients/components/mobile-navigation.js';
+import { initMobileUI } from './mobile/mobile-navigation.js';
 
 // Router
 import { renderView } from './router.js';

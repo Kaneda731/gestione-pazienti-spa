@@ -1,5 +1,5 @@
 // src/js/utils.js
-import { supabase } from './services/supabaseClient.js';
+import { supabase } from '../core/services/supabaseClient.js';
 
 /**
  * Converte un array di oggetti in una stringa CSV.

@@ -1,6 +1,6 @@
-// src/js/auth.js
+// src/core/auth/authService.js
 import { supabase } from '../services/supabaseClient.js';
-import { updateAuthUI } from '../auth-ui.js';
+import { updateAuthUI } from '../../shared/components/ui/AuthUI.js';
 import { oauthManager } from './oauthService.js';
 
 // Esporta una variabile per contenere lo stato dell'utente e del suo profilo

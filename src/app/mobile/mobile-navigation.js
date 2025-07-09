@@ -1,6 +1,6 @@
-// src/js/mobile/mobile-navigation.js
+// src/app/mobile/mobile-navigation.js
 
-import { navigateTo } from '../../../app/router.js';
+import { navigateTo } from '../router.js';
 
 /**
  * Inizializza tutta la logica della UI specifica per mobile.

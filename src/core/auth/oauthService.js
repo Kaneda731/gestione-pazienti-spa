@@ -1,6 +1,6 @@
-// src/js/services/oauthService.js
+// src/core/auth/oauthService.js
 import { supabase } from '../services/supabaseClient.js';
-import { viteSupabaseMiddleware } from './viteSupabaseMiddleware.js';
+import { viteSupabaseMiddleware } from '../services/viteSupabaseMiddleware.js';
 
 /**
  * Gestisce i problemi comuni con OAuth in ambiente Vite

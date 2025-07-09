@@ -3,8 +3,8 @@
  * Utility per testare l'OAuth in ambiente Vite
  */
 
-import { oauthManager } from '../services/oauthService.js';
-import { viteSupabaseMiddleware } from '../services/viteSupabaseMiddleware.js';
+import { oauthManager } from '../core/auth/oauthService.js';
+import { viteSupabaseMiddleware } from '../core/services/viteSupabaseMiddleware.js';
 
 export class OAuthTester {
     constructor() {

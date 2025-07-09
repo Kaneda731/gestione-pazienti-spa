@@ -1,5 +1,5 @@
 // src/js/services/navigationService.js
-import { navigateTo } from '../router.js';
+import { navigateTo } from '../../app/router.js';
 
 /**
  * Inizializza la gestione globale dei pulsanti "Torna al Menu".

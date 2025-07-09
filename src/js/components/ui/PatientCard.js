@@ -2,7 +2,7 @@
 
 import { ActionButtons } from './ActionButtons.js';
 import { StatusBadge } from './StatusBadge.js';
-import { currentUser } from '../../services/authService.js';
+import { currentUser } from '../../../core/auth/authService.js';
 
 /**
  * Componente per renderizzare le card dei pazienti

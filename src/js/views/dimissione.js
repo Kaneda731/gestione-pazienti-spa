@@ -1,7 +1,7 @@
 // src/js/views/dimissione.js
-import { supabase } from '../services/supabaseClient.js';
-import { mostraMessaggio } from '../utils.js';
-import { navigateTo } from '../router.js';
+import { supabase } from '../core/services/supabaseClient.js';
+import { mostraMessaggio } from '../shared/utils/helpers.js';
+import { navigateTo } from '../app/router.js';
 
 // Caching degli elementi del DOM e stato
 const dom = {};

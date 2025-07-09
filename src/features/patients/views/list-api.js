@@ -1,7 +1,7 @@
-// src/js/views/list-api.js
-import { supabase } from '../services/supabaseClient.js';
-import { state, domElements } from './list-state.js';
-import { convertToCSV } from '../utils.js';
+// src/features/patients/views/list-api.js
+import { supabase } from '../../../core/services/supabaseClient.js';
+import { state, domElements } from './list-state-migrated.js';
+import { convertToCSV } from '../../../shared/utils/index.js';
 
 const ITEMS_PER_PAGE = 10;
 

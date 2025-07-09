@@ -1,11 +1,11 @@
-// src/js/views/list.js
-import { navigateTo } from '../router.js';
-import { getFilterOptions, populateSelectWithOptions } from '../utils.js';
-import { state, domElements, cacheDOMElements, loadPersistedFilters, persistFilters, resetFilters } from './list-state.js';
+// src/features/patients/views/list.js
+import { navigateTo } from '../../../app/router.js';
+import { getFilterOptions, populateSelectWithOptions } from '../../../shared/utils/index.js';
+import { state, domElements, cacheDOMElements, loadPersistedFilters, persistFilters, resetFilters } from './list-state-migrated.js';
 import { fetchPazienti, exportPazientiToCSV, updatePazienteStatus, deletePaziente } from './list-api.js';
 import { renderPazienti, showLoading, showError, updateSortIndicators } from './list-renderer.js';
-import { initCustomSelects } from '../components/CustomSelect.js';
-import { showDeleteConfirmModal } from '../services/modalService.js';
+import { initCustomSelects } from '../../../shared/components/forms/CustomSelect.js';
+import { showDeleteConfirmModal } from '../../../shared/services/modalService.js';
 
 async function fetchAndRender() {
     showLoading();
@@ -110,7 +110,7 @@ async function handlePatientAction(action, id) {
     }
 }
 
-import { currentUser } from '../services/authService.js'; // Importa lo stato utente
+import { currentUser } from '../../../core/auth/authService.js'; // Importa lo stato utente
 
 // ... (altro codice del file) ...
 

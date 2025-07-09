@@ -1,6 +1,6 @@
 // src/js/views/list-renderer.js
 import { domElements, state } from './list-state.js';
-import { currentUser } from '../services/authService.js';
+import { currentUser } from '../../../core/auth/authService.js';
 
 const ITEMS_PER_PAGE = 10;
 

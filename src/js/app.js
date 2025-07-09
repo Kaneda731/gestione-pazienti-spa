@@ -13,6 +13,9 @@ import { initBackToMenuButtons } from './services/navigationService.js';
 import { initMobileUI } from './mobile/mobile-navigation.js';
 import { viteSupabaseMiddleware } from './services/viteSupabaseMiddleware.js';
 import './services/bootstrapService.js'; // Inizializza Bootstrap
+import './services/stateService.js'; // Inizializza gestione stato
+import './services/notificationService.js'; // Inizializza notifiche
+import './services/uiStateService.js'; // Inizializza stati UI
 import './components/CustomSelect.js';
 import './mobile/mobile-card-manager.js';
 

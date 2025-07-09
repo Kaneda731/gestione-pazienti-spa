@@ -212,11 +212,13 @@ function renderCards(pazientiToRender) {
                     : `<button class="btn btn-sm btn-outline-warning" data-action="dimetti" data-id="${p.id}" title="Dimetti"><span class="material-icons" style="font-size: 1.1em; pointer-events: none;">event_available</span></button>`;
                 
                 mobileActionButtons = `
+                    mobileActionButtons = `
                     <div style="display: flex; width: 100%; margin-top: 0.75rem; gap: 0.75rem;">
                         <button class="btn btn-sm btn-outline-primary" data-action="edit" data-id="${p.id}" title="Modifica" style="flex-grow: 1;"><span class="material-icons" style="font-size: 1.1em; pointer-events: none;">edit</span></button>
                         ${dimissioneButton}
                         <button class="btn btn-sm btn-outline-danger" data-action="delete" data-id="${p.id}" title="Elimina" style="flex-grow: 1;"><span class="material-icons" style="font-size: 1.1em; pointer-events: none;">delete</span></button>
                     </div>
+                `;
                 `;
             }
 

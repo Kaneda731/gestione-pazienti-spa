@@ -145,24 +145,3 @@
         font-size: 0.95rem !important;
     }
 }
-
-/* Stile per i pulsanti di azione dei filtri (Resetta/Esporta) */
-#filter-actions-container {
-    display: flex;
-    justify-content: space-between;
-    gap: 4%;
-}
-
-#filter-actions-container .btn {
-    flex-basis: 48%;
-    text-align: center;
-    
-    /* Reset FORZATO per garantire dimensioni identiche */
-    padding: 0.5rem 1rem !important;
-    font-size: 0.9rem !important;
-    line-height: 1.5 !important;
-    height: 40px !important; /* Altezza fissa */
-    min-height: 40px !important; /* Altezza minima fissa */
-    box-sizing: border-box !important;
-}
-

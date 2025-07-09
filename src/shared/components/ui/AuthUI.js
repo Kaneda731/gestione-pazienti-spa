@@ -57,31 +57,34 @@ function initAuthEventListeners() {
             showLoginModal();
         }
         
-        if (event.target.closest('#google-signin-button')) {
+        if (event.target.closest('#google-login-btn')) {
             event.preventDefault();
-            const button = event.target.closest('#google-signin-button');
+            console.log('Pulsante Google cliccato');
+            const button = event.target.closest('#google-login-btn');
             const spinner = button.querySelector('.spinner-border');
             const icon = button.querySelector('.material-icons');
             
             button.disabled = true;
-            spinner.style.display = 'inline-block';
-            icon.style.display = 'none';
+            if (spinner) spinner.style.display = 'inline-block';
+            if (icon) icon.style.display = 'none';
             
             try {
-                await signInWithGoogle();
+                console.log('Chiamando signInWithGoogle...');
+                const result = await signInWithGoogle();
+                console.log('Risultato signInWithGoogle:', result);
                 hideLoginModal();
             } catch (error) {
                 console.error('Errore durante l\'accesso:', error);
                 // Mostra errore all'utente
-                const errorDiv = document.getElementById('auth-error-message');
+                const errorDiv = document.getElementById('auth-error');
                 if (errorDiv) {
                     errorDiv.textContent = 'Errore durante l\'accesso. Riprova.';
                     errorDiv.style.display = 'block';
                 }
             } finally {
                 button.disabled = false;
-                spinner.style.display = 'none';
-                icon.style.display = 'inline-block';
+                if (spinner) spinner.style.display = 'none';
+                if (icon) icon.style.display = 'inline-block';
             }
         }
     });

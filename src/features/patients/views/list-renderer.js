@@ -120,7 +120,10 @@ function renderTable(pazientiToRender) {
 
 function renderCards(pazientiToRender) {
     const cardsContainer = document.getElementById('pazienti-cards-container');
-    if (!cardsContainer) return;
+    if (!cardsContainer) {
+        console.error('Element pazienti-cards-container non trovato nel DOM');
+        return;
+    }
     
     cardsContainer.innerHTML = '';
     if (pazientiToRender.length === 0) {

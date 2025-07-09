@@ -138,20 +138,28 @@ export async function renderView() {
     }
     
     viewHtml = await fetchView(viewToRender);
+    console.log('Inserendo HTML della vista nel DOM...', { viewToRender, htmlLength: viewHtml.length });
     appContainer.innerHTML = viewHtml;
 
     const viewDiv = appContainer.querySelector('.view');
     if (viewDiv) {
         viewDiv.classList.add('active');
+        console.log('Vista attivata:', { viewDiv });
     }
 
     const initializer = viewInitializers[viewToRender];
     if (initializer) {
+        console.log('Inizializzatore trovato per:', viewToRender);
         // Usa requestAnimationFrame per assicurarsi che il DOM sia completamente renderizzato
         requestAnimationFrame(() => {
+            console.log('Chiamando inizializzatore per:', viewToRender);
             initializer(urlParams);
         });
-    } else if (viewToRender === 'home') {
+    } else {
+        console.log('Nessun inizializzatore per:', viewToRender);
+    }
+    
+    if (viewToRender === 'home') {
         document.querySelectorAll('.menu-card').forEach(card => {
             card.addEventListener('click', () => {
                 const view = card.dataset.view;

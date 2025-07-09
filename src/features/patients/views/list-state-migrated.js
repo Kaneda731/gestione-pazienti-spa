@@ -25,6 +25,8 @@ export function initListState() {
  * Caching degli elementi DOM della vista lista
  */
 export function cacheDOMElements(viewContainer) {
+    console.log('Caching DOM elements...', { viewContainer });
+    
     domElements.repartoFilter = document.getElementById('list-filter-reparto');
     domElements.diagnosiFilter = document.getElementById('list-filter-diagnosi');
     domElements.statoFilter = document.getElementById('list-filter-stato');
@@ -32,6 +34,7 @@ export function cacheDOMElements(viewContainer) {
     domElements.resetButton = document.getElementById('reset-filters-btn');
     domElements.filterContainer = viewContainer.querySelector('.filters-container');
     domElements.tableBody = document.getElementById('pazienti-table-body');
+    domElements.cardsContainer = document.getElementById('pazienti-cards-container');
     domElements.tableHeaders = viewContainer.querySelectorAll('th[data-sort]');
     domElements.prevButton = document.getElementById('prev-page-btn');
     domElements.nextButton = document.getElementById('next-page-btn');
@@ -39,8 +42,17 @@ export function cacheDOMElements(viewContainer) {
     domElements.backButton = viewContainer.querySelector('button[data-view="home"]');
     domElements.exportButton = document.getElementById('export-csv-btn');
     
+    // Debug: verifica se gli elementi esistono
+    console.log('DOM elements cached:', {
+        tableBody: domElements.tableBody,
+        cardsContainer: domElements.cardsContainer,
+        repartoFilter: domElements.repartoFilter,
+        diagnosiFilter: domElements.diagnosiFilter,
+        statoFilter: domElements.statoFilter
+    });
+    
     // Validazione elementi critici
-    const criticalElements = ['tableBody', 'repartoFilter', 'diagnosiFilter', 'statoFilter'];
+    const criticalElements = ['tableBody', 'cardsContainer', 'repartoFilter', 'diagnosiFilter', 'statoFilter'];
     criticalElements.forEach(key => {
         if (!domElements[key]) {
             console.error(`Elemento DOM critico non trovato: ${key}`);

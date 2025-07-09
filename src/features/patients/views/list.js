@@ -17,6 +17,32 @@ async function fetchAndRender() {
     }
 }
 
+/**
+ * Aspetta che gli elementi DOM critici siano disponibili
+ */
+function waitForDOMElements(timeout = 5000) {
+    return new Promise((resolve, reject) => {
+        const startTime = Date.now();
+        
+        function checkElements() {
+            const tableBody = document.getElementById('pazienti-table-body');
+            const cardsContainer = document.getElementById('pazienti-cards-container');
+            
+            if (tableBody && cardsContainer) {
+                console.log('Elementi DOM trovati, procedendo...');
+                resolve();
+            } else if (Date.now() - startTime > timeout) {
+                reject(new Error('Timeout: elementi DOM non trovati'));
+            } else {
+                // Riprova dopo un breve delay
+                setTimeout(checkElements, 50);
+            }
+        }
+        
+        checkElements();
+    });
+}
+
 function setupEventListeners() {
     const handleFilterChange = () => {
         state.currentPage = 0;
@@ -123,37 +149,48 @@ export async function initListView(urlParams) {
     }
 
     const viewContainer = document.querySelector('#app-container .view');
-    if (!viewContainer) return;
-
-    // 1. Esegui la cache degli elementi DOM statici
-    cacheDOMElements(viewContainer);
-
-    // 2. Recupera i dati per i filtri in parallelo
-    const [repartoOptions, diagnosiOptions] = await Promise.all([
-        getFilterOptions('reparto_appartenenza'),
-        getFilterOptions('diagnosi')
-    ]);
-
-    // 3. Popola i select con i dati ottenuti
-    populateSelectWithOptions(domElements.repartoFilter, repartoOptions);
-    populateSelectWithOptions(domElements.diagnosiFilter, diagnosiOptions);
-
-    // 4. Carica i filtri salvati (da URL o sessionStorage)
-    loadPersistedFilters(urlParams);
-
-    // 5. Ora che il DOM è stabile e popolato, inizializza i custom select
-    initCustomSelects('#list-filter-reparto, #list-filter-diagnosi, #list-filter-stato');
-
-    // 6. Imposta gli event listener
-    setupEventListeners();
-    
-    // 7. Esegui il fetch e il render iniziali (solo se gli elementi sono disponibili)
-    if (domElements.tableBody) {
-        fetchAndRender();
-    } else {
-        console.error('Impossibile inizializzare la vista lista: elementi DOM mancanti');
+    if (!viewContainer) {
+        console.error('View container non trovato');
+        return;
     }
-    
-    // 8. Aggiorna gli indicatori di ordinamento e la vista
-    updateSortIndicators();
+
+    try {
+        // Aspetta che gli elementi DOM critici siano disponibili
+        await waitForDOMElements();
+        
+        // 1. Esegui la cache degli elementi DOM statici
+        cacheDOMElements(viewContainer);
+
+        // 2. Recupera i dati per i filtri in parallelo
+        const [repartoOptions, diagnosiOptions] = await Promise.all([
+            getFilterOptions('reparto_appartenenza'),
+            getFilterOptions('diagnosi')
+        ]);
+
+        // 3. Popola i select con i dati ottenuti
+        populateSelectWithOptions(domElements.repartoFilter, repartoOptions);
+        populateSelectWithOptions(domElements.diagnosiFilter, diagnosiOptions);
+
+        // 4. Carica i filtri salvati (da URL o sessionStorage)
+        loadPersistedFilters(urlParams);
+
+        // 5. Ora che il DOM è stabile e popolato, inizializza i custom select
+        initCustomSelects('#list-filter-reparto, #list-filter-diagnosi, #list-filter-stato');
+
+        // 6. Imposta gli event listener
+        setupEventListeners();
+        
+        // 7. Esegui il fetch e il render iniziali (solo se gli elementi sono disponibili)
+        if (domElements.tableBody && domElements.cardsContainer) {
+            fetchAndRender();
+        } else {
+            console.error('Impossibile inizializzare la vista lista: elementi DOM mancanti');
+        }
+        
+        // 8. Aggiorna gli indicatori di ordinamento e la vista
+        updateSortIndicators();
+        
+    } catch (error) {
+        console.error('Errore durante l\'inizializzazione della vista lista:', error);
+    }
 }

@@ -28,16 +28,7 @@ export class ViteSupabaseMiddleware {
 
     async waitForViteReady() {
         return new Promise((resolve) => {
-            // Controlla che siamo su localhost (ma non forza più la porta 5174)
-            const currentUrl = window.location.origin;
-            // Se vuoi forzare solo localhost, ma su qualsiasi porta:
-            if (!currentUrl.includes('localhost')) {
-                console.warn('Non siamo su localhost, redirect necessario');
-                window.location.href = 'http://localhost:5173';
-                return;
-            }
-
-            if (document.readyState === 'complete' && window.location.href.includes('localhost')) {
+            if (document.readyState === 'complete') {
                 console.log('Vite è pronto');
                 this.isViteReady = true;
                 resolve();
@@ -141,3 +132,4 @@ export class ViteSupabaseMiddleware {
 
 // Esporta un'istanza singleton
 export const viteSupabaseMiddleware = new ViteSupabaseMiddleware();
+

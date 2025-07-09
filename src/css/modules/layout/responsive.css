@@ -158,3 +158,25 @@ img {
         display: none !important;
     }
 }
+
+/* === VISIBILITÀ VISTA LISTA PAZIENTI === */
+
+/* Su mobile, mostra le card e nascondi la tabella */
+@media (max-width: 767px) {
+    .table-responsive {
+        display: none !important;
+    }
+    #pazienti-cards-container {
+        display: block !important;
+    }
+}
+
+/* Su desktop, mostra la tabella e nascondi le card */
+@media (min-width: 768px) {
+    .table-responsive {
+        display: block !important;
+    }
+    #pazienti-cards-container {
+        display: none !important;
+    }
+}

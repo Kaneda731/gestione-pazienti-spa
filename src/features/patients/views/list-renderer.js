@@ -63,41 +63,11 @@ export function showError(error) {
 }
 
 function ensureCorrectView() {
-    console.log('📱 Assicurando vista corretta...');
-    const tableContainer = document.querySelector('.table-responsive');
-    const cardsContainer = document.getElementById('pazienti-cards-container');
-    
-    console.log('📱 Elementi trovati:', {
-        tableContainer: !!tableContainer,
-        cardsContainer: !!cardsContainer,
-        windowWidth: window.innerWidth,
-        shouldShowCards: window.innerWidth < 768 // Mostrar card solo su mobile
-    });
-    
-    if (tableContainer && cardsContainer) {
-        if (window.innerWidth < 768) { // Solo mobile
-            console.log('📱 Modalità mobile: nascondendo tabella, mostrando cards');
-            tableContainer.style.display = 'none';
-            cardsContainer.style.display = 'block';
-        } else {
-            console.log('� Modalità desktop/tablet: mostrando tabella, nascondendo cards');
-            tableContainer.style.display = 'block';
-            cardsContainer.style.display = 'none';
-        }
-        
-        console.log('📱 Stili applicati:', {
-            tableDisplay: tableContainer.style.display,
-            cardsDisplay: cardsContainer.style.display,
-            tableClasses: tableContainer.className,
-            cardsClasses: cardsContainer.className
-        });
-    } else {
-        console.error('❌ Impossibile assicurare vista corretta: elementi mancanti');
-    }
-    
+    // La logica di visibilità è ora gestita interamente dal CSS tramite media queries.
+    // Questa funzione assicura solo che gli stili di overflow siano corretti.
     document.body.style.overflowX = 'hidden';
     document.body.style.maxWidth = '100vw';
-    console.log('✅ Vista corretta assicurata');
+    console.log('✅ Stili di overflow assicurati');
 }
 
 function renderTable(pazientiToRender) {
@@ -203,132 +173,57 @@ function renderCards(pazientiToRender) {
         return;
     }
     
-    const isMobile = window.innerWidth <= 767;
-    console.log('📱 Modalità mobile:', isMobile);
-    
-    
     // Logica per i permessi
     const userRole = currentUser.profile?.role;
     const canEdit = userRole === 'admin' || userRole === 'editor';
 
-    if (isMobile) {
-        const cardsHtml = pazientiToRender.map(p => {
-            const isDimesso = p.data_dimissione;
-            const statusClass = isDimesso ? 'error' : 'success';
+    const cardsHtml = pazientiToRender.map(p => {
+        const isDimesso = p.data_dimissione;
+        const statusClass = isDimesso ? 'error' : 'success';
+        
+        let actionButtons = '';
+        if (canEdit) {
+            const dimissioneButton = isDimesso
+                ? `<button class="btn btn-sm btn-outline-success mobile-compact" data-action="riattiva" data-id="${p.id}" title="Riattiva">
+                     <span class="material-icons mobile-text-xs">undo</span>
+                   </button>`
+                : `<button class="btn btn-sm btn-outline-warning mobile-compact" data-action="dimetti" data-id="${p.id}" title="Dimetti">
+                     <span class="material-icons mobile-text-xs">event_available</span>
+                   </button>`;
             
-            let actionButtons = '';
-            if (canEdit) {
-                const dimissioneButton = isDimesso
-                    ? `<button class="btn btn-sm btn-outline-success mobile-compact" data-action="riattiva" data-id="${p.id}" title="Riattiva">
-                         <span class="material-icons mobile-text-xs">undo</span>
-                       </button>`
-                    : `<button class="btn btn-sm btn-outline-warning mobile-compact" data-action="dimetti" data-id="${p.id}" title="Dimetti">
-                         <span class="material-icons mobile-text-xs">event_available</span>
-                       </button>`;
-                
-                actionButtons = `
-                    <button class="btn btn-sm btn-outline-primary mobile-compact" data-action="edit" data-id="${p.id}" title="Modifica">
-                        <span class="material-icons mobile-text-xs">edit</span>
-                    </button>
-                    ${dimissioneButton}
-                    <button class="btn btn-sm btn-outline-danger mobile-compact" data-action="delete" data-id="${p.id}" title="Elimina">
-                        <span class="material-icons mobile-text-xs">delete</span>
-                    </button>
-                `;
-            }
-
-            return `
-                <div class="card card-list-compact status-${statusClass}">
-                    <div class="card-body">
-                        <div>
-                            <div class="card-title">${p.cognome} ${p.nome}</div>
-                            <div class="card-meta mobile-text-sm">
-                                ${p.diagnosi} • ${p.reparto_appartenenza}
-                            </div>
-                        </div>
-                        <div class="mobile-horizontal" style="gap: 0.25rem;">
-                            ${actionButtons}
-                        </div>
-                    </div>
-                </div>
+            actionButtons = `
+                <button class="btn btn-sm btn-outline-primary mobile-compact" data-action="edit" data-id="${p.id}" title="Modifica">
+                    <span class="material-icons mobile-text-xs">edit</span>
+                </button>
+                ${dimissioneButton}
+                <button class="btn btn-sm btn-outline-danger mobile-compact" data-action="delete" data-id="${p.id}" title="Elimina">
+                    <span class="material-icons mobile-text-xs">delete</span>
+                </button>
             `;
-        }).join('');
-        
-        console.log('📱 Generando HTML per', pazientiToRender.length, 'card (modalità mobile)');
-        cardsContainer.innerHTML = cardsHtml;
-        
-        if (window.MobileCardManager) {
-            window.MobileCardManager.initTouchOptimizations();
         }
-        
-    } else {
-        // Card per desktop/tablet - versione migliorata con tutti i dati
-        const cardsHtml = pazientiToRender.map(p => {
-            const isDimesso = p.data_dimissione;
-            const statusClass = isDimesso ? 'dimesso' : 'attivo';
-            const statusBadge = isDimesso
-                ? `<span class="badge bg-secondary">Dimesso</span>`
-                : `<span class="badge bg-success">Attivo</span>`;
-            
-            let actionButtons = '';
-            if (canEdit) {
-                const dimissioneButton = isDimesso
-                    ? `<button class="btn btn-sm btn-outline-success" data-action="riattiva" data-id="${p.id}" title="Riattiva Paziente">
-                         <span class="material-icons me-1" style="font-size: 1em;">undo</span>Riattiva
-                       </button>`
-                    : `<button class="btn btn-sm btn-outline-warning" data-action="dimetti" data-id="${p.id}" title="Dimetti Paziente">
-                         <span class="material-icons me-1" style="font-size: 1em;">event_available</span>Dimetti
-                       </button>`;
 
-                actionButtons = `
-                    <button class="btn btn-sm btn-outline-primary me-1" data-action="edit" data-id="${p.id}" title="Modifica">
-                        <span class="material-icons me-1" style="font-size: 1em;">edit</span>Modifica
-                    </button>
-                    ${dimissioneButton}
-                    <button class="btn btn-sm btn-outline-danger ms-1" data-action="delete" data-id="${p.id}" title="Elimina">
-                        <span class="material-icons me-1" style="font-size: 1em;">delete</span>Elimina
-                    </button>
-                `;
-            }
-
-            return `
-                <div class="card mb-3 patient-card-desktop">
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-8">
-                                <h5 class="card-title mb-2">${p.cognome} ${p.nome}</h5>
-                                <div class="row">
-                                    <div class="col-sm-6">
-                                        <p class="card-text mb-1">
-                                            <strong>Data Ricovero:</strong> ${new Date(p.data_ricovero).toLocaleDateString()}
-                                        </p>
-                                        <p class="card-text mb-1">
-                                            <strong>Diagnosi:</strong> ${p.diagnosi}
-                                        </p>
-                                    </div>
-                                    <div class="col-sm-6">
-                                        <p class="card-text mb-1">
-                                            <strong>Reparto:</strong> ${p.reparto_appartenenza}
-                                        </p>
-                                        <p class="card-text mb-1">
-                                            <strong>Stato:</strong> ${statusBadge}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-4 d-flex align-items-center justify-content-end">
-                                <div class="patient-actions">
-                                    ${actionButtons}
-                                </div>
-                            </div>
+        return `
+            <div class="card card-list-compact status-${statusClass}">
+                <div class="card-body">
+                    <div>
+                        <div class="card-title">${p.cognome} ${p.nome}</div>
+                        <div class="card-meta mobile-text-sm">
+                            ${p.diagnosi} • ${p.reparto_appartenenza}
                         </div>
                     </div>
+                    <div class="mobile-horizontal" style="gap: 0.25rem;">
+                        ${actionButtons}
+                    </div>
                 </div>
-            `;
-        }).join('');
-        
-        console.log('📱 Generando HTML per', pazientiToRender.length, 'card (modalità desktop migliorata)');
-        cardsContainer.innerHTML = cardsHtml;
+            </div>
+        `;
+    }).join('');
+    
+    console.log('📱 Generando HTML per', pazientiToRender.length, 'card');
+    cardsContainer.innerHTML = cardsHtml;
+    
+    if (window.MobileCardManager) {
+        window.MobileCardManager.initTouchOptimizations();
     }
     
     console.log('✅ renderCards completato con successo');

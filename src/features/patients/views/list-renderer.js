@@ -203,8 +203,8 @@ function renderCards(pazientiToRender) {
         return;
     }
     
-    const isMobile = window.innerWidth <= 767;
-    console.log('📱 Modalità mobile:', isMobile);
+    const isMobile = window.matchMedia("(max-width: 767px)").matches;
+    console.log('📱 Rilevamento mobile (matchMedia):', isMobile);
     
     
     // Logica per i permessi
@@ -214,52 +214,41 @@ function renderCards(pazientiToRender) {
     if (isMobile) {
         const cardsHtml = pazientiToRender.map(p => {
             const isDimesso = p.data_dimissione;
-            const statusClass = isDimesso ? 'error' : 'success';
+            const statusBadge = isDimesso
+                ? `<span class="badge bg-secondary">Dimesso</span>`
+                : `<span class="badge bg-success">Attivo</span>`;
             
             let actionButtons = '';
             if (canEdit) {
                 const dimissioneButton = isDimesso
-                    ? `<button class="btn btn-sm btn-outline-success mobile-compact" data-action="riattiva" data-id="${p.id}" title="Riattiva">
-                         <span class="material-icons mobile-text-xs">undo</span>
-                       </button>`
-                    : `<button class="btn btn-sm btn-outline-warning mobile-compact" data-action="dimetti" data-id="${p.id}" title="Dimetti">
-                         <span class="material-icons mobile-text-xs">event_available</span>
-                       </button>`;
+                    ? `<button class="btn btn-sm btn-outline-success" data-action="riattiva" data-id="${p.id}" title="Riattiva Paziente"><span class="material-icons" style="font-size: 1.1em; pointer-events: none;">undo</span></button>`
+                    : `<button class="btn btn-sm btn-outline-warning" data-action="dimetti" data-id="${p.id}" title="Dimetti Paziente"><span class="material-icons" style="font-size: 1.1em; pointer-events: none;">event_available</span></button>`;
                 
                 actionButtons = `
-                    <button class="btn btn-sm btn-outline-primary mobile-compact" data-action="edit" data-id="${p.id}" title="Modifica">
-                        <span class="material-icons mobile-text-xs">edit</span>
-                    </button>
-                    ${dimissioneButton}
-                    <button class="btn btn-sm btn-outline-danger mobile-compact" data-action="delete" data-id="${p.id}" title="Elimina">
-                        <span class="material-icons mobile-text-xs">delete</span>
-                    </button>
+                    <div class="d-flex justify-content-end mt-3">
+                        <button class="btn btn-sm btn-outline-primary me-1" data-action="edit" data-id="${p.id}" title="Modifica"><span class="material-icons" style="font-size: 1.1em; pointer-events: none;">edit</span></button>
+                        ${dimissioneButton}
+                        <button class="btn btn-sm btn-outline-danger ms-1" data-action="delete" data-id="${p.id}" title="Elimina"><span class="material-icons" style="font-size: 1.1em; pointer-events: none;">delete</span></button>
+                    </div>
                 `;
             }
 
             return `
-                <div class="card card-list-compact status-${statusClass}">
+                <div class="card mb-3 patient-card-mobile">
                     <div class="card-body">
-                        <div>
-                            <div class="card-title">${p.cognome} ${p.nome}</div>
-                            <div class="card-meta mobile-text-sm">
-                                ${p.diagnosi} • ${p.reparto_appartenenza}
-                            </div>
-                        </div>
-                        <div class="mobile-horizontal" style="gap: 0.25rem;">
-                            ${actionButtons}
-                        </div>
+                        <h5 class="card-title mb-2">${p.cognome} ${p.nome}</h5>
+                        <p class="card-text mb-1"><strong>Ricovero:</strong> ${new Date(p.data_ricovero).toLocaleDateString()}</p>
+                        <p class="card-text mb-1"><strong>Diagnosi:</strong> ${p.diagnosi}</p>
+                        <p class="card-text mb-1"><strong>Reparto:</strong> ${p.reparto_appartenenza}</p>
+                        <p class="card-text mb-1"><strong>Stato:</strong> ${statusBadge}</p>
+                        ${actionButtons}
                     </div>
                 </div>
             `;
         }).join('');
         
-        console.log('📱 Generando HTML per', pazientiToRender.length, 'card (modalità mobile)');
+        console.log('📱 Generando HTML per', pazientiToRender.length, 'card (nuovo stile mobile)');
         cardsContainer.innerHTML = cardsHtml;
-        
-        if (window.MobileCardManager) {
-            window.MobileCardManager.initTouchOptimizations();
-        }
         
     } else {
         // Card per desktop/tablet - versione migliorata con tutti i dati

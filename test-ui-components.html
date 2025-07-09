@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Componenti UI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-4">
+        <h1>Test Componenti UI</h1>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <h3>Patient Card</h3>
+                <div id="patient-card-demo"></div>
+            </div>
+            
+            <div class="col-md-6">
+                <h3>Loading Spinner</h3>
+                <div id="loading-demo"></div>
+            </div>
+        </div>
+        
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <h3>Error Message</h3>
+                <div id="error-demo"></div>
+            </div>
+            
+            <div class="col-md-6">
+                <h3>Empty State</h3>
+                <div id="empty-demo"></div>
+            </div>
+        </div>
+        
+        <div class="row mt-4">
+            <div class="col-12">
+                <h3>Confirm Modal</h3>
+                <button id="modal-test" class="btn btn-primary">Test Modal</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { 
+            PatientCard, 
+            LoadingSpinner, 
+            ErrorMessage, 
+            EmptyState, 
+            ConfirmModal 
+        } from './src/js/components/ui/index.js';
+
+        // Test dati paziente
+        const testPatient = {
+            id: 1,
+            cognome: 'Rossi',
+            nome: 'Mario',
+            data_ricovero: '2024-01-15',
+            diagnosi: 'Ipertensione arteriosa',
+            reparto_appartenenza: 'Cardiologia',
+            livello_assistenza: 'Medio',
+            data_dimissione: null
+        };
+
+        // Test Patient Card
+        const patientCard = new PatientCard(testPatient, { isMobile: false });
+        document.getElementById('patient-card-demo').innerHTML = patientCard.render();
+
+        // Test Loading Spinner
+        const loadingSpinner = new LoadingSpinner({ text: 'Caricamento dati...' });
+        document.getElementById('loading-demo').innerHTML = loadingSpinner.render();
+
+        // Test Error Message
+        const errorMessage = ErrorMessage.forDataLoading(new Error('Errore di connessione'));
+        document.getElementById('error-demo').innerHTML = errorMessage.render();
+
+        // Test Empty State
+        const emptyState = EmptyState.forNoPatients();
+        document.getElementById('empty-demo').innerHTML = emptyState.render();
+
+        // Test Confirm Modal
+        document.getElementById('modal-test').addEventListener('click', async () => {
+            const confirmModal = ConfirmModal.forDeletion('il paziente Mario Rossi');
+            const result = await confirmModal.show();
+            alert(`Risultato: ${result ? 'Confermato' : 'Annullato'}`);
+        });
+    </script>
+</body>
+</html>

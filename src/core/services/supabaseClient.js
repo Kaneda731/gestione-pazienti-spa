@@ -1,14 +1,9 @@
 // src/js/services/supabaseClient.js
 import { createClient } from '@supabase/supabase-js';
 
-// Le variabili d'ambiente sono l'unica fonte di verità.
-// Devono essere impostate sia in locale (.env) che in produzione (Netlify).
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-if (!SUPABASE_URL || !SUPABASE_KEY) {
-  throw new Error("Supabase URL o Anon Key non definite. Assicurati di aver configurato le variabili d'ambiente.");
-}
+// Usa le variabili di ambiente se disponibili, altrimenti valori hardcoded
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://aiguzywadjzyrwandgba.supabase.co';
+const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpZ3V6eXdhZGp6eXJ3YW5kZ2JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEyMDM1MzQsImV4cCI6MjA2Njc3OTUzNH0.pezVt3-xxkHBYK2V6ryHUtj_givF_TA9xwEzuK2essw';
 
 // Ottieni la porta corrente dinamicamente
 const currentPort = window.location.port || (window.location.protocol === 'https:' ? '443' : '80');

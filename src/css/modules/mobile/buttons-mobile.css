@@ -149,11 +149,18 @@
 /* Stile per i pulsanti di azione dei filtri (Resetta/Esporta) */
 #filter-actions-container {
     display: flex;
-    justify-content: space-between; /* Mantiene lo spazio tra gli elementi */
-    gap: 4%; /* Spazio tra i pulsanti */
+    justify-content: space-between;
+    gap: 4%;
 }
 
 #filter-actions-container .btn {
-    flex-basis: 48%; /* Forza ogni pulsante a occupare il 48% della larghezza */
+    flex-basis: 48%;
     text-align: center;
+    /* Reset per garantire dimensioni identiche */
+    padding: 0.5rem 1rem; /* Valori uniformi */
+    font-size: 0.9rem;    /* Valori uniformi */
+    line-height: 1.5;     /* Valori uniformi */
+    border-width: 1px;    /* Valori uniformi */
+    border-style: solid;
+    box-sizing: border-box; /* Assicura che padding e border siano inclusi nel calcolo della larghezza */
 }

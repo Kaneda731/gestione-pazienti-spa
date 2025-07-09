@@ -3,8 +3,8 @@ import { defineConfig } from 'vite';
 export default defineConfig({
   // Configurazione per il server di sviluppo
   server: {
-    port: 5174,
-    host: 'localhost',
+    port: 5173,
+    host: true,
     strictPort: false,
     open: false,
     // Configurazione CORS semplificata e corretta per Supabase OAuth

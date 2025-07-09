@@ -34,6 +34,9 @@ export function convertToCSV(data) {
     return [headers.join(','), ...rows].join('\r\n');
 }
 
+// Re-export generateId da formatting.js per compatibilità con i test e import centralizzato
+export { generateId } from './formatting.js';
+
 /**
  * Recupera le opzioni uniche per un filtro.
  * @param {string} filterName - Il nome del filtro (es. 'reparto_appartenenza', 'diagnosi').

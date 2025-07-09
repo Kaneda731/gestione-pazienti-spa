@@ -5,9 +5,9 @@
  * Centralizza tutte le operazioni CRUD e business logic
  */
 
-import { supabase } from './supabaseClient.js';
-import { stateService } from './stateService.js';
-import { notificationService } from './notificationService.js';
+import { supabase } from '/src/core/services/supabaseClient.js';
+import { stateService } from '/src/core/services/stateService.js';
+import { notificationService } from '/src/core/services/notificationService.js';
 
 class PatientService {
     constructor() {

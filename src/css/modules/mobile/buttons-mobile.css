@@ -147,7 +147,11 @@
 }
 
 /* Stile per i pulsanti di azione dei filtri (Resetta/Esporta) */
-.filter-action-btn {
+#filter-actions-container {
+    gap: 0.75rem; /* Aggiunge spazio tra i pulsanti */
+}
+
+#filter-actions-container .btn {
     flex-grow: 1; /* Fa sì che ogni pulsante cresca */
     flex-basis: 0; /* Base di partenza per la crescita */
     text-align: center;

@@ -1,6 +1,7 @@
 // src/features/patients/views/list-renderer.js
 import { domElements, state } from './list-state-migrated.js';
 import { currentUser } from '../../../core/auth/authService.js';
+import { isTrueMobile } from '../../../shared/utils/helpers.js';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -203,8 +204,8 @@ function renderCards(pazientiToRender) {
         return;
     }
     
-    const isMobile = window.innerWidth <= 767;
-    console.log('📱 Modalità mobile:', isMobile);
+    const isMobile = isTrueMobile();
+    console.log('📱 Modalità mobile rilevata:', isMobile);
     
     
     // Logica per i permessi

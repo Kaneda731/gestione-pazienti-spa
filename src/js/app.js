@@ -2,27 +2,27 @@
 
 // --- 0. IMPORT DIPENDENZE E STILI ---
 import 'bootstrap/dist/css/bootstrap.min.css';
-import '/src/css/style.css';
+import '/src/shared/styles/main.css';
 
 // --- 1. INIZIALIZZAZIONE SERVIZI FONDAMENTALI ---
-import { initErrorHandling } from './services/errorService.js';
-import { initAuth } from './services/authService.js';
-import { renderView } from './router.js';
-import { initTheme } from './services/themeService.js';
-import { initBackToMenuButtons } from './services/navigationService.js';
-import { initMobileUI } from './mobile/mobile-navigation.js';
-import { viteSupabaseMiddleware } from './services/viteSupabaseMiddleware.js';
-import './services/bootstrapService.js'; // Inizializza Bootstrap
-import './services/stateService.js'; // Inizializza gestione stato
-import './services/notificationService.js'; // Inizializza notifiche
-import './services/uiStateService.js'; // Inizializza stati UI
-import './components/CustomSelect.js';
-import './mobile/mobile-card-manager.js';
+import { initErrorHandling } from '../core/services/errorService.js';
+import { initAuth } from '../core/auth/authService.js';
+import { renderView } from '../app/router.js';
+import { initTheme } from '../core/services/themeService.js';
+import { initBackToMenuButtons } from '../core/services/navigationService.js';
+import { initMobileUI } from '../features/patients/components/mobile-navigation.js';
+import { viteSupabaseMiddleware } from '../core/services/viteSupabaseMiddleware.js';
+import '../core/services/bootstrapService.js'; // Inizializza Bootstrap
+import '../core/services/stateService.js'; // Inizializza gestione stato
+import '../core/services/notificationService.js'; // Inizializza notifiche
+import '../core/services/uiStateService.js'; // Inizializza stati UI
+import '../shared/components/forms/CustomSelect.js';
+import '../features/patients/components/mobile-card-manager.js';
 
 // Importa il debugger OAuth se abilitato
 if (import.meta.env.VITE_OAUTH_DEBUG === 'true') {
-    import('./utils/oauthDebug.js');
-    import('./utils/oauthTest.js');
+    import('../shared/utils/oauthDebug.js');
+    import('../shared/utils/oauthTest.js');
 }
 
 // --- 2. FUNZIONE DI INIZIALIZZAZIONE PRINCIPALE ---

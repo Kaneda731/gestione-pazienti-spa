@@ -1,8 +1,8 @@
 // src/js/views/grafico.js
-import { supabase } from '../../core/services/supabaseClient.js';
-import { navigateTo } from '../../app/router.js';
-import { getFilterOptions, populateSelectWithOptions } from '../../shared/utils/helpers.js';
-import { initCustomSelects } from '../../shared/components/forms/CustomSelect.js';
+import { supabase } from '../services/supabaseClient.js';
+import { navigateTo } from '../router.js';
+import { getFilterOptions, populateSelectWithOptions } from '../utils.js';
+import { initCustomSelects } from '../components/CustomSelect.js';
 import { 
     createPieChart, 
     showLoadingInContainer, 

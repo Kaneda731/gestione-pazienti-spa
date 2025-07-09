@@ -1,0 +1,513 @@
+/* ===================================
+   NAVBAR MOBILE
+   =================================== */
+
+/* === LAYOUT MOBILE OTTIMIZZATO === */
+@media (max-width: 767px) {
+    .navbar {
+        padding: 0.5rem 1rem !important; /* Allineato con layout-mobile */
+        min-height: 52px; /* Allineato con layout-mobile */
+        /* Miglioramento: navbar più moderna */
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .navbar-brand {
+        font-size: 1.1rem !important;
+        padding: 0.25rem 0 !important;
+    }
+    
+    .navbar-brand span {
+        font-size: 1rem !important;
+        margin-left: 0.5rem;
+    }
+    
+    .navbar-brand .material-icons {
+        width: 32px !important;
+        height: 32px !important;
+        padding: 6px !important;
+        margin-right: 8px !important;
+        font-size: 1.25rem !important;
+    }
+}
+
+/* === THEME TOGGLE MOBILE === */
+@media (max-width: 767px) {
+    #theme-toggle {
+        padding: 0.375rem !important;
+        min-width: 40px !important;
+        min-height: 40px !important;
+        border-radius: 50% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        touch-action: manipulation;
+    }
+    
+    #theme-toggle .material-icons {
+        font-size: 1.125rem !important;
+        margin: 0 !important;
+    }
+    
+    #theme-toggle:active {
+        transform: scale(0.95) !important;
+        background: rgba(255, 255, 255, 0.4) !important;
+    }
+}
+
+/* === AUTH CONTAINER MOBILE === */
+@media (max-width: 767px) {
+    #auth-container {
+        gap: 0.5rem !important;
+    }
+    
+    #auth-container .btn {
+        padding: 0.375rem 0.75rem !important;
+        font-size: 0.875rem !important;
+        min-height: 40px !important;
+        touch-action: manipulation;
+        border-radius: var(--border-radius) !important;
+    }
+    
+    #auth-container .btn-light,
+    #auth-container .btn-outline-light {
+        min-width: 80px !important;
+        white-space: nowrap;
+    }
+    
+    /* Touch feedback */
+    #auth-container .btn:active {
+        transform: scale(0.98) !important;
+    }
+}
+
+/* === NAVBAR COLLAPSE MOBILE === */
+@media (max-width: 767px) {
+    /* Se usiamo navbar collapse in futuro */
+    .navbar-toggler {
+        border: 1px solid rgba(255, 255, 255, 0.3) !important;
+        padding: 0.375rem !important;
+        min-width: 40px !important;
+        min-height: 40px !important;
+        touch-action: manipulation;
+    }
+    
+    .navbar-toggler:focus {
+        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3) !important;
+    }
+    
+    .navbar-toggler-icon {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+    }
+}
+
+/* === LAYOUT COMPATTO SU SMALL MOBILE === */
+@media (max-width: 480px) {
+    .navbar {
+        padding: 0.375rem 0.75rem !important;
+    }
+    
+    .navbar-brand {
+        font-size: 1rem !important;
+    }
+    
+    .navbar-brand span {
+        display: none; /* Nascondi testo su schermi molto piccoli */
+    }
+    
+    .navbar-brand .material-icons {
+        margin-right: 0 !important;
+        width: 28px !important;
+        height: 28px !important;
+        padding: 4px !important;
+    }
+    
+    #theme-toggle {
+        min-width: 44px !important; /* Standard touch area iOS/Android */
+        min-height: 44px !important; /* Standard touch area iOS/Android */
+        padding: 0.5rem !important; /* Aumentato per migliore usabilità */
+    }
+    
+    #auth-container .btn {
+        padding: 0.375rem 0.75rem !important; /* Aumentato per touch area */
+        font-size: 0.75rem !important;
+        min-height: 44px !important; /* Standard touch area iOS/Android */
+        min-width: 80px !important; /* Larghezza minima per leggibilità */
+    }
+}
+
+/* === ACCESSIBILITÀ MOBILE === */
+@media (max-width: 767px) {
+    /* Focus migliorato per navigation via tastiera */
+    .navbar-brand:focus,
+    #theme-toggle:focus,
+    #auth-container .btn:focus {
+        outline: 2px solid rgba(255, 255, 255, 0.8) !important;
+        outline-offset: 2px !important;
+    }
+    
+    /* Prevenzione del double-tap zoom */
+    .navbar {
+        touch-action: manipulation;
+    }
+    
+    /* Miglioramento leggibilità su mobile */
+    .navbar-brand,
+    #auth-container .btn {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+}
+
+/* === PERFORMANCE MOBILE === */
+@media (max-width: 767px) {
+    /* Hardware acceleration per smooth interactions */
+    .navbar-brand,
+    #theme-toggle,
+    #auth-container .btn {
+        will-change: transform;
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
+    }
+    
+    /* Riduci animazioni complesse su mobile */
+    @media (prefers-reduced-motion: reduce) {
+        .navbar-brand,
+        #theme-toggle,
+        #auth-container .btn {
+            transition: none !important;
+        }
+    }
+}
+
+/* === NAVBAR MOBILE DEDICATA === */
+.mobile-navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1030;
+    background: linear-gradient(135deg, #001a2e 0%, #003d82 25%, #0052cc 50%, #1e88e5 75%, #42a5f5 100%);
+    box-shadow: 0 6px 20px rgba(0, 26, 46, 0.5);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* Mostra solo su mobile */
+@media (max-width: 767px) {
+    .mobile-navbar {
+        display: block !important;
+    }
+    
+    /* Nasconde navbar desktop su mobile */
+    .navbar {
+        display: none !important;
+    }
+    
+    /* Aggiusta padding contenuto */
+    #app-container {
+        margin-top: 72px !important;
+    }
+}
+
+.mobile-navbar-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    height: 72px;
+    position: relative;
+}
+
+.mobile-nav-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: rgba(255, 255, 255, 0.9);
+    padding: 12px 16px;
+    border-radius: 20px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    min-width: 80px;
+    min-height: 56px;
+    touch-action: manipulation;
+    position: relative;
+    overflow: hidden;
+    /* Rimuovo backdrop-filter di default */
+}
+
+/* Rimuovo effetto ::before di default - solo hover avrà background */
+.mobile-nav-btn:hover,
+.mobile-nav-btn:focus {
+    color: #ffffff;
+    text-decoration: none;
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.mobile-nav-btn:hover .material-icons,
+.mobile-nav-btn:focus .material-icons {
+    font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 36;
+    transform: scale(1.1);
+}
+
+.mobile-nav-btn:active {
+    transform: translateY(-1px) scale(0.98);
+    transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mobile-nav-btn:active .material-icons {
+    transform: scale(0.95);
+}
+
+.mobile-nav-btn .material-icons {
+    font-size: 36px !important;
+    line-height: 1;
+    z-index: 1;
+    position: relative;
+    text-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+    font-weight: 400;
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 36;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Auth wrapper speciale */
+#mobile-auth-wrapper {
+    position: relative;
+}
+
+/* Override per rimuovere sfondi dal wrapper auth */
+#mobile-auth-wrapper:hover,
+#mobile-auth-wrapper:focus {
+    background: transparent !important;
+}
+
+#mobile-auth-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Adatta i pulsanti auth esistenti per mobile */
+#mobile-auth-container .btn {
+    padding: 2px 6px !important;
+    font-size: 9px !important;
+    min-height: auto !important;
+    border: none !important;
+    background: transparent !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+#mobile-auth-container .btn:hover {
+    color: #ffffff !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* === SUPPORT DARK/LIGHT THEME === */
+
+/* Light Theme (default) */
+.mobile-navbar {
+    background: linear-gradient(135deg, #001a2e 0%, #003d82 25%, #0052cc 50%, #1e88e5 75%, #42a5f5 100%);
+    box-shadow: 0 6px 20px rgba(0, 26, 46, 0.5);
+}
+
+.mobile-nav-btn {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.mobile-nav-btn:hover,
+.mobile-nav-btn:focus {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.15);
+}
+
+/* Dark Theme */
+[data-bs-theme="dark"] .mobile-navbar {
+    background: linear-gradient(135deg, #1a1d29 0%, #1e2330 25%, #252a3a 50%, #2a3045 75%, #303654 100%);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+[data-bs-theme="dark"] .mobile-nav-btn {
+    color: rgba(248, 249, 250, 0.8);
+}
+
+[data-bs-theme="dark"] .mobile-nav-btn:hover,
+[data-bs-theme="dark"] .mobile-nav-btn:focus {
+    color: #f8f9fa;
+    background: rgba(248, 249, 250, 0.15);
+}
+
+[data-bs-theme="dark"] #mobile-auth-container .btn {
+    color: rgba(248, 249, 250, 0.8) !important;
+}
+
+[data-bs-theme="dark"] #mobile-auth-container .btn:hover {
+    color: #f8f9fa !important;
+    background: rgba(248, 249, 250, 0.1) !important;
+}
+
+/* Focus management per accessibilità */
+#mobile-auth-container:focus {
+    outline: none; /* Il focus è gestito programmaticamente */
+}
+
+/* === THEME TOGGLE MOBILE === */
+#mobile-theme-toggle {
+    border: none;
+    background: none !important;
+}
+
+/* Override completo per rimuovere ogni sfondo */
+#mobile-theme-toggle:hover,
+#mobile-theme-toggle:focus {
+    background: transparent !important;
+}
+
+#mobile-theme-toggle .material-icons {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 38px !important;
+}
+
+#mobile-theme-toggle:hover .material-icons,
+#mobile-theme-toggle:focus .material-icons {
+    transform: rotate(30deg) scale(1.15);
+}
+
+/* Stili specifici per tema */
+[data-bs-theme="dark"] #mobile-theme-toggle .material-icons {
+    color: #ffd43b; /* Giallo solare per light_mode */
+    text-shadow: 0 3px 8px rgba(255, 212, 59, 0.4);
+}
+
+[data-bs-theme="light"] #mobile-theme-toggle .material-icons {
+    color: #64b5f6; /* Blu chiaro per dark_mode (luna) */
+    text-shadow: 0 3px 8px rgba(100, 181, 246, 0.4);
+}
+
+/* === STILI SPECIFICI PER ICONE === */
+
+/* Home icon - effetto speciale */
+.mobile-nav-btn[data-action="home"] .material-icons {
+    font-size: 40px !important;
+    color: rgba(255, 255, 255, 0.95);
+}
+
+.mobile-nav-btn[data-action="home"]:hover .material-icons,
+.mobile-nav-btn[data-action="home"]:focus .material-icons {
+    color: #ffffff;
+    filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.6));
+}
+
+/* Auth wrapper - icona dinamica */
+#mobile-auth-wrapper .material-icons {
+    font-size: 34px !important;
+}
+
+/* Migliora la visualizzazione dell'auth */
+#mobile-auth-container {
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Nascondi il testo dei pulsanti auth su mobile */
+#mobile-auth-container .btn {
+    padding: 0 !important;
+    background: none !important;
+    border: none !important;
+    color: inherit !important;
+    min-height: auto !important;
+    min-width: auto !important;
+    font-size: 0 !important; /* Nasconde il testo */
+}
+
+#mobile-auth-container .btn .material-icons {
+    font-size: 34px !important;
+    margin: 0 !important;
+}
+
+/* === LAYOUT SPECIFICO: TEMA - HOME - AUTH === */
+
+.mobile-navbar-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    height: 72px;
+    position: relative;
+}
+
+/* Home button al centro - più prominente */
+.mobile-nav-center {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    min-width: 90px !important;
+    min-height: 64px !important;
+    border-radius: 24px !important;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+}
+
+.mobile-nav-center .material-icons {
+    font-size: 44px !important;
+    font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 44;
+    color: rgba(255, 255, 255, 0.95) !important;
+    filter: drop-shadow(0 0 16px rgba(255, 255, 255, 0.4));
+}
+
+.mobile-nav-center:hover,
+.mobile-nav-center:focus {
+    background: rgba(255, 255, 255, 0.2) !important;
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: translateX(-50%) translateY(-4px) scale(1.08);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+}
+
+.mobile-nav-center:hover .material-icons,
+.mobile-nav-center:focus .material-icons {
+    filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.7));
+    transform: scale(1.1);
+}
+
+.mobile-nav-center:active {
+    transform: translateX(-50%) translateY(-2px) scale(1.02);
+}
+
+/* Bottoni laterali - più compatti */
+#mobile-theme-toggle,
+#mobile-auth-wrapper {
+    min-width: 70px !important;
+    min-height: 56px !important;
+}
+
+/* === DARK THEME SUPPORT PER HOME CENTRATA === */
+
+[data-bs-theme="dark"] .mobile-nav-center {
+    background: rgba(248, 249, 250, 0.1) !important;
+    border-color: rgba(248, 249, 250, 0.2);
+}
+
+[data-bs-theme="dark"] .mobile-nav-center .material-icons {
+    color: rgba(248, 249, 250, 0.95) !important;
+    filter: drop-shadow(0 0 16px rgba(248, 249, 250, 0.4));
+}
+
+[data-bs-theme="dark"] .mobile-nav-center:hover,
+[data-bs-theme="dark"] .mobile-nav-center:focus {
+    background: rgba(248, 249, 250, 0.2) !important;
+    border-color: rgba(248, 249, 250, 0.4);
+}
+
+[data-bs-theme="dark"] .mobile-nav-center:hover .material-icons,
+[data-bs-theme="dark"] .mobile-nav-center:focus .material-icons {
+    filter: drop-shadow(0 0 20px rgba(248, 249, 250, 0.7));
+}

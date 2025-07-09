@@ -1,0 +1,173 @@
+/* ===================================
+   TABLES MOBILE - CARD LAYOUT
+   =================================== */
+
+/* Layout card-based per tabelle su mobile */
+@media (max-width: 767px) {
+    .table-responsive {
+        overflow: visible !important;
+        background: transparent;
+    }
+    
+    /* Trasforma tabella in layout card */
+    .table,
+    .table thead,
+    .table tbody,
+    .table th,
+    .table td,
+    .table tr {
+        display: block;
+    }
+    
+    /* Nascondi header su mobile */
+    .table thead {
+        display: none;
+    }
+    
+    /* Ogni riga diventa una card - layout più compatto */
+    .table tbody tr {
+        background: var(--card-bg);
+        border-radius: var(--border-radius);
+        margin-bottom: 0.75rem; /* Ridotto da 1rem */
+        padding: 0.875rem; /* Ridotto da 1rem */
+        box-shadow: var(--shadow-sm);
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        position: relative;
+        transition: box-shadow 0.2s ease;
+    }
+    
+    .table tbody tr:hover {
+        box-shadow: var(--shadow-md);
+    }
+    
+    /* Celle mobile con etichette */
+    .table tbody td {
+        border: none;
+        padding: 0.5rem 0;
+        text-align: left !important;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        min-height: 44px; /* Area touch ottimale */
+    }
+    
+    /* Pulsanti azione nelle tabelle mobile - sempre centrati e visibili */
+    .table tbody td:last-child {
+        border-bottom: none;
+        margin-top: 0.5rem;
+        padding-top: 1rem;
+        justify-content: center !important;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        display: flex !important;
+        width: 100% !important;
+        text-align: center !important;
+    }
+    
+    /* Etichette mobile */
+    .table tbody td:before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: var(--primary-color);
+        flex: 0 0 40%;
+        font-size: 0.9rem;
+        margin-right: 1rem;
+    }
+    
+    /* Nessuna etichetta per le azioni */
+    .table tbody td:last-child:before {
+        display: none;
+    }
+    
+    /* Badge status mobile */
+    .badge {
+        font-size: 0.75rem;
+        padding: 0.3rem 0.6rem;
+        border-radius: 12px;
+    }
+    
+    /* Pulsanti azione mobile ottimizzati */
+    .table tbody td:last-child .btn {
+        min-width: 44px;
+        height: 44px;
+        margin: 0.2rem;
+        font-size: 0.9rem;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        touch-action: manipulation;
+        flex-shrink: 0; /* Non si restringono mai */
+    }
+    
+    /* Hover e focus per accessibilità */
+    .table tbody td:last-child .btn:hover,
+    .table tbody td:last-child .btn:focus {
+        transform: scale(1.05);
+        transition: transform 0.1s ease;
+        outline: 2px solid var(--primary-color);
+        outline-offset: 2px;
+    }
+    
+    /* Spazio extra per card diagnosi */
+    #diagnosi-table-body tr {
+        padding-bottom: 1.5rem; /* Più spazio per i pulsanti */
+    }
+    
+    /* Layout specifico per i pulsanti azione nelle diagnosi */
+    #diagnosi-table-body td:last-child {
+        padding: 1rem 0.5rem 0.5rem 0.5rem;
+        background: rgba(0, 0, 0, 0.02);
+        border-radius: 8px;
+        margin-top: 1rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.08);
+        overflow: visible !important;
+        min-height: 70px; /* Altezza minima per contenere i pulsanti */
+    }
+    
+    /* Pulsanti diagnosi ottimizzati per mobile */
+    #diagnosi-table-body td:last-child .btn {
+        min-width: 100px;
+        height: 44px;
+        margin: 0.25rem;
+        font-size: 0.9rem;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        touch-action: manipulation;
+        flex-shrink: 0;
+        font-weight: 500;
+    }
+    
+    /* Testo dei pulsanti visibile solo su mobile */
+    #diagnosi-table-body td:last-child .btn .btn-text {
+        display: inline;
+        font-size: 0.85rem;
+    }
+
+    /* Material icons dimensionati correttamente */
+    .table tbody td:last-child .btn .material-icons {
+        font-size: 1.2em;
+        line-height: 1;
+    }
+}
+
+/* ===================================
+   TABLES DESKTOP - Nascondere testo pulsanti
+   =================================== */
+
+/* Su desktop nascondere il testo dei pulsanti azione */
+@media (min-width: 768px) {
+    #diagnosi-table-body td:last-child .btn .btn-text {
+        display: none;
+    }
+}
+
+/* Dark mode per pulsanti azioni diagnosi */
+[data-theme="dark"] #diagnosi-table-body td:last-child {
+    background: rgba(255, 255, 255, 0.05);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}

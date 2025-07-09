@@ -1,0 +1,43 @@
+/* src/shared/styles/main.css */
+
+/* Importa tutti gli stili in ordine di priorità */
+
+/* 1. Variabili e base */
+@import './modules/variables.css';
+@import './modules/base.css';
+
+/* 2. Layout */
+@import './modules/layout/responsive.css';
+@import './modules/layout/pagination.css';
+
+/* 3. Componenti */
+@import './modules/components/navbar.css';
+@import './modules/components/buttons.css';
+@import './modules/components/cards.css';
+@import './modules/components/forms.css';
+@import './modules/components/tables.css';
+@import './modules/components/modals.css';
+@import './modules/components/menu-cards.css';
+@import './modules/components/custom-select-desktop.css';
+@import './modules/components/custom-select-mobile.css';
+
+/* 4. Mobile */
+@import './modules/mobile/layout-mobile.css';
+@import './modules/mobile/navbar-mobile.css';
+@import './modules/mobile/navigation-mobile.css';
+@import './modules/mobile/buttons-mobile.css';
+@import './modules/mobile/cards-mobile.css';
+@import './modules/mobile/forms-mobile.css';
+@import './modules/mobile/tables-mobile.css';
+@import './modules/mobile/modals-mobile.css';
+@import './modules/mobile/menu-cards-mobile.css';
+@import './modules/mobile/pagination-mobile.css';
+@import './modules/mobile/tab-bar.css';
+@import './modules/mobile/mobile-components.css';
+
+/* 5. Temi */
+@import './modules/themes/dark-mode.css';
+@import './modules/mobile/dark-mode-mobile.css';
+
+/* 6. Stili personalizzati (mantenuto per compatibilità) */
+@import './style.css';

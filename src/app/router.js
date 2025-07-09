@@ -1,18 +1,22 @@
-// src/js/router.js
+// src/app/router.js
+
 import { supabase } from '../core/services/supabaseClient.js';
+import { currentUser } from '../core/auth/authService.js';
+import { ROUTES, USER_ROLES } from './config/constants.js';
+
+// Import delle view (aggiornati con nuovi percorsi)
 import { initInserimentoView } from '../features/patients/views/form.js';
 import { initDimissioneView } from '../features/patients/views/dimissione.js';
 import { initGraficoView } from '../features/charts/views/grafico.js';
 import { initListView } from '../features/patients/views/list.js';
 import { initDiagnosiView } from '../features/diagnoses/views/diagnosi.js';
-import { currentUser } from '../core/auth/authService.js'; // Importa lo stato dell'utente
 
 const viewInitializers = {
-    inserimento: initInserimentoView,
-    dimissione: initDimissioneView,
-    grafico: initGraficoView,
-    list: initListView,
-    diagnosi: initDiagnosiView,
+    [ROUTES.FORM]: initInserimentoView,
+    [ROUTES.DISCHARGE]: initDimissioneView,
+    [ROUTES.CHARTS]: initGraficoView,
+    [ROUTES.LIST]: initListView,
+    [ROUTES.DIAGNOSES]: initDiagnosiView,
 };
 
 const viewCache = new Map();

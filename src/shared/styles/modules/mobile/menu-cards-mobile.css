@@ -1,0 +1,78 @@
+/* ===================================
+   MENU CARDS MOBILE
+   =================================== */
+
+/* Applicato solo su schermi mobile */
+@media (max-width: 767px) {
+    /* Container mobile ottimizzato */
+    .menu-cards-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        padding: 1.5rem 1rem;
+        max-width: 100%;
+        margin: 1rem auto;
+    }
+    
+    .menu-card-container {
+        max-width: 100%;
+        padding: 0 0.5rem;
+    }
+    
+    /* Card mobile compatte */
+    .menu-card {
+        min-height: 180px;
+        max-width: 320px;
+        margin: 0 auto;
+        transform: none; /* Disabilita trasformazioni 3D pesanti */
+        transition: transform 0.2s ease, box-shadow 0.2s ease; /* Animazioni leggere */
+    }
+    
+    .menu-card .card-body {
+        padding: 2rem 1.5rem;
+    }
+    
+    /* Icone mobile ridotte */
+    .icon-wrapper {
+        width: 80px;
+        height: 80px;
+        margin-bottom: 1rem;
+        box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3),
+                    0 2px 6px rgba(13, 110, 253, 0.2),
+                    inset 0 1px 2px rgba(255, 255, 255, 0.3);
+    }
+    
+    .icon-wrapper .material-icons {
+        font-size: 2.5rem !important;
+    }
+    
+    /* Animazioni semplificate per mobile */
+    .menu-card:hover {
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25), 
+                    0 4px 10px rgba(59, 130, 246, 0.15);
+    }
+    
+    .menu-card:hover .icon-wrapper {
+        transform: scale(1.05);
+        box-shadow: 0 6px 16px rgba(13, 110, 253, 0.4),
+                    0 3px 8px rgba(13, 110, 253, 0.25);
+    }
+    
+    /* Disabilita pseudo-elements pesanti su mobile */
+    .menu-card::before,
+    .menu-card::after,
+    .icon-wrapper::before {
+        display: none;
+    }
+    
+    /* Testi mobile ottimizzati */
+    .menu-card .card-title {
+        font-size: 1.2rem;
+        margin-bottom: 0.8rem;
+    }
+    
+    .menu-card .card-text {
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+}

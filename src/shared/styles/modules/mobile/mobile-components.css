@@ -1,0 +1,140 @@
+/* ===================================
+   MOBILE COMPONENTS - Micro-interazioni e Stati
+   =================================== */
+
+@media (max-width: 767px) {
+    /* === MICRO-INTERAZIONI MODERNE === */
+
+    /* Ripple effect al tocco (versione con @keyframes, più robusta) */
+    .card, .btn { /* Applicato anche ai bottoni */
+        position: relative !important;
+        overflow: hidden !important;
+    }
+
+    .card::before, .btn::before {
+        content: '' !important;
+        position: absolute !important;
+        top: 50% !important;
+        left: 50% !important;
+        width: 300px !important;
+        height: 300px !important;
+        border-radius: 50% !important;
+        background: rgba(var(--primary-rgb, 255, 255, 255), 0.3) !important;
+        transform: translate(-50%, -50%) scale(0) !important;
+        opacity: 0; /* Rimosso !important per permettere l'animazione */
+        z-index: 0 !important;
+        pointer-events: none; /* Aggiunto per sicurezza */
+    }
+
+    .card:active::before, .btn:active::before {
+        animation: mobileRipple 0.6s ease-out !important;
+    }
+
+    @keyframes mobileRipple {
+        from {
+            transform: translate(-50%, -50%) scale(0);
+            opacity: 0.3;
+        }
+        to {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 0;
+        }
+    }
+
+    .card-header,
+    .card-body,
+    .btn > * { /* Assicura che il contenuto del bottone sia sopra l'effetto */
+        position: relative !important;
+        z-index: 1 !important;
+    }
+
+    /* === STATI DEI COMPONENTI === */
+
+    /* Loading states */
+    .loading {
+        opacity: 0.7 !important;
+        pointer-events: none !important;
+        position: relative !important;
+    }
+
+    .loading::after {
+        content: '' !important;
+        position: absolute !important;
+        top: 50% !important;
+        left: 50% !important;
+        width: 20px !important;
+        height: 20px !important;
+        border: 2px solid var(--border-color) !important;
+        border-top: 2px solid var(--primary-color) !important;
+        border-radius: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        animation: spin 1s linear infinite !important;
+        z-index: 2 !important;
+    }
+
+    @keyframes spin {
+        0% { transform: translate(-50%, -50%) rotate(0deg); }
+        100% { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    /* === ELEVATION SYSTEM MOBILE === */
+    
+    /* Riduci le elevation su mobile per performance */
+    .elevation-1 {
+        box-shadow: var(--shadow-sm) !important;
+    }
+    
+    .elevation-2 {
+        box-shadow: var(--shadow-sm) !important;
+    }
+    
+    .elevation-3 {
+        box-shadow: var(--shadow-md) !important;
+    }
+    
+    .elevation-4 {
+        box-shadow: var(--shadow-md) !important;
+    }
+    
+    .elevation-5 {
+        box-shadow: var(--shadow-lg) !important;
+    }
+
+    /* === ACCESSIBILITÀ E PERFORMANCE === */
+
+    /* Touch areas ottimizzate */
+    .card, .btn {
+        touch-action: manipulation;
+    }
+
+    /* Focus migliorato per navigation via tastiera */
+    .card:focus, .btn:focus {
+        outline: 2px solid var(--primary-color) !important;
+        outline-offset: 2px !important;
+    }
+
+    /* Migliora la leggibilità su mobile */
+    body {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Disabilita backdrop-filter su mobile per performance */
+    .card, .modal-content {
+        backdrop-filter: none !important;
+    }
+
+    /* Hardware acceleration per smooth scrolling */
+    .card, .btn {
+        will-change: transform;
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
+    }
+
+    /* Riduci animazioni complesse su mobile */
+    @media (prefers-reduced-motion: reduce) {
+        .card, .btn {
+            transition: none !important;
+        }
+    }
+}

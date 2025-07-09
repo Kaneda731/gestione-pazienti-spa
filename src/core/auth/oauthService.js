@@ -53,16 +53,6 @@ export class OAuthManager {
         try {
             console.log('Gestisco callback OAuth...');
             
-            // Verifica che siamo ancora su localhost
-            const currentUrl = window.location.origin;
-            if (!currentUrl.includes('localhost')) {
-                console.warn('Non siamo più su localhost, redirect necessario');
-                // Redirect a localhost mantenendo i parametri OAuth
-                const localhostUrl = 'http://localhost:5174' + window.location.pathname + window.location.search + window.location.hash;
-                window.location.href = localhostUrl;
-                return;
-            }
-            
             // Supabase gestisce automaticamente il callback OAuth
             // Dobbiamo solo aspettare che il processo sia completato
             const { data, error } = await supabase.auth.getSession();
@@ -77,7 +67,7 @@ export class OAuthManager {
                 console.log('Sessione OAuth recuperata con successo');
                 this.authState = 'authenticated';
                 
-                // Pulisci l'URL dai parametri OAuth mantenendo localhost
+                // Pulisci l'URL dai parametri OAuth
                 this.cleanupOAuthUrl();
                 
                 // Redirect alla home o alla pagina salvata
@@ -115,17 +105,12 @@ export class OAuthManager {
         if (window.location.hash.includes('access_token') || 
             window.location.search.includes('code')) {
             
-            // Conserva l'URL di base per mantenere localhost
-            const baseUrl = window.location.origin;
-            const newUrl = new URL(baseUrl);
-            
-            // Mantieni solo la parte di path se presente
-            newUrl.pathname = window.location.pathname;
-            
-            // Reimposta l'URL senza i parametri OAuth ma mantenendo la base
-            window.history.replaceState({}, document.title, newUrl.toString());
-            
-            console.log('URL pulito da parametri OAuth, mantenendo:', newUrl.toString());
+            // Pulisce l'URL dai parametri di OAuth, mantenendo solo l'hash pulito se esiste.
+            const cleanHash = window.location.hash.split('&')[0];
+            const newUrl = window.location.pathname + (cleanHash && cleanHash !== '#' ? cleanHash : '');
+
+            window.history.replaceState({}, document.title, newUrl);
+            console.log('URL pulito da parametri OAuth, nuovo URL:', newUrl);
         }
     }
 
@@ -150,15 +135,9 @@ export class OAuthManager {
             
             this.authState = 'authenticating';
             
-            // Assicurati che il redirect URL sia sempre localhost:5174
-            const localhostUrl = 'http://localhost:5174';
-            let redirectTo = import.meta.env.VITE_REDIRECT_URL || localhostUrl;
-            
-            // Verifica che il redirect URL sia corretto
-            if (!redirectTo.includes('localhost:5174')) {
-                console.warn('Redirect URL non è localhost:5174, correggo...');
-                redirectTo = localhostUrl;
-            }
+            // Usa l'URL di base corrente per il reindirizzamento.
+            // Funziona sia in locale (http://localhost:5173) che in produzione.
+            const redirectTo = window.location.origin;
             
             console.log('Iniziando login OAuth con redirect:', redirectTo);
             
@@ -166,11 +145,11 @@ export class OAuthManager {
                 provider: 'google',
                 options: {
                     redirectTo,
-                    // Forziamo un nuovo consent per evitare problemi di cache
-                    queryParams: {
+                    // In sviluppo, potremmo forzare un nuovo consent per debug
+                    queryParams: import.meta.env.DEV ? {
                         access_type: 'offline',
                         prompt: 'consent',
-                    }
+                    } : {}
                 }
             });
             

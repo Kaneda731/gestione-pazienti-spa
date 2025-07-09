@@ -63,36 +63,52 @@ export async function signOut() {
 // INIZIALIZZAZIONE
 // ===================================
 
-export function initAuth(onAuthStateChange) {
+export async function initAuth(onAuthStateChange) {
     // Inizializza l'OAuth manager
     oauthManager.init();
+
+    // Recupera la sessione corrente all'avvio per garantire che la UI sia aggiornata subito
+    const { data: { session } } = await supabase.auth.getSession();
+    console.log('Sessione iniziale recuperata:', session);
+
+    if (session?.user) {
+        const profile = await fetchUserProfile(session.user);
+        currentUser.session = session;
+        currentUser.profile = profile || { role: 'editor' };
+    } else {
+        currentUser.session = null;
+        currentUser.profile = null;
+    }
+    updateAuthUI(session);
+    if (onAuthStateChange) {
+        onAuthStateChange(session);
+    }
     
+    // Ora imposta il listener per i cambiamenti futuri
     supabase.auth.onAuthStateChange(async (event, session) => {
-        console.log('Auth event:', event, 'Session:', session); // <-- LOG DI DEBUG
+        console.log('Auth event:', event, 'Session:', session);
         
-        // Gestisce specificamente i problemi OAuth
         if (event === 'SIGNED_OUT' && oauthManager.getAuthState().state === 'error') {
             console.log('Logout dopo errore OAuth, pulisco stato...');
             oauthManager.clearCorruptedState();
         }
 
-        if (session?.user) {
-            // Utente loggato: recupera il profilo
-            const profile = await fetchUserProfile(session.user);
-            currentUser.session = session;
-            currentUser.profile = profile || { role: 'editor' }; // Fallback a 'editor'
-        } else {
-            // Utente non loggato
-            currentUser.session = null;
-            currentUser.profile = null;
-        }
-        
-        // Aggiorna sempre la UI
-        updateAuthUI(session);
+        // Aggiorna lo stato solo se è cambiato rispetto a quello attuale
+        if (session?.access_token !== currentUser.session?.access_token) {
+            if (session?.user) {
+                const profile = await fetchUserProfile(session.user);
+                currentUser.session = session;
+                currentUser.profile = profile || { role: 'editor' };
+            } else {
+                currentUser.session = null;
+                currentUser.profile = null;
+            }
+            
+            updateAuthUI(session);
 
-        // Chiama il callback per notificare il resto dell'app
-        if (onAuthStateChange) {
-            onAuthStateChange(session);
+            if (onAuthStateChange) {
+                onAuthStateChange(session);
+            }
         }
     });
     

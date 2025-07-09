@@ -68,7 +68,7 @@ async function initializeApp() {
         });
 
         // Gestisce l'autenticazione e il rendering iniziale
-        initAuth(session => {
+        await initAuth(session => {
             console.log('🔐 Callback autenticazione chiamato:', { session: !!session });
             const redirectUrl = sessionStorage.getItem(STORAGE_KEYS.REDIRECT_URL);
             sessionStorage.removeItem(STORAGE_KEYS.REDIRECT_URL);

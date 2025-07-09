@@ -31,6 +31,7 @@ import '../shared/components/forms/CustomSelect.js';
 // Mobile support
 import '../features/patients/components/mobile-card-manager.js';
 import { initMobileUI } from './mobile/mobile-navigation.js';
+import { initializeAuthEventListeners } from '../shared/components/ui/AuthUI.js';
 
 // Router
 import { renderView } from './router.js';
@@ -60,6 +61,7 @@ async function initializeApp() {
         initTheme();
         initBackToMenuButtons();
         initMobileUI();
+        initializeAuthEventListeners();
         
         // Gestisce la navigazione
         window.addEventListener('hashchange', () => {
@@ -93,15 +95,17 @@ async function initializeApp() {
         }
         
     } catch (error) {
-        console.error('❌ Errore FATALE durante l\'inizializzazione dell\'applicazione:', error);
+        console.error('❌ Errore durante l\'inizializzazione dell\'applicazione:', error);
         
-        // Mostra un messaggio di errore fallback che sia visibile all\'utente
+        // Mostra un messaggio di errore fallback
         document.body.innerHTML = `
-            <div style="padding: 20px; font-family: sans-serif; background-color: #fff0f0; border: 1px solid #ffbaba; color: #d8000c;">
-                <h1 style="color: #d8000c;">Errore critico dell\'applicazione</h1>
-                <p>L\'applicazione non è riuscita a caricarsi. Per favore, fai uno screenshot di questo messaggio.</p>
-                <hr>
-                <pre style="white-space: pre-wrap; word-wrap: break-word; background: #f5f5f5; padding: 10px; border-radius: 5px;"><strong>Dettagli dell\'errore:</strong>\n${error.stack || error.message}</pre>
+            <div class="container mt-5">
+                <div class="alert alert-danger" role="alert">
+                    <h4 class="alert-heading">Errore di inizializzazione</h4>
+                    <p>Si è verificato un errore durante l'avvio dell'applicazione.</p>
+                    <hr>
+                    <p class="mb-0">Ricarica la pagina per riprovare.</p>
+                </div>
             </div>
         `;
     }

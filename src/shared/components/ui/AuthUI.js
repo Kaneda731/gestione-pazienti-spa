@@ -117,9 +117,10 @@ function hideLoginModal() {
     }
 }
 
-// Inizializza i listener quando il DOM è pronto
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initAuthEventListeners);
-} else {
+// Inizializza i listener una sola volta
+export function initializeAuthEventListeners() {
+    if (window.authUIListenersInitialized) return;
+    
     initAuthEventListeners();
+    window.authUIListenersInitialized = true;
 }

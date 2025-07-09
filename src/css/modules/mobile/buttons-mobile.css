@@ -154,10 +154,12 @@
 }
 
 #filter-actions-container .btn {
-    flex-basis: 48%;
+    /* Pulsanti azione filtri devono avere dimensioni identiche */
+    flex: 0 0 48%;
+    width: 48%;
+    min-width: unset !important; /* Override min-width desktop */
     text-align: center;
-    
-    /* Reset FORZATO per garantire dimensioni identiche */
+
     padding: 0.5rem 1rem !important;
     font-size: 0.9rem !important;
     line-height: 1.5 !important;

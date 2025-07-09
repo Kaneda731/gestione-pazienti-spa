@@ -6,13 +6,56 @@ import { fetchPazienti, exportPazientiToCSV, updatePazienteStatus, deletePazient
 import { renderPazienti, showLoading, showError, updateSortIndicators } from './list-renderer.js';
 import { initCustomSelects } from '../../../shared/components/forms/CustomSelect.js';
 import { showDeleteConfirmModal } from '../../../shared/services/modalService.js';
+import { supabase } from '../../../core/services/supabaseClient.js';
 
 async function fetchAndRender() {
+    console.log('🔄 Iniziando fetchAndRender...');
+    
+    // Debug: mostra i filtri correnti
+    const currentFilters = getCurrentFilters();
+    console.log('🔍 Filtri correnti:', currentFilters);
+    
     showLoading();
     try {
+        console.log('📡 Chiamando fetchPazienti...');
         const { data, count } = await fetchPazienti();
+        console.log('✅ Dati ricevuti:', { dataLength: data?.length, count });
+        
+        // Se non ci sono risultati, proviamo a verificare se esistono pazienti senza filtri
+        if (count === 0) {
+            console.log('🔍 Nessun risultato con i filtri attuali, verificando se ci sono pazienti nel database...');
+            const { count: totalCount } = await supabase.from('pazienti').select('*', { count: 'exact', head: true });
+            console.log('🔍 Pazienti totali nel database:', totalCount);
+            
+            if (totalCount > 0) {
+                console.log('⚠️ Ci sono pazienti ma i filtri li nascondono. Suggerimento: resetta i filtri.');
+                console.log('🔍 Filtri che stanno bloccando:', currentFilters);
+                
+                // Mostra un messaggio specifico nella tabella
+                if (domElements.tableBody) {
+                    domElements.tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="7" class="text-center text-warning">
+                                <div class="py-4">
+                                    <h5>Nessun risultato con i filtri attuali</h5>
+                                    <p>Ci sono ${totalCount} pazienti nel database, ma i filtri li nascondono.</p>
+                                    <button class="btn btn-primary" onclick="window.resetFiltersAndRefresh()">
+                                        <span class="material-icons me-1">refresh</span>
+                                        Resetta filtri e ricarica
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }
+            }
+        }
+        
+        console.log('🎨 Chiamando renderPazienti...');
         renderPazienti(data, count);
+        console.log('✅ Rendering completato');
     } catch (error) {
+        console.error('❌ Errore in fetchAndRender:', error);
         showError(error);
     }
 }
@@ -150,23 +193,53 @@ async function handlePatientAction(action, id) {
 }
 
 import { currentUser } from '../../../core/auth/authService.js'; // Importa lo stato utente
+import { getCurrentFilters } from './list-state-migrated.js'; // Importa getCurrentFilters
+
+// Funzione globale per resettare i filtri
+window.resetFiltersAndRefresh = function() {
+    console.log('🔄 Resettando filtri e ricaricando...');
+    resetFilters();
+    fetchAndRender();
+};
 
 // ... (altro codice del file) ...
 
 export async function initListView(urlParams) {
+    console.log('🏗️ Inizializzazione vista lista pazienti...', { urlParams });
+    
     // CONTROLLO DI SICUREZZA: Se l'utente non è loggato, non fare nulla.
     // La vista 'login-required' verrà mostrata dal router.
     if (!currentUser.session) {
-        console.log("Accesso a #list bloccato: utente non autenticato.");
+        console.log("❌ Accesso a #list bloccato: utente non autenticato.");
         return;
     }
 
+    console.log('✅ Utente autenticato, continuando con l\'inizializzazione...');
     const viewContainer = document.querySelector('#app-container .view');
     if (!viewContainer) {
-        console.error('View container non trovato');
+        console.error('❌ View container non trovato');
         return;
     }
 
+    console.log('✅ View container trovato:', viewContainer);
+    
+    // Controlla se gli elementi essenziali sono presenti nel DOM
+    const tableBody = document.getElementById('pazienti-table-body');
+    const cardsContainer = document.getElementById('pazienti-cards-container');
+    
+    console.log('🔍 Controllo elementi essenziali:', {
+        tableBody: !!tableBody,
+        cardsContainer: !!cardsContainer,
+        tableBodyId: tableBody?.id,
+        cardsContainerId: cardsContainer?.id
+    });
+    
+    if (!tableBody || !cardsContainer) {
+        console.error('❌ Elementi essenziali mancanti nel DOM');
+        return;
+    }
+
+    console.log('✅ Elementi essenziali trovati, inizializzando...');
     try {
         // Aspetta che gli elementi DOM critici siano disponibili
         await waitForDOMElements();
@@ -195,6 +268,7 @@ export async function initListView(urlParams) {
         
         // 7. Esegui il fetch e il render iniziali (solo se gli elementi sono disponibili)
         if (domElements.tableBody && domElements.cardsContainer) {
+            console.log('🚀 Avviando fetchAndRender...');
             fetchAndRender();
         } else {
             console.error('Impossibile inizializzare la vista lista: elementi DOM mancanti');

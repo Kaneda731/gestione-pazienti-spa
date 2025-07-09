@@ -77,13 +77,14 @@ function updateUIVisibility() {
 }
 
 export async function renderView() {
-    // Controlla se siamo su localhost, se no redirecta
-    const currentUrl = window.location.origin;
-    if (!currentUrl.includes('localhost:5174') && currentUrl.includes('localhost')) {
-        console.log('Redirect da', currentUrl, 'a localhost:5174');
-        window.location.href = 'http://localhost:5174' + window.location.pathname + window.location.search + window.location.hash;
-        return;
-    }
+    console.log('🚀 RenderView chiamato:', { 
+        location: window.location.href,
+        hash: window.location.hash,
+        origin: window.location.origin,
+        userSession: !!currentUser.session,
+        userRole: currentUser.profile?.role,
+        userProfile: currentUser.profile
+    });
     
     // Se l'hash contiene i token di autenticazione, è un redirect da Supabase.
     // Il listener onAuthStateChange è la fonte di verità per gestire questo.
@@ -110,6 +111,13 @@ export async function renderView() {
     const hash = window.location.hash.substring(1) || 'home';
     const [requestedViewName, queryString] = hash.split('?');
     const urlParams = new URLSearchParams(queryString);
+
+    console.log('🎯 Navigazione richiesta:', { 
+        hash, 
+        requestedViewName, 
+        queryString, 
+        urlParams: Object.fromEntries(urlParams) 
+    });
 
     // Definisci qui i permessi per coerenza con updateUIVisibility
     const viewPermissions = {
@@ -173,6 +181,7 @@ export async function renderView() {
         document.querySelectorAll('.menu-card').forEach(card => {
             card.addEventListener('click', () => {
                 const view = card.dataset.view;
+                console.log('🎯 Click su menu card:', view);
                 if (view === 'inserimento') {
                     sessionStorage.removeItem('editPazienteId');
                 }

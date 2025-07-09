@@ -6,36 +6,74 @@ import { convertToCSV } from '../../../shared/utils/index.js';
 const ITEMS_PER_PAGE = 10;
 
 function buildBaseQuery() {
+    console.log('🔍 Costruendo query base...');
+    
     let query = supabase.from('pazienti').select('*', { count: 'exact' });
+    console.log('🔍 Query iniziale creata per tabella "pazienti"');
 
     if (domElements.searchInput) {
         const searchTerm = domElements.searchInput.value.trim();
-        if (searchTerm) query = query.or(`nome.ilike.%${searchTerm}%,cognome.ilike.%${searchTerm}%`);
-    }
-    if (domElements.repartoFilter && domElements.repartoFilter.value) {
-        query = query.eq('reparto_appartenenza', domElements.repartoFilter.value);
-    }
-    if (domElements.diagnosiFilter && domElements.diagnosiFilter.value) {
-        query = query.eq('diagnosi', domElements.diagnosiFilter.value);
-    }
-    if (domElements.statoFilter) {
-        if (domElements.statoFilter.value === 'attivo') query = query.is('data_dimissione', null);
-        else if (domElements.statoFilter.value === 'dimesso') query = query.not('data_dimissione', 'is', null);
+        if (searchTerm) {
+            console.log('🔍 Applicando filtro ricerca:', searchTerm);
+            query = query.or(`nome.ilike.%${searchTerm}%,cognome.ilike.%${searchTerm}%`);
+        }
     }
     
+    if (domElements.repartoFilter && domElements.repartoFilter.value) {
+        console.log('🔍 Applicando filtro reparto:', domElements.repartoFilter.value);
+        query = query.eq('reparto_appartenenza', domElements.repartoFilter.value);
+    }
+    
+    if (domElements.diagnosiFilter && domElements.diagnosiFilter.value) {
+        console.log('🔍 Applicando filtro diagnosi:', domElements.diagnosiFilter.value);
+        query = query.eq('diagnosi', domElements.diagnosiFilter.value);
+    }
+    
+    if (domElements.statoFilter) {
+        if (domElements.statoFilter.value === 'attivo') {
+            console.log('🔍 Applicando filtro stato: attivo');
+            query = query.is('data_dimissione', null);
+        } else if (domElements.statoFilter.value === 'dimesso') {
+            console.log('🔍 Applicando filtro stato: dimesso');
+            query = query.not('data_dimissione', 'is', null);
+        }
+    }
+    
+    console.log('✅ Query base costruita con successo');
     return query;
 }
 
 export async function fetchPazienti() {
+    console.log('📊 Iniziando fetchPazienti...');
+    console.log('📊 Stato corrente:', { 
+        currentPage: state.currentPage, 
+        sortColumn: state.sortColumn, 
+        sortDirection: state.sortDirection 
+    });
+    
     let query = buildBaseQuery();
+    console.log('📊 Query base costruita');
 
     const startIndex = state.currentPage * ITEMS_PER_PAGE;
     const endIndex = startIndex + ITEMS_PER_PAGE - 1;
+    console.log('📊 Range paginazione:', { startIndex, endIndex });
+    
     query = query.order(state.sortColumn, { ascending: state.sortDirection === 'asc' }).range(startIndex, endIndex);
+    console.log('📊 Query finale preparata, eseguendo...');
 
     const { data, error, count } = await query;
-    if (error) throw error;
+    console.log('📊 Risposta Supabase:', { 
+        dataLength: data?.length, 
+        count, 
+        hasError: !!error 
+    });
     
+    if (error) {
+        console.error('❌ Errore Supabase:', error);
+        throw error;
+    }
+    
+    console.log('✅ fetchPazienti completato con successo');
     return { data, count };
 }
 

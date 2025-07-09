@@ -25,7 +25,7 @@ export function initListState() {
  * Caching degli elementi DOM della vista lista
  */
 export function cacheDOMElements(viewContainer) {
-    console.log('Caching DOM elements...', { viewContainer });
+    console.log('🗂️ Caching DOM elements...', { viewContainer });
     
     domElements.repartoFilter = document.getElementById('list-filter-reparto');
     domElements.diagnosiFilter = document.getElementById('list-filter-diagnosi');
@@ -42,14 +42,32 @@ export function cacheDOMElements(viewContainer) {
     domElements.backButton = viewContainer.querySelector('button[data-view="home"]');
     domElements.exportButton = document.getElementById('export-csv-btn');
     
-    // Debug: verifica se gli elementi esistono
-    console.log('DOM elements cached:', {
-        tableBody: domElements.tableBody,
-        cardsContainer: domElements.cardsContainer,
-        repartoFilter: domElements.repartoFilter,
-        diagnosiFilter: domElements.diagnosiFilter,
-        statoFilter: domElements.statoFilter
+    // Debug: verifica se gli elementi critici esistono
+    console.log('🗂️ DOM elements cached:', {
+        tableBody: !!domElements.tableBody,
+        cardsContainer: !!domElements.cardsContainer,
+        repartoFilter: !!domElements.repartoFilter,
+        diagnosiFilter: !!domElements.diagnosiFilter,
+        statoFilter: !!domElements.statoFilter,
+        searchInput: !!domElements.searchInput,
+        resetButton: !!domElements.resetButton,
+        filterContainer: !!domElements.filterContainer,
+        tableHeaders: domElements.tableHeaders?.length || 0,
+        prevButton: !!domElements.prevButton,
+        nextButton: !!domElements.nextButton,
+        pageInfo: !!domElements.pageInfo,
+        backButton: !!domElements.backButton,
+        exportButton: !!domElements.exportButton
     });
+    
+    if (!domElements.tableBody || !domElements.cardsContainer) {
+        console.error('❌ Elementi DOM critici mancanti:', {
+            tableBody: !!domElements.tableBody,
+            cardsContainer: !!domElements.cardsContainer
+        });
+    } else {
+        console.log('✅ Elementi DOM critici trovati');
+    }
     
     // Validazione elementi critici
     const criticalElements = ['tableBody', 'cardsContainer', 'repartoFilter', 'diagnosiFilter', 'statoFilter'];

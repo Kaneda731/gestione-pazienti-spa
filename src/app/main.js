@@ -69,17 +69,24 @@ async function initializeApp() {
 
         // Gestisce l'autenticazione e il rendering iniziale
         initAuth(session => {
+            console.log('🔐 Callback autenticazione chiamato:', { session: !!session });
             const redirectUrl = sessionStorage.getItem(STORAGE_KEYS.REDIRECT_URL);
             sessionStorage.removeItem(STORAGE_KEYS.REDIRECT_URL);
 
             if (session && redirectUrl) {
+                console.log('🔀 Reindirizzamento a:', redirectUrl);
                 window.location.hash = redirectUrl;
             } else {
+                console.log('🏠 Chiamando renderView per homepage');
                 renderView();
             }
         });
 
         console.log('✅ Applicazione inizializzata con successo');
+        
+        // Esegui il render iniziale per sicurezza
+        console.log('🎬 Eseguendo render iniziale...');
+        renderView();
         
         if (window.appLogger) {
             window.appLogger.info(`${environment.APP_NAME} inizializzata con middleware Vite-Supabase.`);

@@ -1,5 +1,5 @@
-// src/js/views/list-renderer.js
-import { domElements, state } from './list-state.js';
+// src/features/patients/views/list-renderer.js
+import { domElements, state } from './list-state-migrated.js';
 import { currentUser } from '../../../core/auth/authService.js';
 
 const ITEMS_PER_PAGE = 10;
@@ -21,11 +21,24 @@ export function updateSortIndicators() {
 }
 
 export function renderPazienti(data, count) {
+    console.log('🎨 Iniziando renderPazienti...', { dataLength: data?.length, count });
+    
+    console.log('🎨 Chiamando renderTable...');
     renderTable(data);
+    
+    console.log('🎨 Chiamando renderCards...');
     renderCards(data);
+    
+    console.log('🎨 Aggiornando controlli paginazione...');
     updatePaginationControls(count);
+    
+    console.log('🎨 Aggiornando indicatori ordinamento...');
     updateSortIndicators();
+    
+    console.log('🎨 Assicurando vista corretta...');
     ensureCorrectView();
+    
+    console.log('✅ renderPazienti completato');
 }
 
 export function showLoading() {
@@ -50,57 +63,86 @@ export function showError(error) {
 }
 
 function ensureCorrectView() {
+    console.log('📱 Assicurando vista corretta...');
     const tableContainer = document.querySelector('.table-responsive');
     const cardsContainer = document.getElementById('pazienti-cards-container');
     
+    console.log('📱 Elementi trovati:', {
+        tableContainer: !!tableContainer,
+        cardsContainer: !!cardsContainer,
+        windowWidth: window.innerWidth,
+        shouldShowCards: window.innerWidth < 768 // Mostrar card solo su mobile
+    });
+    
     if (tableContainer && cardsContainer) {
-        if (window.innerWidth < 1500) {
+        if (window.innerWidth < 768) { // Solo mobile
+            console.log('📱 Modalità mobile: nascondendo tabella, mostrando cards');
             tableContainer.style.display = 'none';
             cardsContainer.style.display = 'block';
         } else {
+            console.log('� Modalità desktop/tablet: mostrando tabella, nascondendo cards');
             tableContainer.style.display = 'block';
             cardsContainer.style.display = 'none';
         }
+        
+        console.log('📱 Stili applicati:', {
+            tableDisplay: tableContainer.style.display,
+            cardsDisplay: cardsContainer.style.display,
+            tableClasses: tableContainer.className,
+            cardsClasses: cardsContainer.className
+        });
+    } else {
+        console.error('❌ Impossibile assicurare vista corretta: elementi mancanti');
     }
     
     document.body.style.overflowX = 'hidden';
     document.body.style.maxWidth = '100vw';
+    console.log('✅ Vista corretta assicurata');
 }
 
 function renderTable(pazientiToRender) {
+    console.log('📋 Iniziando renderTable con', pazientiToRender?.length, 'pazienti');
+    
     let tableBody = document.getElementById('pazienti-table-body');
     
     if (!tableBody) {
-        console.error('Element pazienti-table-body non trovato nel DOM');
-        console.log('Contenuto attuale del DOM:', {
-            appContainer: document.querySelector('#app-container'),
-            viewContainer: document.querySelector('#app-container .view'),
+        console.error('❌ Element pazienti-table-body non trovato nel DOM');
+        console.log('🔍 Contenuto attuale del DOM:', {
+            appContainer: !!document.querySelector('#app-container'),
+            viewContainer: !!document.querySelector('#app-container .view'),
             allTablesInDOM: document.querySelectorAll('table').length,
-            allTbodyInDOM: document.querySelectorAll('tbody').length
+            allTbodyInDOM: document.querySelectorAll('tbody').length,
+            listHtml: document.querySelector('#app-container .view')?.innerHTML?.substring(0, 500) + '...'
         });
         
         // Prova a cercare di nuovo dopo un breve delay
         setTimeout(() => {
             tableBody = document.getElementById('pazienti-table-body');
             if (tableBody) {
-                console.log('Elemento trovato al secondo tentativo');
+                console.log('✅ Elemento trovato al secondo tentativo');
                 renderTableContent(tableBody, pazientiToRender);
             } else {
-                console.error('Elemento ancora non trovato al secondo tentativo');
+                console.error('❌ Elemento ancora non trovato al secondo tentativo');
             }
         }, 200);
         return;
     }
     
+    console.log('✅ Elemento pazienti-table-body trovato, renderizzando contenuto...');
     renderTableContent(tableBody, pazientiToRender);
 }
 
 function renderTableContent(tableBody, pazientiToRender) {
+    console.log('📋 Renderizzando contenuto tabella per', pazientiToRender?.length, 'pazienti');
+    
     tableBody.innerHTML = '';
     if (pazientiToRender.length === 0) {
+        console.log('ℹ️ Nessun paziente da visualizzare');
         tableBody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">Nessun paziente trovato.</td></tr>';
         return;
     }
+    
+    console.log('🔄 Generando HTML per le righe...');
     const rowsHtml = pazientiToRender.map(p => {
         const isDimesso = p.data_dimissione;
         const statusBadge = isDimesso
@@ -138,23 +180,32 @@ function renderTableContent(tableBody, pazientiToRender) {
             </tr>
         `;
     }).join('');
+    
+    console.log('✅ HTML generato, impostando innerHTML...');
     tableBody.innerHTML = rowsHtml;
+    console.log('✅ Contenuto tabella renderizzato con successo');
 }
 
 function renderCards(pazientiToRender) {
+    console.log('📱 Iniziando renderCards con', pazientiToRender?.length, 'pazienti');
+    
     const cardsContainer = document.getElementById('pazienti-cards-container');
     if (!cardsContainer) {
-        console.error('Element pazienti-cards-container non trovato nel DOM');
+        console.error('❌ Element pazienti-cards-container non trovato nel DOM');
         return;
     }
     
+    console.log('✅ Elemento pazienti-cards-container trovato');
     cardsContainer.innerHTML = '';
     if (pazientiToRender.length === 0) {
+        console.log('ℹ️ Nessun paziente da visualizzare nelle card');
         cardsContainer.innerHTML = '<div class="text-center text-muted p-4">Nessun paziente trovato.</div>';
         return;
     }
     
     const isMobile = window.innerWidth <= 767;
+    console.log('📱 Modalità mobile:', isMobile);
+    
     
     // Logica per i permessi
     const userRole = currentUser.profile?.role;
@@ -203,6 +254,7 @@ function renderCards(pazientiToRender) {
             `;
         }).join('');
         
+        console.log('📱 Generando HTML per', pazientiToRender.length, 'card (modalità mobile)');
         cardsContainer.innerHTML = cardsHtml;
         
         if (window.MobileCardManager) {
@@ -210,64 +262,76 @@ function renderCards(pazientiToRender) {
         }
         
     } else {
+        // Card per desktop/tablet - versione migliorata con tutti i dati
         const cardsHtml = pazientiToRender.map(p => {
             const isDimesso = p.data_dimissione;
             const statusClass = isDimesso ? 'dimesso' : 'attivo';
-            const statusText = isDimesso ? 'Dimesso' : 'Attivo';
+            const statusBadge = isDimesso
+                ? `<span class="badge bg-secondary">Dimesso</span>`
+                : `<span class="badge bg-success">Attivo</span>`;
             
             let actionButtons = '';
             if (canEdit) {
                 const dimissioneButton = isDimesso
-                    ? `<button class="btn btn-outline-success" data-action="riattiva" data-id="${p.id}" title="Riattiva Paziente">
+                    ? `<button class="btn btn-sm btn-outline-success" data-action="riattiva" data-id="${p.id}" title="Riattiva Paziente">
                          <span class="material-icons me-1" style="font-size: 1em;">undo</span>Riattiva
                        </button>`
-                    : `<button class="btn btn-outline-warning" data-action="dimetti" data-id="${p.id}" title="Dimetti Paziente">
+                    : `<button class="btn btn-sm btn-outline-warning" data-action="dimetti" data-id="${p.id}" title="Dimetti Paziente">
                          <span class="material-icons me-1" style="font-size: 1em;">event_available</span>Dimetti
                        </button>`;
 
                 actionButtons = `
-                    <button class="btn btn-outline-primary" data-action="edit" data-id="${p.id}">
+                    <button class="btn btn-sm btn-outline-primary me-1" data-action="edit" data-id="${p.id}" title="Modifica">
                         <span class="material-icons me-1" style="font-size: 1em;">edit</span>Modifica
                     </button>
                     ${dimissioneButton}
-                    <button class="btn btn-outline-danger" data-action="delete" data-id="${p.id}">
+                    <button class="btn btn-sm btn-outline-danger ms-1" data-action="delete" data-id="${p.id}" title="Elimina">
                         <span class="material-icons me-1" style="font-size: 1em;">delete</span>Elimina
                     </button>
                 `;
             }
 
             return `
-                <div class="patient-card">
-                    <div class="patient-card-header">
-                        <h6 class="patient-name">${p.cognome} ${p.nome}</h6>
-                        <span class="patient-status ${statusClass}">${statusText}</span>
-                    </div>
-                    <div class="patient-details">
-                        <div class="patient-detail">
-                            <span class="patient-detail-label">Data Ricovero</span>
-                            <span class="patient-detail-value">${new Date(p.data_ricovero).toLocaleDateString()}</span>
+                <div class="card mb-3 patient-card-desktop">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h5 class="card-title mb-2">${p.cognome} ${p.nome}</h5>
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <p class="card-text mb-1">
+                                            <strong>Data Ricovero:</strong> ${new Date(p.data_ricovero).toLocaleDateString()}
+                                        </p>
+                                        <p class="card-text mb-1">
+                                            <strong>Diagnosi:</strong> ${p.diagnosi}
+                                        </p>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <p class="card-text mb-1">
+                                            <strong>Reparto:</strong> ${p.reparto_appartenenza}
+                                        </p>
+                                        <p class="card-text mb-1">
+                                            <strong>Stato:</strong> ${statusBadge}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 d-flex align-items-center justify-content-end">
+                                <div class="patient-actions">
+                                    ${actionButtons}
+                                </div>
+                            </div>
                         </div>
-                        <div class="patient-detail">
-                            <span class="patient-detail-label">Diagnosi</span>
-                            <span class="patient-detail-value">${p.diagnosi}</span>
-                        </div>
-                        <div class="patient-detail">
-                            <span class="patient-detail-label">Reparto</span>
-                            <span class="patient-detail-value">${p.reparto_appartenenza}</span>
-                        </div>
-                        <div class="patient-detail">
-                            <span class="patient-detail-label">Livello</span>
-                            <span class="patient-detail-value">${p.livello_assistenza}</span>
-                        </div>
-                    </div>
-                    <div class="patient-actions">
-                        ${actionButtons}
                     </div>
                 </div>
             `;
         }).join('');
+        
+        console.log('📱 Generando HTML per', pazientiToRender.length, 'card (modalità desktop migliorata)');
         cardsContainer.innerHTML = cardsHtml;
     }
+    
+    console.log('✅ renderCards completato con successo');
 }
 
 function updatePaginationControls(totalItems) {

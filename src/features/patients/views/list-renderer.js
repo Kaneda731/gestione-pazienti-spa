@@ -21,24 +21,11 @@ export function updateSortIndicators() {
 }
 
 export function renderPazienti(data, count) {
-    console.log('🎨 Iniziando renderPazienti...', { dataLength: data?.length, count });
-    
-    console.log('🎨 Chiamando renderTable...');
     renderTable(data);
-    
-    console.log('🎨 Chiamando renderCards...');
     renderCards(data);
-    
-    console.log('🎨 Aggiornando controlli paginazione...');
     updatePaginationControls(count);
-    
-    console.log('🎨 Aggiornando indicatori ordinamento...');
     updateSortIndicators();
-    
-    console.log('🎨 Assicurando vista corretta...');
     ensureCorrectView();
-    
-    console.log('✅ renderPazienti completato');
 }
 
 export function showLoading() {
@@ -63,105 +50,45 @@ export function showError(error) {
 }
 
 function ensureCorrectView() {
-    console.log('📱 Assicurando vista corretta...');
     const tableContainer = document.querySelector('.table-responsive');
     const cardsContainer = document.getElementById('pazienti-cards-container');
     
-    console.log('📱 Elementi trovati:', {
-        tableContainer: !!tableContainer,
-        cardsContainer: !!cardsContainer,
-        windowWidth: window.innerWidth,
-        shouldShowCards: window.innerWidth < 768 // Mostrar card solo su mobile
-    });
-    
     if (tableContainer && cardsContainer) {
-        if (window.innerWidth < 768) { // Solo mobile
-            console.log('📱 Modalità mobile: nascondendo tabella, mostrando cards');
+        if (window.matchMedia("(max-width: 767px)").matches) {
             tableContainer.style.display = 'none';
             cardsContainer.style.display = 'block';
         } else {
-            console.log('� Modalità desktop/tablet: mostrando tabella, nascondendo cards');
             tableContainer.style.display = 'block';
             cardsContainer.style.display = 'none';
         }
-        
-        console.log('📱 Stili applicati:', {
-            tableDisplay: tableContainer.style.display,
-            cardsDisplay: cardsContainer.style.display,
-            tableClasses: tableContainer.className,
-            cardsClasses: cardsContainer.className
-        });
-    } else {
-        console.error('❌ Impossibile assicurare vista corretta: elementi mancanti');
     }
-    
-    document.body.style.overflowX = 'hidden';
-    document.body.style.maxWidth = '100vw';
-    console.log('✅ Vista corretta assicurata');
 }
 
 function renderTable(pazientiToRender) {
-    console.log('📋 Iniziando renderTable con', pazientiToRender?.length, 'pazienti');
-    
-    let tableBody = document.getElementById('pazienti-table-body');
-    
-    if (!tableBody) {
-        console.error('❌ Element pazienti-table-body non trovato nel DOM');
-        console.log('🔍 Contenuto attuale del DOM:', {
-            appContainer: !!document.querySelector('#app-container'),
-            viewContainer: !!document.querySelector('#app-container .view'),
-            allTablesInDOM: document.querySelectorAll('table').length,
-            allTbodyInDOM: document.querySelectorAll('tbody').length,
-            listHtml: document.querySelector('#app-container .view')?.innerHTML?.substring(0, 500) + '...'
-        });
-        
-        // Prova a cercare di nuovo dopo un breve delay
-        setTimeout(() => {
-            tableBody = document.getElementById('pazienti-table-body');
-            if (tableBody) {
-                console.log('✅ Elemento trovato al secondo tentativo');
-                renderTableContent(tableBody, pazientiToRender);
-            } else {
-                console.error('❌ Elemento ancora non trovato al secondo tentativo');
-            }
-        }, 200);
-        return;
-    }
-    
-    console.log('✅ Elemento pazienti-table-body trovato, renderizzando contenuto...');
-    renderTableContent(tableBody, pazientiToRender);
-}
+    const tableBody = document.getElementById('pazienti-table-body');
+    if (!tableBody) return;
 
-function renderTableContent(tableBody, pazientiToRender) {
-    console.log('📋 Renderizzando contenuto tabella per', pazientiToRender?.length, 'pazienti');
-    
     tableBody.innerHTML = '';
     if (pazientiToRender.length === 0) {
-        console.log('ℹ️ Nessun paziente da visualizzare');
         tableBody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">Nessun paziente trovato.</td></tr>';
         return;
     }
     
-    console.log('🔄 Generando HTML per le righe...');
     const rowsHtml = pazientiToRender.map(p => {
         const isDimesso = p.data_dimissione;
-        const statusBadge = isDimesso
-            ? `<span class="badge bg-secondary">Dimesso</span>`
-            : `<span class="badge bg-success">Attivo</span>`;
-
-        // Logica per i pulsanti basata sui permessi
+        const statusBadge = isDimesso ? `<span class="badge bg-secondary">Dimesso</span>` : `<span class="badge bg-success">Attivo</span>`;
         const userRole = currentUser.profile?.role;
         const canEdit = userRole === 'admin' || userRole === 'editor';
         let actionButtons = '';
 
         if (canEdit) {
-            const actionButton = isDimesso
+            const dimissioneButton = isDimesso
                 ? `<button class="btn btn-sm btn-outline-success" data-action="riattiva" data-id="${p.id}" title="Riattiva Paziente"><span class="material-icons" style="font-size: 1.1em; pointer-events: none;">undo</span></button>`
                 : `<button class="btn btn-sm btn-outline-warning" data-action="dimetti" data-id="${p.id}" title="Dimetti Paziente"><span class="material-icons" style="font-size: 1.1em; pointer-events: none;">event_available</span></button>`;
             
             actionButtons = `
                 <button class="btn btn-sm btn-outline-primary me-1" data-action="edit" data-id="${p.id}" title="Modifica"><span class="material-icons" style="font-size: 1.1em; pointer-events: none;">edit</span></button>
-                ${actionButton}
+                ${dimissioneButton}
                 <button class="btn btn-sm btn-outline-danger ms-1" data-action="delete" data-id="${p.id}" title="Elimina"><span class="material-icons" style="font-size: 1.1em; pointer-events: none;">delete</span></button>
             `;
         }
@@ -174,16 +101,12 @@ function renderTableContent(tableBody, pazientiToRender) {
                 <td data-label="Diagnosi">${p.diagnosi}</td>
                 <td data-label="Reparto">${p.reparto_appartenenza}</td>
                 <td data-label="Stato">${statusBadge}</td>
-                <td class="text-nowrap">
-                    ${actionButtons}
-                </td>
+                <td class="text-nowrap">${actionButtons}</td>
             </tr>
         `;
     }).join('');
     
-    console.log('✅ HTML generato, impostando innerHTML...');
     tableBody.innerHTML = rowsHtml;
-    console.log('✅ Contenuto tabella renderizzato con successo');
 }
 
 function renderCards(pazientiToRender) {
@@ -218,7 +141,6 @@ function renderCards(pazientiToRender) {
                         <button class="btn btn-sm btn-outline-danger" data-action="delete" data-id="${p.id}" title="Elimina" style="flex-grow: 1;"><span class="material-icons" style="font-size: 1.1em; pointer-events: none;">delete</span></button>
                     </div>
                 `;
-                `;
             }
 
             return `
@@ -249,7 +171,7 @@ function renderCards(pazientiToRender) {
                 desktopActionButtons = `
                     <button class="btn btn-sm btn-outline-primary me-1" data-action="edit" data-id="${p.id}" title="Modifica"><span class="material-icons me-1" style="font-size: 1em;">edit</span>Modifica</button>
                     ${dimissioneButton}
-                    <button class="btn btn-sm btn-outline-danger ms-1" data-action="delete" data-id="${p.id}" title="Elimina"><span class="material-icons me-1" style="font-size: 1em;">delete</span>Elimina</button>
+                    <button class="btn btn-sm btn-outline-danger ms-1" data-action="delete" data-id="${p.id}" title="Elimina"><span class="material-icons me-1" style="font-size: 1em;">delete</span></button>
                 `;
             }
 

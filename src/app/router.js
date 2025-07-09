@@ -138,7 +138,12 @@ export async function renderView() {
     }
     
     viewHtml = await fetchView(viewToRender);
-    console.log('Inserendo HTML della vista nel DOM...', { viewToRender, htmlLength: viewHtml.length });
+    console.log('Inserendo HTML della vista nel DOM...', { 
+        viewToRender, 
+        htmlLength: viewHtml.length,
+        containsTableBody: viewHtml.includes('pazienti-table-body'),
+        containsCardsContainer: viewHtml.includes('pazienti-cards-container')
+    });
     appContainer.innerHTML = viewHtml;
 
     const viewDiv = appContainer.querySelector('.view');
@@ -150,11 +155,16 @@ export async function renderView() {
     const initializer = viewInitializers[viewToRender];
     if (initializer) {
         console.log('Inizializzatore trovato per:', viewToRender);
-        // Usa requestAnimationFrame per assicurarsi che il DOM sia completamente renderizzato
-        requestAnimationFrame(() => {
+        // Usa setTimeout con un delay più lungo per assicurarsi che il DOM sia completamente renderizzato
+        setTimeout(() => {
+            console.log('DOM dopo timeout:', {
+                tableBody: document.getElementById('pazienti-table-body'),
+                cardsContainer: document.getElementById('pazienti-cards-container'),
+                viewContainer: document.querySelector('#app-container .view')
+            });
             console.log('Chiamando inizializzatore per:', viewToRender);
             initializer(urlParams);
-        });
+        }, 100); // Aumentiamo il delay a 100ms
     } else {
         console.log('Nessun inizializzatore per:', viewToRender);
     }

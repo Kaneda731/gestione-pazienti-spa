@@ -68,14 +68,37 @@ function ensureCorrectView() {
 }
 
 function renderTable(pazientiToRender) {
-    if (!domElements.tableBody) {
+    let tableBody = document.getElementById('pazienti-table-body');
+    
+    if (!tableBody) {
         console.error('Element pazienti-table-body non trovato nel DOM');
+        console.log('Contenuto attuale del DOM:', {
+            appContainer: document.querySelector('#app-container'),
+            viewContainer: document.querySelector('#app-container .view'),
+            allTablesInDOM: document.querySelectorAll('table').length,
+            allTbodyInDOM: document.querySelectorAll('tbody').length
+        });
+        
+        // Prova a cercare di nuovo dopo un breve delay
+        setTimeout(() => {
+            tableBody = document.getElementById('pazienti-table-body');
+            if (tableBody) {
+                console.log('Elemento trovato al secondo tentativo');
+                renderTableContent(tableBody, pazientiToRender);
+            } else {
+                console.error('Elemento ancora non trovato al secondo tentativo');
+            }
+        }, 200);
         return;
     }
     
-    domElements.tableBody.innerHTML = '';
+    renderTableContent(tableBody, pazientiToRender);
+}
+
+function renderTableContent(tableBody, pazientiToRender) {
+    tableBody.innerHTML = '';
     if (pazientiToRender.length === 0) {
-        domElements.tableBody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">Nessun paziente trovato.</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">Nessun paziente trovato.</td></tr>';
         return;
     }
     const rowsHtml = pazientiToRender.map(p => {
@@ -115,7 +138,7 @@ function renderTable(pazientiToRender) {
             </tr>
         `;
     }).join('');
-    domElements.tableBody.innerHTML = rowsHtml;
+    tableBody.innerHTML = rowsHtml;
 }
 
 function renderCards(pazientiToRender) {

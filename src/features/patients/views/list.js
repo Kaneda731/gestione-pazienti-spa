@@ -20,22 +20,35 @@ async function fetchAndRender() {
 /**
  * Aspetta che gli elementi DOM critici siano disponibili
  */
-function waitForDOMElements(timeout = 5000) {
+function waitForDOMElements(timeout = 10000) {
     return new Promise((resolve, reject) => {
         const startTime = Date.now();
+        let attempts = 0;
         
         function checkElements() {
+            attempts++;
             const tableBody = document.getElementById('pazienti-table-body');
             const cardsContainer = document.getElementById('pazienti-cards-container');
             
+            console.log(`Tentativo ${attempts}: Cercando elementi DOM...`, {
+                tableBody: !!tableBody,
+                cardsContainer: !!cardsContainer,
+                appContainer: !!document.querySelector('#app-container'),
+                viewContainer: !!document.querySelector('#app-container .view')
+            });
+            
             if (tableBody && cardsContainer) {
-                console.log('Elementi DOM trovati, procedendo...');
+                console.log('Elementi DOM trovati dopo', attempts, 'tentativi');
                 resolve();
             } else if (Date.now() - startTime > timeout) {
+                console.error('Timeout dopo', attempts, 'tentativi. Elementi trovati:', {
+                    tableBody: !!tableBody,
+                    cardsContainer: !!cardsContainer
+                });
                 reject(new Error('Timeout: elementi DOM non trovati'));
             } else {
-                // Riprova dopo un breve delay
-                setTimeout(checkElements, 50);
+                // Riprova dopo un delay più lungo
+                setTimeout(checkElements, 100);
             }
         }
         

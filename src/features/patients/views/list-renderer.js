@@ -187,48 +187,35 @@ function renderTableContent(tableBody, pazientiToRender) {
 }
 
 function renderCards(pazientiToRender) {
-    console.log('📱 Iniziando renderCards con', pazientiToRender?.length, 'pazienti');
-    
     const cardsContainer = document.getElementById('pazienti-cards-container');
-    if (!cardsContainer) {
-        console.error('❌ Element pazienti-cards-container non trovato nel DOM');
-        return;
-    }
-    
-    console.log('✅ Elemento pazienti-cards-container trovato');
+    if (!cardsContainer) return;
+
     cardsContainer.innerHTML = '';
     if (pazientiToRender.length === 0) {
-        console.log('ℹ️ Nessun paziente da visualizzare nelle card');
         cardsContainer.innerHTML = '<div class="text-center text-muted p-4">Nessun paziente trovato.</div>';
         return;
     }
     
     const isMobile = window.matchMedia("(max-width: 767px)").matches;
-    console.log('📱 Rilevamento mobile (matchMedia):', isMobile);
-    
-    
-    // Logica per i permessi
     const userRole = currentUser.profile?.role;
     const canEdit = userRole === 'admin' || userRole === 'editor';
 
     if (isMobile) {
         const cardsHtml = pazientiToRender.map(p => {
             const isDimesso = p.data_dimissione;
-            const statusBadge = isDimesso
-                ? `<span class="badge bg-secondary">Dimesso</span>`
-                : `<span class="badge bg-success">Attivo</span>`;
-            
-            let actionButtons = '';
+            const statusBadge = isDimesso ? `<span class="badge bg-secondary">Dimesso</span>` : `<span class="badge bg-success">Attivo</span>`;
+            let mobileActionButtons = '';
+
             if (canEdit) {
                 const dimissioneButton = isDimesso
-                    ? `<button class="btn btn-sm btn-outline-success" data-action="riattiva" data-id="${p.id}" title="Riattiva Paziente"><span class="material-icons" style="font-size: 1.1em; pointer-events: none;">undo</span></button>`
-                    : `<button class="btn btn-sm btn-outline-warning" data-action="dimetti" data-id="${p.id}" title="Dimetti Paziente"><span class="material-icons" style="font-size: 1.1em; pointer-events: none;">event_available</span></button>`;
+                    ? `<button class="btn btn-sm btn-outline-success" data-action="riattiva" data-id="${p.id}" title="Riattiva"><span class="material-icons" style="font-size: 1.1em; pointer-events: none;">undo</span></button>`
+                    : `<button class="btn btn-sm btn-outline-warning" data-action="dimetti" data-id="${p.id}" title="Dimetti"><span class="material-icons" style="font-size: 1.1em; pointer-events: none;">event_available</span></button>`;
                 
-                actionButtons = `
+                mobileActionButtons = `
                     <div style="display: flex; width: 100%; margin-top: 0.75rem; gap: 0.75rem;">
-                        <button class="btn btn-sm btn-outline-primary me-1" data-action="edit" data-id="${p.id}" title="Modifica" style="flex-grow: 1;"><span class="material-icons" style="font-size: 1.1em; pointer-events: none;">edit</span></button>
+                        <button class="btn btn-sm btn-outline-primary" data-action="edit" data-id="${p.id}" title="Modifica" style="flex-grow: 1;"><span class="material-icons" style="font-size: 1.1em; pointer-events: none;">edit</span></button>
                         ${dimissioneButton}
-                        <button class="btn btn-sm btn-outline-danger ms-1" data-action="delete" data-id="${p.id}" title="Elimina" style="flex-grow: 1;"><span class="material-icons" style="font-size: 1.1em; pointer-events: none;">delete</span></button>
+                        <button class="btn btn-sm btn-outline-danger" data-action="delete" data-id="${p.id}" title="Elimina" style="flex-grow: 1;"><span class="material-icons" style="font-size: 1.1em; pointer-events: none;">delete</span></button>
                     </div>
                 `;
             }
@@ -241,42 +228,27 @@ function renderCards(pazientiToRender) {
                         <p class="card-text mb-1"><strong>Diagnosi:</strong> ${p.diagnosi}</p>
                         <p class="card-text mb-1"><strong>Reparto:</strong> ${p.reparto_appartenenza}</p>
                         <p class="card-text mb-1"><strong>Stato:</strong> ${statusBadge}</p>
-                        ${actionButtons}
+                        ${mobileActionButtons}
                     </div>
                 </div>
             `;
         }).join('');
-        
-        console.log('📱 Generando HTML per', pazientiToRender.length, 'card (nuovo stile mobile)');
         cardsContainer.innerHTML = cardsHtml;
-        
     } else {
-        // Card per desktop/tablet - versione migliorata con tutti i dati
         const cardsHtml = pazientiToRender.map(p => {
             const isDimesso = p.data_dimissione;
-            const statusClass = isDimesso ? 'dimesso' : 'attivo';
-            const statusBadge = isDimesso
-                ? `<span class="badge bg-secondary">Dimesso</span>`
-                : `<span class="badge bg-success">Attivo</span>`;
-            
-            let actionButtons = '';
+            const statusBadge = isDimesso ? `<span class="badge bg-secondary">Dimesso</span>` : `<span class="badge bg-success">Attivo</span>`;
+            let desktopActionButtons = '';
+
             if (canEdit) {
                 const dimissioneButton = isDimesso
-                    ? `<button class="btn btn-sm btn-outline-success" data-action="riattiva" data-id="${p.id}" title="Riattiva Paziente">
-                         <span class="material-icons me-1" style="font-size: 1em;">undo</span>Riattiva
-                       </button>`
-                    : `<button class="btn btn-sm btn-outline-warning" data-action="dimetti" data-id="${p.id}" title="Dimetti Paziente">
-                         <span class="material-icons me-1" style="font-size: 1em;">event_available</span>Dimetti
-                       </button>`;
+                    ? `<button class="btn btn-sm btn-outline-success" data-action="riattiva" data-id="${p.id}" title="Riattiva Paziente"><span class="material-icons me-1" style="font-size: 1em;">undo</span>Riattiva</button>`
+                    : `<button class="btn btn-sm btn-outline-warning" data-action="dimetti" data-id="${p.id}" title="Dimetti Paziente"><span class="material-icons me-1" style="font-size: 1em;">event_available</span>Dimetti</button>`;
 
-                actionButtons = `
-                    <button class="btn btn-sm btn-outline-primary me-1" data-action="edit" data-id="${p.id}" title="Modifica">
-                        <span class="material-icons me-1" style="font-size: 1em;">edit</span>Modifica
-                    </button>
+                desktopActionButtons = `
+                    <button class="btn btn-sm btn-outline-primary me-1" data-action="edit" data-id="${p.id}" title="Modifica"><span class="material-icons me-1" style="font-size: 1em;">edit</span>Modifica</button>
                     ${dimissioneButton}
-                    <button class="btn btn-sm btn-outline-danger ms-1" data-action="delete" data-id="${p.id}" title="Elimina">
-                        <span class="material-icons me-1" style="font-size: 1em;">delete</span>Elimina
-                    </button>
+                    <button class="btn btn-sm btn-outline-danger ms-1" data-action="delete" data-id="${p.id}" title="Elimina"><span class="material-icons me-1" style="font-size: 1em;">delete</span>Elimina</button>
                 `;
             }
 
@@ -288,39 +260,25 @@ function renderCards(pazientiToRender) {
                                 <h5 class="card-title mb-2">${p.cognome} ${p.nome}</h5>
                                 <div class="row">
                                     <div class="col-sm-6">
-                                        <p class="card-text mb-1">
-                                            <strong>Data Ricovero:</strong> ${new Date(p.data_ricovero).toLocaleDateString()}
-                                        </p>
-                                        <p class="card-text mb-1">
-                                            <strong>Diagnosi:</strong> ${p.diagnosi}
-                                        </p>
+                                        <p class="card-text mb-1"><strong>Data Ricovero:</strong> ${new Date(p.data_ricovero).toLocaleDateString()}</p>
+                                        <p class="card-text mb-1"><strong>Diagnosi:</strong> ${p.diagnosi}</p>
                                     </div>
                                     <div class="col-sm-6">
-                                        <p class="card-text mb-1">
-                                            <strong>Reparto:</strong> ${p.reparto_appartenenza}
-                                        </p>
-                                        <p class="card-text mb-1">
-                                            <strong>Stato:</strong> ${statusBadge}
-                                        </p>
+                                        <p class="card-text mb-1"><strong>Reparto:</strong> ${p.reparto_appartenenza}</p>
+                                        <p class="card-text mb-1"><strong>Stato:</strong> ${statusBadge}</p>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-4 d-flex align-items-center justify-content-end">
-                                <div class="patient-actions">
-                                    ${actionButtons}
-                                </div>
+                                <div class="patient-actions">${desktopActionButtons}</div>
                             </div>
                         </div>
                     </div>
                 </div>
             `;
         }).join('');
-        
-        console.log('📱 Generando HTML per', pazientiToRender.length, 'card (modalità desktop migliorata)');
         cardsContainer.innerHTML = cardsHtml;
     }
-    
-    console.log('✅ renderCards completato con successo');
 }
 
 function updatePaginationControls(totalItems) {

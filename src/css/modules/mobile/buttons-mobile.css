@@ -145,3 +145,10 @@
         font-size: 0.95rem !important;
     }
 }
+
+/* Stile per i pulsanti di azione dei filtri (Resetta/Esporta) */
+.filter-action-btn {
+    flex-grow: 1; /* Fa sì che ogni pulsante cresca */
+    flex-basis: 0; /* Base di partenza per la crescita */
+    text-align: center;
+}

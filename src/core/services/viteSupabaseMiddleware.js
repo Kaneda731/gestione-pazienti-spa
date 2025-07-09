@@ -111,6 +111,11 @@ export class ViteSupabaseMiddleware {
     }
 
     onReady(callback) {
+        if (typeof callback !== 'function') {
+            console.warn('onReady: callback deve essere una funzione');
+            return;
+        }
+        
         if (this.isViteReady && this.isSupabaseReady) {
             callback();
         } else {
@@ -120,7 +125,11 @@ export class ViteSupabaseMiddleware {
 
     notifyReady() {
         console.log('Middleware Vite-Supabase pronto');
-        this.readyCallbacks.forEach(callback => callback());
+        this.readyCallbacks.forEach(callback => {
+            if (typeof callback === 'function') {
+                callback();
+            }
+        });
         this.readyCallbacks = [];
     }
 

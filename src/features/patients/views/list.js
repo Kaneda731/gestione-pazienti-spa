@@ -147,8 +147,12 @@ export async function initListView(urlParams) {
     // 6. Imposta gli event listener
     setupEventListeners();
     
-    // 7. Esegui il fetch e il render iniziali
-    fetchAndRender();
+    // 7. Esegui il fetch e il render iniziali (solo se gli elementi sono disponibili)
+    if (domElements.tableBody) {
+        fetchAndRender();
+    } else {
+        console.error('Impossibile inizializzare la vista lista: elementi DOM mancanti');
+    }
     
     // 8. Aggiorna gli indicatori di ordinamento e la vista
     updateSortIndicators();

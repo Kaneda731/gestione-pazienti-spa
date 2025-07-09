@@ -147,7 +147,10 @@ export async function renderView() {
 
     const initializer = viewInitializers[viewToRender];
     if (initializer) {
-        initializer(urlParams);
+        // Usa requestAnimationFrame per assicurarsi che il DOM sia completamente renderizzato
+        requestAnimationFrame(() => {
+            initializer(urlParams);
+        });
     } else if (viewToRender === 'home') {
         document.querySelectorAll('.menu-card').forEach(card => {
             card.addEventListener('click', () => {

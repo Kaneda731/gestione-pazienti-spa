@@ -38,6 +38,14 @@ export function cacheDOMElements(viewContainer) {
     domElements.pageInfo = document.getElementById('page-info');
     domElements.backButton = viewContainer.querySelector('button[data-view="home"]');
     domElements.exportButton = document.getElementById('export-csv-btn');
+    
+    // Validazione elementi critici
+    const criticalElements = ['tableBody', 'repartoFilter', 'diagnosiFilter', 'statoFilter'];
+    criticalElements.forEach(key => {
+        if (!domElements[key]) {
+            console.error(`Elemento DOM critico non trovato: ${key}`);
+        }
+    });
 }
 
 /**

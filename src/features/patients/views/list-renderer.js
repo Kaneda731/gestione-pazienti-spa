@@ -68,6 +68,11 @@ function ensureCorrectView() {
 }
 
 function renderTable(pazientiToRender) {
+    if (!domElements.tableBody) {
+        console.error('Element pazienti-table-body non trovato nel DOM');
+        return;
+    }
+    
     domElements.tableBody.innerHTML = '';
     if (pazientiToRender.length === 0) {
         domElements.tableBody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">Nessun paziente trovato.</td></tr>';

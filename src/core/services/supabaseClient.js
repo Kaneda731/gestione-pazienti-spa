@@ -1,13 +1,26 @@
 // src/js/services/supabaseClient.js
 import { createClient } from '@supabase/supabase-js';
 
-// Le variabili d'ambiente sono l'unica fonte di verità.
-// Devono essere impostate sia in locale (.env) che in produzione (Netlify).
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+const debugContainer = document.getElementById('debug-container');
+
 if (!SUPABASE_URL || !SUPABASE_KEY) {
-  throw new Error("Supabase URL o Anon Key non definite. Assicurati di aver configurato le variabili d'ambiente.");
+  if (debugContainer) {
+    debugContainer.style.display = 'block';
+    debugContainer.innerHTML = '<b>Errore Critico:</b> Variabili d\'ambiente Supabase non trovate! Controlla la configurazione di Netlify.';
+  }
+  console.error("Supabase URL o Anon Key non definite. Assicurati di aver configurato le variabili d'ambiente.");
+  // Non blocchiamo l'app, ma la lasciamo in uno stato di errore visibile.
+} else {
+  if (debugContainer) {
+    debugContainer.style.background = '#28a745';
+    debugContainer.style.color = 'white';
+    debugContainer.style.display = 'block';
+    debugContainer.innerHTML = '<b>OK:</b> Variabili d\'ambiente Supabase caricate correttamente.';
+    setTimeout(() => { debugContainer.style.display = 'none'; }, 5000);
+  }
 }
 
 // Ottieni la porta corrente dinamicamente

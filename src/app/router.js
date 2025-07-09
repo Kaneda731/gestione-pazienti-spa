@@ -20,7 +20,7 @@ const viewInitializers = {
 };
 
 const viewCache = new Map();
-const views = import.meta.glob('/src/views/*.html', { as: 'raw' });
+const views = import.meta.glob('/src/views/*.html', { query: '?raw', import: 'default' });
 
 async function fetchView(viewName) {
     if (viewCache.has(viewName)) {

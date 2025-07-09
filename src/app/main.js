@@ -6,7 +6,7 @@
 
 // Importazioni di stile
 import 'bootstrap/dist/css/bootstrap.min.css';
-import '/src/shared/styles/main.css';
+import '/src/css/style.css';
 
 // Configurazione
 import { environment, isDevelopment } from './config/environment.js';

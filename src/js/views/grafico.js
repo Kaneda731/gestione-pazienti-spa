@@ -3,6 +3,12 @@ import { supabase } from '../services/supabaseClient.js';
 import { navigateTo } from '../router.js';
 import { getFilterOptions, populateSelectWithOptions } from '../utils.js';
 import { initCustomSelects } from '../components/CustomSelect.js';
+import { 
+    createPieChart, 
+    showLoadingInContainer, 
+    showErrorInContainer, 
+    showMessageInContainer 
+} from '../services/chartService.js';
 
 // Caching degli elementi del DOM
 const dom = {};
@@ -23,7 +29,7 @@ function resetFilters() {
     });
     dom.startDateFilter.value = '';
     dom.endDateFilter.value = '';
-    dom.chartContainer.innerHTML = '<p class="text-muted text-center mt-5">Seleziona i filtri e clicca "Applica" per visualizzare il grafico.</p>';
+    showMessageInContainer(dom.chartContainer, 'Seleziona i filtri e clicca "Applica" per visualizzare il grafico.');
 }
 
 /**
@@ -47,7 +53,7 @@ function buildChartQuery() {
  * Disegna il grafico a torta basandosi sui dati filtrati.
  */
 async function drawChart() {
-    dom.chartContainer.innerHTML = '<div class="d-flex justify-content-center align-items-center h-100"><div class="spinner-border text-primary"></div></div>';
+    showLoadingInContainer(dom.chartContainer);
     
     try {
         const query = buildChartQuery();
@@ -55,29 +61,30 @@ async function drawChart() {
         if (error) throw error;
 
         if (data.length === 0) {
-            dom.chartContainer.innerHTML = '<p class="text-muted text-center mt-5">Nessun dato trovato per i filtri selezionati.</p>';
+            showMessageInContainer(dom.chartContainer, 'Nessun dato trovato per i filtri selezionati.');
             return;
         }
         
+        // Elabora i dati per il grafico
         const counts = data.reduce((acc, { diagnosi }) => {
             acc[diagnosi] = (acc[diagnosi] || 0) + 1;
             return acc;
         }, {});
 
-        const dataTable = google.visualization.arrayToDataTable([['Diagnosi', 'Numero Pazienti'], ...Object.entries(counts)]);
-        const options = {
+        const chartData = [['Diagnosi', 'Numero Pazienti'], ...Object.entries(counts)];
+        const chartOptions = {
             title: 'Distribuzione Diagnosi dei Pazienti Filtrati',
             pieHole: 0.4,
             legend: { position: 'labeled' },
             chartArea: { left: 10, top: 20, width: '90%', height: '85%' }
         };
         
-        const chart = new google.visualization.PieChart(dom.chartContainer);
-        chart.draw(dataTable, options);
+        // Crea il grafico usando il servizio modulare
+        await createPieChart(dom.chartContainer, chartData, chartOptions);
 
     } catch (error) {
         console.error('Errore durante la creazione del grafico:', error);
-        dom.chartContainer.innerHTML = `<div class="alert alert-danger"><strong>Errore:</strong> Impossibile caricare il grafico. ${error.message}</div>`;
+        showErrorInContainer(dom.chartContainer, `Impossibile caricare il grafico. ${error.message}`);
     }
 }
 
@@ -109,7 +116,7 @@ export async function initGraficoView() {
     dom.resetButton = document.getElementById('reset-filters-btn');
     dom.backButton = view.querySelector('button[data-view="home"]');
 
-    const initialize = async () => {
+    try {
         // 1. Recupera i dati per i filtri in parallelo
         const [repartoOptions, provenienzaOptions, diagnosiOptions] = await Promise.all([
             getFilterOptions('reparto_appartenenza'),
@@ -127,8 +134,12 @@ export async function initGraficoView() {
 
         // 4. Imposta gli event listener
         setupEventListeners();
-    };
 
-    google.charts.load('current', { 'packages': ['corechart'] });
-    google.charts.setOnLoadCallback(initialize);
+        // 5. Mostra messaggio iniziale
+        showMessageInContainer(dom.chartContainer, 'Seleziona i filtri e clicca "Applica" per visualizzare il grafico.');
+
+    } catch (error) {
+        console.error('Errore durante l\'inizializzazione della vista grafico:', error);
+        showErrorInContainer(dom.chartContainer, `Errore durante l'inizializzazione: ${error.message}`);
+    }
 }

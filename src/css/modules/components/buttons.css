@@ -273,3 +273,92 @@
 .btn-custom-info:hover::before {
     left: 100%;
 }
+
+/* Pulsanti Applica Filtri - Stile Bootstrap Primary corretto */
+#apply-filters-btn {
+    border-radius: var(--btn-border-radius);
+    font-size: var(--btn-font-size);
+    font-weight: var(--btn-font-weight);
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--primary-color);
+    color: white;
+    background: linear-gradient(135deg, var(--primary-color), #4dabf7);
+    padding: 0.5rem 1rem;
+    min-width: 140px;
+}
+
+#apply-filters-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: var(--btn-shine-transition);
+    z-index: 1;
+}
+
+#apply-filters-btn:hover {
+    background: linear-gradient(135deg, #339af0, var(--primary-color));
+    transform: var(--btn-transform-hover);
+    box-shadow: var(--btn-shadow-hover);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+#apply-filters-btn:hover::before {
+    left: 100%;
+}
+
+#apply-filters-btn:active {
+    transform: var(--btn-transform-active);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Pulsante Aggiungi Diagnosi */
+#save-diagnosi-btn {
+    border-radius: var(--btn-border-radius);
+    font-size: var(--btn-font-size);
+    font-weight: var(--btn-font-weight);
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--primary-color);
+    color: white;
+    background: linear-gradient(135deg, var(--primary-color), #4dabf7);
+    padding: 0.5rem 1rem;
+}
+
+#save-diagnosi-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: var(--btn-shine-transition);
+    z-index: 1;
+}
+
+#save-diagnosi-btn:hover {
+    background: linear-gradient(135deg, #339af0, var(--primary-color));
+    transform: var(--btn-transform-hover);
+    box-shadow: var(--btn-shadow-hover);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+#save-diagnosi-btn:hover::before {
+    left: 100%;
+}
+
+#save-diagnosi-btn:active {
+    transform: var(--btn-transform-active);
+    box-shadow: var(--shadow-sm);
+}

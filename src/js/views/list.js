@@ -5,6 +5,7 @@ import { state, domElements, cacheDOMElements, loadPersistedFilters, persistFilt
 import { fetchPazienti, exportPazientiToCSV, updatePazienteStatus, deletePaziente } from './list-api.js';
 import { renderPazienti, showLoading, showError, updateSortIndicators } from './list-renderer.js';
 import { initCustomSelects } from '../components/CustomSelect.js';
+import { showDeleteConfirmModal } from '../services/modalService.js';
 
 async function fetchAndRender() {
     showLoading();
@@ -93,14 +94,10 @@ async function handlePatientAction(action, id) {
             navigateTo('inserimento');
             break;
         case 'delete':
-            const deleteModal = new bootstrap.Modal(document.getElementById('delete-confirm-modal'));
-            const confirmBtn = document.getElementById('confirm-delete-btn');
-            confirmBtn.onclick = async () => {
+            await showDeleteConfirmModal(async () => {
                 await deletePaziente(id);
                 fetchAndRender();
-                deleteModal.hide();
-            };
-            deleteModal.show();
+            });
             break;
         case 'dimetti':
             await updatePazienteStatus(id, true);

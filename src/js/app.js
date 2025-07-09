@@ -2,7 +2,6 @@
 
 // --- 0. IMPORT DIPENDENZE E STILI ---
 import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap'; // Importa il JS di Bootstrap e lo rende globale
 import '/src/css/style.css';
 
 // --- 1. INIZIALIZZAZIONE SERVIZI FONDAMENTALI ---
@@ -13,6 +12,7 @@ import { initTheme } from './services/themeService.js';
 import { initBackToMenuButtons } from './services/navigationService.js';
 import { initMobileUI } from './mobile/mobile-navigation.js';
 import { viteSupabaseMiddleware } from './services/viteSupabaseMiddleware.js';
+import './services/bootstrapService.js'; // Inizializza Bootstrap
 import './components/CustomSelect.js';
 import './mobile/mobile-card-manager.js';
 

@@ -1,4 +1,51 @@
 @media (max-width: 767px) {
+  /* Override totale per il pulsante reset filtri mobile: mai rosso, mai bordo grigio, sempre blu e bianco */
+  #reset-filters-btn.btn,
+  #reset-filters-btn.btn.btn-outline-secondary {
+    background: #1971c2 !important;
+    color: #fff !important;
+    border: 2px solid #1862ab !important;
+    font-weight: 700 !important;
+    box-shadow: 0 2px 8px rgba(25,113,194,0.15) !important;
+    letter-spacing: 0.03em !important;
+    text-transform: uppercase !important;
+    transition: background 0.2s, box-shadow 0.2s, border-color 0.2s;
+  }
+  #reset-filters-btn.btn:hover,
+  #reset-filters-btn.btn:active {
+    background: #1862ab !important;
+    border-color: #11345b !important;
+    box-shadow: 0 4px 12px rgba(25,113,194,0.25) !important;
+  }
+  #reset-filters-btn .material-icons {
+    color: #fff !important;
+    font-size: 1.4em !important;
+    vertical-align: middle !important;
+  }
+}
+@media (max-width: 767px) {
+  /* Pulsante RESET filtri mobile: stile blu come export, testo e icona bianchi, nessun bordo grigio */
+  #filter-actions-container > #reset-filters-btn.btn {
+    background: #1971c2 !important; /* blu solido */
+    color: #fff !important;
+    border: 2px solid #1862ab !important;
+    font-weight: 700 !important;
+    box-shadow: 0 2px 8px rgba(25,113,194,0.15) !important;
+    letter-spacing: 0.03em !important;
+    text-transform: uppercase !important;
+    transition: background 0.2s, box-shadow 0.2s, border-color 0.2s;
+  }
+  #filter-actions-container > #reset-filters-btn.btn:hover,
+  #filter-actions-container > #reset-filters-btn.btn:active {
+    background: #1862ab !important;
+    border-color: #11345b !important;
+    box-shadow: 0 4px 12px rgba(25,113,194,0.25) !important;
+  }
+  #reset-filters-btn .material-icons {
+    color: #fff !important;
+  }
+}
+@media (max-width: 767px) {
   /* Redesign specifico per i tasti Resetta e Esporta su mobile */
   #filter-actions-container > #export-csv-btn.btn {
     background: #1971c2 !important; /* blu solido */
@@ -49,21 +96,32 @@
     padding-left: 0.5rem !important;
     padding-right: 0.5rem !important;
   }
-  /* Redesign specifico per il tasto Reset su mobile */
+  /* Override definitivo: il tasto reset filtri mobile è sempre blu con testo e icona bianchi, mai rosso */
+  #reset-filters-btn.btn,
+  #reset-filters-btn.btn.btn-outline-secondary,
   #filter-actions-container > #reset-filters-btn.btn {
-    background: #fff !important;
-    color: #e03131 !important;
-    border: 2px solid #e03131 !important;
-    box-shadow: 0 2px 8px rgba(224,49,49,0.08) !important;
-    font-weight: 600 !important;
-    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    background: #1971c2 !important;
+    color: #fff !important;
+    border: 2px solid #1862ab !important;
+    font-weight: 700 !important;
+    box-shadow: 0 2px 8px rgba(25,113,194,0.15) !important;
+    letter-spacing: 0.03em !important;
+    text-transform: uppercase !important;
+    transition: background 0.2s, box-shadow 0.2s, border-color 0.2s;
   }
+  #reset-filters-btn.btn:hover,
+  #reset-filters-btn.btn:active,
   #filter-actions-container > #reset-filters-btn.btn:hover,
   #filter-actions-container > #reset-filters-btn.btn:active {
-    background: #ffe3e3 !important;
-    color: #b10000 !important;
-    border-color: #b10000 !important;
-    box-shadow: 0 4px 12px rgba(224,49,49,0.18) !important;
+    background: #1862ab !important;
+    color: #fff !important;
+    border-color: #11345b !important;
+    box-shadow: 0 4px 12px rgba(25,113,194,0.25) !important;
+  }
+  #reset-filters-btn .material-icons {
+    color: #fff !important;
+    font-size: 1.4em !important;
+    vertical-align: middle !important;
   }
   /* Icone nei bottoni azioni filtri */
   #filter-actions-container > .btn .material-icons,

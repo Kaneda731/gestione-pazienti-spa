@@ -12,6 +12,7 @@ import {
 
 // Centralizza la scelta del servizio grafico: ora sempre Chart.js anche su mobile
 let createPieChart;
+const isDesktop = () => window.innerWidth >= 992;
 async function getPieChartService() {
     // Usa sempre Chart.js, sia su desktop che su mobile
     const mod = await import('../services/chartjsService.js');

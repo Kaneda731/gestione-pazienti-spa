@@ -15,12 +15,12 @@
 /* Variabili CSS principali */
 :root {
     /* Colori principali - Palette coordinata */
-    --primary-color: #3b82f6;
+    --primary-color: #2563eb;
     --primary-light: #60a5fa;
-    --primary-dark: #1d4ed8;
-    --secondary-color: #6b7280;
-    --secondary-light: #9ca3af;
-    --secondary-dark: #4b5563;
+    --primary-dark: #1e40af;
+    --secondary-color: #64748b;
+    --secondary-light: #a3aed6;
+    --secondary-dark: #334155;
     --success-color: #10b981;
     --success-light: #34d399;
     --success-dark: #059669;
@@ -34,27 +34,36 @@
     --info-light: #22d3ee;
     --info-dark: #0891b2;
     --light-color: #f8fafc;
-    --dark-color: #1f2937;
-    
+    --dark-color: #1e293b;
+
+    /* Font e leggibilità */
+    --font-family-base: 'Inter', 'Segoe UI', Arial, sans-serif;
+    --font-size-base: 1rem;
+    --font-size-lg: 1.125rem;
+    --font-size-sm: 0.95rem;
+    --font-weight-base: 400;
+    --font-weight-bold: 600;
+    --line-height-base: 1.6;
+
     /* Testi - Gerarchia più definita */
     --text-primary: #111827;
-    --text-secondary: #4b5563;
-    --text-muted: #6b7280;
-    --text-light: #9ca3af;
-    
+    --text-secondary: #334155;
+    --text-muted: #64748b;
+    --text-light: #a3aed6;
+
     /* Backgrounds e superfici - Più sofisticati */
     --body-bg: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 50%, #e5e7eb 100%);
-    --card-bg: rgba(255, 255, 255, 0.9);
-    --card-bg-hover: rgba(255, 255, 255, 0.95);
+    --card-bg: rgba(255, 255, 255, 0.97);
+    --card-bg-hover: rgba(255, 255, 255, 1);
     --bg-primary: #ffffff;
     --bg-secondary: #f9fafb;
     --bg-tertiary: #f3f4f6;
     --bg-quaternary: #e5e7eb;
-    
+
     /* Navbar - Coordinata con primary */
     --navbar-bg: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 30%, var(--primary-light) 70%, var(--info-color) 100%);
     --navbar-shadow: 0 8px 32px rgba(59, 130, 246, 0.25), 0 4px 16px rgba(29, 78, 216, 0.15), 0 0 20px rgba(96, 165, 250, 0.1);
-    
+
     /* Borders - Più delicati */
     --border-color: #e5e7eb;
     --border-color-light: #f3f4f6;
@@ -62,13 +71,20 @@
     --border-radius: 12px;
     --border-radius-sm: 0.5rem;
     --border-radius-lg: 1rem;
-    
+
+    /* Spaziature */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2.5rem;
+
     /* Shadows e effetti - Più sofisticati */
     --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
     --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.05);
     --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.08);
     --shadow-xl: 0 16px 40px rgba(0, 0, 0, 0.15), 0 8px 16px rgba(0, 0, 0, 0.1);
-    
+
     /* Status badges - Coordinati con palette */
     --badge-success-bg: linear-gradient(135deg, var(--success-light), var(--success-color));
     --badge-success-color: var(--success-dark);
@@ -76,7 +92,7 @@
     --badge-danger-bg: linear-gradient(135deg, var(--danger-light), var(--danger-color));
     --badge-danger-color: var(--danger-dark);
     --badge-danger-border: var(--danger-light);
-    
+
     /* Alerts - Coordinati con palette */
     --alert-success-bg: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(52, 211, 153, 0.15));
     --alert-success-color: var(--success-dark);

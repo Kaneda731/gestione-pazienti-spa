@@ -5,10 +5,11 @@
 /* === AUTH MODAL BASE === */
 .modal-content {
     background: var(--card-bg);
-    border: none;
-    box-shadow: var(--shadow-lg);
-    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-xl);
+    border-radius: 16px;
     overflow: hidden;
+    backdrop-filter: var(--glass-blur);
 }
 
 .modal-header {
@@ -16,11 +17,14 @@
     color: white;
     border: none;
     padding: 1.25rem 1.5rem;
+    box-shadow: 0 2px 8px rgba(37,99,235,0.08);
 }
 
 .modal-title {
-    font-weight: 600;
-    font-size: 1.1rem;
+    font-weight: 700;
+    font-size: 1.15rem;
+    letter-spacing: 0.01em;
+    font-family: var(--font-family-base);
 }
 
 .modal-title .material-icons {

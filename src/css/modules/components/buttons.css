@@ -1,3 +1,28 @@
+/* Miglioramento accessibilità e focus per tutti i pulsanti */
+.btn, button, [type="button"], [type="submit"] {
+    outline: none;
+    box-shadow: none;
+    font-family: var(--font-family-base);
+    font-size: var(--btn-font-size);
+    font-weight: var(--btn-font-weight);
+    letter-spacing: 0.01em;
+    transition: var(--transition);
+}
+
+.btn:focus-visible, button:focus-visible, [type="button"]:focus-visible, [type="submit"]:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(37,99,235,0.15);
+    z-index: 2;
+}
+
+/* Stato disabled ben visibile */
+.btn:disabled, button:disabled, [type="button"]:disabled, [type="submit"]:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    filter: grayscale(0.2);
+    box-shadow: none;
+}
 /* ===================================
    PULSANTI
    =================================== */

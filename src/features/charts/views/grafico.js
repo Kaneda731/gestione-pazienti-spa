@@ -3,12 +3,20 @@ import { supabase } from '../../../core/services/supabaseClient.js';
 import { navigateTo } from '../../../app/router.js';
 import { getFilterOptions, populateSelectWithOptions } from '../../../shared/utils/index.js';
 import { initCustomSelects } from '../../../shared/components/forms/CustomSelect.js';
+
 import { 
-    createPieChart, 
     showLoadingInContainer, 
     showErrorInContainer, 
     showMessageInContainer 
 } from '../services/chartService.js';
+
+// Centralizza la scelta del servizio grafico: ora sempre Chart.js anche su mobile
+let createPieChart;
+async function getPieChartService() {
+    // Usa sempre Chart.js, sia su desktop che su mobile
+    const mod = await import('../services/chartjsService.js');
+    return mod.createPieChart;
+}
 
 // Caching degli elementi del DOM
 const dom = {};
@@ -54,7 +62,6 @@ function buildChartQuery() {
  */
 async function drawChart() {
     showLoadingInContainer(dom.chartContainer);
-    
     try {
         const query = buildChartQuery();
         const { data, error } = await query;
@@ -64,7 +71,7 @@ async function drawChart() {
             showMessageInContainer(dom.chartContainer, 'Nessun dato trovato per i filtri selezionati.');
             return;
         }
-        
+
         // Elabora i dati per il grafico
         const counts = data.reduce((acc, { diagnosi }) => {
             acc[diagnosi] = (acc[diagnosi] || 0) + 1;
@@ -72,15 +79,66 @@ async function drawChart() {
         }, {});
 
         const chartData = [['Diagnosi', 'Numero Pazienti'], ...Object.entries(counts)];
-        const chartOptions = {
+
+        // Opzioni avanzate Chart.js per desktop
+        let chartOptions = {
             title: 'Distribuzione Diagnosi dei Pazienti Filtrati',
             pieHole: 0.4,
             legend: { position: 'labeled' },
             chartArea: { left: 10, top: 20, width: '90%', height: '85%' }
         };
-        
-        // Crea il grafico usando il servizio modulare
-        await createPieChart(dom.chartContainer, chartData, chartOptions);
+
+        if (isDesktop()) {
+            chartOptions = {
+                title: 'Distribuzione Diagnosi dei Pazienti Filtrati',
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'right',
+                        align: 'center',
+                        maxWidth: 220,
+                        labels: {
+                            boxWidth: 20,
+                            font: { size: 15, weight: 'bold' },
+                            padding: 10
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Distribuzione Diagnosi dei Pazienti Filtrati',
+                        font: { size: 22, weight: 'bold' },
+                        align: 'start',
+                        padding: { top: 0, bottom: 30, right: 40 }
+                    },
+                    tooltip: {
+                        enabled: true,
+                        backgroundColor: '#222',
+                        borderColor: '#fff',
+                        borderWidth: 2,
+                        titleFont: { size: 16, weight: 'bold' },
+                        bodyFont: { size: 15 },
+                        callbacks: {
+                            label: ctx => `${ctx.label}: ${ctx.parsed}`
+                        }
+                    }
+                },
+                cutout: '40%',
+                animation: {
+                    animateRotate: true,
+                    animateScale: true
+                },
+                layout: {
+                    padding: 30
+                },
+                hoverOffset: 24,
+                responsive: true,
+                maintainAspectRatio: false
+            };
+        }
+
+        // Scegli il servizio grafico giusto
+        const pieChartService = await getPieChartService();
+        await pieChartService(dom.chartContainer, chartData, chartOptions);
 
     } catch (error) {
         console.error('Errore durante la creazione del grafico:', error);

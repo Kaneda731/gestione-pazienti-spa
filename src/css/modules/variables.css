@@ -63,6 +63,8 @@
     /* Navbar - Coordinata con primary */
     --navbar-bg: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 30%, var(--primary-light) 70%, var(--info-color) 100%);
     --navbar-shadow: 0 8px 32px rgba(59, 130, 246, 0.25), 0 4px 16px rgba(29, 78, 216, 0.15), 0 0 20px rgba(96, 165, 250, 0.1);
+    --navbar-z-index: 1002;
+    --navbar-transition: box-shadow 0.3s, background 0.3s;
 
     /* Borders - Più delicati */
     --border-color: #e5e7eb;

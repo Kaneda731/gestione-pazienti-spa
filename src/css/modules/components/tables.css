@@ -13,18 +13,23 @@
     background: linear-gradient(135deg, var(--primary-color), #4dabf7);
     color: white;
     border: none;
-    font-weight: 600;
-    padding: 1rem;
+    font-weight: 700;
+    padding: 1.1rem 1rem;
+    letter-spacing: 0.01em;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.08);
 }
 
 .table tbody td {
-    padding: 1rem;
-    border-color: rgba(0, 0, 0, 0.05);
+    padding: 1rem 0.75rem;
+    border-color: var(--border-color-light);
     vertical-align: middle;
+    font-size: 1rem;
+    color: var(--text-primary);
 }
 
 .table-hover tbody tr:hover {
-    background-color: rgba(13, 110, 253, 0.05);
+    background-color: rgba(37,99,235,0.07);
+    transition: background 0.2s;
 }
 
 /* Fix azioni tabella - evita accavallamento icone */

@@ -10,19 +10,8 @@ export function initMobileUI() {
     if (window.innerWidth > 768) return;
 
     initMobileNavbar();
-    const mobileNav = new MobileNavigation();
-    
-    // Re-check su resize
-    window.addEventListener('resize', () => {
-        if (window.innerWidth <= 768 && !window.mobileNavInstance) {
-            window.mobileNavInstance = new MobileNavigation();
-        } else if (window.innerWidth > 768 && window.mobileNavInstance) {
-            window.mobileNavInstance.destroy();
-            window.mobileNavInstance = null;
-        }
-    });
-
-    window.mobileNavInstance = mobileNav;
+    // La logica MobileNavigation/FAB è stata rimossa: la navigazione mobile è ora solo tramite la navbar centrale
+    // Se serve gestire resize, puoi aggiungere qui eventuali listener per la navbar mobile
 }
 
 /**
@@ -36,17 +25,15 @@ export function syncMobileAuth() {
     const session = currentUser.session;
 
     if (session) {
-        // Utente loggato: mostra icona utente e imposta il logout
-        const userInitial = session.user.email.charAt(0).toUpperCase();
-        mobileAuthContainer.innerHTML = `
-            <div class="mobile-user-avatar" title="${session.user.email}">
-                ${userInitial}
-            </div>
-        `;
+        // Utente loggato: mostra icona di logout NEUTRA (logout) e imposta il logout
+        mobileAuthContainer.innerHTML = `<span class=\"material-icons mobile-logout-icon\" title=\"Logout\">logout</span>`;
         mobileAuthContainer.onclick = async (event) => {
             event.preventDefault();
             await signOut();
         };
+        // Evidenzia la casetta centrale
+        const homeIcon = document.querySelector('.mobile-nav-center .material-icons');
+        if (homeIcon) homeIcon.classList.add('navbar-home-logged');
     } else {
         // Utente non loggato: mostra icona di login e imposta il login
         mobileAuthContainer.innerHTML = `<span class="material-icons">login</span>`;
@@ -56,6 +43,9 @@ export function syncMobileAuth() {
             const loginTrigger = document.getElementById('login-modal-trigger');
             if (loginTrigger) loginTrigger.click();
         };
+        // Rimuovi evidenziazione dalla casetta centrale
+        const homeIcon = document.querySelector('.mobile-nav-center .material-icons');
+        if (homeIcon) homeIcon.classList.remove('navbar-home-logged');
     }
 }
 
@@ -79,65 +69,4 @@ function initMobileNavbar() {
 /**
  * Classe per la navigazione mobile (FAB).
  */
-class MobileNavigation {
-    constructor() {
-        this.fabElement = null;
-        this.init();
-    }
-    
-    init() {
-        this.setupEventListeners();
-        this.updateView(window.location.hash.substring(1) || 'home');
-    }
-    
-    createFAB() {
-        const existingFab = document.querySelector('.mobile-fab-container');
-        if (existingFab) existingFab.remove();
-        
-        const fabContainer = document.createElement('div');
-        fabContainer.className = 'mobile-fab-container';
-        fabContainer.innerHTML = `
-            <button class="mobile-fab" data-action="home" title="Torna alla Home">
-                <span class="material-icons">arrow_back</span>
-            </button>
-        `;
-        document.body.appendChild(fabContainer);
-        this.fabElement = fabContainer.querySelector('.mobile-fab');
-        this.fabElement.addEventListener('click', (e) => {
-            e.preventDefault();
-            window.navigateTo('home');
-        });
-    }
-    
-    setupEventListeners() {
-        document.addEventListener('viewChanged', (e) => {
-            this.updateView(e.detail.view);
-        });
-    }
-    
-    updateView(newView) {
-        if (newView === 'home' || newView === '') {
-            this.hideFAB();
-        } else {
-            this.showFAB();
-        }
-    }
-    
-    showFAB() {
-        if (!this.fabElement) this.createFAB();
-        const fabContainer = document.querySelector('.mobile-fab-container');
-        if (fabContainer) fabContainer.style.display = 'block';
-    }
-    
-    hideFAB() {
-        const fabContainer = document.querySelector('.mobile-fab-container');
-        if (fabContainer) fabContainer.style.display = 'none';
-    }
-
-    destroy() {
-        const fabContainer = document.querySelector('.mobile-fab-container');
-        if (fabContainer) fabContainer.remove();
-        this.fabElement = null;
-        // Rimuovi listener se necessario
-    }
-}
+// RIMOSSA la classe MobileNavigation e la logica FAB: ora la navigazione mobile è gestita solo dalla navbar centrale

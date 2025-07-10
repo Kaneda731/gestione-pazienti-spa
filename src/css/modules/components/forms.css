@@ -1,3 +1,9 @@
+/*
+ * ATTENZIONE: Per evitare differenze di altezza tra select native (.form-select) e custom select (.custom-select-trigger)
+ * nei form (es. diagnosi in inserimento paziente), forziamo min-height, padding e font-size identici su entrambi.
+ * Questo previene bug ricorrenti dovuti a differenze tra rendering JS e HTML/CSS nativo.
+ * Se il problema si ripresenta, controlla qui!
+ */
 /* Uniforma altezza e padding di tutte le custom select nei form (non solo nei filtri) */
 .custom-select-wrapper .custom-select-trigger {
     min-height: 48px;

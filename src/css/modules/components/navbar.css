@@ -1,3 +1,81 @@
+/*
+ * Evidenzia l'icona home nella navbar mobile quando l'utente è loggato
+ */
+@media (max-width: 768px) {
+  .navbar-home-logged,
+  .navbar-home-logged.material-icons {
+    color: #fff !important;
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary-color) 60%, var(--info-color));
+    border-radius: 50%;
+    box-shadow: 0 4px 16px rgba(37,99,235,0.18), 0 2px 8px rgba(0,0,0,0.10);
+    padding: 8px !important;
+    font-size: 2rem !important;
+    border: 2px solid var(--primary-light) !important;
+    outline: 2px solid var(--primary-color) !important;
+    filter: drop-shadow(0 0 8px var(--primary-color));
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s, outline 0.2s, filter 0.2s;
+  }
+  .navbar-home-logged svg {
+    fill: #fff !important;
+  }
+  /*
+   * Logout icon mobile: solo icona bianca su sfondo trasparente, nessun bordo, nessun alone, nessun gradiente.
+   * Mantieni dimensioni coerenti con la UI, padding zero, nessun effetto focus/active visibile.
+   */
+  .material-icons.mobile-logout-icon {
+    color: #fff !important;
+    background: transparent !important;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3.4rem !important;
+    padding: 2px !important;
+    margin: 0 0.5rem;
+    box-shadow: none !important;
+    border: none !important;
+    transition: none !important;
+    filter: none !important;
+    vertical-align: middle !important;
+    line-height: 1 !important;
+  }
+  .mobile-logout-icon:active,
+  .mobile-logout-icon:focus {
+    background: transparent !important;
+    outline: none;
+    box-shadow: none !important;
+    border: none !important;
+  }
+}
+/*
+ * Migliora l'avatar utente nella navbar mobile:
+ * - Cerchio colorato, iniziale bianca, ombra, bordo, dimensione coerente con la UI moderna.
+ */
+@media (max-width: 768px) {
+  .mobile-user-avatar {
+    width: 2.5rem;
+    height: 2.5rem;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.25rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(37,99,235,0.12), 0 1.5px 4px rgba(0,0,0,0.08);
+    border: 2px solid var(--primary-light);
+    margin: 0 0.5rem;
+    letter-spacing: 0.01em;
+    transition: box-shadow 0.2s, border 0.2s;
+  }
+  .mobile-user-avatar:active,
+  .mobile-user-avatar:focus {
+    box-shadow: 0 4px 16px rgba(37,99,235,0.18);
+    border-color: var(--primary-color);
+    outline: none;
+  }
+}
 /* ===================================
    NAVBAR DESKTOP/TABLET
    =================================== */

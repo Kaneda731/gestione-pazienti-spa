@@ -81,14 +81,8 @@ async function drawChart() {
 
         const chartData = [['Diagnosi', 'Numero Pazienti'], ...Object.entries(counts)];
 
-        // Opzioni avanzate Chart.js per desktop
-        let chartOptions = {
-            title: 'Distribuzione Diagnosi dei Pazienti Filtrati',
-            pieHole: 0.4,
-            legend: { position: 'labeled' },
-            chartArea: { left: 10, top: 20, width: '90%', height: '85%' }
-        };
-
+        // Opzioni Chart.js: desktop (legend a destra), mobile (legend in basso orizzontale)
+        let chartOptions;
         if (isDesktop()) {
             chartOptions = {
                 title: 'Distribuzione Diagnosi dei Pazienti Filtrati',
@@ -132,6 +126,51 @@ async function drawChart() {
                     padding: 30
                 },
                 hoverOffset: 24,
+                responsive: true,
+                maintainAspectRatio: false
+            };
+        } else {
+            chartOptions = {
+                title: 'Distribuzione Diagnosi dei Pazienti Filtrati',
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom',
+                        align: 'start',
+                        labels: {
+                            boxWidth: 18,
+                            font: { size: 13, weight: 'bold' },
+                            padding: 8
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Distribuzione Diagnosi dei Pazienti Filtrati',
+                        font: { size: 18, weight: 'bold' },
+                        align: 'start',
+                        padding: { top: 0, bottom: 18, right: 0 }
+                    },
+                    tooltip: {
+                        enabled: true,
+                        backgroundColor: '#222',
+                        borderColor: '#fff',
+                        borderWidth: 2,
+                        titleFont: { size: 14, weight: 'bold' },
+                        bodyFont: { size: 13 },
+                        callbacks: {
+                            label: ctx => `${ctx.label}: ${ctx.parsed}`
+                        }
+                    }
+                },
+                cutout: '38%',
+                animation: {
+                    animateRotate: true,
+                    animateScale: true
+                },
+                layout: {
+                    padding: 16
+                },
+                hoverOffset: 18,
                 responsive: true,
                 maintainAspectRatio: false
             };

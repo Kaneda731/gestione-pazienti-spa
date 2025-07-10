@@ -38,12 +38,21 @@
 
     /* Font e leggibilità */
     --font-family-base: 'Inter', 'Segoe UI', Arial, sans-serif;
+    --font-family-mono: 'Fira Mono', 'Menlo', 'Monaco', monospace;
+    --font-size-xs: 0.85rem;
+    --font-size-sm: 0.95rem;
     --font-size-base: 1rem;
     --font-size-lg: 1.125rem;
-    --font-size-sm: 0.95rem;
+    --font-size-xl: 1.35rem;
     --font-weight-base: 400;
     --font-weight-bold: 600;
+    --font-weight-extra-bold: 700;
     --line-height-base: 1.6;
+    /* Focus & Accessibilità */
+    --focus-outline: 2px solid var(--primary-color);
+    --focus-outline-offset: 2px;
+    --focus-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
+    --focus-bg: #e0e7ff;
 
     /* Testi - Gerarchia più definita */
     --text-primary: #111827;
@@ -75,11 +84,13 @@
     --border-radius-lg: 1rem;
 
     /* Spaziature */
+    --spacing-xxs: 0.125rem;
     --spacing-xs: 0.25rem;
     --spacing-sm: 0.5rem;
     --spacing-md: 1rem;
     --spacing-lg: 1.5rem;
     --spacing-xl: 2.5rem;
+    --spacing-xxl: 4rem;
 
     /* Shadows e effetti - Più sofisticati */
     --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
@@ -94,6 +105,20 @@
     --badge-danger-bg: linear-gradient(135deg, var(--danger-light), var(--danger-color));
     --badge-danger-color: var(--danger-dark);
     --badge-danger-border: var(--danger-light);
+    --badge-info-bg: linear-gradient(135deg, var(--info-light), var(--info-color));
+    --badge-info-color: var(--info-dark);
+    --badge-info-border: var(--info-light);
+    --badge-warning-bg: linear-gradient(135deg, var(--warning-light), var(--warning-color));
+    --badge-warning-color: var(--warning-dark);
+    --badge-warning-border: var(--warning-light);
+    --badge-neutral-bg: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+    --badge-neutral-color: #334155;
+    --badge-neutral-border: #cbd5e1;
+    /* Spinner/Loader */
+    --spinner-size: 2.5rem;
+    --spinner-border: 4px solid var(--primary-light);
+    --spinner-border-top: 4px solid var(--primary-color);
+    --spinner-speed: 0.7s;
 
     /* Alerts - Coordinati con palette */
     --alert-success-bg: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(52, 211, 153, 0.15));
@@ -111,9 +136,20 @@
     
     /* Glassmorphism effects */
     --glass-bg: rgba(255, 255, 255, 0.8);
+    --glass-bg-strong: rgba(255, 255, 255, 0.92);
     --glass-border: rgba(255, 255, 255, 0.9);
     --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    --glass-shadow-strong: 0 16px 48px rgba(0,0,0,0.18);
     --glass-blur: blur(12px);
+    --glass-blur-strong: blur(20px);
+    /* Empty state & Icone */
+    --empty-icon-size: 3.5rem;
+    --empty-text-size: 1.15rem;
+    --empty-text-color: var(--text-muted);
+    --empty-bg: var(--bg-secondary);
+    --icon-size-base: 1.25rem;
+    --icon-size-lg: 1.75rem;
+    --icon-size-xl: 2.5rem;
     
     /* Transizioni */
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);

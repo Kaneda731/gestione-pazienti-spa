@@ -82,9 +82,15 @@
     
     /* Badge status mobile */
     .badge {
-        font-size: 0.75rem;
-        padding: 0.3rem 0.6rem;
-        border-radius: 12px;
+        font-size: 0.82rem;
+        padding: 0.35rem 0.8rem;
+        border-radius: 14px;
+        font-weight: 600;
+        border: 1.5px solid var(--border-color-dark);
+        box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+        letter-spacing: 0.01em;
+        background: var(--badge-success-bg);
+        color: var(--badge-success-color);
     }
     
     /* Pulsanti azione mobile ottimizzati */

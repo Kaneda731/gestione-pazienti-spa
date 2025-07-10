@@ -9,8 +9,12 @@
     border-bottom: 1px solid rgba(255, 255, 255, 0.2);
     position: sticky;
     top: 0;
-    z-index: 1000;
-    transition: var(--transition);
+    z-index: var(--navbar-z-index);
+    transition: var(--navbar-transition);
+}
+
+.navbar:hover, .navbar:focus-within {
+    box-shadow: 0 12px 32px rgba(37,99,235,0.13), 0 4px 16px rgba(29, 78, 216, 0.10);
 }
 
 .navbar-brand {

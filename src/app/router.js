@@ -86,6 +86,7 @@ export async function renderView() {
         userProfile: currentUser.profile
     });
     
+
     // Se l'hash contiene i token di autenticazione, è un redirect da Supabase.
     // Il listener onAuthStateChange è la fonte di verità per gestire questo.
     // Non facciamo nulla e aspettiamo che si attivi e chiami un render pulito.
@@ -97,6 +98,13 @@ export async function renderView() {
     // Controllo di sicurezza: non renderizzare se lo stato utente non è ancora definito.
     if (currentUser.session === undefined) {
         console.log("Render interrotto: stato di autenticazione non ancora pronto.");
+        return;
+    }
+
+    // PATCH: se non loggato e la view è home o list, mostra login-required invece della pagina vuota
+    const hashView = window.location.hash.replace(/^#/, '');
+    if (!currentUser.session && (hashView === '' || hashView === 'home' || hashView === 'list')) {
+        window.location.hash = 'login-required';
         return;
     }
 
@@ -189,6 +197,22 @@ export async function renderView() {
             });
         });
     } else if (viewToRender === 'login-required') {
+        // Mostra automaticamente il modal di login se presente, altrimenti focus/bottone
+        setTimeout(() => {
+            // Prova a mostrare il modal Bootstrap se esiste
+            const authModal = document.getElementById('auth-modal');
+            if (authModal && window.bootstrap) {
+                const modal = window.bootstrap.Modal.getOrCreateInstance(authModal);
+                modal.show();
+            } else {
+                // Fallback: focus sul bottone login
+                const loginButton = document.getElementById('login-prompt-button');
+                if (loginButton) {
+                    loginButton.focus();
+                }
+            }
+        }, 200);
+        // Sempre: collega il bottone login
         const loginButton = document.getElementById('login-prompt-button');
         if (loginButton) {
             loginButton.addEventListener('click', () => {

@@ -1,3 +1,26 @@
+/* Uniforma altezza e padding di tutte le custom select nei form (non solo nei filtri) */
+.custom-select-wrapper .custom-select-trigger {
+    min-height: 48px;
+    padding: 0.75rem 2.5rem 0.75rem 1rem;
+    font-size: 1rem;
+    font-family: var(--font-family-base);
+    box-sizing: border-box;
+}
+
+/* Forza anche le select native ad avere la stessa altezza minima */
+.form-select {
+    min-height: 48px;
+    box-sizing: border-box;
+}
+/* Uniforma altezza e padding di tutte le select nei form (inserimento/modifica) */
+.form-select,
+.custom-select-trigger {
+    min-height: 3.125rem;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
 /* ===================================
    FORM STYLES
    =================================== */

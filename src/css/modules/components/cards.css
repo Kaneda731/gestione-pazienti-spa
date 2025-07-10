@@ -18,7 +18,7 @@
     background: var(--card-bg-hover);
 }
 
-.card-header {
+ .card-header {
     background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
     border-bottom: 1px solid var(--border-color-light);
     padding: 1.5rem;

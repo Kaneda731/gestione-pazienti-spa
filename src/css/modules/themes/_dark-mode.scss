@@ -1,0 +1,57 @@
+// File: src/css/modules/themes/_dark-mode.scss
+
+[data-bs-theme="dark"] {
+    // Sovrascrivi le variabili di root di Bootstrap per il tema scuro
+    --bs-body-bg: #1a1d29;
+    --bs-body-color: #f8f9fa;
+    --bs-border-color: #495057;
+    
+    // Le nostre variabili personalizzate per il tema scuro
+    --body-bg: linear-gradient(135deg, #1a1d29, #1e2330);
+    --card-bg: #252a3a;
+    --bg-primary: #1e2330;
+    --bg-secondary: #252a3a;
+    --bg-tertiary: #2a3045;
+    --text-primary: #f8f9fa;
+    --text-secondary: #cbd5e1;
+    --text-muted: #94a3b8;
+    --primary-color: #4dabf7;
+    --secondary-color: #adb5bd;
+    --light-color: #3d4454;
+    --dark-color: #f8f9fa;
+    --border-color: #495057;
+    --input-bg: #3d4454;
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6);
+    --card-bg-hover: #2a3045; // Aggiunta per hover effect
+
+    // Stili specifici per componenti che non possono essere gestiti solo con le variabili
+    .navbar {
+        background: linear-gradient(135deg, #1a1d29 0%, #1e2330 30%, #252a3a 70%, #2a3045 100%) !important;
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid var(--border-color);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 4px 16px rgba(0, 0, 0, 0.4), 0 0 20px rgba(37, 99, 235, 0.2);
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+    }
+
+    .table th {
+        background: linear-gradient(135deg, var(--primary-color), #339af0);
+        color: white;
+    }
+
+    #home-view .home-special-card {
+        background: linear-gradient(145deg, #252a3a, #2a3045);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(37, 99, 235, 0.1);
+    }
+
+    #home-view .home-special-card:hover {
+        box-shadow: 0 25px 50px rgba(37, 99, 235, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        border-color: rgba(37, 99, 235, 0.3);
+        background: var(--card-bg-hover);
+    }
+}

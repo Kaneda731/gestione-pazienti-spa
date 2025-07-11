@@ -646,8 +646,3 @@ export function initCustomSelects(selector = '.form-select[data-custom="true"]')
         return { success: 0, errors: 1 };
     }
 };
-
-// Auto-inizializzazione quando il DOM è pronto
-document.addEventListener('DOMContentLoaded', () => {
-    initCustomSelects();
-});

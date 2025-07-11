@@ -49,12 +49,13 @@ export function showError(error) {
     }
 }
 
-function ensureCorrectView() {
+export function ensureCorrectView() {
     const tableContainer = document.querySelector('.table-responsive');
     const cardsContainer = document.getElementById('pazienti-cards-container');
     
     if (tableContainer && cardsContainer) {
-        if (window.matchMedia("(max-width: 767px)").matches) {
+        // Usa il breakpoint di Bootstrap 'lg' (992px) per lo switch
+        if (window.matchMedia("(max-width: 991.98px)").matches) {
             tableContainer.style.display = 'none';
             cardsContainer.style.display = 'block';
         } else {

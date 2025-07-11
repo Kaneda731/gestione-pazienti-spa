@@ -7,10 +7,12 @@
   },
   "devDependencies": {
     "jsdom": "^26.1.0",
+    "sass": "^1.89.2",
     "vite": "^7.0.3",
     "vitest": "^1.6.0"
   },
   "dependencies": {
+    "@popperjs/core": "^2.11.8",
     "@supabase/supabase-js": "^2.50.3",
     "bootstrap": "^5.3.7",
     "google-charts": "^2.0.0"

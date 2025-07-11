@@ -3,7 +3,7 @@ import { navigateTo } from '../../../app/router.js';
 import { getFilterOptions, populateSelectWithOptions } from '../../../shared/utils/index.js';
 import { state, domElements, cacheDOMElements, loadPersistedFilters, persistFilters, resetFilters } from './list-state-migrated.js';
 import { fetchPazienti, exportPazientiToCSV, updatePazienteStatus, deletePaziente } from './list-api.js';
-import { renderPazienti, showLoading, showError, updateSortIndicators } from './list-renderer.js';
+import { renderPazienti, showLoading, showError, updateSortIndicators, ensureCorrectView } from './list-renderer.js';
 import { initCustomSelects } from '../../../shared/components/forms/CustomSelect.js';
 import { showDeleteConfirmModal } from '../../../shared/services/modalService.js';
 import { supabase } from '../../../core/services/supabaseClient.js';
@@ -165,8 +165,9 @@ function setupEventListeners() {
         navigateTo('home');
     });
     
-    window.removeEventListener('resize', updateSortIndicators);
-    window.addEventListener('resize', updateSortIndicators);
+    // Listener per il resize della finestra per gestire il layout
+    window.removeEventListener('resize', ensureCorrectView);
+    window.addEventListener('resize', ensureCorrectView);
 }
 
 async function handlePatientAction(action, id) {

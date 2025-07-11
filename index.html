@@ -14,15 +14,19 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-    <!-- Stili custom principali -->
-    
+    <!-- 
+      Stili caricati in modo responsivo dal browser.
+      Vite processerà i file .scss e li servirà come CSS.
+    -->
+    <link rel="stylesheet" href="/src/css/desktop.scss" media="(min-width: 769px)">
+    <link rel="stylesheet" href="/src/css/mobile.scss" media="(max-width: 768px)">
     
     <!-- Entry point per Vite -->
     <script type="module" src="/src/app/main.js"></script>
 </head>
 <body>
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary-gradient">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary-gradient d-none d-lg-flex">
         <div class="container-fluid">
             <a class="navbar-brand d-flex align-items-center" href="#">
                 <span class="material-icons me-2">local_hospital</span>
@@ -37,7 +41,7 @@
         </div>
     </nav>
 
-    <nav class="mobile-navbar">
+    <nav class="mobile-navbar d-lg-none">
         <div class="mobile-navbar-container">
             <button id="mobile-theme-toggle" class="mobile-nav-action" title="Cambia tema">
                 <span class="material-icons" id="mobile-theme-icon">dark_mode</span>

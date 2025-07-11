@@ -71,5 +71,5 @@
 [data-bs-theme="dark"] #mobile-tab-bar {
     background: linear-gradient(135deg, #1a1d29 0%, #1e2330 30%, #252a3a 70%, #2a3045 100%);
     border-bottom-color: var(--border-color);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 4px 16px rgba(0, 0, 0, 0.4), 0 0 20px rgba(77, 171, 247, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 4px 16px rgba(0, 0, 0, 0.4), 0 0 20px rgba(37, 99, 235, 0.2);
 }

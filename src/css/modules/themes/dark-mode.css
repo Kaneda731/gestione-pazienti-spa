@@ -41,7 +41,7 @@
         background: linear-gradient(135deg, #1a1d29 0%, #1e2330 30%, #252a3a 70%, #2a3045 100%) !important;
         backdrop-filter: blur(10px);
         border-bottom: 1px solid var(--border-color);
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 4px 16px rgba(0, 0, 0, 0.4), 0 0 20px rgba(77, 171, 247, 0.2);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 4px 16px rgba(0, 0, 0, 0.4), 0 0 20px rgba(37, 99, 235, 0.2);
     }
 
     .card, .table-responsive {
@@ -81,19 +81,19 @@
     }
 
     .table-hover tbody tr:hover {
-        background-color: rgba(77, 171, 247, 0.1);
+        background-color: rgba(37, 99, 235, 0.1);
     }
 
     /* === MENU CARDS === */
     .menu-card {
         background: linear-gradient(145deg, #252a3a, #2a3045);
         box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(77, 171, 247, 0.1);
+        border: 1px solid rgba(37, 99, 235, 0.1);
     }
 
     .menu-card:hover {
-        box-shadow: 0 25px 50px rgba(77, 171, 247, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-        border-color: rgba(77, 171, 247, 0.3);
+        box-shadow: 0 25px 50px rgba(37, 99, 235, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        border-color: rgba(37, 99, 235, 0.3);
     }
 
     /* === OTTIMIZZAZIONI MOBILE === */
@@ -103,7 +103,7 @@
         }
 
         .menu-card:hover {
-            box-shadow: 0 8px 20px rgba(77, 171, 247, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.08);
         }
     }
 }

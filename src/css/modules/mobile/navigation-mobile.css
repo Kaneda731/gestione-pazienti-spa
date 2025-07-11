@@ -112,7 +112,7 @@
     /* Stile dark mode per FAB */
     [data-bs-theme="dark"] .mobile-fab {
         background: linear-gradient(135deg, #4dabf7, var(--primary-color));
-        box-shadow: 0 4px 16px rgba(77, 171, 247, 0.4);
+        box-shadow: 0 4px 16px rgba(37, 99, 235, 0.4);
     }
 }
 

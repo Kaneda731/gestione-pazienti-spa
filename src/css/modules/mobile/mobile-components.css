@@ -72,10 +72,6 @@
         z-index: 2 !important;
     }
 
-    @keyframes spin {
-        0% { transform: translate(-50%, -50%) rotate(0deg); }
-        100% { transform: translate(-50%, -50%) rotate(360deg); }
-    }
 
     /* === ELEVATION SYSTEM MOBILE === */
     
@@ -107,11 +103,7 @@
         touch-action: manipulation;
     }
 
-    /* Focus migliorato per navigation via tastiera */
-    .card:focus, .btn:focus {
-        outline: 2px solid var(--primary-color) !important;
-        outline-offset: 2px !important;
-    }
+    /* Focus gestito globalmente */
 
     /* Migliora la leggibilità su mobile */
     body {
@@ -124,9 +116,8 @@
         backdrop-filter: none !important;
     }
 
-    /* Hardware acceleration per smooth scrolling */
+    /* Hardware acceleration per smooth scrolling (rimosso will-change per ottimizzare memoria) */
     .card, .btn {
-        will-change: transform;
         -webkit-transform: translateZ(0);
         transform: translateZ(0);
     }

@@ -85,7 +85,7 @@
     #next-page-btn:focus {
         outline: 2px solid var(--primary-color) !important;
         outline-offset: 2px !important;
-        box-shadow: var(--shadow-md), 0 0 0 4px rgba(59, 130, 246, 0.2) !important;
+        box-shadow: var(--shadow-md), 0 0 0 4px rgba(37, 99, 235, 0.2) !important;
     }
     
     /* Feedback tattile per touch */

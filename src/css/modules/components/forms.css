@@ -33,7 +33,7 @@
 
 /* Base form styles */
 
-.form-control, 
+.form-control,
 .form-select {
     border: 1px solid var(--input-border);
     border-radius: var(--border-radius-sm);
@@ -44,15 +44,24 @@
     color: var(--text-primary);
     font-family: var(--font-family-base);
     outline: none;
+    box-shadow: var(--shadow-sm);
 }
 
-.form-control:focus, 
+.form-control:focus,
 .form-select:focus {
     border-color: var(--input-border-focus);
-    box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
-    outline: 2px solid var(--primary-color);
+    box-shadow: var(--focus-shadow);
     background: var(--bg-primary);
     z-index: 2;
+}
+
+/* Effetto hover per desktop - uguale alle custom-select */
+@media (min-width: 992px) {
+    .form-control:hover,
+    .form-select:hover {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.1);
+    }
 }
 
 .form-label {
@@ -84,7 +93,6 @@
 .filters-container .form-control:focus,
 .filters-container .form-select:focus {
     border-color: var(--input-border-focus);
-    box-shadow: var(--input-shadow-focus);
 }
 
 .filters-container .form-label {
@@ -134,7 +142,7 @@
 
 .custom-select-trigger {
     background: var(--card-bg);
-    border: 1px solid rgba(13, 110, 253, 0.2);
+    border: 1px solid var(--input-border);
     border-radius: var(--border-radius);
     padding: 0.75rem 2.5rem 0.75rem 1rem;
     cursor: pointer;
@@ -150,13 +158,13 @@
 
 .custom-select-trigger:hover {
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.1);
+    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.1);
 }
 
 .custom-select-wrapper:focus-within .custom-select-trigger,
 .custom-select-wrapper.open .custom-select-trigger {
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.15);
 }
 
 .custom-select-label {
@@ -186,7 +194,7 @@
     left: 0;
     right: 0;
     background: var(--card-bg);
-    border: 1px solid rgba(13, 110, 253, 0.2);
+    border: 1px solid var(--input-border);
     border-radius: var(--border-radius);
     box-shadow: var(--shadow-lg);
     z-index: 1000;
@@ -236,12 +244,12 @@
 
 .custom-select-option:hover,
 .custom-select-option.focused {
-    background: rgba(13, 110, 253, 0.1);
+    background: rgba(37, 99, 235, 0.1);
     color: var(--primary-color);
 }
 
 .custom-select-option:active {
-    background: rgba(13, 110, 253, 0.2);
+    background: rgba(37, 99, 235, 0.2);
 }
 
 /* Indicatore scroll elegante ma più visibile */
@@ -251,12 +259,12 @@
     right: 8px;
     width: 24px;
     height: 16px;
-    background: rgba(13, 110, 253, 0.1);
+    background: rgba(37, 99, 235, 0.1);
     border-radius: 12px;
     opacity: 0.8;
     transition: all 0.3s ease;
     pointer-events: none;
-    border: 1px solid rgba(13, 110, 253, 0.3);
+    border: 1px solid rgba(37, 99, 235, 0.3);
     backdrop-filter: blur(4px);
 }
 
@@ -279,13 +287,13 @@
 }
 
 @keyframes pulseGlow {
-    0%, 100% { 
-        opacity: 0.8; 
-        box-shadow: 0 0 4px rgba(13, 110, 253, 0.3);
+    0%, 100% {
+        opacity: 0.8;
+        box-shadow: 0 0 4px rgba(37, 99, 235, 0.3);
     }
-    50% { 
-        opacity: 1; 
-        box-shadow: 0 0 8px rgba(13, 110, 253, 0.5);
+    50% {
+        opacity: 1;
+        box-shadow: 0 0 8px rgba(37, 99, 235, 0.5);
     }
 }
 

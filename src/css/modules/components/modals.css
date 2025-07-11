@@ -37,18 +37,7 @@
     padding: 1.5rem;
 }
 
-.modal-body .form-control {
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
-    padding: 0.75rem 1rem;
-    font-size: 1rem;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.modal-body .form-control:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
-}
+/* Gli stili per .form-control sono ora gestiti globalmente in forms.css */
 
 .modal-body .form-label {
     font-weight: 600;

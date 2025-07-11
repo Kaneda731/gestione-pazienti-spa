@@ -1,7 +1,8 @@
 /* ===================================
-   CARD STYLES DESKTOP/TABLET
+   CARD STYLES - GLOBAL & CLEANED
    =================================== */
 
+/* Regola standard per tutte le card */
 .card {
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius) !important;
@@ -10,13 +11,18 @@
     backdrop-filter: var(--glass-blur);
     transition: var(--transition);
     overflow: hidden;
+    margin-bottom: 2rem;
+    max-width: 900px; /* Comportamento di default: larghezza limitata */
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .card:hover {
-    box-shadow: var(--shadow-xl);
+    /* Nessun effetto hover per le card generiche */
 }
 
- .card-header {
+/* Stile dell'intestazione */
+.card-header {
     background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
     border-bottom: 1px solid var(--border-color-light);
     padding: 1.5rem;
@@ -29,67 +35,25 @@
     padding: 1.5rem;
 }
 
-/* Quando card-body è l'ultimo elemento della card */
-.card-body:last-child {
-    border-radius: 0 0 var(--border-radius) var(--border-radius) !important;
-}
-
-/* Quando card-body è l'unico elemento della card */
-.card > .card-body:only-child {
-    border-radius: var(--border-radius) !important;
-}
-
-/* Fix specifico per la vista diagnosi */
-#view-diagnosi .card {
-    border-radius: var(--border-radius) !important;
-}
-
-#view-diagnosi .card .card-header {
-    border-radius: var(--border-radius) var(--border-radius) 0 0 !important;
-}
-
-#view-diagnosi .card .card-body {
-    border-radius: 0 0 var(--border-radius) var(--border-radius) !important;
-}
-
-/* Elevation system - Sofisticato */
-.elevation-1 {
-    box-shadow: var(--shadow-sm);
-}
-
-.elevation-2 {
-    box-shadow: var(--shadow-md);
-}
-
-.elevation-3 {
-    box-shadow: var(--shadow-lg);
-}
-
-.elevation-4 {
-    box-shadow: var(--shadow-xl);
-}
-
-.elevation-5 {
-    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.2), 0 12px 24px rgba(0, 0, 0, 0.15);
-}
-
 /* ===================================
-   CARD STYLES DESKTOP/TABLET
+   MODIFICATORI E RESPONSIVE
    =================================== */
 
-/* === RESPONSIVE DESKTOP/TABLET === */
+/* Unica, chiara eccezione per la card a larghezza maggiore (es. elenco pazienti) */
+@media (min-width: 768px) {
+    .card.card-full-width {
+        max-width: 1400px;
+    }
+}
+
+/* Adattamenti responsive generici */
 @media (min-width: 768px) {
     .card-header {
         padding: 1.5rem;
         font-size: 1.125rem;
     }
-    
     .card-body {
         padding: 1.5rem;
-    }
-    
-    .card:hover {
-        /* L'effetto transform è solo per le menu-card */
     }
 }
 
@@ -98,12 +62,7 @@
         padding: 2rem;
         font-size: 1.25rem;
     }
-    
     .card-body {
         padding: 2rem;
-    }
-    
-    .card:hover {
-        box-shadow: var(--shadow-xl);
     }
 }

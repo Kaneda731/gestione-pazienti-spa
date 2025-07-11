@@ -30,8 +30,8 @@ export class CustomSelect {
     }
     
     init() {
-        // Nascondi la select originale
-        this.selectElement.style.display = 'none';
+        // NON nascondere la select originale, usa una classe CSS
+        this.selectElement.classList.add('custom-select-original');
         
         // Crea il wrapper custom
         this.wrapper = this.createWrapper();
@@ -255,12 +255,18 @@ export class CustomSelect {
         
         this.isOpen = true;
         this.wrapper.classList.add('open');
+
+        // Gestione overflow della card genitore
+        const parentCard = this.wrapper.closest('.card');
+        if (parentCard) {
+            parentCard.classList.add('overflow-visible');
+        }
         
         if (window.innerWidth <= 767) {
             this.disableOtherCustomSelects();
             this.createMobileModal();
         } else {
-            this.wrapper.querySelector('.custom-select-dropdown').style.display = 'block';
+            // Non usare stili inline, la classe .open gestirà la visibilità
             if (this.selectedValue === '') {
                 const firstOption = this.wrapper.querySelector('.custom-select-option');
                 if (firstOption) {
@@ -519,11 +525,17 @@ export class CustomSelect {
         this.isOpen = false;
         this.wrapper.classList.remove('open');
 
+        // Gestione overflow della card genitore
+        const parentCard = this.wrapper.closest('.card');
+        if (parentCard) {
+            parentCard.classList.remove('overflow-visible');
+        }
+
         if (this.mobileModal) {
             this.removeMobileModal();
             this.enableOtherCustomSelects();
         } else {
-            this.wrapper.querySelector('.custom-select-dropdown').style.display = 'none';
+            // Non usare stili inline, la classe .open gestirà la visibilità
             this.wrapper.querySelectorAll('.custom-select-option').forEach(opt => {
                 opt.classList.remove('focused');
             });

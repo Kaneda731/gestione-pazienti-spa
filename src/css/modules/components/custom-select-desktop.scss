@@ -8,17 +8,38 @@
     font-family: var(--font-family-sans-serif);
 }
 
+/*
+  Stile del trigger.
+  La maggior parte delle proprietà (altezza, padding, bordi, etc.)
+  sono ereditate dalla regola unificata in forms.scss, che si applica
+  anche a .custom-select-trigger.
+  Qui definiamo solo ciò che è specifico per il layout del trigger.
+*/
 .custom-select-trigger {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.5rem 1rem;
-    background-color: var(--input-bg);
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    transition: border-color 0.2s, box-shadow 0.2s;
-    min-height: 38px; /* Altezza standard form */
+    justify-content: space-between; /* Allinea label e freccia */
+    width: 100%;
+    text-align: left;
+}
+
+/* ===================================
+   DARK MODE SUPPORT
+   =================================== */
+
+[data-bs-theme="dark"] .custom-select-trigger {
+    background: var(--dark-input-bg);
+    border-color: var(--dark-border-color);
+    color: var(--dark-color);
+}
+
+[data-bs-theme="dark"] .custom-select-trigger:focus,
+[data-bs-theme="dark"] .custom-select-wrapper.open .custom-select-trigger {
+    background: var(--dark-input-bg-focus);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(37, 99, 235, 0.25);
+}
+
+[data-bs-theme="dark"] .custom-select-trigger:hover {
+    border-color: var(--primary-color);
 }
 
 .custom-select-trigger:hover {
@@ -113,6 +134,12 @@
 /* ===================================
    CUSTOM SELECT DESKTOP - OVERFLOW FIX
    =================================== */
+
+/* Quando un custom select è aperto, la card genitore deve permettere l'overflow
+   per mostrare correttamente il dropdown. */
+.card:has(.custom-select-wrapper.open) {
+    overflow: visible;
+}
 
 /* Regole specifiche per desktop (≥992px) */
 @media (min-width: 992px) {
@@ -305,19 +332,6 @@
     }
     
     /* Trigger styling */
-    .custom-select-trigger {
-        min-height: 38px;
-        padding: 0.375rem 2.25rem 0.375rem 0.75rem;
-        background: var(--card-bg, white);
-        border: 2px solid var(--border-color-dark, #0e0f10); /* Bordo ancora più scuro e spesso */
-        color: var(--text-primary, #212529);
-        border-radius: 0.375rem;
-        cursor: pointer;
-        position: relative;
-        display: flex;
-        align-items: center;
-        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-    }
 
     .custom-select-trigger:hover {
         border-color: #131414 !important; /* Ancora più scuro in hover */

@@ -12,11 +12,11 @@ import { initListView } from '../features/patients/views/list.js';
 import { initDiagnosiView } from '../features/diagnoses/views/diagnosi.js';
 
 const viewInitializers = {
-    [ROUTES.FORM]: initInserimentoView,
-    [ROUTES.DISCHARGE]: initDimissioneView,
-    [ROUTES.CHARTS]: initGraficoView,
-    [ROUTES.LIST]: initListView,
-    [ROUTES.DIAGNOSES]: initDiagnosiView,
+    'inserimento': initInserimentoView,
+    'dimissione': initDimissioneView,
+    'grafico': initGraficoView,
+    'list': initListView,
+    'diagnosi': initDiagnosiView,
 };
 
 const viewCache = new Map();

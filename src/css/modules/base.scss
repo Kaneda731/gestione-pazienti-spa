@@ -125,3 +125,12 @@ h1, h2, h3, h4, h5, h6 {
     outline-offset: var(--focus-outline-offset);
     box-shadow: var(--focus-shadow);
 }
+
+/*
+  FIX PER CUSTOM SELECT
+  Aggiunge overflow visibile a un contenitore (es. .card)
+  quando un CustomSelect al suo interno è aperto.
+*/
+.overflow-visible {
+    overflow: visible !important;
+}

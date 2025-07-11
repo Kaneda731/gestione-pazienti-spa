@@ -1,3 +1,17 @@
+/* Uniforma altezza input e select nei gruppi input di diagnosi e dimissione su mobile */
+@media (max-width: 767px) {
+    #diagnosi-form .input-group .form-control,
+    #diagnosi-form .input-group .form-select,
+    #form-dimissione .input-group .form-control,
+    #form-dimissione .input-group .form-select {
+        min-height: 56px !important;
+        font-size: 16px !important;
+        padding: 1rem 1.25rem !important;
+        border-radius: 8px !important;
+        width: 100% !important;
+        margin-bottom: 0 !important;
+    }
+}
 /* ===================================
    FORMS MOBILE
    =================================== */

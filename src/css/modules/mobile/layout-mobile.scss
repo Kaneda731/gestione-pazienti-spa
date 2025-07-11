@@ -55,14 +55,6 @@
         padding: 1rem;
     }
     
-    /* Form mobile */
-    .form-control,
-    .form-select {
-        min-height: 44px;
-        font-size: 16px; /* Previene zoom su iOS */
-        border-radius: 8px;
-    }
-    
     /* Pulsanti mobile */
     .btn {
         min-height: 44px;

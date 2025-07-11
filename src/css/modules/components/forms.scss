@@ -1,0 +1,213 @@
+/* Uniforma altezza input e select nei gruppi input di diagnosi e dimissione su desktop */
+#diagnosi-form .input-group .form-control,
+#diagnosi-form .input-group .form-select,
+#form-dimissione .input-group .form-control,
+#form-dimissione .input-group .form-select {
+    min-height: 56px;
+    font-size: 16px;
+    padding: 1rem 1.25rem;
+    border-radius: 8px;
+    width: 100%;
+    margin-bottom: 0;
+}
+.search-results-list .list-group-item {
+  /* ...stili desktop già presenti... */
+}
+
+@media (max-width: 768px) {
+  .search-results-list .list-group-item {
+    padding: 1rem 0.75rem;
+    font-size: 1.15rem;
+    margin-bottom: 0.75rem;
+    border-radius: calc(var(--border-radius) * 1.5);
+    box-shadow: 0 2px 8px rgba(37,99,235,0.12);
+    min-height: 56px;
+    touch-action: manipulation;
+  }
+  .search-results-list .list-group-item .result-icon {
+    font-size: 1.25rem;
+    margin-right: 0.5rem;
+  }
+  .search-results-list .list-group-item .result-title {
+    font-size: 1.15rem;
+  }
+  .search-results-list .list-group-item .result-details {
+    font-size: 1rem;
+  }
+}
+
+
+/* ===================================
+   FORM STYLES
+   =================================== */
+
+/* Base form styles */
+
+/* 
+  DEFINIZIONE UNICA PER TUTTI I CAMPI FORM
+  Questa è la fonte di verità per l'aspetto dei campi.
+  min-height è !important per stabilire una base solida.
+*/
+.form-control,
+.form-select,
+.custom-select-trigger {
+    border: 1px solid var(--input-border);
+    border-radius: var(--border-radius-sm);
+    padding: 1rem 1.25rem;
+    min-height: 56px !important; /* Base height for all form controls */
+    display: flex;
+    align-items: center;
+    transition: var(--transition);
+    background: var(--input-bg);
+    font-size: 1rem;
+    color: var(--text-primary);
+    font-family: var(--font-family-base);
+    outline: none;
+    box-shadow: var(--shadow-sm);
+}
+
+.form-control:focus,
+.form-select:focus,
+.custom-select-wrapper.open .custom-select-trigger {
+    border-color: var(--input-border-focus);
+    box-shadow: var(--focus-shadow);
+    background: var(--bg-primary);
+    z-index: 2;
+}
+
+/* Effetto hover per desktop - uguale per tutti i campi */
+@media (min-width: 992px) {
+    .form-control:hover,
+    .form-select:hover,
+    .custom-select-trigger:hover {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.1);
+    }
+}
+
+.form-label {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    font-family: var(--font-family-base);
+    letter-spacing: 0.01em;
+}
+
+/* Form sections */
+.form-section {
+    background: var(--bg-secondary);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    border: 1px solid var(--border-color);
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.section-title {
+    color: var(--text-primary);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.section-title .material-icons {
+    color: var(--primary-color);
+    background: rgba(37, 99, 235, 0.1);
+    border-radius: 50%;
+    padding: 6px;
+    font-size: 20px;
+}
+
+
+
+/* Stile per i risultati della ricerca nella vista dimissione */
+#search-results .list-group-item-action {
+    background-color: transparent !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border-color-light) !important; /* Bordo leggero per separazione */
+    margin-bottom: -1px; /* Sovrappone i bordi per un look pulito */
+    transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
+}
+
+#search-results .list-group-item-action:first-child {
+    border-top-left-radius: var(--border-radius-sm);
+    border-top-right-radius: var(--border-radius-sm);
+}
+
+#search-results .list-group-item-action:last-child {
+    margin-bottom: 0;
+    border-bottom-left-radius: var(--border-radius-sm);
+    border-bottom-right-radius: var(--border-radius-sm);
+}
+
+#search-results .list-group-item-action:hover,
+#search-results .list-group-item-action:focus {
+    background-color: rgba(37, 99, 235, 0.1) !important; /* Azzurro chiaro, in palette */
+    color: var(--primary-color) !important;
+    border-color: rgba(37, 99, 235, 0.2) !important;
+    outline: none !important;
+    box-shadow: none !important;
+    z-index: 2; /* Porta l'elemento in primo piano al passaggio del mouse */
+}
+
+/* Miglioramento grafico risultati ricerca Dimissione Paziente */
+.search-results-list {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.search-results-list .list-group-item {
+  background: var(--card-bg);
+  color: var(--text-primary);
+  border-radius: var(--border-radius);
+  box-shadow: 0 2px 8px rgba(37,99,235,0.08);
+  margin-bottom: 1rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--border-color);
+  transition: box-shadow 0.2s, background 0.2s, color 0.2s;
+  display: flex;
+  align-items: center;
+}
+
+.search-results-list .list-group-item:hover {
+  background: rgba(37,99,235,0.08);
+  color: var(--primary-color);
+  box-shadow: 0 4px 16px rgba(37,99,235,0.18);
+  border-color: var(--primary-color);
+}
+
+.search-results-list .list-group-item .result-icon {
+  margin-right: 1rem;
+  font-size: 1.5rem;
+  color: var(--primary-color);
+}
+
+.search-results-list .list-group-item .result-title {
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.search-results-list .list-group-item .result-details {
+  margin-left: auto;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+
+/*
+  REGOLE PER CUSTOM SELECT SPOSTATE DA JS A CSS
+*/
+select.custom-select-original {
+  display: none !important; /* Forza il select originale a nascondersi */
+}
+
+.custom-select-dropdown {
+  display: none;
+}
+
+.custom-select-wrapper.open .custom-select-dropdown {
+  display: block;
+}

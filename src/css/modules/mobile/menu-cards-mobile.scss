@@ -4,7 +4,7 @@
 
 @media (max-width: 767px) {
     /* Contenitore grid per le card della home */
-    .home-special-cards-grid {
+    .menu-cards-grid {
         display: grid;
         grid-template-columns: 1fr; /* Una colonna su mobile */
         gap: 1.5rem;
@@ -13,13 +13,13 @@
     }
 
     /* Contenitore di ogni singola card */
-    .home-special-card-container {
+    .menu-card-container {
         width: 100%;
         max-width: 300px; /* Ridotta la larghezza massima della card */
     }
 
     /* Stile della card speciale della home */
-    .home-special-card {
+    .menu-card {
         width: 100%;
         min-height: auto; /* Rimuovo l'altezza minima fissa */
         display: flex;
@@ -38,7 +38,7 @@
     }
 
     /* Effetto al tocco */
-    .home-special-card:active {
+    .menu-card:active {
         transform: scale(0.97);
         box-shadow: var(--shadow-sm) !important;
     }
@@ -62,14 +62,14 @@
     }
 
     /* Titolo della card */
-    .home-special-card .card-title {
+    .menu-card .card-title {
         font-size: 1.1rem;
         font-weight: 600;
         margin-bottom: 0.25rem;
     }
 
     /* Testo descrittivo */
-    .home-special-card .card-text {
+    .menu-card .card-text {
         font-size: 0.9rem;
         color: var(--text-secondary);
     }

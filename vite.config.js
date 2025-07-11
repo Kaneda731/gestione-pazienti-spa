@@ -15,6 +15,15 @@ export default defineConfig({
     }
   },
   
+  // Aggiunta per sopprimere i warning di deprecazione di Sass
+  css: {
+    preprocessorOptions: {
+      scss: {
+        quietDeps: true
+      }
+    }
+  },
+
   // Configurazione per il build di produzione
   build: {
     outDir: 'dist',

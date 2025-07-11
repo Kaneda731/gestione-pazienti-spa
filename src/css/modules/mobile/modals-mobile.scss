@@ -82,44 +82,6 @@
     }
 
     /* ============================ */
-    /* === FORM & INPUT === */
-    /* ============================ */
-    .modal .form-label {
-        font-size: 1rem;
-        font-weight: 600;
-        margin-bottom: 0.75rem;
-        display: flex;
-        align-items: center;
-        color: var(--text-color);
-    }
-    
-    .modal .form-label .material-icons {
-        font-size: 1.1rem;
-        margin-right: 0.5rem;
-    }
-
-    .modal .form-control {
-        font-size: 16px; /* Previene zoom su iOS */
-        min-height: 48px;
-        padding: 0.75rem 1rem;
-        border-radius: 12px;
-        will-change: transform;
-        transform: translateZ(0);
-    }
-    
-    .modal .form-control:focus {
-        transform: none;
-        box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.25);
-        border-color: var(--primary-color);
-        background: var(--input-bg);
-        outline: none;
-    }
-
-    .modal .mb-3 {
-        margin-bottom: 1.5rem !important;
-    }
-
-    /* ============================ */
     /* === PULSANTI === */
     /* ============================ */
     .modal .btn {
@@ -189,25 +151,11 @@
         background: var(--card-bg);
         color: var(--text-color);
     }
-    
-    [data-bs-theme="dark"] .modal .form-control {
-        background: var(--input-bg);
-        border-color: var(--border-color);
-        color: var(--text-color);
-    }
-    
-    [data-bs-theme="dark"] .modal .form-control:focus {
-        background: var(--input-bg);
-        border-color: var(--primary-color);
-        color: var(--text-color);
-        box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.2);
-    }
 
     /* ============================ */
     /* === ACCESSIBILITÀ === */
     /* ============================ */
     .modal-content .btn:focus,
-    .modal-content .form-control:focus,
     .modal-content .btn-close:focus,
     .modal-content a:focus {
         outline: 3px solid var(--primary-color) !important;
@@ -251,11 +199,6 @@
             min-height: 44px;
             padding: 0.75rem 1.25rem;
             font-size: 0.95rem;
-        }
-        
-        .modal .form-control {
-            min-height: 44px;
-            padding: 0.625rem 0.875rem;
         }
     }
 }

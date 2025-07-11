@@ -4,9 +4,15 @@
  * Entry point principale dell'applicazione
  */
 
-// Importazioni di stile
-import 'bootstrap/dist/css/bootstrap.min.css';
-import '/src/css/desktop.css';
+// Importazioni di stile dinamiche
+function loadStyles() {
+    if (window.innerWidth <= 768) {
+        import('/src/css/mobile.scss');
+    } else {
+        import('/src/css/desktop.scss');
+    }
+}
+loadStyles();
 
 // Configurazione
 import { environment, isDevelopment } from './config/environment.js';

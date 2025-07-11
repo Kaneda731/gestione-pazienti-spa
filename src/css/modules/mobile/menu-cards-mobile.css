@@ -1,78 +1,76 @@
 /* ===================================
-   MENU CARDS MOBILE
+   MENU CARDS MOBILE - REBUILT
    =================================== */
 
-/* Applicato solo su schermi mobile */
 @media (max-width: 767px) {
-    /* Container mobile ottimizzato */
-    .menu-cards-grid {
-        grid-template-columns: 1fr;
+    /* Contenitore grid per le card della home */
+    .home-special-cards-grid {
+        display: grid;
+        grid-template-columns: 1fr; /* Una colonna su mobile */
         gap: 1.5rem;
         padding: 1.5rem 1rem;
-        max-width: 100%;
-        margin: 1rem auto;
+        justify-items: center; /* Centra le card orizzontalmente */
     }
-    
-    .menu-card-container {
-        max-width: 100%;
-        padding: 0 0.5rem;
+
+    /* Contenitore di ogni singola card */
+    .home-special-card-container {
+        width: 100%;
+        max-width: 300px; /* Ridotta la larghezza massima della card */
     }
-    
-    /* Card mobile compatte */
-    .menu-card {
-        min-height: 180px;
-        max-width: 320px;
-        margin: 0 auto;
-        transform: none; /* Disabilita trasformazioni 3D pesanti */
-        transition: transform 0.2s ease, box-shadow 0.2s ease; /* Animazioni leggere */
+
+    /* Stile della card speciale della home */
+    .home-special-card {
+        width: 100%;
+        min-height: auto; /* Rimuovo l'altezza minima fissa */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 0.75rem; /* Padding ulteriormente ridotto */
+        
+        /* Mantiene lo stile base delle card ma assicura il layout corretto */
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius) !important;
+        box-shadow: var(--shadow-md) !important;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
-    
-    .menu-card .card-body {
-        padding: 2rem 1.5rem;
+
+    /* Effetto al tocco */
+    .home-special-card:active {
+        transform: scale(0.97);
+        box-shadow: var(--shadow-sm) !important;
     }
-    
-    /* Icone mobile ridotte */
+
+    /* Contenitore dell'icona */
     .icon-wrapper {
-        width: 80px;
-        height: 80px;
-        margin-bottom: 1rem;
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3),
-                    0 2px 6px rgba(37, 99, 235, 0.2),
-                    inset 0 1px 2px rgba(255, 255, 255, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 60px; /* Dimensione del cerchio molto ridotta */
+        height: 60px; /* Dimensione del cerchio molto ridotta */
+        border-radius: 50%; /* Lo rende un cerchio */
+        background: var(--primary-color); /* Sfondo blu */
+        margin-bottom: 0.5rem; /* Spazio inferiore minimo */
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); /* Ombra più leggera */
     }
-    
+
     .icon-wrapper .material-icons {
-        font-size: 2.5rem !important;
+        font-size: 32px !important; /* Icona più piccola */
+        color: white !important; /* Icona bianca per contrasto */
     }
-    
-    /* Animazioni semplificate per mobile */
-    .menu-card:hover {
-        transform: translateY(-3px) scale(1.02);
-        box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25),
-                    0 4px 10px rgba(37, 99, 235, 0.15);
+
+    /* Titolo della card */
+    .home-special-card .card-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
     }
-    
-    .menu-card:hover .icon-wrapper {
-        transform: scale(1.05);
-        box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4),
-                    0 3px 8px rgba(37, 99, 235, 0.25);
-    }
-    
-    /* Disabilita pseudo-elements pesanti su mobile */
-    .menu-card::before,
-    .menu-card::after,
-    .icon-wrapper::before {
-        display: none;
-    }
-    
-    /* Testi mobile ottimizzati */
-    .menu-card .card-title {
-        font-size: 1.2rem;
-        margin-bottom: 0.8rem;
-    }
-    
-    .menu-card .card-text {
+
+    /* Testo descrittivo */
+    .home-special-card .card-text {
         font-size: 0.9rem;
-        line-height: 1.5;
+        color: var(--text-secondary);
     }
 }

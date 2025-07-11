@@ -1,0 +1,47 @@
+/* ===================================
+   DESKTOP SCSS STYLESHEET
+   =================================== */
+
+// 1. Funzioni e variabili di Bootstrap
+@import "bootstrap/scss/functions";
+@import "bootstrap/scss/variables";
+
+// 2. Le nostre variabili personalizzate
+@import "modules/_variables.scss"; 
+
+// 3. Mappe e mixin di Bootstrap
+@import "bootstrap/scss/maps";
+@import "bootstrap/scss/mixins";
+@import "bootstrap/scss/root";
+
+// 4. Componenti selettivi di Bootstrap
+@import "bootstrap/scss/reboot";
+@import "bootstrap/scss/containers";
+@import "bootstrap/scss/grid";
+@import "bootstrap/scss/tables";
+@import "bootstrap/scss/forms";
+@import "bootstrap/scss/buttons";
+@import "bootstrap/scss/dropdown";
+@import "bootstrap/scss/nav";
+@import "bootstrap/scss/navbar";
+@import "bootstrap/scss/card";
+@import "bootstrap/scss/pagination";
+@import "bootstrap/scss/close";
+@import "bootstrap/scss/modal";
+@import "bootstrap/scss/helpers";
+@import "bootstrap/scss/utilities";
+@import "bootstrap/scss/utilities/api";
+
+// 5. Stili personalizzati del progetto (solo desktop)
+@import "modules/themes/_dark-mode.scss";
+@import "modules/base.css";
+@import "modules/layout/responsive.css";
+@import "modules/layout/pagination.css";
+@import "modules/components/buttons.css";
+@import "modules/components/cards.css";
+@import "modules/components/forms.css";
+@import "modules/components/tables.css";
+@import "modules/components/modals.css";
+@import "modules/components/navbar.css";
+@import "modules/components/menu-cards.css";
+@import "modules/components/custom-select-desktop.css";

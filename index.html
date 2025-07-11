@@ -15,7 +15,7 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
     <!-- Stili custom principali -->
-    <link rel="stylesheet" href="/src/css/style.css">
+    
     
     <!-- Entry point per Vite -->
     <script type="module" src="/src/app/main.js"></script>
@@ -37,16 +37,16 @@
         </div>
     </nav>
 
-    <nav class="mobile-navbar d-none">
+    <nav class="mobile-navbar">
         <div class="mobile-navbar-container">
-            <button class="mobile-nav-btn" id="mobile-theme-toggle" type="button" title="Cambia tema">
+            <button id="mobile-theme-toggle" class="mobile-nav-action" title="Cambia tema">
                 <span class="material-icons" id="mobile-theme-icon">dark_mode</span>
             </button>
-            <a href="#home" class="mobile-nav-btn mobile-nav-center" data-action="home" title="Home">
+            <a href="#home" id="mobile-home-link" class="mobile-nav-action" title="Home">
                 <span class="material-icons">home</span>
             </a>
-            <div class="mobile-nav-btn" id="mobile-auth-wrapper" title="Accesso">
-                <div id="mobile-auth-container" tabindex="-1"></div>
+            <div id="mobile-auth-container" class="mobile-nav-action">
+                <!-- L'icona di autenticazione verrà iniettata qui dal JavaScript -->
             </div>
         </div>
     </nav>

@@ -1,72 +1,74 @@
 // src/app/mobile/mobile-navigation.js
-
-import { navigateTo } from '../router.js';
-import { signInWithGoogle, signOut, currentUser } from '../../core/auth/authService.js';
+import { signOut, currentUser } from '../../core/auth/authService.js';
 
 /**
- * Inizializza tutta la logica della UI specifica per mobile.
+ * Gestisce la visibilità delle navbar (desktop vs mobile) in base alla larghezza dello schermo.
  */
-export function initMobileUI() {
-    if (window.innerWidth > 768) return;
+function handleNavbarVisibility() {
+    const desktopNavbar = document.querySelector('.navbar'); // La navbar di Bootstrap
+    const mobileNavbar = document.querySelector('.mobile-navbar');
 
-    initMobileNavbar();
-    // La logica MobileNavigation/FAB è stata rimossa: la navigazione mobile è ora solo tramite la navbar centrale
-    // Se serve gestire resize, puoi aggiungere qui eventuali listener per la navbar mobile
+    if (!desktopNavbar || !mobileNavbar) return;
+
+    const isMobile = window.innerWidth <= 767;
+
+    desktopNavbar.classList.toggle('d-none', isMobile);
+    mobileNavbar.classList.toggle('d-none', !isMobile);
+    
+    if (isMobile) {
+        syncMobileAuth(); // Sincronizza lo stato auth quando si passa a mobile
+    }
 }
 
 /**
- * Gestisce la sincronizzazione del pulsante di autenticazione nella navbar mobile.
- * Questa funzione viene chiamata da AuthUI ogni volta che lo stato di autenticazione cambia.
+ * Sincronizza lo stato di autenticazione (login/logout) sulla navbar mobile.
  */
 export function syncMobileAuth() {
     const mobileAuthContainer = document.getElementById('mobile-auth-container');
-    if (!mobileAuthContainer) return;
+    const homeLink = document.getElementById('mobile-home-link');
+    if (!mobileAuthContainer || !homeLink) return;
 
     const session = currentUser.session;
 
     if (session) {
-        // Utente loggato: mostra icona di logout NEUTRA (logout) e imposta il logout
-        mobileAuthContainer.innerHTML = `<span class=\"material-icons mobile-logout-icon\" title=\"Logout\">logout</span>`;
+        // Utente loggato: mostra icona di logout e attiva l'effetto sulla home
+        mobileAuthContainer.innerHTML = `<span class="material-icons" title="Logout">logout</span>`;
         mobileAuthContainer.onclick = async (event) => {
             event.preventDefault();
             await signOut();
         };
-        // Evidenzia la casetta centrale
-        const homeIcon = document.querySelector('.mobile-nav-center .material-icons');
-        if (homeIcon) homeIcon.classList.add('navbar-home-logged');
+        homeLink.classList.add('navbar-home-logged');
     } else {
-        // Utente non loggato: mostra icona di login e imposta il login
-        mobileAuthContainer.innerHTML = `<span class="material-icons">login</span>`;
+        // Utente non loggato: mostra icona di login e disattiva l'effetto
+        mobileAuthContainer.innerHTML = `<span class="material-icons" title="Login">login</span>`;
         mobileAuthContainer.onclick = (event) => {
             event.preventDefault();
-            // Chiama la stessa funzione usata dal modal di login desktop
             const loginTrigger = document.getElementById('login-modal-trigger');
             if (loginTrigger) loginTrigger.click();
         };
-        // Rimuovi evidenziazione dalla casetta centrale
-        const homeIcon = document.querySelector('.mobile-nav-center .material-icons');
-        if (homeIcon) homeIcon.classList.remove('navbar-home-logged');
+        homeLink.classList.remove('navbar-home-logged');
     }
 }
 
 /**
- * Inizializza la navbar mobile, inclusa la sincronizzazione del pulsante auth.
+ * Inizializza la UI mobile, inclusa la gestione della visibilità della navbar
+ * e l'ascolto dei cambiamenti di stato di autenticazione.
  */
-function initMobileNavbar() {
-    const authContainer = document.getElementById('auth-container');
-    if (authContainer) {
+export function initMobileUI() {
+    // Gestione iniziale e su resize
+    handleNavbarVisibility();
+    window.addEventListener('resize', handleNavbarVisibility);
+
+    // Ascolta i cambiamenti nel contenitore auth desktop per sincronizzare la UI mobile
+    const desktopAuthContainer = document.getElementById('auth-container');
+    if (desktopAuthContainer) {
         const observer = new MutationObserver(syncMobileAuth);
-        observer.observe(authContainer, {
+        observer.observe(desktopAuthContainer, {
             childList: true,
             subtree: true
         });
-        // Esegui una sincronizzazione iniziale per sicurezza
-        setTimeout(syncMobileAuth, 100);
     }
+    
+    // Sincronizzazione iniziale per sicurezza
+    setTimeout(syncMobileAuth, 150);
 }
-
-
-/**
- * Classe per la navigazione mobile (FAB).
- */
-// RIMOSSA la classe MobileNavigation e la logica FAB: ora la navigazione mobile è gestita solo dalla navbar centrale

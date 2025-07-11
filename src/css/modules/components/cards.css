@@ -14,8 +14,6 @@
 
 .card:hover {
     box-shadow: var(--shadow-xl);
-    transform: translateY(-3px) scale(1.01);
-    background: var(--card-bg-hover);
 }
 
  .card-header {
@@ -91,7 +89,7 @@
     }
     
     .card:hover {
-        transform: translateY(-2px);
+        box-shadow: var(--shadow-xl);
     }
 }
 
@@ -106,7 +104,6 @@
     }
     
     .card:hover {
-        transform: translateY(-4px);
         box-shadow: var(--shadow-xl);
     }
 }

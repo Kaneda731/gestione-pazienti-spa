@@ -125,7 +125,7 @@
     
     /* Form inputs - Coordinati */
     --input-bg: var(--bg-primary);
-    --input-border: rgba(37, 99, 235, 0.2);
+    --input-border: rgba(100, 116, 139, 0.3);
     --input-border-focus: var(--primary-color);
     --input-shadow-focus: 0 0 0 3px rgba(37, 99, 235, 0.1);
     

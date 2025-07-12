@@ -259,7 +259,7 @@ export async function initListView(urlParams) {
         populateSelectWithOptions(domElements.diagnosiFilter, diagnosiOptions);
 
         // 4. Carica i filtri salvati (da URL o sessionStorage)
-        loadPersistedFilters(urlParams);
+        loadPersistedFilters();
 
         // 5. Ora che il DOM è stabile e popolato, inizializza i custom select
         initCustomSelects('#list-filter-reparto, #list-filter-diagnosi, #list-filter-stato');

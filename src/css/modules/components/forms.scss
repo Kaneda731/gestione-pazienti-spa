@@ -1,4 +1,70 @@
 /* Uniforma altezza input e select nei gruppi input di diagnosi e dimissione su desktop */
+@media (min-width: 768px) {
+    #diagnosi-form .form-control,
+    #diagnosi-form #save-diagnosi-btn, /* Selettore più specifico */
+    #form-dimissione .form-control,
+    #form-dimissione .form-select {
+        min-height: 56px;
+    }
+
+    #diagnosi-form #save-diagnosi-btn {
+        min-width: 180px; /* Larghezza fissa per il pulsante */
+        flex-shrink: 0; /* Impedisce al pulsante di restringersi */
+    }
+}
+
+/* Stile specifico per il pulsante Aggiungi Diagnosi per garantire larghezza fissa */
+.btn-add-diagnosi {
+    min-width: 180px !important; /* Larghezza fissa */
+    flex-shrink: 0 !important;   /* Non permettere al pulsante di restringersi */
+}
+
+/* 
+  FIX DEFINITIVO PER ALLINEAMENTO FORM DIAGNOSI 
+  Questo blocco forza l'input e il pulsante ad avere la stessa altezza.
+*/
+#diagnosi-form .d-flex {
+    align-items: stretch; /* Allunga gli elementi per riempire l'altezza del contenitore */
+}
+
+#diagnosi-form .form-control,
+#diagnosi-form .btn {
+    height: 56px; /* Imposta un'altezza fissa e uguale per entrambi */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Stile per il contenitore del form diagnosi */
+.diagnosi-form-container {
+    display: flex;
+    flex-direction: column; /* Layout a colonna di default (mobile) */
+    gap: 0.75rem; /* Spazio tra input e pulsante su mobile */
+}
+
+.diagnosi-form-container .btn {
+    width: 100%; /* Pulsante a larghezza piena su mobile */
+}
+
+/* Stili per desktop (schermi più grandi di 768px) */
+@media (min-width: 768px) {
+    .diagnosi-form-container {
+        flex-direction: row; /* Layout a riga su desktop */
+        align-items: center; /* Allinea verticalmente */
+        gap: 0.5rem; /* Spazio ridotto tra gli elementi su desktop */
+    }
+
+    .diagnosi-form-container .form-control {
+        flex-grow: 1; /* L'input occupa lo spazio rimanente */
+    }
+
+    .diagnosi-form-container .btn {
+        width: auto; /* Larghezza automatica in base al contenuto */
+        min-width: 180px; /* Larghezza minima fissa */
+        flex-shrink: 0; /* Impedisce al pulsante di restringersi */
+    }
+}
+
 #diagnosi-form .input-group .form-control,
 #diagnosi-form .input-group .form-select,
 #form-dimissione .input-group .form-control,

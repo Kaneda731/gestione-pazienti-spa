@@ -15,6 +15,7 @@
     "@popperjs/core": "^2.11.8",
     "@supabase/supabase-js": "^2.50.3",
     "bootstrap": "^5.3.7",
-    "google-charts": "^2.0.0"
+    "google-charts": "^2.0.0",
+    "imask": "^7.6.1"
   }
 }

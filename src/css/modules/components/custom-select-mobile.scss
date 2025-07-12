@@ -334,4 +334,81 @@
         -webkit-user-select: none !important;
         user-select: none !important;
     }
+
+    // Calendario custom dentro il modal mobile
+    .custom-select-mobile-content .datepicker-container {
+        position: static;
+        max-width: 100%;
+        width: 100%;
+        margin: 0;
+        box-shadow: none;
+        border-radius: 0.75rem;
+        padding: 0.5rem;
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .custom-select-mobile-content .datepicker-grid {
+        gap: 2px;
+        min-height: 280px;
+        grid-auto-rows: minmax(36px, 1fr);
+        align-items: center;
+        justify-items: center;
+        width: 100%;
+        box-sizing: border-box;
+        overflow: hidden;
+    }
+    .custom-select-mobile-content .datepicker-day,
+    .custom-select-mobile-content .datepicker-weekday {
+        font-size: 1rem;
+        aspect-ratio: 1 / 1;
+        padding: 4px;
+        border-radius: 0.5rem;
+        background: transparent;
+        color: #495057;
+        transition: background 0.15s, color 0.15s;
+        min-width: 36px;
+        min-height: 36px;
+        max-width: 44px;
+        max-height: 44px;
+        box-sizing: border-box;
+        visibility: visible !important;
+        overflow: hidden;
+    }
+    .custom-select-mobile-content .datepicker-day.selected {
+        background: #343a40;
+        color: #f8f9fa;
+        font-weight: 600;
+        z-index: 1;
+        max-width: 44px;
+        max-height: 44px;
+    }
+    .custom-select-mobile-content .datepicker-day:hover,
+    .custom-select-mobile-content .datepicker-day:active {
+        background: #6c757d;
+        color: #fff;
+        z-index: 2;
+    }
+    // Dark mode calendario nel modal
+    [data-bs-theme="dark"] .custom-select-mobile-content .datepicker-container {
+        background: #212529;
+        border-color: #495057;
+    }
+    [data-bs-theme="dark"] .custom-select-mobile-content .datepicker-day,
+    [data-bs-theme="dark"] .custom-select-mobile-content .datepicker-weekday {
+        color: #f8f9fa;
+        background: transparent;
+    }
+    [data-bs-theme="dark"] .custom-select-mobile-content .datepicker-day.selected {
+        background: #0d6efd;
+        color: #fff;
+    }
+    [data-bs-theme="dark"] .custom-select-mobile-content .datepicker-day:hover,
+    [data-bs-theme="dark"] .custom-select-mobile-content .datepicker-day:active {
+        background: #343a40;
+        color: #fff;
+    }
 }

@@ -8,6 +8,10 @@
 import { environment, isDevelopment } from './config/environment.js';
 import { STORAGE_KEYS } from './config/constants.js';
 
+// Importa gli stili SCSS
+import '/src/css/desktop.scss';
+import '/src/css/mobile.scss';
+
 // Core services
 import { initErrorHandling } from '../core/services/errorService.js';
 import { initAuth } from '../core/auth/authService.js';

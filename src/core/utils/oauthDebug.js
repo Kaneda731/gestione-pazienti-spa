@@ -4,7 +4,7 @@
  * Debug utilities per OAuth
  */
 
-export function logOAuthState() {
+function logOAuthState() {
     console.log('OAuth Debug - Current State:', {
         location: window.location.href,
         hash: window.location.hash,
@@ -14,7 +14,7 @@ export function logOAuthState() {
     });
 }
 
-export function clearOAuthState() {
+function clearOAuthState() {
     console.log('OAuth Debug - Clearing state...');
     localStorage.removeItem('supabase.auth.token');
     sessionStorage.removeItem('supabase.auth.token');

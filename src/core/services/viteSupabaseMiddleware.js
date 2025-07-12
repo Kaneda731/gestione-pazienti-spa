@@ -6,7 +6,7 @@
 
 import { supabase } from './supabaseClient.js';
 
-export class ViteSupabaseMiddleware {
+class ViteSupabaseMiddleware {
     constructor() {
         this.isViteReady = false;
         this.isSupabaseReady = false;

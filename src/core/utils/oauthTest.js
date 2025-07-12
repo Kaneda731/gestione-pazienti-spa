@@ -4,7 +4,7 @@
  * Test utilities per OAuth
  */
 
-export function testOAuthFlow() {
+function testOAuthFlow() {
     console.log('OAuth Test - Testing flow...');
     
     // Simula un test del flusso OAuth
@@ -19,7 +19,7 @@ export function testOAuthFlow() {
     return testData;
 }
 
-export function validateOAuthResponse(response) {
+function validateOAuthResponse(response) {
     console.log('OAuth Test - Validating response:', response);
     
     const requiredFields = ['access_token', 'token_type', 'expires_in'];

@@ -15,19 +15,3 @@ export { Modal, Tooltip, Dropdown, Collapse };
 if (typeof window !== 'undefined') {
     window.bootstrap = { Modal, Tooltip, Dropdown, Collapse };
 }
-
-/**
- * Inizializza tutti i tooltip presenti nella pagina
- */
-export function initTooltips() {
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-    [...tooltipTriggerList].map(tooltipTriggerEl => new Tooltip(tooltipTriggerEl));
-}
-
-/**
- * Inizializza tutti i dropdown presenti nella pagina
- */
-export function initDropdowns() {
-    const dropdownElementList = document.querySelectorAll('.dropdown-toggle');
-    [...dropdownElementList].map(dropdownToggleEl => new Dropdown(dropdownToggleEl));
-}

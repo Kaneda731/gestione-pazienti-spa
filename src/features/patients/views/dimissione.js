@@ -2,6 +2,7 @@
 import { supabase } from '../../../core/services/supabaseClient.js';
 import { mostraMessaggio } from '../../../shared/utils/helpers.js';
 import { navigateTo } from '../../../app/router.js';
+import { initDatepickers } from '../../../shared/components/forms/Datepicker.js';
 
 // Caching degli elementi del DOM e stato
 const dom = {};
@@ -105,7 +106,7 @@ function setupEventListeners() {
 /**
  * Inizializza la vista di dimissione paziente.
  */
-export function initDimissioneView() {
+export async function initDimissioneView() {
     const view = document.querySelector('#app-container .view');
     if (!view) return;
 
@@ -118,6 +119,9 @@ export function initDimissioneView() {
     dom.selectedPazienteRicovero = document.getElementById('selected-paziente-ricovero');
     dom.dataDimissioneInput = document.getElementById('data_dimissione');
     dom.backButton = view.querySelector('button[data-view="home"]');
+
+    // Inizializza il datepicker
+    await initDatepickers(view);
 
     // Reset dello stato all'inizializzazione
     dom.dimissioneForm.classList.add('d-none');

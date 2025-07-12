@@ -3,6 +3,7 @@ import { supabase } from '../../../core/services/supabaseClient.js';
 import { navigateTo } from '../../../app/router.js';
 import { getFilterOptions, populateSelectWithOptions } from '../../../shared/utils/index.js';
 import { initCustomSelects } from '../../../shared/components/forms/CustomSelect.js';
+import { initDatepickers } from '../../../shared/components/forms/Datepicker.js';
 
 import { 
     showLoadingInContainer, 
@@ -227,8 +228,9 @@ export async function initGraficoView() {
         populateSelectWithOptions(dom.provenienzaFilter, provenienzaOptions);
         populateSelectWithOptions(dom.diagnosiFilter, diagnosiOptions);
 
-        // 3. Inizializza i custom select
+        // 3. Inizializza i componenti del form
         initCustomSelects('#filter-reparto, #filter-provenienza, #filter-diagnosi, #filter-assistenza');
+        await initDatepickers(view);
 
         // 4. Imposta gli event listener
         setupEventListeners();

@@ -39,7 +39,10 @@
                         
                         <div class="mb-3">
                             <label for="data_dimissione" class="form-label">Data di Dimissione</label>
-                            <input type="date" id="data_dimissione" name="data_dimissione" class="form-control" required>
+                            <div class="input-group-icon">
+                                <input type="text" id="data_dimissione" name="data_dimissione" class="form-control" data-datepicker placeholder="gg/mm/aaaa" required>
+                                <span class="material-icons input-icon">calendar_today</span>
+                            </div>
                         </div>
                         
                         <button type="submit" class="btn btn-primary">

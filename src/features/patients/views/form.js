@@ -3,6 +3,7 @@ import { supabase } from '../../../core/services/supabaseClient.js';
 import { mostraMessaggio } from '../../../shared/utils/helpers.js';
 import { navigateTo } from '../../../app/router.js';
 import { initCustomSelects } from '../../../shared/components/forms/CustomSelect.js';
+import { initDatepickers } from '../../../shared/components/forms/Datepicker.js';
 
 // Oggetto per il caching degli elementi del DOM del form
 const dom = {};
@@ -172,8 +173,9 @@ export async function initInserimentoView() {
 
     // A questo punto, il form è stato popolato (in caso di modifica)
     // e le opzioni delle diagnosi sono state caricate.
-    // Ora è sicuro inizializzare i custom select.
+    // Ora è sicuro inizializzare i componenti del form.
     initCustomSelects('#form-inserimento [data-custom="true"]');
+    await initDatepickers(formElement);
 
     setupFormEventListeners(editId);
 }

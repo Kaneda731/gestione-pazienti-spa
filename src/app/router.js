@@ -172,14 +172,14 @@ export async function renderView() {
     if (initializer) {
         console.log('Inizializzatore trovato per:', viewToRender);
         // Usa setTimeout con un delay più lungo per assicurarsi che il DOM sia completamente renderizzato
-        setTimeout(() => {
+        setTimeout(async () => {
             console.log('DOM dopo timeout:', {
                 tableBody: document.getElementById('pazienti-table-body'),
                 cardsContainer: document.getElementById('pazienti-cards-container'),
                 viewContainer: document.querySelector('#app-container .view')
             });
             console.log('Chiamando inizializzatore per:', viewToRender);
-            initializer(urlParams);
+            await initializer(urlParams);
         }, 100); // Aumentiamo il delay a 100ms
     } else {
         console.log('Nessun inizializzatore per:', viewToRender);

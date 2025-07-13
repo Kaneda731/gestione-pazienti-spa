@@ -288,6 +288,13 @@ select.custom-select-original {
   display: block;
 }
 
+/* Stili per il datepicker (Tema Chiaro) */
+.datepicker {
+    --bs-datepicker-cell-selected-bg: var(--primary-color);
+    --bs-datepicker-cell-today-color: var(--primary-color);
+    --bs-datepicker-font-size: var(--font-size-sm);
+}
+
 /* Stili per i gruppi di input con icone (es. datepicker) */
 .input-group-icon {
     position: relative;

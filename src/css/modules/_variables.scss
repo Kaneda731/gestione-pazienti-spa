@@ -162,3 +162,17 @@
     --btn-shadow-hover: 0 4px 15px rgba(0, 0, 0, 0.25);
     --btn-shine-transition: left 0.5s;
 }
+
+/* Aggiunta per Flatpickr Dark Mode */
+[data-bs-theme="dark"] {
+    --flatpickr-bg: var(--card-bg);
+    --flatpickr-text-color: var(--text-primary);
+    --flatpickr-border-color: var(--border-color);
+    --flatpickr-month-bg: var(--bg-tertiary);
+    --flatpickr-weekday-color: var(--text-secondary);
+    --flatpickr-day-hover-bg: var(--bg-tertiary);
+    --flatpickr-day-selected-bg: var(--primary-color);
+    --flatpickr-day-selected-color: white;
+    --flatpickr-day-today-border-color: var(--primary-color);
+    --flatpickr-day-disabled-color: var(--text-muted);
+}

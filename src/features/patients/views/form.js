@@ -20,162 +20,270 @@ async function loadDiagnosiOptions() {
         return;
     }
 
-    const diagnosiSelect = dom.form.querySelector('#diagnosi');
-    diagnosiSelect.innerHTML = '<option value="">Seleziona diagnosi...</option>';
-    data.forEach(d => {
-        const option = document.createElement('option');
-        option.value = d.nome;
-        option.textContent = d.nome;
-        diagnosiSelect.appendChild(option);
-    });
+    return data || [];
 }
 
-/**
- * Popola il form con i dati di un paziente per la modifica.
- * @param {string} editId - L'ID del paziente da modificare.
- */
-async function populateFormForEdit(editId) {
-    dom.title.innerHTML = '<span class="material-icons me-2">edit</span>Modifica Paziente';
-    dom.submitButton.innerHTML = '<span class="material-icons me-1" style="vertical-align: middle;">save</span>Salva Modifiche';
-    dom.dataDimissioneContainer.style.display = 'block'; // Mostra il campo
+async function loadPrenotazioniOptions() {
+    const { data, error } = await supabase
+        .from('prenotazioni')
+        .select('*')
+        .order('data', { ascending: true });
 
-    try {
-        const { data, error } = await supabase.from('pazienti').select('*').eq('id', editId).single();
-        if (error) throw error;
-        
-        // Popola dinamicamente i campi del form
-        for (const key in data) {
-            if (dom.form.elements[key]) {
-                // Correzione per i campi di tipo 'date'
-                if (dom.form.elements[key].type === 'date' && data[key]) {
-                    dom.form.elements[key].value = data[key].split('T')[0];
-                } else {
-                    dom.form.elements[key].value = data[key];
-                }
-                
-                // Se è una select con custom, aggiorna anche il custom select
-                if (dom.form.elements[key].hasAttribute('data-custom') && dom.form.elements[key].customSelectInstance) {
-                    dom.form.elements[key].customSelectInstance.setValue(data[key]);
-                }
-            }
-        }
-    } catch (error) {
-        mostraMessaggio(`Errore nel caricamento dei dati del paziente: ${error.message}`, 'error');
-        navigateTo('list'); // Torna alla lista se non si possono caricare i dati
-    }
-}
-
-/**
- * Prepara il form per l'inserimento di un nuovo paziente.
- */
-function setupFormForInsert() {
-    dom.title.innerHTML = '<span class="material-icons me-2">person_add</span>Inserimento Nuovo Paziente';
-    dom.submitButton.innerHTML = '<span class="material-icons me-1" style="vertical-align: middle;">save</span>Salva Paziente';
-    dom.form.reset();
-    dom.idInput.value = '';
-    dom.dataDimissioneContainer.style.display = 'none'; // Nasconde il campo
-    // Imposta la data di ricovero di default a oggi
-    dom.form.querySelector('#data_ricovero').value = new Date().toISOString().split('T')[0];
-}
-
-/**
- * Gestisce la logica di submit del form (sia inserimento che modifica).
- * @param {Event} e - L'evento di submit.
- * @param {string|null} editId - L'ID del paziente se in modalità modifica, altrimenti null.
- */
-async function handleFormSubmit(e, editId) {
-    e.preventDefault();
-    if (!dom.form.checkValidity()) {
-        mostraMessaggio('Per favore, compila tutti i campi obbligatori.', 'error');
+    if (error) {
+        console.error('Error loading prenotazioni options:', error.message);
+        mostraMessaggio('Errore durante il caricamento delle prenotazioni.', 'danger');
         return;
     }
-    
-    dom.submitButton.disabled = true;
-    const originalButtonHTML = dom.submitButton.innerHTML;
-    dom.submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Salvataggio...';
-    
-    const formData = Object.fromEntries(new FormData(dom.form));
-    delete formData.id; // Rimuove l'ID dal corpo della richiesta in ogni caso
 
-    // Se la data di dimissione è vuota, assicurati che venga inviato 'null'
-    if (!formData.data_dimissione) {
-        formData.data_dimissione = null;
+    return data || [];
+}
+
+function buildFormsOptionsList(prenotazioni) {
+    return prenotazioni.map(p => ({
+        value: p.id,
+        text: `${p.cognome} ${p.nome} - ${new Date(p.data).toLocaleDateString('it-IT')}`
+    }));
+}
+
+async function loadEditingPatient(patientId) {
+    if (!patientId) return null;
+
+    const { data, error } = await supabase
+        .from('pazienti')
+        .select('*')
+        .eq('id', patientId)
+        .single();
+
+    if (error) {
+        console.error('Error loading patient for editing:', error.message);
+        mostraMessaggio('Errore durante il caricamento del paziente.', 'danger');
+        return null;
     }
 
+    return data;
+}
+
+function populateFormForEdit(patient) {
+    if (!patient) return;
+
+    // Popola i campi del form con i dati del paziente
+    dom.formElement.querySelector('#nome').value = patient.nome || '';
+    dom.formElement.querySelector('#cognome').value = patient.cognome || '';
+    dom.formElement.querySelector('#data_nascita').value = patient.data_nascita || '';
+    dom.formElement.querySelector('#telefono').value = patient.telefono || '';
+    dom.formElement.querySelector('#data_ricovero').value = patient.data_ricovero || '';
+    dom.formElement.querySelector('#data_dimissione').value = patient.data_dimissione || '';
+    dom.formElement.querySelector('#email').value = patient.email || '';
+    dom.formElement.querySelector('#note').value = patient.note || '';
+
+    // Seleziona la diagnosi corretta nel select
+    const diagnosiSelect = dom.formElement.querySelector('select[data-custom-select="diagnosi"]');
+    if (diagnosiSelect && patient.diagnosi) {
+        diagnosiSelect.value = patient.diagnosi;
+    }
+
+    // Seleziona la prenotazione corretta nel select
+    const prenotazioniSelect = dom.formElement.querySelector('select[data-custom-select="prenotazioni"]');
+    if (prenotazioniSelect && patient.prenotazione_id) {
+        prenotazioniSelect.value = patient.prenotazione_id;
+    }
+
+    // Aggiorna il titolo del form
+    const titleElement = dom.formElement.querySelector('h2');
+    if (titleElement) {
+        titleElement.textContent = 'Modifica Paziente';
+    }
+
+    // Aggiorna il testo del pulsante di submit
+    const submitButton = dom.formElement.querySelector('button[type="submit"]');
+    if (submitButton) {
+        submitButton.innerHTML = '<span class="material-icons me-2">save</span>Aggiorna Paziente';
+    }
+}
+
+async function handleFormSubmit(event) {
+    event.preventDefault();
+
+    const formData = new FormData(event.target);
+    const patientData = {
+        nome: formData.get('nome'),
+        cognome: formData.get('cognome'),
+        data_nascita: formData.get('data_nascita'),
+        telefono: formData.get('telefono'),
+        data_ricovero: formData.get('data_ricovero'),
+        data_dimissione: formData.get('data_dimissione') || null,
+        email: formData.get('email'),
+        diagnosi: formData.get('diagnosi'),
+        prenotazione_id: formData.get('prenotazioni') || null,
+        note: formData.get('note')
+    };
+
+    // Verifica se siamo in modalità modifica o inserimento
+    const patientId = new URLSearchParams(window.location.search).get('id');
+    
     try {
-        let error;
-        if (editId) {
-            // Modalità Modifica
-            const { error: updateError } = await supabase.from('pazienti').update(formData).eq('id', editId);
-            error = updateError;
+        let result;
+        if (patientId) {
+            // Modalità modifica
+            result = await supabase
+                .from('pazienti')
+                .update(patientData)
+                .eq('id', patientId);
         } else {
-            // Modalità Inserimento
-            delete formData.data_dimissione; // Non si può inserire un nuovo paziente già dimesso
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) throw new Error('Utente non autenticato.');
-            formData.user_id = user.id;
-            const { error: insertError } = await supabase.from('pazienti').insert([formData]);
-            error = insertError;
+            // Modalità inserimento
+            result = await supabase
+                .from('pazienti')
+                .insert([patientData]);
         }
 
-        if (error) throw error;
+        if (result.error) {
+            throw result.error;
+        }
 
-        mostraMessaggio('Dati salvati con successo!', 'success');
-        sessionStorage.removeItem('editPazienteId');
-        setTimeout(() => navigateTo('list'), 1000);
+        const action = patientId ? 'aggiornato' : 'inserito';
+        mostraMessaggio(`Paziente ${action} con successo!`, 'success');
+        
+        // Reindirizza alla home dopo un breve delay
+        setTimeout(() => {
+            navigateTo('#home');
+        }, 1500);
 
     } catch (error) {
-        mostraMessaggio(`Errore nel salvataggio: ${error.message}`, 'error');
-    } finally {
-        dom.submitButton.disabled = false;
-        dom.submitButton.innerHTML = originalButtonHTML;
+        console.error('Error saving patient:', error.message);
+        mostraMessaggio('Errore durante il salvataggio del paziente.', 'danger');
     }
 }
 
-/**
- * Inizializza gli event listener per il form.
- * @param {string|null} editId - L'ID del paziente se in modalità modifica.
- */
-function setupFormEventListeners(editId) {
-    dom.form.onsubmit = (e) => handleFormSubmit(e, editId);
+export async function renderInserimentoView() {
+    const formHTML = `
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Inserimento Nuovo Paziente</h2>
+            <button type="button" class="btn btn-outline-secondary" onclick="window.history.back()">
+                <span class="material-icons me-2">arrow_back</span>
+                Indietro
+            </button>
+        </div>
 
-    dom.backButton.addEventListener('click', () => {
-        sessionStorage.removeItem('editPazienteId');
-        navigateTo('home');
-    });
-}
+        <form id="patient-form" class="row g-3">
+            <div class="col-md-6">
+                <label for="nome" class="form-label">Nome *</label>
+                <input type="text" class="form-control" id="nome" name="nome" required>
+            </div>
+            <div class="col-md-6">
+                <label for="cognome" class="form-label">Cognome *</label>
+                <input type="text" class="form-control" id="cognome" name="cognome" required>
+            </div>
+            <div class="col-md-6">
+                <label for="data_nascita" class="form-label">Data di Nascita</label>
+                <div class="input-group-icon">
+                    <input type="text" class="form-control" id="data_nascita" name="data_nascita" data-datepicker placeholder="gg/mm/aaaa">
+                    <span class="material-icons input-icon">calendar_today</span>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <label for="telefono" class="form-label">Telefono</label>
+                <input type="tel" class="form-control" id="telefono" name="telefono">
+            </div>
+            <div class="col-md-6">
+                <label for="data_ricovero" class="form-label">Data Ricovero *</label>
+                <div class="input-group-icon">
+                    <input type="text" class="form-control" id="data_ricovero" name="data_ricovero" data-datepicker placeholder="gg/mm/aaaa" required>
+                    <span class="material-icons input-icon">calendar_today</span>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <label for="data_dimissione" class="form-label">Data Dimissione</label>
+                <div class="input-group-icon">
+                    <input type="text" class="form-control" id="data_dimissione" name="data_dimissione" data-datepicker placeholder="gg/mm/aaaa">
+                    <span class="material-icons input-icon">calendar_today</span>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" name="email">
+            </div>
+            <div class="col-md-6">
+                <label for="diagnosi" class="form-label">Diagnosi</label>
+                <select name="diagnosi" data-custom-select="diagnosi" data-placeholder="Seleziona una diagnosi">
+                    <option value="">Seleziona una diagnosi</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label for="prenotazioni" class="form-label">Prenotazione</label>
+                <select name="prenotazioni" data-custom-select="prenotazioni" data-placeholder="Seleziona una prenotazione">
+                    <option value="">Seleziona una prenotazione</option>
+                </select>
+            </div>
+            <div class="col-12">
+                <label for="note" class="form-label">Note</label>
+                <textarea class="form-control" id="note" name="note" rows="3"></textarea>
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary">
+                    <span class="material-icons me-2">save</span>
+                    Salva Paziente
+                </button>
+            </div>
+        </form>
+    `;
 
-/**
- * Inizializza la vista di inserimento/modifica paziente.
- */
-export async function initInserimentoView() {
-    const formElement = document.getElementById('form-inserimento');
-    if (!formElement) return;
+    // Cache degli elementi DOM
+    const appContainer = document.getElementById('app-container');
+    appContainer.innerHTML = formHTML;
+    
+    dom.formElement = document.getElementById('patient-form');
 
-    // Caching degli elementi DOM
-    dom.form = formElement;
-    dom.backButton = formElement.closest('.card').querySelector('button[data-view="home"]');
-    dom.title = document.getElementById('inserimento-title');
-    dom.submitButton = formElement.querySelector('button[type="submit"]');
-    dom.idInput = document.getElementById('paziente-id');
-    dom.dataDimissioneContainer = document.getElementById('data-dimissione-container');
+    // Inizializza i componenti
+    await initCustomSelects(dom.formElement);
+    await initDatepickers(dom.formElement);
 
-    // Carica le opzioni delle diagnosi in parallelo con il setup del form
-    await loadDiagnosiOptions();
+    // Carica e popola le opzioni
+    try {
+        const [diagnosiOptions, prenotazioniOptions] = await Promise.all([
+            loadDiagnosiOptions(),
+            loadPrenotazioniOptions()
+        ]);
 
-    const editId = sessionStorage.getItem('editPazienteId');
+        // Popola il select delle diagnosi
+        const diagnosiSelect = dom.formElement.querySelector('select[data-custom-select="diagnosi"]');
+        if (diagnosiSelect && diagnosiOptions) {
+            diagnosiOptions.forEach(diagnosi => {
+                const option = document.createElement('option');
+                option.value = diagnosi.nome;
+                option.textContent = diagnosi.nome;
+                diagnosiSelect.appendChild(option);
+            });
+        }
 
-    if (editId) {
-        await populateFormForEdit(editId);
-    } else {
-        setupFormForInsert();
+        // Popola il select delle prenotazioni
+        const prenotazioniSelect = dom.formElement.querySelector('select[data-custom-select="prenotazioni"]');
+        if (prenotazioniSelect && prenotazioniOptions) {
+            const optionsList = buildFormsOptionsList(prenotazioniOptions);
+            optionsList.forEach(option => {
+                const optionElement = document.createElement('option');
+                optionElement.value = option.value;
+                optionElement.textContent = option.text;
+                prenotazioniSelect.appendChild(optionElement);
+            });
+        }
+
+        // Reinizializza i custom selects dopo aver popolato le opzioni
+        await initCustomSelects(dom.formElement);
+
+    } catch (error) {
+        console.error('Error loading form options:', error);
+        mostraMessaggio('Errore durante il caricamento delle opzioni del form.', 'danger');
     }
 
-    // A questo punto, il form è stato popolato (in caso di modifica)
-    // e le opzioni delle diagnosi sono state caricate.
-    // Ora è sicuro inizializzare i componenti del form.
-    initCustomSelects('#form-inserimento [data-custom="true"]');
-    await initDatepickers(formElement);
+    // Verifica se siamo in modalità modifica
+    const patientId = new URLSearchParams(window.location.search).get('id');
+    if (patientId) {
+        const patient = await loadEditingPatient(patientId);
+        populateFormForEdit(patient);
+    }
 
-    setupFormEventListeners(editId);
+    // Aggiungi l'event listener per il submit del form
+    dom.formElement.addEventListener('submit', handleFormSubmit);
+
+    return formHTML;
 }

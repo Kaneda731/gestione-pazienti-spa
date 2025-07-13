@@ -1,139 +1,82 @@
-import { supabase } from '../../../core/services/supabaseClient.js';
-import { mostraMessaggio } from '../../../shared/utils/helpers.js';
-import { navigateTo } from '../../../app/router.js';
+// src/features/diagnoses/views/diagnosi.js
+import { getDiagnosi, saveDiagnosi, deleteDiagnosi } from './diagnosi-api.js';
+import {
+    dom,
+    renderTable,
+    populateFormForEdit,
+    resetForm,
+    showFeedback
+} from './diagnosi-ui.js';
 
-let diagnosiTableBody;
-let diagnosiForm;
-let diagnosiInput;
-let saveDiagnosiBtn;
 let currentDiagnosiId = null;
 
-export async function initDiagnosiView() {
-    diagnosiTableBody = document.getElementById('diagnosi-table-body');
-    diagnosiForm = document.getElementById('diagnosi-form');
-    diagnosiInput = document.getElementById('diagnosi-name');
-    saveDiagnosiBtn = document.getElementById('save-diagnosi-btn');
-
-    if (diagnosiForm) {
-        diagnosiForm.addEventListener('submit', handleSaveDiagnosi);
+async function loadAndRenderDiagnosi() {
+    try {
+        const diagnosi = await getDiagnosi();
+        renderTable(diagnosi);
+    } catch (error) {
+        showFeedback(error.message, 'error');
     }
-
-    const backButton = document.querySelector('[data-view="home"]');
-    if (backButton) {
-        backButton.addEventListener('click', () => navigateTo('home'));
-    }
-
-    await loadDiagnosi();
 }
 
-async function loadDiagnosi() {
-    const { data, error } = await supabase
-        .from('diagnosi')
-        .select('id, nome')
-        .order('nome', { ascending: true });
-
-    if (error) {
-        console.error('Error loading diagnosi:', error);
-        mostraMessaggio('Errore durante il caricamento delle diagnosi.', 'error');
-        return;
-    }
-
-    renderDiagnosiTable(data);
-}
-
-function renderDiagnosiTable(diagnosi) {
-    diagnosiTableBody.innerHTML = '';
-    if (diagnosi.length === 0) {
-        diagnosiTableBody.innerHTML = '<tr><td colspan="2" class="text-center">Nessuna diagnosi trovata.</td></tr>';
-        return;
-    }
-
-    diagnosi.forEach(d => {
-        const row = diagnosiTableBody.insertRow();
-        row.innerHTML = `
-            <td data-label="Nome Diagnosi">${d.nome}</td>
-            <td data-label="Azioni">
-                <button class="btn btn-sm btn-warning edit-btn" data-id="${d.id}" data-name="${d.nome}" title="Modifica diagnosi">
-                    <span class="material-icons">edit</span>
-                    <span class="btn-text">Modifica</span>
-                </button>
-                <button class="btn btn-sm btn-danger delete-btn" data-id="${d.id}" title="Elimina diagnosi">
-                    <span class="material-icons">delete</span>
-                    <span class="btn-text">Elimina</span>
-                </button>
-            </td>
-        `;
-        row.querySelector('.edit-btn').addEventListener('click', handleEditDiagnosi);
-        row.querySelector('.delete-btn').addEventListener('click', handleDeleteDiagnosi);
-    });
-}
-
-async function handleSaveDiagnosi(event) {
+async function handleSave(event) {
     event.preventDefault();
-    const name = diagnosiInput.value.trim();
+    const name = dom.input.value.trim();
 
     if (!name) {
-        mostraMessaggio('Il nome della diagnosi non può essere vuoto.', 'error');
+        showFeedback('Il nome della diagnosi non può essere vuoto.', 'error');
         return;
     }
 
-    if (currentDiagnosiId) {
-        const { error } = await supabase
-            .from('diagnosi')
-            .update({ nome: name })
-            .eq('id', currentDiagnosiId);
+    try {
+        await saveDiagnosi(currentDiagnosiId, name);
+        const action = currentDiagnosiId ? 'aggiornata' : 'aggiunta';
+        showFeedback(`Diagnosi ${action} con successo!`, 'success');
+        resetForm();
+        currentDiagnosiId = null;
+        await loadAndRenderDiagnosi();
+    } catch (error) {
+        showFeedback(error.message, 'error');
+    }
+}
 
-        if (error) {
-            console.error('Error updating diagnosis:', error.message);
-            mostraMessaggio('Errore durante l\'aggiornamento della diagnosi.', 'error');
-        } else {
-            mostraMessaggio('Diagnosi aggiornata con successo!', 'success');
-            resetForm();
-            await loadDiagnosi();
-        }
-    } else {
-        const { error } = await supabase
-            .from('diagnosi')
-            .insert({ nome: name });
-
-        if (error) {
-            console.error('Error adding diagnosis:', error.message);
-            mostraMessaggio('Errore durante l\'aggiunta della diagnosi.', 'error');
-        } else {
-            mostraMessaggio('Diagnosi aggiunta con successo!', 'success');
-            diagnosiInput.value = '';
-            await loadDiagnosi();
+async function handleDelete(id) {
+    if (confirm('Sei sicuro di voler eliminare questa diagnosi?')) {
+        try {
+            await deleteDiagnosi(id);
+            showFeedback('Diagnosi eliminata con successo!', 'success');
+            await loadAndRenderDiagnosi();
+        } catch (error) {
+            showFeedback(error.message, 'error');
         }
     }
 }
 
-function handleEditDiagnosi(event) {
-    const button = event.currentTarget;
-    currentDiagnosiId = button.dataset.id;
-    diagnosiInput.value = button.dataset.name;
-    saveDiagnosiBtn.textContent = 'Aggiorna Diagnosi';
-}
+function handleTableClick(event) {
+    const target = event.target.closest('button');
+    if (!target) return;
 
-async function handleDeleteDiagnosi(event) {
-    const id = event.currentTarget.dataset.id;
-    if (confirm('Sei sicuro di voler eliminare questa diagnosi? Questa azione è irreversibile.')) {
-        const { error } = await supabase
-            .from('diagnosi')
-            .delete()
-            .eq('id', id);
+    const id = target.dataset.id;
 
-        if (error) {
-            console.error('Error deleting diagnosis:', error.message);
-            mostraMessaggio('Errore durante l\'eliminazione della diagnosi.', 'error');
-        } else {
-            mostraMessaggio('Diagnosi eliminata con successo!', 'success');
-            await loadDiagnosi();
-        }
+    if (target.classList.contains('edit-btn')) {
+        currentDiagnosiId = id;
+        populateFormForEdit(target.dataset.name);
+    } else if (target.classList.contains('delete-btn')) {
+        handleDelete(id);
     }
 }
 
-function resetForm() {
-    currentDiagnosiId = null;
-    diagnosiInput.value = '';
-    saveDiagnosiBtn.textContent = 'Aggiungi Diagnosi';
+export async function initDiagnosiView() {
+    dom.form.addEventListener('submit', handleSave);
+    dom.tableBody.addEventListener('click', handleTableClick);
+
+    // Carica i dati iniziali
+    await loadAndRenderDiagnosi();
+
+    // Funzione di cleanup
+    return () => {
+        // Rimuovi gli event listener se necessario, anche se la vista viene distrutta
+        // dom.form.removeEventListener('submit', handleSave);
+        // dom.tableBody.removeEventListener('click', handleTableClick);
+    };
 }

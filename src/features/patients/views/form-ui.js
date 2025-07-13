@@ -1,5 +1,5 @@
 // src/features/patients/views/form-ui.js
-import { initCustomSelects } from '../../../shared/components/forms/CustomSelect.js';
+import { initCustomSelects, updateCustomSelect } from '../../../shared/components/forms/CustomSelect.js';
 import CustomDatepicker from '../../../shared/components/forms/CustomDatepicker.js';
 import { mostraMessaggio } from '../../../shared/utils/helpers.js';
 
@@ -49,6 +49,9 @@ export function populateForm(patient) {
     // Aggiorna il titolo e il pulsante per la modalità modifica
     document.getElementById('inserimento-title').innerHTML = '<span class="material-icons me-2">edit</span>Modifica Paziente';
     document.getElementById('save-patient-btn').innerHTML = '<span class="material-icons me-1" style="vertical-align: middle;">save</span>Aggiorna Paziente';
+    
+    // Forza l'aggiornamento di tutti i custom select per mostrare i valori corretti
+    updateCustomSelect('#form-inserimento [data-custom="true"]');
 }
 
 /**
@@ -66,6 +69,9 @@ export function renderDiagnosiOptions(options) {
         option.textContent = diagnosi.nome;
         diagnosiSelect.appendChild(option);
     });
+
+    // Forza l'aggiornamento del select specifico
+    updateCustomSelect('#diagnosi');
 }
 
 /**

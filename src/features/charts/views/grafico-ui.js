@@ -1,0 +1,134 @@
+// src/features/charts/views/grafico-ui.js
+import { populateSelectWithOptions } from '../../../shared/utils/index.js';
+import { initCustomSelects, updateCustomSelect } from '../../../shared/components/forms/CustomSelect.js';
+import CustomDatepicker from '../../../shared/components/forms/CustomDatepicker.js';
+import { createPieChart } from '../services/chartjsService.js';
+
+let datepickerInstance = null;
+
+// Contiene gli elementi del DOM per un accesso più facile
+export const dom = {
+    get chartContainer() { return document.getElementById('chart-container'); },
+    get repartoFilter() { return document.getElementById('filter-reparto'); },
+    get provenienzaFilter() { return document.getElementById('filter-provenienza'); },
+    get diagnosiFilter() { return document.getElementById('filter-diagnosi'); },
+    get assistenzaFilter() { return document.getElementById('filter-assistenza'); },
+    get startDateFilter() { return document.getElementById('filter-start-date'); },
+    get endDateFilter() { return document.getElementById('filter-end-date'); },
+    get applyButton() { return document.getElementById('apply-filters-btn'); },
+    get resetButton() { return document.getElementById('reset-filters-btn'); },
+};
+
+/**
+ * Inizializza i componenti della UI (datepicker, custom selects).
+ */
+export function initializeUI() {
+    initCustomSelects('#filter-reparto, #filter-provenienza, #filter-diagnosi, #filter-assistenza');
+    datepickerInstance = new CustomDatepicker('[data-datepicker]', {
+        dateFormat: "d/m/Y",
+    });
+    showInitialMessage();
+}
+
+/**
+ * Distrugge i componenti della UI per il cleanup.
+ */
+export function cleanupUI() {
+    if (datepickerInstance) {
+        datepickerInstance.destroy();
+        datepickerInstance = null;
+    }
+}
+
+/**
+ * Popola i select dei filtri con le opzioni caricate.
+ * @param {object} options - L'oggetto contenente le opzioni per i filtri.
+ */
+export function populateFilters(options) {
+    populateSelectWithOptions(dom.repartoFilter, options.repartoOptions);
+    updateCustomSelect('#filter-reparto');
+
+    populateSelectWithOptions(dom.provenienzaFilter, options.provenienzaOptions);
+    updateCustomSelect('#filter-provenienza');
+
+    populateSelectWithOptions(dom.diagnosiFilter, options.diagnosiOptions);
+    updateCustomSelect('#filter-diagnosi');
+}
+
+/**
+ * Legge i valori correnti dai campi dei filtri.
+ * @returns {object} Un oggetto con i filtri selezionati.
+ */
+export function getFilters() {
+    return {
+        reparto: dom.repartoFilter.value,
+        provenienza: dom.provenienzaFilter.value,
+        diagnosi: dom.diagnosiFilter.value,
+        assistenza: dom.assistenzaFilter.value,
+        startDate: dom.startDateFilter.value,
+        endDate: dom.endDateFilter.value,
+    };
+}
+
+/**
+ * Resetta tutti i filtri ai loro valori di default.
+ */
+export function resetFilters() {
+    const filterIds = ['filter-reparto', 'filter-provenienza', 'filter-diagnosi', 'filter-assistenza'];
+    filterIds.forEach(id => {
+        const select = document.getElementById(id);
+        if (select) {
+            select.value = '';
+            if (select.customSelectInstance) {
+                select.customSelectInstance.setValue('');
+            }
+        }
+    });
+    dom.startDateFilter.value = '';
+    dom.endDateFilter.value = '';
+    showInitialMessage();
+}
+
+/**
+ * Disegna il grafico a torta con i dati forniti.
+ * @param {Array} data - I dati da visualizzare.
+ */
+export async function drawChart(data) {
+    if (data.length === 0) {
+        showMessage('Nessun dato trovato per i filtri selezionati.');
+        return;
+    }
+
+    const counts = data.reduce((acc, { diagnosi }) => {
+        acc[diagnosi] = (acc[diagnosi] || 0) + 1;
+        return acc;
+    }, {});
+
+    const chartData = [['Diagnosi', 'Numero Pazienti'], ...Object.entries(counts)];
+    
+    const chartOptions = {
+        // ... (le opzioni del grafico potrebbero essere esternalizzate)
+        title: { text: 'Distribuzione Diagnosi dei Pazienti Filtrati' },
+        responsive: true,
+        maintainAspectRatio: false,
+    };
+
+    await createPieChart(dom.chartContainer, chartData, chartOptions);
+}
+
+// Funzioni per mostrare stati nella UI
+export function showLoading() {
+    dom.chartContainer.innerHTML = '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>';
+}
+
+export function showInitialMessage() {
+    dom.chartContainer.innerHTML = '<p class="text-muted">Seleziona i filtri e clicca "Applica" per visualizzare il grafico.</p>';
+}
+
+export function showMessage(message) {
+    dom.chartContainer.innerHTML = `<p class="text-muted">${message}</p>`;
+}
+
+export function showError(errorMessage) {
+    dom.chartContainer.innerHTML = `<div class="alert alert-danger">${errorMessage}</div>`;
+}

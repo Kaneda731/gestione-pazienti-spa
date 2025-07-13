@@ -1,150 +1,90 @@
 // src/features/patients/views/dimissione.js
-import { supabase } from '../../../core/services/supabaseClient.js';
-import { mostraMessaggio } from '../../../shared/utils/helpers.js';
 import { navigateTo } from '../../../app/router.js';
-import CustomDatepicker from '../../../shared/components/forms/CustomDatepicker.js';
+import { searchActivePatients, dischargePatient } from './dimissione-api.js';
+import { 
+    dom,
+    initializeUI, 
+    cleanupUI,
+    renderSearchResults,
+    displayDischargeForm,
+    setLoading,
+    resetView,
+    showFeedback
+} from './dimissione-ui.js';
 
-// Caching degli elementi del DOM e stato
-const dom = {};
-let selectedPaziente = null;
-let datepickerInstance = null;
+let selectedPatient = null;
 
-/**
- * Mostra i risultati della ricerca dei pazienti.
- * @param {Array<Object>} pazienti - La lista dei pazienti trovati.
- */
-function renderResults(pazienti) {
-    dom.resultsContainer.innerHTML = '';
-    if (pazienti.length === 0) {
-        dom.resultsContainer.innerHTML = '<p class="text-center text-muted">Nessun paziente attivo trovato.</p>';
-        return;
-    }
-    pazienti.forEach(p => {
-        const item = document.createElement('button');
-        item.className = 'list-group-item list-group-item-action';
-        item.textContent = `${p.cognome} ${p.nome} (Ricovero: ${new Date(p.data_ricovero).toLocaleDateString()})`;
-        item.onclick = () => selectPaziente(p);
-        dom.resultsContainer.appendChild(item);
-    });
-}
-
-/**
- * Seleziona un paziente dalla lista e mostra il form di dimissione.
- * @param {Object} paziente - L'oggetto paziente selezionato.
- */
-function selectPaziente(paziente) {
-    selectedPaziente = paziente;
-    dom.selectedPazienteNome.textContent = `${paziente.cognome} ${paziente.nome}`;
-    dom.selectedPazienteRicovero.textContent = new Date(paziente.data_ricovero).toLocaleDateString();
-    dom.dimissioneForm.classList.remove('d-none');
-    dom.resultsContainer.innerHTML = '';
-    dom.searchInput.value = '';
-    dom.searchInput.focus();
-}
-
-/**
- * Esegue la ricerca dei pazienti attivi per cognome.
- */
 async function handleSearch() {
     const searchTerm = dom.searchInput.value.trim();
     if (searchTerm.length < 2) {
-        mostraMessaggio('Inserisci almeno 2 caratteri per la ricerca.', 'info', 'messaggio-container-dimissione');
+        showFeedback('Inserisci almeno 2 caratteri per la ricerca.', 'info');
         return;
     }
-    dom.resultsContainer.innerHTML = '<div class="text-center"><div class="spinner-border"></div></div>';
+    
+    setLoading(true);
     try {
-        const { data, error } = await supabase
-            .from('pazienti')
-            .select('id, nome, cognome, data_ricovero')
-            .ilike('cognome', `%${searchTerm}%`)
-            .is('data_dimissione', null) // Cerca solo pazienti attivi
-            .order('cognome');
-        if (error) throw error;
-        renderResults(data);
+        const patients = await searchActivePatients(searchTerm);
+        renderSearchResults(patients, (patient) => {
+            selectedPatient = patient;
+            displayDischargeForm(patient);
+        });
     } catch (error) {
-        mostraMessaggio(`Errore nella ricerca: ${error.message}`, 'error', 'messaggio-container-dimissione');
+        showFeedback(error.message, 'error');
+    } finally {
+        // Se non ci sono risultati, setLoading(false) non è necessario
+        // perché renderSearchResults gestisce il contenitore.
+        if (dom.resultsContainer.innerHTML.includes('spinner')) {
+             setLoading(false);
+        }
     }
 }
 
-/**
- * Gestisce il submit del form di dimissione.
- * @param {Event} e - L'evento di submit.
- */
-async function handleDimissioneSubmit(e) {
-    e.preventDefault();
-    const data_dimissione = dom.dataDimissioneInput.value;
-    if (!selectedPaziente || !data_dimissione) {
-        mostraMessaggio('Seleziona un paziente e una data di dimissione.', 'warning', 'messaggio-container-dimissione');
+async function handleDischargeSubmit(event) {
+    event.preventDefault();
+    const dischargeDate = dom.dataDimissioneInput.value;
+
+    if (!selectedPatient || !dischargeDate) {
+        showFeedback('Seleziona un paziente e una data di dimissione.', 'warning');
         return;
     }
+
     try {
-        const { error } = await supabase.from('pazienti').update({ data_dimissione }).eq('id', selectedPaziente.id);
-        if (error) throw error;
-        mostraMessaggio('Paziente dimesso con successo!', 'success', 'messaggio-container-dimissione');
-        dom.dimissioneForm.classList.add('d-none');
-        selectedPaziente = null;
+        await dischargePatient(selectedPatient.id, dischargeDate);
+        showFeedback('Paziente dimesso con successo!', 'success');
+        selectedPatient = null;
+        resetView();
         setTimeout(() => navigateTo('home'), 1500);
     } catch (error) {
-        mostraMessaggio(`Errore durante la dimissione: ${error.message}`, 'error', 'messaggio-container-dimissione');
+        showFeedback(error.message, 'error');
     }
 }
 
-/**
- * Inizializza gli event listener per la vista.
- */
 function setupEventListeners() {
-    dom.searchInput.addEventListener('keypress', e => {
+    dom.searchButton.addEventListener('click', handleSearch);
+    dom.searchInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             e.preventDefault();
             handleSearch();
         }
     });
-    dom.searchButton.addEventListener('click', handleSearch);
-    dom.dimissioneForm.addEventListener('submit', handleDimissioneSubmit);
-    dom.backButton.addEventListener('click', () => navigateTo('home'));
+    
+    dom.dischargeForm.addEventListener('submit', handleDischargeSubmit);
+    
+    // Il back button è gestito globalmente, ma se serve logica specifica va qui.
+    // dom.backButton.addEventListener('click', () => navigateTo('home'));
 }
 
-/**
- * Inizializza la vista di dimissione paziente.
- */
-export async function initDimissioneView() {
-    const view = document.querySelector('#app-container .view');
-    if (!view) return;
+export function initDimissioneView() {
+    initializeUI();
+    setupEventListeners();
+    
+    dom.searchInput.focus();
 
-    // Caching degli elementi DOM
-    dom.searchInput = document.getElementById('search-paziente');
-    dom.searchButton = document.getElementById('search-button');
-    dom.resultsContainer = document.getElementById('search-results');
-    dom.dimissioneForm = document.getElementById('form-dimissione');
-    dom.selectedPazienteNome = document.getElementById('selected-paziente-nome');
-    dom.selectedPazienteRicovero = document.getElementById('selected-paziente-ricovero');
-    dom.dataDimissioneInput = document.getElementById('data_dimissione');
-    dom.backButton = view.querySelector('button[data-view="home"]');
-
-    // Inizializza il datepicker
-    datepickerInstance = new CustomDatepicker('[data-datepicker]', {
-        dateFormat: "Y-m-d",
-        allowInput: true,
-        static: true,
-        disableMobile: true // Forza il calendario custom anche su mobile
-    });
-
-    // Reset dello stato all'inizializzazione
-    dom.dimissioneForm.classList.add('d-none');
-    dom.resultsContainer.innerHTML = '';
-    dom.searchInput.value = '';
-    selectedPaziente = null;
-
-    setTimeout(() => {
-        setupEventListeners();
-        dom.searchInput.focus();
-    }, 0);
-
-    // Restituisci una funzione di cleanup
+    // La funzione di cleanup viene restituita per essere chiamata dal router
     return () => {
-        if (datepickerInstance) {
-            datepickerInstance.destroy();
-            datepickerInstance = null;
-        }
+        cleanupUI();
+        selectedPatient = null;
+        // Qui si potrebbero rimuovere gli event listener se necessario,
+        // ma dato che la vista viene distrutta, non è strettamente obbligatorio.
     };
 }

@@ -2,11 +2,12 @@
 import { supabase } from '../../../core/services/supabaseClient.js';
 import { mostraMessaggio } from '../../../shared/utils/helpers.js';
 import { navigateTo } from '../../../app/router.js';
-import { initDatepickers } from '../../../shared/components/forms/Datepicker.js';
+import CustomDatepicker from '../../../shared/components/forms/CustomDatepicker.js';
 
 // Caching degli elementi del DOM e stato
 const dom = {};
 let selectedPaziente = null;
+let datepickerInstance = null;
 
 /**
  * Mostra i risultati della ricerca dei pazienti.
@@ -121,7 +122,12 @@ export async function initDimissioneView() {
     dom.backButton = view.querySelector('button[data-view="home"]');
 
     // Inizializza il datepicker
-    await initDatepickers(view);
+    datepickerInstance = new CustomDatepicker('[data-datepicker]', {
+        dateFormat: "Y-m-d",
+        allowInput: true,
+        static: true,
+        disableMobile: true // Forza il calendario custom anche su mobile
+    });
 
     // Reset dello stato all'inizializzazione
     dom.dimissioneForm.classList.add('d-none');
@@ -133,4 +139,12 @@ export async function initDimissioneView() {
         setupEventListeners();
         dom.searchInput.focus();
     }, 0);
+
+    // Restituisci una funzione di cleanup
+    return () => {
+        if (datepickerInstance) {
+            datepickerInstance.destroy();
+            datepickerInstance = null;
+        }
+    };
 }

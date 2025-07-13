@@ -4,77 +4,72 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestione Pazienti</title>
+    <link rel="icon" href="/src/favicon.svg" type="image/svg+xml">
     
-    <!-- Favicon (Vite lo troverà a partire dalla root del progetto) -->
-    <link rel="icon" type="image/svg+xml" href="/src/favicon.svg">
-    
-    <!-- Google Fonts & Icons (possono rimanere qui) -->
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-
-    <!-- 
-      Stili caricati in modo responsivo dal browser.
-      Vite processerà i file .scss e li servirà come CSS.
-    -->
-    <link rel="stylesheet" href="/src/css/desktop.scss" media="(min-width: 769px)">
-    <link rel="stylesheet" href="/src/css/mobile.scss" media="(max-width: 768px)">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Material+Icons&display=swap" rel="stylesheet">
     
-    <!-- Entry point per Vite -->
-    <script type="module" src="/src/app/main.js"></script>
+    <!-- Gli stili sono ora importati esclusivamente tramite main.js -->
 </head>
 <body>
+    <div id="app">
+        <!-- Navbar Desktop -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top d-none d-lg-block">
+            <div class="container-fluid">
+                <a class="navbar-brand d-flex align-items-center" href="#home">
+                    <img src="/src/favicon.svg" alt="Logo" width="30" height="24" class="d-inline-block align-text-top me-2">
+                    Gestione Pazienti
+                </a>
+                <div class="d-flex align-items-center gap-3">
+                    <button type="button" class="btn btn-outline-secondary btn-sm d-flex align-items-center" id="theme-toggle" title="Cambia tema">
+                        <span class="material-icons" id="theme-icon">dark_mode</span>
+                    </button>
+                    <div id="auth-container">
+                        <!-- Contenuto Auth UI iniettato qui -->
+                    </div>
+                </div>
+            </div>
+        </nav>
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary-gradient d-none d-lg-flex">
-        <div class="container-fluid">
-            <a class="navbar-brand d-flex align-items-center" href="#">
-                <span class="material-icons me-2">local_hospital</span>
-                Gestione Pazienti
-            </a>
-            <div class="d-flex align-items-center gap-3">
-                <button type="button" class="btn btn-outline-secondary btn-sm d-flex align-items-center" id="theme-toggle" title="Cambia tema">
-                    <span class="material-icons" id="theme-icon">dark_mode</span>
+        <!-- Navbar Mobile -->
+        <nav class="mobile-navbar d-lg-none">
+            <div class="mobile-navbar-container">
+                <button id="mobile-theme-toggle" class="mobile-nav-action" title="Cambia tema">
+                    <span class="material-icons" id="mobile-theme-icon">dark_mode</span>
                 </button>
-                <div id="auth-container"></div>
-            </div>
-        </div>
-    </nav>
-
-    <nav class="mobile-navbar d-lg-none">
-        <div class="mobile-navbar-container">
-            <button id="mobile-theme-toggle" class="mobile-nav-action" title="Cambia tema">
-                <span class="material-icons" id="mobile-theme-icon">dark_mode</span>
-            </button>
-            <a href="#home" id="mobile-home-link" class="mobile-nav-action" title="Home">
-                <span class="material-icons">home</span>
-            </a>
-            <div id="mobile-auth-container" class="mobile-nav-action">
-                <!-- L'icona di autenticazione verrà iniettata qui dal JavaScript -->
-            </div>
-        </div>
-    </nav>
-
-    <main class="container mt-5" id="app-container"></main>
-
-    <div class="modal fade" id="delete-confirm-modal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Conferma Eliminazione</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <a href="#home" id="mobile-home-link" class="mobile-nav-action" title="Home">
+                    <span class="material-icons">home</span>
+                </a>
+                <div id="mobile-auth-container" class="mobile-nav-action">
+                    <!-- L'icona di autenticazione verrà iniettata qui dal JavaScript -->
                 </div>
-                <div class="modal-body">
-                    <p>Sei sicuro di voler eliminare questo paziente? L'azione è irreversibile.</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
-                    <button type="button" class="btn btn-danger" id="confirm-delete-btn">Elimina</button>
+            </div>
+        </nav>
+
+        <main class="container mt-5" id="app-container"></main>
+
+        <div class="modal fade" id="delete-confirm-modal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Conferma Eliminazione</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Sei sicuro di voler eliminare questo paziente? L'azione è irreversibile.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+                        <button type="button" class="btn btn-danger" id="confirm-delete-btn">Elimina</button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <script type="module" src="/src/app/main.js"></script>
 </body>
 </html>
 

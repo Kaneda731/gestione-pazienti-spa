@@ -11,6 +11,8 @@ import { initGraficoView } from '../features/charts/views/grafico.js';
 import { initListView } from '../features/patients/views/list.js';
 import { initDiagnosiView } from '../features/diagnoses/views/diagnosi.js';
 
+let currentViewCleanup = null;
+
 const viewInitializers = {
     'inserimento': initInserimentoView,
     'dimissione': initDimissioneView,
@@ -77,6 +79,13 @@ function updateUIVisibility() {
 }
 
 export async function renderView() {
+    // Esegui la pulizia della vista precedente, se necessario
+    if (typeof currentViewCleanup === 'function') {
+        console.log('Eseguendo cleanup per la vista precedente...');
+        currentViewCleanup();
+        currentViewCleanup = null;
+    }
+
     console.log('🚀 RenderView chiamato:', { 
         location: window.location.href,
         hash: window.location.hash,
@@ -179,7 +188,7 @@ export async function renderView() {
                 viewContainer: document.querySelector('#app-container .view')
             });
             console.log('Chiamando inizializzatore per:', viewToRender);
-            await initializer(urlParams);
+            currentViewCleanup = await initializer(urlParams);
         }, 100); // Aumentiamo il delay a 100ms
     } else {
         console.log('Nessun inizializzatore per:', viewToRender);

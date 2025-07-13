@@ -52,6 +52,20 @@ export class CustomSelect {
     createWrapper() {
         const wrapper = document.createElement('div');
         wrapper.className = 'custom-select-wrapper';
+
+        // Aggiungi attributi per l'accessibilità e l'autofill
+        const originalId = this.selectElement.id;
+        const originalName = this.selectElement.name;
+
+        if (originalId) {
+            // Usa un ID derivato per il wrapper per evitare duplicati
+            wrapper.id = `${originalId}-custom-select`;
+        }
+        if (originalName) {
+            // Il name può essere utile per alcuni tool
+            wrapper.setAttribute('data-name', originalName);
+        }
+
         wrapper.innerHTML = `
             <div class="custom-select-trigger">
                 <span class="custom-select-label">${this.options.placeholder}</span>

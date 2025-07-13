@@ -3,10 +3,11 @@ import { supabase } from '../../../core/services/supabaseClient.js';
 import { mostraMessaggio } from '../../../shared/utils/helpers.js';
 import { navigateTo } from '../../../app/router.js';
 import { initCustomSelects } from '../../../shared/components/forms/CustomSelect.js';
-import { initDatepickers } from '../../../shared/components/forms/Datepicker.js';
+import CustomDatepicker from '../../../shared/components/forms/CustomDatepicker.js';
 
 // Oggetto per il caching degli elementi del DOM del form
 const dom = {};
+let datepickerInstance = null;
 
 async function loadDiagnosiOptions() {
     const { data, error } = await supabase
@@ -195,13 +196,13 @@ export async function initInserimentoView() {
             </div>
             <div class="col-md-6">
                 <label for="diagnosi" class="form-label">Diagnosi</label>
-                <select name="diagnosi" data-custom-select="diagnosi" data-placeholder="Seleziona una diagnosi">
+                <select id="diagnosi" name="diagnosi" data-custom-select="diagnosi" data-placeholder="Seleziona una diagnosi">
                     <option value="">Seleziona una diagnosi</option>
                 </select>
             </div>
             <div class="col-md-6">
                 <label for="prenotazioni" class="form-label">Prenotazione</label>
-                <select name="prenotazioni" data-custom-select="prenotazioni" data-placeholder="Seleziona una prenotazione">
+                <select id="prenotazioni" name="prenotazioni" data-custom-select="prenotazioni" data-placeholder="Seleziona una prenotazione">
                     <option value="">Seleziona una prenotazione</option>
                 </select>
             </div>
@@ -226,7 +227,14 @@ export async function initInserimentoView() {
 
     // Inizializza i componenti
     await initCustomSelects(dom.formElement);
-    await initDatepickers(dom.formElement);
+    
+    // Inizializza il datepicker e salva l'istanza
+    datepickerInstance = new CustomDatepicker('[data-datepicker]', {
+        dateFormat: "d/m/Y",
+        allowInput: true,
+        static: true,
+        disableMobile: true // Forza il calendario custom anche su mobile
+    });
 
     // Carica e popola le opzioni
     try {
@@ -276,5 +284,12 @@ export async function initInserimentoView() {
     // Aggiungi l'event listener per il submit del form
     dom.formElement.addEventListener('submit', handleFormSubmit);
 
-    return formHTML;
+    // Restituisci una funzione di cleanup
+    return () => {
+        if (datepickerInstance) {
+            datepickerInstance.destroy();
+            datepickerInstance = null;
+        }
+        // Aggiungere qui la distruzione di altri componenti se necessario
+    };
 }

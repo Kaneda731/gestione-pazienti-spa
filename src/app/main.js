@@ -8,7 +8,9 @@
 import { environment, isDevelopment } from './config/environment.js';
 import { STORAGE_KEYS } from './config/constants.js';
 
-// Importa gli stili SCSS
+// Importa tutti gli stili, nell'ordine corretto
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'flatpickr/dist/flatpickr.min.css';
 import '/src/css/desktop.scss';
 import '/src/css/mobile.scss';
 

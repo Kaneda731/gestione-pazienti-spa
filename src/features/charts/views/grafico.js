@@ -3,7 +3,7 @@ import { supabase } from '../../../core/services/supabaseClient.js';
 import { navigateTo } from '../../../app/router.js';
 import { getFilterOptions, populateSelectWithOptions } from '../../../shared/utils/index.js';
 import { initCustomSelects } from '../../../shared/components/forms/CustomSelect.js';
-import { initDatepickers } from '../../../shared/components/forms/Datepicker.js';
+import CustomDatepicker from '../../../shared/components/forms/CustomDatepicker.js';
 
 import { 
     showLoadingInContainer, 
@@ -22,6 +22,7 @@ async function getPieChartService() {
 
 // Caching degli elementi del DOM
 const dom = {};
+let datepickerInstance = null;
 
 /**
  * Resetta tutti i filtri ai loro valori di default.
@@ -230,7 +231,12 @@ export async function initGraficoView() {
 
         // 3. Inizializza i componenti del form
         initCustomSelects('#filter-reparto, #filter-provenienza, #filter-diagnosi, #filter-assistenza');
-        await initDatepickers(view);
+        datepickerInstance = new CustomDatepicker('[data-datepicker]', {
+            dateFormat: "Y-m-d",
+            allowInput: true,
+            static: true,
+            disableMobile: true // Forza il calendario custom anche su mobile
+        });
 
         // 4. Imposta gli event listener
         setupEventListeners();
@@ -242,4 +248,12 @@ export async function initGraficoView() {
         console.error('Errore durante l\'inizializzazione della vista grafico:', error);
         showErrorInContainer(dom.chartContainer, `Errore durante l'inizializzazione: ${error.message}`);
     }
+
+    // Restituisci una funzione di cleanup
+    return () => {
+        if (datepickerInstance) {
+            datepickerInstance.destroy();
+            datepickerInstance = null;
+        }
+    };
 }

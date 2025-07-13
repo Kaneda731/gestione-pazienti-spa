@@ -1,8 +1,11 @@
 // src/app/mobile/mobile-navigation.js
 import { signOut, currentUser } from '../../core/auth/authService.js';
 
+let isCurrentlyMobile = window.innerWidth <= 767;
+
 /**
  * Gestisce la visibilità delle navbar (desktop vs mobile) in base alla larghezza dello schermo.
+ * Emette un evento 'mode:change' quando la modalità cambia.
  */
 function handleNavbarVisibility() {
     const desktopNavbar = document.querySelector('.navbar'); // La navbar di Bootstrap
@@ -12,6 +15,26 @@ function handleNavbarVisibility() {
 
     const isMobile = window.innerWidth <= 767;
 
+    // Se la modalità non è cambiata, non fare nulla
+    if (isMobile === isCurrentlyMobile) {
+        // Anche se la modalità non cambia, assicuriamoci che la visibilità sia corretta.
+        // Questo risolve edge case in cui gli elementi potrebbero non essere sincronizzati.
+        desktopNavbar.classList.toggle('d-none', isMobile);
+        mobileNavbar.classList.toggle('d-none', !isMobile);
+        return;
+    }
+
+    // La modalità è cambiata, aggiorna lo stato e invia l'evento
+    isCurrentlyMobile = isMobile;
+
+    console.log(`Mode changed to: ${isMobile ? 'mobile' : 'desktop'}`); // Per debug
+
+    const event = new CustomEvent('mode:change', {
+        detail: { isMobile }
+    });
+    window.dispatchEvent(event);
+
+    // Aggiorna la visibilità delle navbar
     desktopNavbar.classList.toggle('d-none', isMobile);
     mobileNavbar.classList.toggle('d-none', !isMobile);
     

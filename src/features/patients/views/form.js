@@ -175,10 +175,7 @@ export async function initInserimentoView() {
             </div>
             <div class="col-md-6">
                 <label for="data_nascita" class="form-label">Data di Nascita</label>
-                <div class="input-group-icon">
-                    <input type="text" class="form-control" id="data_nascita" name="data_nascita" data-datepicker placeholder="gg/mm/aaaa">
-                    <span class="material-icons input-icon">calendar_today</span>
-                </div>
+                <input type="text" class="form-control" id="data_nascita" name="data_nascita" data-datepicker placeholder="gg/mm/aaaa">
             </div>
             <div class="col-md-6">
                 <label for="telefono" class="form-label">Telefono</label>
@@ -186,17 +183,11 @@ export async function initInserimentoView() {
             </div>
             <div class="col-md-6">
                 <label for="data_ricovero" class="form-label">Data Ricovero *</label>
-                <div class="input-group-icon">
-                    <input type="text" class="form-control" id="data_ricovero" name="data_ricovero" data-datepicker placeholder="gg/mm/aaaa" required>
-                    <span class="material-icons input-icon">calendar_today</span>
-                </div>
+                <input type="text" class="form-control" id="data_ricovero" name="data_ricovero" data-datepicker placeholder="gg/mm/aaaa" required>
             </div>
             <div class="col-md-6">
                 <label for="data_dimissione" class="form-label">Data Dimissione</label>
-                <div class="input-group-icon">
-                    <input type="text" class="form-control" id="data_dimissione" name="data_dimissione" data-datepicker placeholder="gg/mm/aaaa">
-                    <span class="material-icons input-icon">calendar_today</span>
-                </div>
+                <input type="text" class="form-control" id="data_dimissione" name="data_dimissione" data-datepicker placeholder="gg/mm/aaaa">
             </div>
             <div class="col-md-6">
                 <label for="email" class="form-label">Email</label>

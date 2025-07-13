@@ -1,29 +1,8 @@
 /* Flatpickr Light Theme - Custom Styles */
 
-/* Nascondi l'icona di default di Flatpickr per usare la nostra Material Icon */
+/* Usa il calendario predefinito di Flatpickr con le nostre icone Material Icons */
 .flatpickr-input[readonly] {
     cursor: pointer;
-}
-
-.flatpickr-input + .input-group-append .input-group-text {
-    display: none;
-}
-
-/* Nascondi completamente l'icona integrata di Flatpickr */
-.flatpickr-calendar::before,
-.flatpickr-calendar::after {
-    display: none !important;
-}
-
-/* Assicurati che non ci siano icone duplicate nei datepicker */
-input[data-datepicker] + .flatpickr-input + .input-group-append {
-    display: none;
-}
-
-/* Mantieni solo la nostra icona Material Icons */
-.input-group-icon .input-icon {
-    pointer-events: none;
-    z-index: 5;
 }
 
 /* Stili per il calendario Flatpickr */

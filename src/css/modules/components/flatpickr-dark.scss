@@ -1,29 +1,8 @@
 /* Flatpickr Dark Theme - Custom Styles */
 
-/* Nascondi l'icona di default di Flatpickr per usare la nostra Material Icon */
+/* Usa il calendario predefinito di Flatpickr con le nostre icone Material Icons nel dark mode */
 [data-bs-theme="dark"] .flatpickr-input[readonly] {
     cursor: pointer;
-}
-
-[data-bs-theme="dark"] .flatpickr-input + .input-group-append .input-group-text {
-    display: none;
-}
-
-/* Nascondi completamente l'icona integrata di Flatpickr nel dark mode */
-[data-bs-theme="dark"] .flatpickr-calendar::before,
-[data-bs-theme="dark"] .flatpickr-calendar::after {
-    display: none !important;
-}
-
-/* Assicurati che non ci siano icone duplicate nei datepicker nel dark mode */
-[data-bs-theme="dark"] input[data-datepicker] + .flatpickr-input + .input-group-append {
-    display: none;
-}
-
-/* Mantieni solo la nostra icona Material Icons nel dark mode */
-[data-bs-theme="dark"] .input-group-icon .input-icon {
-    pointer-events: none;
-    z-index: 5;
 }
 
 /* Stili per il calendario Flatpickr in dark mode */

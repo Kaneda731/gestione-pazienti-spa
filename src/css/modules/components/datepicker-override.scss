@@ -1,0 +1,88 @@
+/* ===================================
+   DATEPICKER OVERRIDE - NASCONDI CALENDARIO NATIVO
+   =================================== */
+
+/* Nascondi il calendario nativo del browser per usare solo Flatpickr */
+input[data-datepicker] {
+    cursor: pointer;
+    
+    /* Webkit browsers (Chrome, Safari, Edge) */
+    &::-webkit-calendar-picker-indicator {
+        display: none !important;
+        -webkit-appearance: none !important;
+    }
+    
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button {
+        -webkit-appearance: none !important;
+        margin: 0 !important;
+        display: none !important;
+    }
+    
+    /* Impedisci l'apertura del picker nativo */
+    &::-webkit-datetime-edit,
+    &::-webkit-datetime-edit-fields-wrapper,
+    &::-webkit-datetime-edit-text,
+    &::-webkit-datetime-edit-month-field,
+    &::-webkit-datetime-edit-day-field,
+    &::-webkit-datetime-edit-year-field {
+        display: none !important;
+    }
+}
+
+/* Firefox */
+input[data-datepicker][type="date"] {
+    -moz-appearance: textfield !important;
+}
+
+/* Assicurati che funzioni su tutte le modalità - Light Mode */
+input[data-datepicker] {
+    background-color: var(--input-bg, #ffffff);
+    border: 1px solid var(--input-border, rgba(100, 116, 139, 0.3));
+    color: var(--text-primary, #111827);
+    
+    &:focus {
+        border-color: var(--primary-color, #2563eb);
+        box-shadow: var(--input-shadow-focus, 0 0 0 3px rgba(37, 99, 235, 0.1));
+        outline: none;
+    }
+}
+
+/* Dark Mode */
+[data-bs-theme="dark"] input[data-datepicker] {
+    background-color: var(--input-bg, #374151);
+    border: 1px solid var(--input-border, rgba(100, 116, 139, 0.5));
+    color: var(--text-primary, #f8fafc);
+    
+    &:focus {
+        border-color: var(--primary-color, #2563eb);
+        box-shadow: var(--input-shadow-focus, 0 0 0 3px rgba(37, 99, 235, 0.2));
+    }
+    
+    /* Nascondi anche in dark mode */
+    &::-webkit-calendar-picker-indicator {
+        display: none !important;
+        -webkit-appearance: none !important;
+    }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    input[data-datepicker] {
+        font-size: 16px; /* Previene lo zoom su iOS */
+        min-height: 44px; /* Touch target minimo */
+        padding: 12px 16px;
+        
+        /* Nascondi picker nativo anche su mobile */
+        &::-webkit-calendar-picker-indicator {
+            display: none !important;
+        }
+    }
+    
+    /* Dark mode mobile */
+    [data-bs-theme="dark"] input[data-datepicker] {
+        &::-webkit-calendar-picker-indicator {
+            display: none !important;
+        }
+    }
+}

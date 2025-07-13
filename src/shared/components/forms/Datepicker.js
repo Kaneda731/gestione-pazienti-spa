@@ -11,12 +11,12 @@ import 'flatpickr/dist/flatpickr.min.css';
  * @param {HTMLElement} container - Il contenitore in cui cercare i datepicker.
  */
 export function initDatepickers(container = document) {
-    const datepickerElements = container.querySelectorAll('input[data-datepicker]');
+    const datepickerInputs = container.querySelectorAll('input[data-datepicker]');
 
-    datepickerElements.forEach(el => {
-        if (el._flatpickr) return; // Già inizializzato
+    datepickerInputs.forEach(input => {
+        if (input._flatpickr) return; // Già inizializzato
 
-        flatpickr(el, {
+        flatpickr(input, {
             locale: Italian,
             dateFormat: "d/m/Y",
             allowInput: true, // Permette di scrivere la data a mano

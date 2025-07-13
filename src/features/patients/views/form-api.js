@@ -48,13 +48,24 @@ export async function getPatientById(patientId) {
  * @returns {Promise<Object>} I dati del paziente salvato.
  */
 export async function savePatient(patientData, patientId) {
+    // Pulisci i dati per rimuovere campi vuoti non necessari
+    const cleanData = {};
+    Object.keys(patientData).forEach(key => {
+        if (patientData[key] !== '' && patientData[key] !== null && patientData[key] !== undefined) {
+            cleanData[key] = patientData[key];
+        }
+    });
+    
+    // Assicurati che infetto sia un booleano
+    cleanData.infetto = Boolean(cleanData.infetto);
+    
     let result;
     if (patientId) {
         // Modalità modifica
-        result = await supabase.from('pazienti').update(patientData).eq('id', patientId).select().single();
+        result = await supabase.from('pazienti').update(cleanData).eq('id', patientId).select().single();
     } else {
         // Modalità inserimento
-        result = await supabase.from('pazienti').insert(patientData).select().single();
+        result = await supabase.from('pazienti').insert(cleanData).select().single();
     }
 
     if (result.error) {

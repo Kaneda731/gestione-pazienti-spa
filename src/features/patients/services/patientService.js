@@ -130,7 +130,8 @@ class PatientService {
             const dataToInsert = {
                 ...patientData,
                 user_id: user.id,
-                data_dimissione: null // Nuovo paziente sempre attivo
+                data_dimissione: null, // Nuovo paziente sempre attivo
+                infetto: Boolean(patientData.infetto) // Assicurati che sia un booleano
             };
 
             const { data, error } = await supabase
@@ -334,11 +335,20 @@ class PatientService {
      * Validazione dati paziente
      */
     validatePatientData(data) {
-        const required = ['nome', 'cognome', 'data_ricovero', 'diagnosi', 'reparto_appartenenza'];
+        const required = ['nome', 'cognome', 'data_nascita', 'data_ricovero', 'diagnosi', 'reparto_appartenenza'];
         
         for (const field of required) {
             if (!data[field] || data[field].toString().trim() === '') {
                 throw new Error(`Il campo ${field} è obbligatorio`);
+            }
+        }
+
+        // Validazione data nascita
+        if (data.data_nascita) {
+            const nascitaDate = new Date(data.data_nascita);
+            const oggi = new Date();
+            if (nascitaDate > oggi) {
+                throw new Error('La data di nascita non può essere nel futuro');
             }
         }
 
@@ -358,6 +368,13 @@ class PatientService {
                 throw new Error('La data di dimissione non può essere precedente alla data di ricovero');
             }
         }
+
+        // Validazione codice RAD (opzionale ma con formato specifico)
+        if (data.codice_rad && data.codice_rad.trim() !== '') {
+            if (data.codice_rad.length > 11) {
+                throw new Error('Il codice RAD non può superare i 11 caratteri');
+            }
+        }
     }
 
     /**
@@ -365,20 +382,23 @@ class PatientService {
      */
     generateCSV(data) {
         const headers = [
-            'Nome', 'Cognome', 'Data Ricovero', 'Data Dimissione', 
+            'Nome', 'Cognome', 'Data Nascita', 'Data Ricovero', 'Data Dimissione',
             'Diagnosi', 'Reparto Appartenenza', 'Reparto Provenienza',
-            'Livello Assistenza'
+            'Livello Assistenza', 'Codice RAD', 'Infetto'
         ];
 
         const rows = data.map(p => [
             p.nome || '',
             p.cognome || '',
+            p.data_nascita ? new Date(p.data_nascita).toLocaleDateString() : '',
             p.data_ricovero ? new Date(p.data_ricovero).toLocaleDateString() : '',
             p.data_dimissione ? new Date(p.data_dimissione).toLocaleDateString() : '',
             p.diagnosi || '',
             p.reparto_appartenenza || '',
             p.reparto_provenienza || '',
-            p.livello_assistenza || ''
+            p.livello_assistenza || '',
+            p.codice_rad || '',
+            p.infetto ? 'Sì' : 'No'
         ]);
 
         return [headers, ...rows]

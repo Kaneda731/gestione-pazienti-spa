@@ -37,8 +37,20 @@ export function populateForm(patient) {
     document.getElementById('paziente-id').value = patient.id || '';
     document.getElementById('nome').value = patient.nome || '';
     document.getElementById('cognome').value = patient.cognome || '';
-    document.getElementById('data_ricovero').value = patient.data_ricovero || '';
-    document.getElementById('data_dimissione').value = patient.data_dimissione || '';
+    
+    // Converti le date da yyyy-mm-dd a dd/mm/yyyy per il datepicker
+    const formatDateForDisplay = (dateStr) => {
+        if (!dateStr) return '';
+        if (dateStr.includes('-')) {
+            const [year, month, day] = dateStr.split('-');
+            return `${day}/${month}/${year}`;
+        }
+        return dateStr;
+    };
+    
+    document.getElementById('data_nascita').value = formatDateForDisplay(patient.data_nascita || '');
+    document.getElementById('data_ricovero').value = formatDateForDisplay(patient.data_ricovero || '');
+    document.getElementById('data_dimissione').value = formatDateForDisplay(patient.data_dimissione || '');
     document.getElementById('diagnosi').value = patient.diagnosi || '';
     document.getElementById('reparto_appartenenza').value = patient.reparto_appartenenza || '';
     document.getElementById('reparto_provenienza').value = patient.reparto_provenienza || '';
@@ -85,6 +97,15 @@ export function getFormData() {
 
     // Gestisci la checkbox, che non viene inviata se non è spuntata
     data.infetto = form.querySelector('#infetto').checked;
+    
+    // Converti le date dal formato dd/mm/yyyy a yyyy-mm-dd per Supabase
+    const dateFields = ['data_nascita', 'data_ricovero', 'data_dimissione'];
+    dateFields.forEach(field => {
+        if (data[field] && data[field].includes('/')) {
+            const [day, month, year] = data[field].split('/');
+            data[field] = `${year}-${month}-${day}`;
+        }
+    });
 
     return data;
 }

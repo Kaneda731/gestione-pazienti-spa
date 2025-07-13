@@ -2,11 +2,11 @@
    DATEPICKER OVERRIDE - NASCONDI CALENDARIO NATIVO
    =================================== */
 
-/* Nascondi il calendario nativo del browser per usare solo Flatpickr */
-input[data-datepicker] {
+/* Nascondi calendario nativo solo per input Flatpickr abilitati */
+input.flatpickr-enabled {
     cursor: pointer;
     
-    /* Webkit browsers (Chrome, Safari, Edge) */
+    /* Nascondi icona calendario nativo */
     &::-webkit-calendar-picker-indicator {
         display: none !important;
         -webkit-appearance: none !important;
@@ -18,14 +18,13 @@ input[data-datepicker] {
         margin: 0 !important;
         display: none !important;
     }
+}
+
+/* Fallback per tutti gli input datepicker */
+input[data-datepicker] {
+    cursor: pointer;
     
-    /* Impedisci l'apertura del picker nativo */
-    &::-webkit-datetime-edit,
-    &::-webkit-datetime-edit-fields-wrapper,
-    &::-webkit-datetime-edit-text,
-    &::-webkit-datetime-edit-month-field,
-    &::-webkit-datetime-edit-day-field,
-    &::-webkit-datetime-edit-year-field {
+    &::-webkit-calendar-picker-indicator {
         display: none !important;
     }
 }

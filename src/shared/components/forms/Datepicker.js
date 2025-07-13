@@ -16,10 +16,20 @@ export function initDatepickers(container = document) {
     datepickerInputs.forEach(input => {
         if (input._flatpickr) return; // Già inizializzato
 
+        // Semplice: forza type text e autocomplete off
+        input.setAttribute('type', 'text');
+        input.setAttribute('autocomplete', 'off');
+        
+        // Aggiungi classe per CSS targeting
+        input.classList.add('flatpickr-enabled');
+
+        // Inizializza Flatpickr con configurazione semplice
         flatpickr(input, {
             locale: Italian,
             dateFormat: "d/m/Y",
-            allowInput: true, // Permette di scrivere la data a mano
+            allowInput: true,
+            clickOpens: true, // Assicura che si apra al click
+            disableMobile: false, // Permetti funzionamento su mobile
         });
     });
 }

@@ -1,0 +1,23 @@
+// src/css/modules/layout/_layout.scss
+
+// Questo file contiene le regole di layout principali per l'applicazione.
+
+#view-container {
+    transition: padding 0.3s ease-in-out;
+}
+
+// Stili per Desktop (quando la navbar è in alto)
+@media (min-width: 768px) {
+    #view-container {
+        padding-top: 80px; // Spazio per la navbar fissa + un po' di respiro
+        padding-bottom: 2rem; // Spazio in fondo alla pagina
+    }
+}
+
+// Stili per Mobile (quando la navbar è in basso)
+@media (max-width: 767px) {
+    #view-container {
+        padding-top: 2rem; // Spazio in cima su mobile
+        padding-bottom: 100px; // Spazio per la bottom-nav fissa + un po' di respiro
+    }
+}

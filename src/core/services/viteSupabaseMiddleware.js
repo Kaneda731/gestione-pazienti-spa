@@ -8,21 +8,16 @@ import { supabase } from './supabaseClient.js';
 
 class ViteSupabaseMiddleware {
     constructor() {
-        this.isViteReady = false;
-        this.isSupabaseReady = false;
-        this.readyCallbacks = [];
-        
+        this.readyPromise = new Promise((resolve) => {
+            this.resolveReady = resolve;
+        });
+
         this.init();
     }
 
     async init() {
-        // Aspetta che Vite sia completamente pronto
         await this.waitForViteReady();
-        
-        // Verifica che Supabase sia inizializzato correttamente
         await this.waitForSupabaseReady();
-        
-        // Notifica tutti i callback che siamo pronti
         this.notifyReady();
     }
 
@@ -30,14 +25,11 @@ class ViteSupabaseMiddleware {
         return new Promise((resolve) => {
             if (document.readyState === 'complete') {
                 console.log('Vite è pronto');
-                this.isViteReady = true;
                 resolve();
             } else {
                 window.addEventListener('load', () => {
-                    // Piccolo delay per assicurarsi che Vite abbia finito di caricare tutto
                     setTimeout(() => {
                         console.log('Vite è pronto (dopo load)');
-                        this.isViteReady = true;
                         resolve();
                     }, 100);
                 }, { once: true });
@@ -48,35 +40,20 @@ class ViteSupabaseMiddleware {
     async waitForSupabaseReady() {
         return new Promise(async (resolve) => {
             try {
-                // Testa la connessione a Supabase
-                const { data, error } = await supabase.auth.getSession();
-                
-                if (error && error.status !== 401) {
-                    console.warn('Problema con la connessione Supabase:', error);
-                    // Continuiamo comunque, potrebbe essere normale
-                }
-                
+                await supabase.auth.getSession();
                 console.log('Supabase è pronto');
-                this.isSupabaseReady = true;
                 resolve();
             } catch (error) {
                 console.error('Errore nell\'inizializzazione Supabase:', error);
-                
-                // Prova a pulire lo stato se necessario
                 this.clearCorruptedState();
-                
-                // Ritenta una volta
                 setTimeout(async () => {
                     try {
                         await supabase.auth.getSession();
                         console.log('Supabase è pronto (dopo retry)');
-                        this.isSupabaseReady = true;
                         resolve();
                     } catch (retryError) {
                         console.error('Errore nel retry Supabase:', retryError);
-                        // Continuiamo comunque
-                        this.isSupabaseReady = true;
-                        resolve();
+                        resolve(); // Risolviamo comunque per non bloccare l'app
                     }
                 }, 500);
             }
@@ -85,14 +62,10 @@ class ViteSupabaseMiddleware {
 
     clearCorruptedState() {
         console.log('Pulisco stato corrotto...');
-        
-        // Pulisci localStorage
         ['supabase.auth.token', 'sb-aiguzywadjzyrwandgba-auth-token'].forEach(key => {
             localStorage.removeItem(key);
             sessionStorage.removeItem(key);
         });
-        
-        // Pulisci cookie Supabase
         document.cookie.split(";").forEach(cookie => {
             const eqPos = cookie.indexOf("=");
             const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
@@ -102,34 +75,19 @@ class ViteSupabaseMiddleware {
         });
     }
 
-    onReady(callback) {
-        if (typeof callback !== 'function') {
-            console.warn('onReady: callback deve essere una funzione');
-            return;
-        }
-        
-        if (this.isViteReady && this.isSupabaseReady) {
-            callback();
-        } else {
-            this.readyCallbacks.push(callback);
-        }
+    /**
+     * Restituisce una Promise che si risolve quando il middleware è pronto.
+     * @returns {Promise<void>}
+     */
+    onReady() {
+        return this.readyPromise;
     }
 
     notifyReady() {
         console.log('Middleware Vite-Supabase pronto');
-        this.readyCallbacks.forEach(callback => {
-            if (typeof callback === 'function') {
-                callback();
-            }
-        });
-        this.readyCallbacks = [];
-    }
-
-    isReady() {
-        return this.isViteReady && this.isSupabaseReady;
+        this.resolveReady();
     }
 }
 
 // Esporta un'istanza singleton
 export const viteSupabaseMiddleware = new ViteSupabaseMiddleware();
-

@@ -5,57 +5,66 @@ class CustomDatepicker {
         this.selector = selector;
         this.options = options;
         this.instances = [];
-
-        // Bind 'this' per i metodi usati come event handler
-        this.reinit = this.reinit.bind(this);
+        
+        // L'handler è ora legato all'istanza della classe
+        this.handleIconClick = this.handleIconClick.bind(this);
 
         this.init();
-        
-        // Aggiungi listener per il cambio di modalità
-        window.addEventListener('mode:change', this.reinit);
     }
 
     init() {
-        this.elements = document.querySelectorAll(this.selector);
-        this.elements.forEach(element => {
-            // Prevenire la doppia inizializzazione
+        const elements = document.querySelectorAll(this.selector);
+        
+        elements.forEach(element => {
             if (element._flatpickr) {
                 element._flatpickr.destroy();
             }
 
             const instance = flatpickr(element, {
                 ...this.options,
-                // Aggiungi qui opzioni di default se necessario
+                dateFormat: "d/m/Y",
+                disableMobile: true, // Forza il calendario Flatpickr anche su mobile
             });
+            
+            // Associa l'istanza di flatpickr direttamente all'elemento input
+            element._flatpickrInstance = instance;
             this.instances.push(instance);
         });
+
+        // Aggiungi un solo listener sul documento
+        document.addEventListener('click', this.handleIconClick);
     }
 
-    /**
-     * Distrugge e reinizializza le istanze di Flatpickr.
-     * Utile quando la UI cambia dinamicamente (es. cambio modalità desktop/mobile).
-     */
-    reinit() {
-        console.log('Reinitializing Flatpickr due to mode change.');
-        this.destroyInstances();
-        this.init();
+    handleIconClick(event) {
+        // Controlla se l'elemento cliccato è un'icona del calendario
+        const icon = event.target.closest('.input-icon');
+        if (!icon) return;
+
+        // Trova il wrapper e l'input associato
+        const wrapper = icon.closest('.input-group-icon');
+        if (!wrapper) return;
+
+        const input = wrapper.querySelector(this.selector);
+        if (input && input._flatpickrInstance) {
+            // Usa l'istanza salvata per aprire il calendario
+            input._flatpickrInstance.toggle();
+        }
     }
 
-    /**
-     * Distrugge solo le istanze di flatpickr, senza rimuovere l'event listener.
-     */
-    destroyInstances() {
-        this.instances.forEach(instance => instance.destroy());
-        this.instances = [];
-    }
-
-    /**
-     * Distrugge completamente il componente, incluse le istanze e gli event listener.
-     */
     destroy() {
-        this.destroyInstances();
-        window.removeEventListener('mode:change', this.reinit);
-        console.log('CustomDatepicker destroyed completely.');
+        // Rimuovi il listener globale
+        document.removeEventListener('click', this.handleIconClick);
+
+        // Pulisci le istanze salvate sugli elementi
+        this.instances.forEach(instance => {
+            if (instance.element) {
+                delete instance.element._flatpickrInstance;
+            }
+            instance.destroy();
+        });
+        
+        this.instances = [];
+        console.log('CustomDatepicker instances and global handler destroyed.');
     }
 }
 

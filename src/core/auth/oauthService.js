@@ -117,12 +117,7 @@ export class OAuthManager {
     async signInWithGoogle() {
         try {
             // Assicurati che il middleware sia pronto
-            if (!viteSupabaseMiddleware.isReady()) {
-                console.log('Aspetto che il middleware sia pronto...');
-                await new Promise(resolve => {
-                    viteSupabaseMiddleware.onReady(resolve);
-                });
-            }
+            await viteSupabaseMiddleware.onReady();
             
             // Se siamo già in uno stato di errore, proviamo a pulirlo
             if (this.authState === 'error') {

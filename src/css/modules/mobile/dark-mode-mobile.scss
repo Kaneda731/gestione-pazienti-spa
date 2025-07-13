@@ -66,14 +66,16 @@
     
     /* Form controls mobile dark mode */
     [data-bs-theme="dark"] .form-control,
-    [data-bs-theme="dark"] .form-select {
+    [data-bs-theme="dark"] .form-select,
+    [data-bs-theme="dark"] .custom-select-trigger {
         background-color: var(--input-bg);
         border-color: var(--border-color);
-        color: var(--dark-color);
+        color: var(--text-primary);
     }
     
     [data-bs-theme="dark"] .form-control:focus,
-    [data-bs-theme="dark"] .form-select:focus {
+    [data-bs-theme="dark"] .form-select:focus,
+    [data-bs-theme="dark"] .custom-select-wrapper.open .custom-select-trigger {
         border-color: var(--primary-color);
         box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.15);
     }

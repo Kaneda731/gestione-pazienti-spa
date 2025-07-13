@@ -154,6 +154,11 @@
         margin-bottom: 0.5rem;
         font-weight: 600;
     }
+
+    /* FIX: Assicura che il trigger del custom select abbia lo sfondo corretto su mobile */
+    .custom-select-trigger {
+        background: var(--input-bg) !important;
+    }
 }
 
 /* ===================================

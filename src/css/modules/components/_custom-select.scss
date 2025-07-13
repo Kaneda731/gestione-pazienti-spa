@@ -1,0 +1,117 @@
+/* ===================================
+   CUSTOM SELECT - STILI BASE
+   =================================== */
+
+.custom-select-wrapper {
+    position: relative;
+    width: 100%;
+    font-family: var(--font-family-sans-serif);
+}
+
+.custom-select-trigger {
+    justify-content: space-between;
+    width: 100%;
+    text-align: left;
+    background: var(--input-bg);
+}
+
+.custom-select-trigger:hover {
+    border-color: var(--primary-color);
+}
+
+.custom-select-wrapper.open .custom-select-trigger {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(37, 99, 235, 0.25);
+}
+
+.custom-select-label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.custom-select-arrow {
+    transition: transform 0.2s ease;
+}
+
+.custom-select-wrapper.open .custom-select-arrow {
+    transform: rotate(180deg);
+}
+
+.custom-select-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-top: none;
+    border-radius: 0 0 var(--border-radius) var(--border-radius);
+    z-index: 1050;
+    max-height: 200px;
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+}
+
+.custom-select-wrapper.open .custom-select-dropdown {
+    display: block;
+}
+
+.custom-select-option {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    color: var(--text-primary);
+}
+
+.custom-select-option:hover, .custom-select-option.focused {
+    background-color: var(--bg-secondary);
+}
+
+.custom-select-option.selected {
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: 600;
+}
+
+/* ===================================
+   DARK MODE SUPPORT (GLOBALE)
+   =================================== */
+
+[data-bs-theme="dark"] .custom-select-trigger {
+    background: var(--input-bg);
+    border-color: var(--border-color);
+    color: var(--text-primary); /* Usa text-primary anche per dark */
+}
+
+[data-bs-theme="dark"] .custom-select-trigger:hover {
+    border-color: var(--primary-color);
+}
+
+[data-bs-theme="dark"] .custom-select-trigger:focus,
+[data-bs-theme="dark"] .custom-select-wrapper.open .custom-select-trigger {
+    background: var(--input-bg);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(37, 99, 235, 0.25);
+}
+
+[data-bs-theme="dark"] .custom-select-dropdown {
+    background-color: var(--card-bg); /* Sfondo del menu a tendina */
+    border-color: var(--border-color);
+}
+
+[data-bs-theme="dark"] .custom-select-option {
+    color: var(--text-primary);
+    background-color: transparent; /* Assicura che non ci sia sfondo di default */
+}
+
+[data-bs-theme="dark"] .custom-select-option:hover,
+[data-bs-theme="dark"] .custom-select-option.focused {
+    background-color: var(--bg-secondary); /* Sfondo per hover/focus */
+}
+
+[data-bs-theme="dark"] .custom-select-option.selected {
+    background-color: var(--primary-color);
+    color: white;
+}

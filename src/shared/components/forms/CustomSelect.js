@@ -203,15 +203,18 @@ export class CustomSelect {
     open() {
         this.isOpen = true;
         this.wrapper.classList.add('open');
+
+        // Gestione overflow della card genitore
         const parentCard = this.wrapper.closest('.card');
-        if (parentCard) parentCard.classList.add('overflow-visible');
-        if (window.innerWidth <= 767) {
-            this.disableOtherCustomSelects();
-            this.createMobileModal();
-        } else {
-            if (this.selectedValue === '') {
-                const firstOption = this.wrapper.querySelector('.custom-select-option');
-                if (firstOption) firstOption.classList.add('focused');
+        if (parentCard) {
+            parentCard.classList.add('overflow-visible');
+        }
+        
+        // Non usare più il modal mobile, apri sempre il dropdown
+        if (this.selectedValue === '') {
+            const firstOption = this.wrapper.querySelector('.custom-select-option');
+            if (firstOption) {
+                firstOption.classList.add('focused');
             }
         }
     }

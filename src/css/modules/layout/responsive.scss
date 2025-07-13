@@ -78,6 +78,11 @@ body {
 * {
     box-sizing: border-box;
 }
+
+/* Spaziatura per le view non-home */
+main:not(#home-view) .view {
+    padding-top: 1.5rem;
+}
 /* ===================================
    RESPONSIVE DESKTOP/TABLET LAYOUT
    =================================== */

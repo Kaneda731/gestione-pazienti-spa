@@ -154,7 +154,7 @@ async function handleFormSubmit(event) {
     }
 }
 
-export async function renderInserimentoView() {
+export async function initInserimentoView() {
     const formHTML = `
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2>Inserimento Nuovo Paziente</h2>

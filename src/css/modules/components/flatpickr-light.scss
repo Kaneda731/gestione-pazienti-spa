@@ -1,10 +1,40 @@
-/* Flatpickr Light Theme */
+/* Flatpickr Light Theme - Custom Styles */
+
+/* Nascondi l'icona di default di Flatpickr per usare la nostra Material Icon */
+.flatpickr-input[readonly] {
+    cursor: pointer;
+}
+
+.flatpickr-input + .input-group-append .input-group-text {
+    display: none;
+}
+
+/* Nascondi completamente l'icona integrata di Flatpickr */
+.flatpickr-calendar::before,
+.flatpickr-calendar::after {
+    display: none !important;
+}
+
+/* Assicurati che non ci siano icone duplicate nei datepicker */
+input[data-datepicker] + .flatpickr-input + .input-group-append {
+    display: none;
+}
+
+/* Mantieni solo la nostra icona Material Icons */
+.input-group-icon .input-icon {
+    pointer-events: none;
+    z-index: 5;
+}
+
+/* Stili per il calendario Flatpickr */
 .flatpickr-calendar {
     background-color: var(--card-bg, #ffffff);
     border: 1px solid var(--border-color, #e5e7eb);
     border-radius: var(--border-radius, 12px);
     box-shadow: var(--shadow-lg, 0 8px 24px rgba(0, 0, 0, 0.12));
     color: var(--text-primary, #111827);
+    font-family: var(--font-family-base, 'Inter', sans-serif);
+    z-index: 9999;
 
     .flatpickr-month {
         background-color: var(--bg-secondary, #e3f2fd);
@@ -84,5 +114,28 @@
     &:focus {
         border-color: var(--primary-color, #2563eb);
         box-shadow: var(--input-shadow-focus, 0 0 0 3px rgba(37, 99, 235, 0.1));
+    }
+}
+
+/* Stili mobile per Flatpickr */
+@media (max-width: 768px) {
+    .flatpickr-calendar {
+        width: 280px;
+        font-size: 14px;
+        
+        .flatpickr-day {
+            width: 35px;
+            height: 35px;
+            line-height: 35px;
+        }
+        
+        .flatpickr-month {
+            height: 40px;
+        }
+        
+        .flatpickr-weekday {
+            height: 30px;
+            line-height: 30px;
+        }
     }
 }

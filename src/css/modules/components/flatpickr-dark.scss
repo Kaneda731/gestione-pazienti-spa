@@ -1,10 +1,40 @@
-/* Flatpickr Dark Theme */
+/* Flatpickr Dark Theme - Custom Styles */
+
+/* Nascondi l'icona di default di Flatpickr per usare la nostra Material Icon */
+[data-bs-theme="dark"] .flatpickr-input[readonly] {
+    cursor: pointer;
+}
+
+[data-bs-theme="dark"] .flatpickr-input + .input-group-append .input-group-text {
+    display: none;
+}
+
+/* Nascondi completamente l'icona integrata di Flatpickr nel dark mode */
+[data-bs-theme="dark"] .flatpickr-calendar::before,
+[data-bs-theme="dark"] .flatpickr-calendar::after {
+    display: none !important;
+}
+
+/* Assicurati che non ci siano icone duplicate nei datepicker nel dark mode */
+[data-bs-theme="dark"] input[data-datepicker] + .flatpickr-input + .input-group-append {
+    display: none;
+}
+
+/* Mantieni solo la nostra icona Material Icons nel dark mode */
+[data-bs-theme="dark"] .input-group-icon .input-icon {
+    pointer-events: none;
+    z-index: 5;
+}
+
+/* Stili per il calendario Flatpickr in dark mode */
 [data-bs-theme="dark"] .flatpickr-calendar {
     background-color: var(--card-bg, #1e293b);
     border: 1px solid var(--border-color, #374151);
     border-radius: var(--border-radius, 12px);
     box-shadow: var(--shadow-lg, 0 8px 24px rgba(0, 0, 0, 0.3));
     color: var(--text-primary, #f8fafc);
+    font-family: var(--font-family-base, 'Inter', sans-serif);
+    z-index: 9999;
 
     .flatpickr-month {
         background-color: var(--bg-secondary, #334155);
@@ -84,5 +114,28 @@
     &:focus {
         border-color: var(--primary-color, #2563eb);
         box-shadow: var(--input-shadow-focus, 0 0 0 3px rgba(37, 99, 235, 0.2));
+    }
+}
+
+/* Stili mobile per Flatpickr in dark mode */
+@media (max-width: 768px) {
+    [data-bs-theme="dark"] .flatpickr-calendar {
+        width: 280px;
+        font-size: 14px;
+        
+        .flatpickr-day {
+            width: 35px;
+            height: 35px;
+            line-height: 35px;
+        }
+        
+        .flatpickr-month {
+            height: 40px;
+        }
+        
+        .flatpickr-weekday {
+            height: 30px;
+            line-height: 30px;
+        }
     }
 }

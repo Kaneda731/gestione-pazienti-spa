@@ -8,19 +8,19 @@
                 </div>
                 <div class="card-body">
                     <div class="filters-container row g-3 mb-3">
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <label for="list-filter-reparto" class="form-label">Reparto</label>
                             <select id="list-filter-reparto" class="form-select form-select-sm" data-custom="true">
                                 <!-- Popolato dinamicamente -->
                             </select>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <label for="list-filter-diagnosi" class="form-label">Diagnosi</label>
                             <select id="list-filter-diagnosi" class="form-select form-select-sm" data-custom="true">
                                 <!-- Popolato dinamicamente -->
                             </select>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <label for="list-filter-stato" class="form-label">Stato</label>
                             <select id="list-filter-stato" class="form-select form-select-sm" data-custom="true">
                                 <option value="">Tutti</option>
@@ -28,9 +28,17 @@
                                 <option value="dimesso">Dimesso</option>
                             </select>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-2">
+                            <label for="list-filter-infetto" class="form-label">Flag Infetto</label>
+                            <select id="list-filter-infetto" class="form-select form-select-sm" data-custom="true">
+                                <option value="">Tutti</option>
+                                <option value="true">Infetto</option>
+                                <option value="false">Non Infetto</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
                             <label for="list-search" class="form-label">Cerca</label>
-                            <input type="text" id="list-search" class="form-control form-control-sm" placeholder="Per nome o cognome...">
+                            <input type="text" id="list-search" class="form-control form-control-sm" placeholder="Per nome, cognome o RAD...">
                         </div>
                     </div>
                     
@@ -41,6 +49,7 @@
                                 <tr>
                                     <th data-sort="cognome">Cognome <span class="sort-indicator"></span></th>
                                     <th data-sort="nome">Nome <span class="sort-indicator"></span></th>
+                                    <th data-sort="data_nascita">Data Nascita <span class="sort-indicator"></span></th>
                                     <th data-sort="data_ricovero">Data Ricovero <span class="sort-indicator"></span></th>
                                     <th>Diagnosi</th>
                                     <th>Reparto</th>
@@ -62,6 +71,9 @@
                         </button>
                         <button id="export-csv-btn" class="btn btn-outline-secondary">
                             <span class="material-icons me-1" style="vertical-align: text-bottom;">download</span>Esporta
+                        </button>
+                        <button id="debug-db-btn" class="btn btn-outline-warning" style="display: none;">
+                            <span class="material-icons me-1" style="vertical-align: text-bottom;">bug_report</span>Debug DB
                         </button>
                     </div>
                     </div>

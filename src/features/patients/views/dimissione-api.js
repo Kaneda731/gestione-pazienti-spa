@@ -28,6 +28,27 @@ export async function searchActivePatients(searchTerm) {
  * @returns {Promise<Object>} I dati del paziente aggiornato.
  */
 export async function dischargePatient(patientId, dischargeDate) {
+    // Prima verifichiamo se il paziente esiste e non è già dimesso
+    const { data: existingPatient, error: checkError } = await supabase
+        .from('pazienti')
+        .select('id, data_dimissione')
+        .eq('id', patientId)
+        .is('data_dimissione', null)
+        .single();
+
+    if (checkError) {
+        console.error('Errore durante la verifica del paziente:', checkError);
+        if (checkError.code === 'PGRST116') {
+            throw new Error('Paziente non trovato o già dimesso.');
+        }
+        throw new Error('Errore durante la verifica del paziente.');
+    }
+
+    if (!existingPatient) {
+        throw new Error('Paziente non trovato o già dimesso.');
+    }
+
+    // Procediamo con l'aggiornamento
     const { data, error } = await supabase
         .from('pazienti')
         .update({ data_dimissione: dischargeDate })
@@ -37,7 +58,11 @@ export async function dischargePatient(patientId, dischargeDate) {
 
     if (error) {
         console.error('Errore durante la dimissione:', error);
+        if (error.code === 'PGRST116') {
+            throw new Error('Paziente non trovato durante l\'aggiornamento.');
+        }
         throw new Error('Errore durante l\'aggiornamento del paziente.');
     }
+    
     return data;
 }

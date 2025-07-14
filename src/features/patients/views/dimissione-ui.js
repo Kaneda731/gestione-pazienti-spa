@@ -43,9 +43,11 @@ export function cleanupUI() {
  * @param {function} onSelect - La callback da eseguire quando un paziente viene selezionato.
  */
 export function renderSearchResults(patients, onSelect) {
-    resultsContainer.innerHTML = '';
+    if (!dom.resultsContainer) return;
+    
+    dom.resultsContainer.innerHTML = '';
     if (patients.length === 0) {
-        resultsContainer.innerHTML = '<p class="text-center text-muted">Nessun paziente attivo trovato.</p>';
+        dom.resultsContainer.innerHTML = '<p class="text-center text-muted">Nessun paziente attivo trovato.</p>';
         return;
     }
     patients.forEach(p => {
@@ -53,7 +55,7 @@ export function renderSearchResults(patients, onSelect) {
         item.className = 'list-group-item list-group-item-action';
         item.textContent = `${p.cognome} ${p.nome} (Ricovero: ${new Date(p.data_ricovero).toLocaleDateString()})`;
         item.onclick = () => onSelect(p);
-        resultsContainer.appendChild(item);
+        dom.resultsContainer.appendChild(item);
     });
 }
 
@@ -62,23 +64,30 @@ export function renderSearchResults(patients, onSelect) {
  * @param {Object} patient - Il paziente selezionato.
  */
 export function displayDischargeForm(patient) {
-    selectedPatientName.textContent = `${patient.cognome} ${patient.nome}`;
-    selectedPatientRicovero.textContent = new Date(patient.data_ricovero).toLocaleDateString();
-    dischargeForm.classList.remove('d-none');
-    resultsContainer.innerHTML = '';
-    searchInput.value = '';
-    dataDimissioneInput.focus();
+    if (!dom.selectedPatientName || !dom.selectedPatientRicovero || !dom.dischargeForm || !dom.resultsContainer || !dom.searchInput || !dom.dataDimissioneInput) {
+        console.error('Elementi DOM mancanti per displayDischargeForm');
+        return;
+    }
+    
+    dom.selectedPatientName.textContent = `${patient.cognome} ${patient.nome}`;
+    dom.selectedPatientRicovero.textContent = new Date(patient.data_ricovero).toLocaleDateString();
+    dom.dischargeForm.classList.remove('d-none');
+    dom.resultsContainer.innerHTML = '';
+    dom.searchInput.value = '';
+    dom.dataDimissioneInput.focus();
 }
 
 /**
  * Mostra o nasconde l'indicatore di caricamento.
- * @param {boolean} isLoading 
+ * @param {boolean} isLoading
  */
 export function setLoading(isLoading) {
+    if (!dom.resultsContainer) return;
+    
     if (isLoading) {
-        resultsContainer.innerHTML = '<div class="text-center"><div class="spinner-border"></div></div>';
+        dom.resultsContainer.innerHTML = '<div class="text-center"><div class="spinner-border"></div></div>';
     } else {
-        resultsContainer.innerHTML = '';
+        dom.resultsContainer.innerHTML = '';
     }
 }
 
@@ -86,10 +95,18 @@ export function setLoading(isLoading) {
  * Resetta la vista al suo stato iniziale.
  */
 export function resetView() {
-    dischargeForm.classList.add('d-none');
-    resultsContainer.innerHTML = '';
-    searchInput.value = '';
-    if (dataDimissioneInput) dataDimissioneInput.value = '';
+    if (dom.dischargeForm) {
+        dom.dischargeForm.classList.add('d-none');
+    }
+    if (dom.resultsContainer) {
+        dom.resultsContainer.innerHTML = '';
+    }
+    if (dom.searchInput) {
+        dom.searchInput.value = '';
+    }
+    if (dom.dataDimissioneInput) {
+        dom.dataDimissioneInput.value = '';
+    }
 }
 
 /**

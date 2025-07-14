@@ -30,6 +30,7 @@ export function cacheDOMElements(viewContainer) {
     domElements.repartoFilter = document.getElementById('list-filter-reparto');
     domElements.diagnosiFilter = document.getElementById('list-filter-diagnosi');
     domElements.statoFilter = document.getElementById('list-filter-stato');
+    domElements.infettoFilter = document.getElementById('list-filter-infetto');
     domElements.searchInput = document.getElementById('list-search');
     domElements.resetButton = document.getElementById('reset-filters-btn');
     domElements.filterContainer = viewContainer.querySelector('.filters-container');
@@ -70,7 +71,7 @@ export function cacheDOMElements(viewContainer) {
     }
     
     // Validazione elementi critici
-    const criticalElements = ['tableBody', 'cardsContainer', 'repartoFilter', 'diagnosiFilter', 'statoFilter'];
+    const criticalElements = ['tableBody', 'cardsContainer', 'repartoFilter', 'diagnosiFilter', 'statoFilter', 'infettoFilter'];
     criticalElements.forEach(key => {
         if (!domElements[key]) {
             console.error(`Elemento DOM critico non trovato: ${key}`);
@@ -95,6 +96,9 @@ export function loadPersistedFilters() {
     if (domElements.statoFilter && filters.stato) {
         domElements.statoFilter.value = filters.stato;
     }
+    if (domElements.infettoFilter && filters.infetto) {
+        domElements.infettoFilter.value = filters.infetto;
+    }
     if (domElements.searchInput && filters.search) {
         domElements.searchInput.value = filters.search;
     }
@@ -108,6 +112,7 @@ export function persistFilters() {
         reparto: domElements.repartoFilter?.value || '',
         diagnosi: domElements.diagnosiFilter?.value || '',
         stato: domElements.statoFilter?.value || '',
+        infetto: domElements.infettoFilter?.value || '',
         search: domElements.searchInput?.value || '',
         page: stateService.getFilters().page || 0,
         sortColumn: stateService.getFilters().sortColumn || 'data_ricovero',
@@ -128,10 +133,11 @@ export function resetFilters() {
     if (domElements.repartoFilter) domElements.repartoFilter.value = '';
     if (domElements.diagnosiFilter) domElements.diagnosiFilter.value = '';
     if (domElements.statoFilter) domElements.statoFilter.value = '';
+    if (domElements.infettoFilter) domElements.infettoFilter.value = '';
     if (domElements.searchInput) domElements.searchInput.value = '';
     
     // Resetta custom select se presenti
-    [domElements.repartoFilter, domElements.diagnosiFilter, domElements.statoFilter].forEach(element => {
+    [domElements.repartoFilter, domElements.diagnosiFilter, domElements.statoFilter, domElements.infettoFilter].forEach(element => {
         if (element?.customSelectInstance) {
             element.customSelectInstance.setValue('');
         }

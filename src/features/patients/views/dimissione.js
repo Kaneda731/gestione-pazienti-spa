@@ -15,6 +15,11 @@ import {
 let selectedPatient = null;
 
 async function handleSearch() {
+    if (!dom.searchInput) {
+        console.error('Elemento searchInput non trovato');
+        return;
+    }
+    
     const searchTerm = dom.searchInput.value.trim();
     if (searchTerm.length < 2) {
         showFeedback('Inserisci almeno 2 caratteri per la ricerca.', 'info');
@@ -33,7 +38,7 @@ async function handleSearch() {
     } finally {
         // Se non ci sono risultati, setLoading(false) non è necessario
         // perché renderSearchResults gestisce il contenitore.
-        if (dom.resultsContainer.innerHTML.includes('spinner')) {
+        if (dom.resultsContainer && dom.resultsContainer.innerHTML.includes('spinner')) {
              setLoading(false);
         }
     }
@@ -41,6 +46,12 @@ async function handleSearch() {
 
 async function handleDischargeSubmit(event) {
     event.preventDefault();
+    
+    if (!dom.dataDimissioneInput) {
+        console.error('Elemento dataDimissioneInput non trovato');
+        return;
+    }
+    
     const dischargeDate = dom.dataDimissioneInput.value;
 
     if (!selectedPatient || !dischargeDate) {
@@ -60,15 +71,22 @@ async function handleDischargeSubmit(event) {
 }
 
 function setupEventListeners() {
-    dom.searchButton.addEventListener('click', handleSearch);
-    dom.searchInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            handleSearch();
-        }
-    });
+    if (dom.searchButton) {
+        dom.searchButton.addEventListener('click', handleSearch);
+    }
     
-    dom.dischargeForm.addEventListener('submit', handleDischargeSubmit);
+    if (dom.searchInput) {
+        dom.searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                handleSearch();
+            }
+        });
+    }
+    
+    if (dom.dischargeForm) {
+        dom.dischargeForm.addEventListener('submit', handleDischargeSubmit);
+    }
     
     // Il back button è gestito globalmente, ma se serve logica specifica va qui.
     // dom.backButton.addEventListener('click', () => navigateTo('home'));
@@ -78,7 +96,9 @@ export function initDimissioneView() {
     initializeUI();
     setupEventListeners();
     
-    dom.searchInput.focus();
+    if (dom.searchInput) {
+        dom.searchInput.focus();
+    }
 
     // La funzione di cleanup viene restituita per essere chiamata dal router
     return () => {

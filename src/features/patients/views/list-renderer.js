@@ -30,7 +30,7 @@ export function renderPazienti(data, count) {
 
 export function showLoading() {
     if (domElements.tableBody) {
-        domElements.tableBody.innerHTML = '<tr><td colspan="7" class="text-center"><div class="spinner-border"></div></td></tr>';
+        domElements.tableBody.innerHTML = '<tr><td colspan="8" class="text-center"><div class="spinner-border"></div></td></tr>';
     }
     const cardsContainer = document.getElementById('pazienti-cards-container');
     if (cardsContainer) {
@@ -41,7 +41,7 @@ export function showLoading() {
 export function showError(error) {
     console.error('Errore dettagliato durante il fetch dei pazienti:', error);
     if (domElements.tableBody) {
-        domElements.tableBody.innerHTML = `<tr><td colspan="7" class="text-center text-danger"><strong>Errore nel caricamento dei dati.</strong><br>Controlla la console per i dettagli.</td></tr>`;
+        domElements.tableBody.innerHTML = `<tr><td colspan="8" class="text-center text-danger"><strong>Errore nel caricamento dei dati.</strong><br>Controlla la console per i dettagli.</td></tr>`;
     }
     const cardsContainer = document.getElementById('pazienti-cards-container');
     if (cardsContainer) {
@@ -71,7 +71,7 @@ function renderTable(pazientiToRender) {
 
     tableBody.innerHTML = '';
     if (pazientiToRender.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">Nessun paziente trovato.</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">Nessun paziente trovato.</td></tr>';
         return;
     }
     
@@ -98,6 +98,7 @@ function renderTable(pazientiToRender) {
             <tr>
                 <td data-label="Cognome" class="field-border-dark">${p.cognome}</td>
                 <td data-label="Nome" class="field-border-dark">${p.nome}</td>
+                <td data-label="Data Nascita" class="field-border-dark">${p.data_nascita ? new Date(p.data_nascita).toLocaleDateString() : '-'}</td>
                 <td data-label="Data Ricovero" class="field-border-dark">${new Date(p.data_ricovero).toLocaleDateString()}</td>
                 <td data-label="Diagnosi">${p.diagnosi}</td>
                 <td data-label="Reparto">${p.reparto_appartenenza}</td>
@@ -138,6 +139,7 @@ function renderCards(pazientiToRender) {
                 <div class="card mb-3 patient-card-mobile">
                     <div class="card-body">
                         <h5 class="card-title mb-2">${p.cognome} ${p.nome}</h5>
+                        <p class="card-text mb-1 field-border-dark"><strong>Nascita:</strong> ${p.data_nascita ? new Date(p.data_nascita).toLocaleDateString() : '-'}</p>
                         <p class="card-text mb-1 field-border-dark"><strong>Ricovero:</strong> ${new Date(p.data_ricovero).toLocaleDateString()}</p>
                         <p class="card-text mb-1 field-border-dark"><strong>Diagnosi:</strong> ${p.diagnosi}</p>
                         <p class="card-text mb-1 field-border-dark"><strong>Nome:</strong> ${p.nome}</p>
@@ -175,10 +177,11 @@ function renderCards(pazientiToRender) {
                                     <div class="col-sm-6">
                                         <p class="card-text mb-1 field-border-dark"><strong>Cognome:</strong> ${p.cognome}</p>
                                         <p class="card-text mb-1 field-border-dark"><strong>Nome:</strong> ${p.nome}</p>
+                                        <p class="card-text mb-1 field-border-dark"><strong>Data Nascita:</strong> ${p.data_nascita ? new Date(p.data_nascita).toLocaleDateString() : '-'}</p>
                                         <p class="card-text mb-1 field-border-dark"><strong>Data Ricovero:</strong> ${new Date(p.data_ricovero).toLocaleDateString()}</p>
-                                        <p class="card-text mb-1 field-border-dark"><strong>Diagnosi:</strong> ${p.diagnosi}</p>
                                     </div>
                                     <div class="col-sm-6">
+                                        <p class="card-text mb-1 field-border-dark"><strong>Diagnosi:</strong> ${p.diagnosi}</p>
                                         <p class="card-text mb-1"><strong>Reparto:</strong> ${p.reparto_appartenenza}</p>
                                         <p class="card-text mb-1"><strong>Stato:</strong> ${statusBadge}</p>
                                     </div>

@@ -36,7 +36,8 @@ class PatientService {
 
             let query = supabase
                 .from('pazienti')
-                .select('*', { count: 'exact' });
+                .select('*', { count: 'exact' })
+                .not('user_id', 'is', null);
 
             // Applica filtri
             if (reparto) query = query.eq('reparto_appartenenza', reparto);
@@ -266,6 +267,7 @@ class PatientService {
             let query = supabase
                 .from('pazienti')
                 .select('id, nome, cognome, data_ricovero, diagnosi, reparto_appartenenza')
+                .not('user_id', 'is', null)
                 .or(`nome.ilike.%${searchTerm}%,cognome.ilike.%${searchTerm}%`)
                 .order('cognome');
 
@@ -293,7 +295,7 @@ class PatientService {
             stateService.setLoading(true, 'Preparazione esportazione...');
 
             // Ottieni tutti i pazienti senza paginazione
-            let query = supabase.from('pazienti').select('*');
+            let query = supabase.from('pazienti').select('*').not('user_id', 'is', null);
 
             // Applica gli stessi filtri della vista
             if (filters.reparto) query = query.eq('reparto_appartenenza', filters.reparto);
@@ -433,7 +435,8 @@ class PatientService {
         try {
             const { data, error } = await supabase
                 .from('pazienti')
-                .select('data_dimissione, diagnosi, reparto_appartenenza');
+                .select('data_dimissione, diagnosi, reparto_appartenenza')
+                .not('user_id', 'is', null);
 
             if (error) throw error;
 
@@ -456,6 +459,60 @@ class PatientService {
         } catch (error) {
             console.error('Errore nel caricamento statistiche:', error);
             throw error;
+        }
+    }
+
+    /**
+     * Debug function per verificare la fonte dei dati
+     */
+    async debugDataSource() {
+        console.log('🔍 DEBUG: Verifica fonte dati pazienti...');
+        
+        try {
+            // 1. Verifica connessione Supabase
+            const { data: { user }, error: authError } = await supabase.auth.getUser();
+            console.log('👤 Utente autenticato:', user?.email || 'Non autenticato');
+            if (authError) console.error('❌ Errore autenticazione:', authError);
+
+            // 2. Verifica tabella pazienti
+            const { data: allPatients, count, error: dbError } = await supabase
+                .from('pazienti')
+                .select('*', { count: 'exact' });
+            
+            console.log('📊 Pazienti nel database:', count);
+            console.log('📋 Dettagli pazienti:', allPatients);
+
+            // 3. Verifica cache locale
+            console.log('💾 Cache locale:', {
+                cacheSize: this.cache.size,
+                cacheKeys: Array.from(this.cache.keys())
+            });
+
+            // 4. Verifica localStorage/sessionStorage
+            console.log('🗄️ LocalStorage keys:', Object.keys(localStorage));
+            console.log('🗄️ SessionStorage keys:', Object.keys(sessionStorage));
+            
+            // 5. Verifica se ci sono dati mock
+            const hasMockData = allPatients && allPatients.some(p => 
+                p.nome?.includes('Test') || 
+                p.cognome?.includes('Test') || 
+                p.email?.includes('test@')
+            );
+            console.log('🧪 Dati mock rilevati:', hasMockData);
+
+            return {
+                user: user?.email,
+                dbCount: count,
+                hasDbError: !!dbError,
+                cacheSize: this.cache.size,
+                hasMockData,
+                localStorageKeys: Object.keys(localStorage),
+                sessionStorageKeys: Object.keys(sessionStorage)
+            };
+
+        } catch (error) {
+            console.error('❌ Errore durante debug:', error);
+            return { error: error.message };
         }
     }
 }

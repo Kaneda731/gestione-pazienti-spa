@@ -94,26 +94,47 @@ export function resetFilters() {
  * @param {Array} data - I dati da visualizzare.
  */
 export async function drawChart(data) {
-    if (data.length === 0) {
+    if (!data || data.length === 0) {
         showMessage('Nessun dato trovato per i filtri selezionati.');
         return;
     }
 
-    const counts = data.reduce((acc, { diagnosi }) => {
-        acc[diagnosi] = (acc[diagnosi] || 0) + 1;
+    // Filtra i dati validi e gestisce valori null/undefined
+    const validData = data.filter(item => item && item.diagnosi && item.diagnosi.trim() !== '');
+    
+    if (validData.length === 0) {
+        showMessage('Nessuna diagnosi valida trovata nei dati selezionati.');
+        return;
+    }
+
+    const counts = validData.reduce((acc, { diagnosi }) => {
+        const key = diagnosi ? diagnosi.trim() : 'Non specificata';
+        if (key) {
+            acc[key] = (acc[key] || 0) + 1;
+        }
         return acc;
     }, {});
 
-    const chartData = [['Diagnosi', 'Numero Pazienti'], ...Object.entries(counts)];
+    const entries = Object.entries(counts);
+    if (entries.length === 0) {
+        showMessage('Nessuna diagnosi valida trovata nei dati selezionati.');
+        return;
+    }
+
+    const chartData = [['Diagnosi', 'Numero Pazienti'], ...entries];
     
     const chartOptions = {
-        // ... (le opzioni del grafico potrebbero essere esternalizzate)
-        title: { text: 'Distribuzione Diagnosi dei Pazienti Filtrati' },
+        title: 'Distribuzione Diagnosi dei Pazienti Filtrati',
         responsive: true,
         maintainAspectRatio: false,
     };
 
-    await createPieChart(dom.chartContainer, chartData, chartOptions);
+    try {
+        await createPieChart(dom.chartContainer, chartData, chartOptions);
+    } catch (chartError) {
+        console.error('Errore durante la creazione del grafico:', chartError);
+        showError(`Errore nella visualizzazione del grafico: ${chartError.message}`);
+    }
 }
 
 // Funzioni per mostrare stati nella UI

@@ -39,7 +39,8 @@ export async function initGraficoView() {
         const options = await getFilterOptionsForChart();
         populateFilters(options);
     } catch (error) {
-        showError(error.message);
+        console.error('Errore durante l\'inizializzazione della vista grafico:', error);
+        showError(error.message || 'Errore durante il caricamento dei filtri.');
     }
 
     setupEventListeners();

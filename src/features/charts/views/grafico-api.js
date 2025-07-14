@@ -24,7 +24,17 @@ export async function getChartData(filters) {
         throw new Error('Impossibile caricare i dati per il grafico.');
     }
 
-    return data || [];
+    // Assicurati che i dati siano validi e filtra eventuali record non validi
+    const validData = (data || []).filter(item =>
+        item &&
+        typeof item === 'object' &&
+        item.diagnosi && // Assicurati che ci sia una diagnosi valida
+        item.diagnosi !== null &&
+        String(item.diagnosi).trim() !== '' // Escludi diagnosi vuote
+    );
+
+    console.log(`Dati validi trovati: ${validData.length} pazienti`);
+    return validData;
 }
 
 /**

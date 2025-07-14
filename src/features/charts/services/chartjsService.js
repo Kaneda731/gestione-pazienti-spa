@@ -40,14 +40,37 @@ export async function createPieChart(container, data, options = {}) {
     // Crea canvas per Chart.js
     container.innerHTML = '<canvas id="chartCanvas" style="width:100%!important;height:100%!important;display:block;background:linear-gradient(135deg,#e3eef7 0%,#c8d8e8 100%) !important;"></canvas>';
     const canvas = container.querySelector('#chartCanvas');
-    canvas.width = container.offsetWidth;
-    canvas.height = container.offsetHeight;
+    
+    if (!canvas) {
+        throw new Error('Impossibile creare il canvas per il grafico');
+    }
+    
+    canvas.width = container.offsetWidth || 400;
+    canvas.height = container.offsetHeight || 400;
     const ctx = canvas.getContext('2d');
+    
+    if (!ctx) {
+        throw new Error('Impossibile ottenere il contesto 2D dal canvas');
+    }
 
     // Converte i dati dal formato Google Charts al formato Chart.js
     const [, ...dataRows] = data; // Rimuove la riga header
-    const labels = dataRows.map(row => row[0]);
-    const values = dataRows.map(row => row[1]);
+    
+    // Filtra righe non valide
+    const validRows = dataRows.filter(row =>
+        row &&
+        row.length >= 2 &&
+        row[0] != null &&
+        row[1] != null &&
+        !isNaN(Number(row[1]))
+    );
+    
+    if (validRows.length === 0) {
+        throw new Error('Nessun dato valido per il grafico');
+    }
+    
+    const labels = validRows.map(row => String(row[0]));
+    const values = validRows.map(row => Number(row[1]));
 
     // Applica override opzioni legenda se richiesto (es. mobile)
     let legendOptions = options.plugins && options.plugins.legend ? options.plugins.legend : undefined;
@@ -66,11 +89,7 @@ export async function createPieChart(container, data, options = {}) {
                 borderWidth: 3,
                 borderColor: '#fff',
                 hoverBorderWidth: 6,
-                hoverBorderColor: '#222',
-                shadowOffsetX: 0,
-                shadowOffsetY: 6,
-                shadowBlur: 18,
-                shadowColor: 'rgba(0,0,0,0.18)'
+                hoverBorderColor: '#222'
             }]
         },
         options: {
@@ -104,7 +123,7 @@ export async function createPieChart(container, data, options = {}) {
                     titleFont: { size: 18, weight: 'bold' },
                     bodyFont: { size: 16 },
                     callbacks: {
-                        label: ctx => `${ctx.label}: ${ctx.parsed}`
+                        label: ctx => `${ctx.label || 'N/A'}: ${ctx.parsed || 0}`
                     }
                 }
             },
@@ -116,7 +135,6 @@ export async function createPieChart(container, data, options = {}) {
             },
             layout: options.layout || { padding: 40 },
             hoverOffset: options.hoverOffset || 36,
-            // Effetto "3D" fake: ombra su hover (simulato via plugin)
             onHover: (event, chartElement) => {
                 if (chartElement.length) {
                     event.native.target.style.cursor = 'pointer';
@@ -124,24 +142,7 @@ export async function createPieChart(container, data, options = {}) {
                     event.native.target.style.cursor = 'default';
                 }
             }
-        },
-        plugins: [
-            // Plugin per ombra "3D" su hover
-            {
-                id: 'shadow3d',
-                beforeDraw: chart => {
-                    const ctx = chart.ctx;
-                    ctx.save();
-                    ctx.shadowColor = 'rgba(0,0,0,0.18)';
-                    ctx.shadowBlur = 18;
-                    ctx.shadowOffsetY = 6;
-                },
-                afterDraw: chart => {
-                    const ctx = chart.ctx;
-                    ctx.restore();
-                }
-            }
-        ]
+        }
     };
 
     return new Chart(ctx, chartConfig);

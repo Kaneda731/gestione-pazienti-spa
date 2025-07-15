@@ -35,27 +35,22 @@ async function loadChartJs() {
  * @returns {Promise} Promise che si risolve quando il grafico è creato
  */
 export async function createPieChart(container, data, options = {}) {
+    const ChartJs = await loadChartJs();
     const Chart = await loadChartJs();
-    
     // Crea canvas per Chart.js
     container.innerHTML = '<canvas id="chartCanvas" style="width:100%!important;height:100%!important;display:block;background:linear-gradient(135deg,#e3eef7 0%,#c8d8e8 100%) !important;"></canvas>';
     const canvas = container.querySelector('#chartCanvas');
-    
     if (!canvas) {
         throw new Error('Impossibile creare il canvas per il grafico');
     }
-    
-    canvas.width = container.offsetWidth || 400;
-    canvas.height = container.offsetHeight || 400;
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
     const ctx = canvas.getContext('2d');
-    
     if (!ctx) {
         throw new Error('Impossibile ottenere il contesto 2D dal canvas');
     }
-
     // Converte i dati dal formato Google Charts al formato Chart.js
     const [, ...dataRows] = data; // Rimuove la riga header
-    
     // Filtra righe non valide
     const validRows = dataRows.filter(row =>
         row &&
@@ -64,15 +59,20 @@ export async function createPieChart(container, data, options = {}) {
         row[1] != null &&
         !isNaN(Number(row[1]))
     );
-    
     if (validRows.length === 0) {
         throw new Error('Nessun dato valido per il grafico');
     }
-    
     const labels = validRows.map(row => String(row[0]));
     const values = validRows.map(row => Number(row[1]));
 
-    // Applica override opzioni legenda se richiesto (es. mobile)
+    // Opzioni legenda mobile
+    const isMobile = window.innerWidth <= 767;
+    const legendLabels = isMobile
+        ? { boxWidth: 14, font: { size: 12, weight: 'bold' }, padding: 6 }
+        : { boxWidth: 20, font: { size: 15, weight: 'bold' }, padding: 10 };
+
+    const legendPosition = isMobile ? 'bottom' : 'right';
+
     let legendOptions = options.plugins && options.plugins.legend ? options.plugins.legend : undefined;
     let titleOptions = options.plugins && options.plugins.title ? options.plugins.title : undefined;
     let tooltipOptions = options.plugins && options.plugins.tooltip ? options.plugins.tooltip : undefined;
@@ -106,14 +106,9 @@ export async function createPieChart(container, data, options = {}) {
                 },
                 legend: legendOptions || {
                     display: true,
-                    position: 'right',
+                    position: legendPosition,
                     align: 'center',
-                    maxWidth: 220,
-                    labels: {
-                        boxWidth: 20,
-                        font: { size: 15, weight: 'bold' },
-                        padding: 10
-                    }
+                    labels: legendLabels
                 },
                 tooltip: tooltipOptions || {
                     enabled: true,
@@ -144,8 +139,7 @@ export async function createPieChart(container, data, options = {}) {
             }
         }
     };
-
-    return new Chart(ctx, chartConfig);
+    return new ChartJs(ctx, chartConfig);
 }
 
 export { showLoadingInContainer, showErrorInContainer, showMessageInContainer } from './chartService.js';

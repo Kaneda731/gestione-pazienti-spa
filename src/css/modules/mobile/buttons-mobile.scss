@@ -1,4 +1,31 @@
 @media (max-width: 767px) {
+  #apply-filters-btn.btn-custom-info,
+  #reset-filters-btn.btn-custom-info {
+    font-size: 1rem;
+    padding: 0.75rem 1rem;
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: 8px;
+    line-height: 1.1;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+  }
+  #apply-filters-btn.btn-custom-info .material-icons,
+  #reset-filters-btn.btn-custom-info .material-icons {
+    font-size: 1em !important;
+    text-align: center !important;
+    margin: 0 auto !important;
+    display: inline-block !important;
+  }
+}
+@media (max-width: 767px) {
+  /* Regola duplicata rimossa: padding e font-size già gestiti sopra */
+}
+@media (max-width: 767px) {
+  /* Regola duplicata rimossa: padding e font-size già gestiti sopra */
+}
+@media (max-width: 767px) {
   /* BOTTONI AZIONI FILTRI: unificazione override reset/esporta */
   #filter-actions-container > #reset-filters-btn.btn,
   #filter-actions-container > #export-csv-btn.btn,
@@ -10,10 +37,9 @@
     font-weight: 700 !important;
     box-shadow: 0 2px 8px rgba(25,113,194,0.15) !important;
     letter-spacing: 0.03em !important;
-    text-transform: uppercase !important;
+    text-transform: none !important;
     transition: background 0.2s, box-shadow 0.2s, border-color 0.2s;
-    padding-left: 0.5rem !important;
-    padding-right: 0.5rem !important;
+    /* Padding gestito dalla regola generale sopra */
   }
   #filter-actions-container > #reset-filters-btn.btn:hover,
   #filter-actions-container > #reset-filters-btn.btn:active,
@@ -28,7 +54,7 @@
   #reset-filters-btn .material-icons,
   #export-csv-btn .material-icons {
     color: #fff !important;
-    font-size: 1.4em !important;
+    font-size: 1.1em !important;
     vertical-align: middle !important;
   }
 
@@ -42,7 +68,7 @@
     min-width: 0 !important;
     max-width: 100% !important;
     min-height: 44px !important;
-    padding: 0.75rem 0.5rem !important;
+    padding: 0.75rem 1.5rem !important;
     font-size: 1rem !important;
     line-height: 1.2 !important;
     box-sizing: border-box !important;
@@ -203,11 +229,7 @@
     white-space: nowrap !important;
   }
   /* Forza padding uguale anche sui bottoni specifici */
-  #filter-actions-container > #reset-filters-btn.btn,
-  #filter-actions-container > #export-csv-btn.btn {
-    padding-left: 0.5rem !important;
-    padding-right: 0.5rem !important;
-  }
+
   /* Override definitivo: il tasto reset filtri mobile è sempre blu con testo e icona bianchi, mai rosso */
   #reset-filters-btn.btn,
   #reset-filters-btn.btn.btn-outline-secondary,
@@ -218,7 +240,8 @@
     font-weight: 700 !important;
     box-shadow: 0 2px 8px rgba(25,113,194,0.15) !important;
     letter-spacing: 0.03em !important;
-    text-transform: uppercase !important;
+    /* text-transform: uppercase !important; */
+    /* Rimuovo padding custom, font-size e larghezza sono già gestiti dalla regola generale per i bottoni azione mobile */
     transition: background 0.2s, box-shadow 0.2s, border-color 0.2s;
   }
   #reset-filters-btn.btn:hover,

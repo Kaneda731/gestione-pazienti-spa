@@ -36,63 +36,42 @@ async function loadChartJs() {
  */
 export async function createPieChart(container, data, options = {}) {
     const ChartJs = await loadChartJs();
-    const Chart = await loadChartJs();
-    // Crea canvas per Chart.js
-    container.innerHTML = '<canvas id="chartCanvas" style="width:100%!important;height:100%!important;display:block;background:linear-gradient(135deg,#e3eef7 0%,#c8d8e8 100%) !important;"></canvas>';
-    const canvas = container.querySelector('#chartCanvas');
-    if (!canvas) {
-        throw new Error('Impossibile creare il canvas per il grafico');
+    // Funzione per creare il canvas e applicare gli stili
+    function createChartCanvas(container) {
+        container.innerHTML = '';
+        const canvas = document.createElement('canvas');
+        canvas.id = 'chartCanvas';
+        canvas.style.width = '100%';
+        canvas.style.height = '100%';
+        canvas.style.display = 'block';
+        canvas.style.background = 'linear-gradient(135deg,#e3eef7 0%,#c8d8e8 100%)';
+        container.appendChild(canvas);
+        return canvas;
     }
-    canvas.style.width = '100%';
-    canvas.style.height = '100%';
-    const ctx = canvas.getContext('2d');
-    if (!ctx) {
-        throw new Error('Impossibile ottenere il contesto 2D dal canvas');
+
+    // Funzione per validare e convertire i dati
+    function parseChartData(data) {
+        const [, ...dataRows] = data;
+        const validRows = dataRows.filter(row =>
+            row && row.length >= 2 && row[0] != null && row[1] != null && !isNaN(Number(row[1]))
+        );
+        if (validRows.length === 0) throw new Error('Nessun dato valido per il grafico');
+        return {
+            labels: validRows.map(row => String(row[0])),
+            values: validRows.map(row => Number(row[1]))
+        };
     }
-    // Converte i dati dal formato Google Charts al formato Chart.js
-    const [, ...dataRows] = data; // Rimuove la riga header
-    // Filtra righe non valide
-    const validRows = dataRows.filter(row =>
-        row &&
-        row.length >= 2 &&
-        row[0] != null &&
-        row[1] != null &&
-        !isNaN(Number(row[1]))
-    );
-    if (validRows.length === 0) {
-        throw new Error('Nessun dato valido per il grafico');
-    }
-    const labels = validRows.map(row => String(row[0]));
-    const values = validRows.map(row => Number(row[1]));
 
-    // Opzioni legenda mobile
-    const isMobile = window.innerWidth <= 767;
-    const legendLabels = isMobile
-        ? { boxWidth: 14, font: { size: 12, weight: 'bold' }, padding: 6 }
-        : { boxWidth: 20, font: { size: 15, weight: 'bold' }, padding: 10 };
-
-    const legendPosition = isMobile ? 'bottom' : 'right';
-
-    let legendOptions = options.plugins && options.plugins.legend ? options.plugins.legend : undefined;
-    let titleOptions = options.plugins && options.plugins.title ? options.plugins.title : undefined;
-    let tooltipOptions = options.plugins && options.plugins.tooltip ? options.plugins.tooltip : undefined;
-    const chartConfig = {
-        type: 'doughnut',
-        data: {
-            labels: labels,
-            datasets: [{
-                data: values,
-                backgroundColor: [
-                    '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
-                    '#FF9F40', '#43e97b', '#f9ea8f', '#f67019', '#a259f7', '#e14eca', '#00c9a7'
-                ],
-                borderWidth: 3,
-                borderColor: '#fff',
-                hoverBorderWidth: 6,
-                hoverBorderColor: '#222'
-            }]
-        },
-        options: {
+    // Funzione per generare le opzioni Chart.js
+    function getChartOptions(options, isMobile) {
+        const legendLabels = isMobile
+            ? { boxWidth: 14, font: { size: 12, weight: 'bold' }, padding: 6 }
+            : { boxWidth: 20, font: { size: 15, weight: 'bold' }, padding: 10 };
+        const legendPosition = isMobile ? 'bottom' : 'right';
+        let legendOptions = options.plugins && options.plugins.legend ? options.plugins.legend : undefined;
+        let titleOptions = options.plugins && options.plugins.title ? options.plugins.title : undefined;
+        let tooltipOptions = options.plugins && options.plugins.tooltip ? options.plugins.tooltip : undefined;
+        return {
             responsive: true,
             maintainAspectRatio: false,
             cutout: options.cutout || '38%',
@@ -137,7 +116,34 @@ export async function createPieChart(container, data, options = {}) {
                     event.native.target.style.cursor = 'default';
                 }
             }
-        }
+        };
+    }
+
+    // --- Logica principale ---
+    const canvas = createChartCanvas(container);
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('Impossibile ottenere il contesto 2D dal canvas');
+    const { labels, values } = parseChartData(data);
+    const isMobile = window.innerWidth <= 767;
+    const chartOptions = getChartOptions(options, isMobile);
+
+    const chartConfig = {
+        type: 'doughnut',
+        data: {
+            labels,
+            datasets: [{
+                data: values,
+                backgroundColor: [
+                    '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+                    '#FF9F40', '#43e97b', '#f9ea8f', '#f67019', '#a259f7', '#e14eca', '#00c9a7'
+                ],
+                borderWidth: 3,
+                borderColor: '#fff',
+                hoverBorderWidth: 6,
+                hoverBorderColor: '#222'
+            }]
+        },
+        options: chartOptions
     };
     return new ChartJs(ctx, chartConfig);
 }

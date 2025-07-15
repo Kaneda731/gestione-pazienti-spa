@@ -1,4 +1,6 @@
 # Copilot Instructions for gestione-pazienti-spa
+# Regola aggiuntiva:
+Quando ti chiedo un commit, eseguilo sempre su tutti i file modificati (git add . && git commit ...).
 
 ## Architettura e Componenti Chiave
 - **SPA (Single Page Application)** per la gestione pazienti, basata su Vite e Supabase.

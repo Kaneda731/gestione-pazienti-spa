@@ -13,6 +13,7 @@ export const dom = {
     get provenienzaFilter() { return document.getElementById('filter-provenienza'); },
     get diagnosiFilter() { return document.getElementById('filter-diagnosi'); },
     get assistenzaFilter() { return document.getElementById('filter-assistenza'); },
+    get infettoFilter() { return document.getElementById('filter-infetto'); },
     get startDateFilter() { return document.getElementById('filter-start-date'); },
     get endDateFilter() { return document.getElementById('filter-end-date'); },
     get applyButton() { return document.getElementById('apply-filters-btn'); },
@@ -53,6 +54,15 @@ export function populateFilters(options) {
 
     populateSelectWithOptions(dom.diagnosiFilter, options.diagnosiOptions);
     updateCustomSelect('#filter-diagnosi');
+
+    // Popola il filtro Infetto (Sì/No/Tutti)
+    if (dom.infettoFilter) {
+        dom.infettoFilter.innerHTML = `
+            <option value="">Tutti</option>
+            <option value="true">Sì</option>
+            <option value="false">No</option>
+        `;
+    }
 }
 
 /**
@@ -65,6 +75,7 @@ export function getFilters() {
         provenienza: dom.provenienzaFilter.value,
         diagnosi: dom.diagnosiFilter.value,
         assistenza: dom.assistenzaFilter.value,
+        infetto: dom.infettoFilter.value,
         startDate: dom.startDateFilter.value,
         endDate: dom.endDateFilter.value,
     };

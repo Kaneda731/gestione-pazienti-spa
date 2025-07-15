@@ -14,6 +14,8 @@ export async function getChartData(filters) {
     if (filters.provenienza) query = query.eq('reparto_provenienza', filters.provenienza);
     if (filters.diagnosi) query = query.eq('diagnosi', filters.diagnosi);
     if (filters.assistenza) query = query.eq('livello_assistenza', filters.assistenza);
+    if (filters.infetto === 'true') query = query.eq('infetto', true);
+    if (filters.infetto === 'false') query = query.eq('infetto', false);
     if (filters.startDate) query = query.gte('data_ricovero', filters.startDate);
     if (filters.endDate) query = query.lte('data_ricovero', filters.endDate);
 

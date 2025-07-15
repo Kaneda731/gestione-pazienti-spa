@@ -121,7 +121,7 @@ function renderCards(pazientiToRender) {
     if (window.matchMedia("(max-width: 767px)").matches) {
         const cardsHtml = pazientiToRender.map(p => {
             const isDimesso = p.data_dimissione;
-            const statusBadge = isDimesso ? `<span class="badge bg-secondary">Dimesso</span>` : `<span class="badge bg-success">Attivo</span>`;
+            const statusBadge = isDimesso ? `<span class="badge bg-warning text-dark">Dimesso</span>` : `<span class="badge bg-success">Attivo</span>`;
             let mobileActionButtons = '';
             if (canEdit) {
                 const dimissioneButton = isDimesso
@@ -136,16 +136,13 @@ function renderCards(pazientiToRender) {
                 `;
             }
             return `
-                <div class="card mb-3 patient-card-mobile">
+                <div class="card mb-3 patient-card-mobile card-border-dark">
                     <div class="card-body">
-                        <h5 class="card-title mb-2">${p.cognome} ${p.nome}</h5>
-                        <p class="card-text mb-1 field-border-dark"><strong>Nascita:</strong> ${p.data_nascita ? new Date(p.data_nascita).toLocaleDateString() : '-'}</p>
-                        <p class="card-text mb-1 field-border-dark"><strong>Ricovero:</strong> ${new Date(p.data_ricovero).toLocaleDateString()}</p>
-                        <p class="card-text mb-1 field-border-dark"><strong>Diagnosi:</strong> ${p.diagnosi}</p>
-                        <p class="card-text mb-1 field-border-dark"><strong>Nome:</strong> ${p.nome}</p>
-                        <p class="card-text mb-1 field-border-dark"><strong>Cognome:</strong> ${p.cognome}</p>
-                        <p class="card-text mb-1"><strong>Reparto:</strong> ${p.reparto_appartenenza}</p>
-                        <p class="card-text mb-1"><strong>Stato:</strong> ${statusBadge}</p>
+                        <h5 class="card-title mb-2" style="font-size: 1.35rem;">${p.cognome} ${p.nome}</h5>
+                        <p class="card-text mb-1 field-border-dark" style="font-size: 1.15rem;"><strong>Data di Nascita:</strong> ${p.data_nascita ? new Date(p.data_nascita).toLocaleDateString() : '-'}</p>
+                        <p class="card-text mb-1 field-border-dark" style="font-size: 1.15rem;"><strong>Data Ricovero:</strong> ${new Date(p.data_ricovero).toLocaleDateString()}</p>
+                        <p class="card-text mb-1 field-border-dark" style="font-size: 1.15rem;"><strong>Diagnosi:</strong> ${p.diagnosi}</p>
+                        <p class="card-text mb-1" style="font-size: 1.15rem;">${statusBadge}</p>
                         ${mobileActionButtons}
                     </div>
                 </div>
@@ -155,7 +152,7 @@ function renderCards(pazientiToRender) {
     } else {
         const cardsHtml = pazientiToRender.map(p => {
             const isDimesso = p.data_dimissione;
-            const statusBadge = isDimesso ? `<span class="badge bg-secondary">Dimesso</span>` : `<span class="badge bg-success">Attivo</span>`;
+            const statusBadge = isDimesso ? `<span class="badge bg-warning text-dark">Dimesso</span>` : `<span class="badge bg-success">Attivo</span>`;
             let desktopActionButtons = '';
             if (canEdit) {
                 const dimissioneButton = isDimesso
@@ -183,7 +180,7 @@ function renderCards(pazientiToRender) {
                                     <div class="col-sm-6">
                                         <p class="card-text mb-1 field-border-dark"><strong>Diagnosi:</strong> ${p.diagnosi}</p>
                                         <p class="card-text mb-1"><strong>Reparto:</strong> ${p.reparto_appartenenza}</p>
-                                        <p class="card-text mb-1"><strong>Stato:</strong> ${statusBadge}</p>
+                        <p class="card-text mb-1">${statusBadge}</p>
                                     </div>
                                 </div>
                             </div>

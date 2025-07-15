@@ -1,0 +1,13 @@
+// Bordo personalizzato per card mobile
+.card-border-dark {
+  border: 2px solid #343a40 !important; // Colore scuro Bootstrap
+  border-radius: 1rem !important;
+}
+
+// Esempio: solo su mobile
+@media (max-width: 767px) {
+  .card-border-dark {
+    border-color: #007bff !important; // Blu Bootstrap per evidenziare su mobile
+    box-shadow: 0 2px 8px rgba(0,123,255,0.08);
+  }
+}

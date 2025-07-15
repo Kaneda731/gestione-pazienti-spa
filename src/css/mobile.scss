@@ -31,6 +31,7 @@
 // 5. Stili specifici per mobile
 @import "modules/themes/_dark-mode.scss"; // Carica il tema base
 @import "modules/mobile/layout-mobile.scss";
+@import "modules/mobile/card-border-dark-mobile.scss";
 @import "modules/mobile/mobile-components.scss";
 @import "modules/mobile/navbar-mobile.scss";
 @import "modules/mobile/tab-bar.scss";

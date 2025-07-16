@@ -4,7 +4,7 @@ Quando ti chiedo un commit, eseguilo sempre su tutti i file modificati (git add 
 
 ## Architettura e Componenti Chiave
 - **SPA (Single Page Application)** per la gestione pazienti, basata su Vite e Supabase.
-- **src/app/**: entrypoint (`main.js`), router custom (`router.js`), configurazioni e supporto mobile.
+- **src/app/**: entrypoint (`main.js`), router custom (`router.js`), configurazioni e suporto mobile.
 - **src/core/services/**: servizi condivisi (es. `supabaseClient.js`, `stateService.js`, `notificationService.js`).
 - **src/features/**: funzionalità verticali (es. `patients`, `charts`, `diagnoses`), ognuna con views, servizi e componenti propri.
 - **src/shared/**: componenti UI riutilizzabili, servizi e utilità trasversali.

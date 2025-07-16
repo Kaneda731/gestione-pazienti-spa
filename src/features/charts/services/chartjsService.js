@@ -39,6 +39,7 @@ export async function createPieChart(container, data, options = {}) {
     // Funzione per creare il canvas e applicare gli stili
     function createChartCanvas(container) {
         container.innerHTML = '';
+        container.style.padding = '0';
         const canvas = document.createElement('canvas');
         canvas.id = 'chartCanvas';
         canvas.style.width = '100%';
@@ -107,7 +108,7 @@ export async function createPieChart(container, data, options = {}) {
                 duration: 1200,
                 easing: 'easeOutElastic'
             },
-            layout: options.layout || { padding: 40 },
+            layout: { padding: 0 },
             hoverOffset: options.hoverOffset || 36,
             onHover: (event, chartElement) => {
                 if (chartElement.length) {

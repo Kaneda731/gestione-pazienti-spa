@@ -14,12 +14,10 @@ import {
 async function handleFormSubmit(event, state) {
     event.preventDefault();
     const patientData = getFormData();
-    console.log('Form: Dati paziente raccolti:', patientData);
     
     try {
         showFeedbackMessage('Salvataggio in corso...', 'info');
-        const savedPatient = await savePatient(patientData, state.patientId);
-        console.log('Form: Paziente salvato con successo:', savedPatient);
+        await savePatient(patientData, state.patientId);
         
         const action = state.mode === 'edit' ? 'aggiornato' : 'inserito';
         showFeedbackMessage(`Paziente ${action} con successo!`, 'success');
@@ -27,7 +25,6 @@ async function handleFormSubmit(event, state) {
         setTimeout(() => navigateTo('list'), 1500);
 
     } catch (error) {
-        console.error('Form: Errore durante il salvataggio del paziente:', error);
         showFeedbackMessage(error.message, 'danger');
     }
 }

@@ -65,9 +65,7 @@ function initAuthEventListeners() {
             if (icon) icon.style.display = 'none';
             
             try {
-                console.log('Chiamando signInWithGoogle...');
                 const result = await signInWithGoogle();
-                console.log('Risultato signInWithGoogle:', result);
                 hideLoginModal();
             } catch (error) {
                 console.error('Errore durante l\'accesso:', error);

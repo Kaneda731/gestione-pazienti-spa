@@ -43,23 +43,18 @@ export { generateId } from './formatting.js';
  * @returns {Promise<string[]>} - Una promise che risolve in un array di stringhe.
  */
 export async function getFilterOptions(filterName) {
-    try {
-        let data, error;
-        console.log(`DEBUG: Chiamata getFilterOptions per ${filterName}`); // DEBUG
-        if (filterName === 'diagnosi') {
-            ({ data, error } = await supabase.from('diagnosi').select('nome').order('nome', { ascending: true }));
-            if (error) throw error;
-            return data.map(item => item.nome);
-        } else {
-            ({ data, error } = await supabase.from('pazienti').select(filterName));
-            if (error) throw error;
-            return [...new Set(data.map(item => item[filterName]).filter(Boolean))].sort();
-        }
+    const { data, error } = await supabase
+        .from('pazienti')
+        .select(filterName)
+        .not(filterName, 'is', null)
+        .order(filterName, { ascending: true })
+        .distinct();
 
-    } catch (error) {
-        console.error(`Errore durante il recupero delle opzioni per ${filterName}:`, error);
+    if (error) {
+        console.error(`Errore nel recupero delle opzioni per ${filterName}:`, error);
         return [];
     }
+    return data.map(item => item[filterName]);
 }
 
 /**

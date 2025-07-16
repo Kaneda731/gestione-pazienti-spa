@@ -11,10 +11,6 @@ export async function getDiagnosi() {
         .select('id, nome')
         .order('nome', { ascending: true });
 
-    // Aggiungi questi console.log per il debug su Netlify
-    console.log('Supabase getDiagnosi - Data:', data);
-    console.log('Supabase getDiagnosi - Error:', error);
-
     if (error) {
         console.error('Errore caricamento diagnosi:', error);
         throw new Error('Impossibile caricare le diagnosi.');

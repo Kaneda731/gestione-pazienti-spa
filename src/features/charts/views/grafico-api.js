@@ -35,7 +35,6 @@ export async function getChartData(filters) {
         String(item.diagnosi).trim() !== '' // Escludi diagnosi vuote
     );
 
-    console.log(`Dati validi trovati: ${validData.length} pazienti`);
     return validData;
 }
 

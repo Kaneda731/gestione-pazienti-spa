@@ -64,7 +64,10 @@ class CustomDatepicker {
         });
         
         this.instances = [];
-        console.log('CustomDatepicker instances and global handler destroyed.');
+        if (datepickerInstance) {
+        datepickerInstance.destroy();
+        datepickerInstance = null;
+    }
     }
 }
 

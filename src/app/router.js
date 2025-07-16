@@ -106,6 +106,11 @@ export async function renderView() {
         const [requestedViewName, queryString] = hash.split('?');
         const urlParams = new URLSearchParams(queryString);
 
+        console.log('Router: Hash corrente:', hash);
+        console.log('Router: Vista richiesta:', requestedViewName);
+        console.log('Router: Sessione utente presente:', !!currentUser.session);
+        console.log('Router: Ruolo utente:', currentUser.profile?.role);
+
         const viewPermissions = {
             'inserimento': ['admin', 'editor'],
             'list': ['admin', 'editor', 'viewer'],
@@ -116,13 +121,16 @@ export async function renderView() {
         
         let viewToRender = requestedViewName;
         if (Object.keys(viewPermissions).includes(requestedViewName) && !currentUser.session) {
+            console.log('Router: Utente non autenticato, reindirizzo a login-required.');
             sessionStorage.setItem('redirectUrl', hash);
             viewToRender = 'login-required';
         } else if (viewPermissions[requestedViewName] && !viewPermissions[requestedViewName].includes(currentUser.profile?.role)) {
             if(currentUser.profile) {
+              console.log('Router: Permessi insufficienti per la vista ', requestedViewName, ', reindirizzo a access-denied.');
               viewToRender = 'access-denied';
             }
         }
+        console.log('Router: Vista finale da renderizzare:', viewToRender);
         
         // Carica l'HTML per la vista richiesta
         const viewHtml = await fetchView(viewToRender);
@@ -136,13 +144,16 @@ export async function renderView() {
 
         // Carica e inizializza il modulo JS corrispondente, se esiste
         const moduleLoader = viewModules[viewToRender];
+        console.log('Router: Modulo loader per ', viewToRender, ':', !!moduleLoader);
         if (moduleLoader) {
             const module = await moduleLoader();
+            console.log('Router: Modulo caricato per ', viewToRender, ':', module);
             if (viewToRender === 'list') {
                 const listData = await module.fetchListData();
                 currentViewCleanup = await module.initListView(listData);
             } else {
                 const initializer = Object.values(module).find(fn => typeof fn === 'function' && fn.name.startsWith('init'));
+                console.log('Router: Inizializzatore trovato per ', viewToRender, ':', !!initializer);
                 if (initializer) {
                     currentViewCleanup = await initializer(urlParams);
                 }

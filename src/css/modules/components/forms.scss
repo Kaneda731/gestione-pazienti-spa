@@ -1,3 +1,23 @@
+/* Evidenzia la checkbox Paziente Infetto */
+#infetto.form-check-input {
+  width: 1.5em;
+  height: 1.5em;
+  border: 2px solid var(--primary, #2563eb);
+  box-shadow: 0 0 0 2px rgba(37,99,235,0.15);
+  accent-color: var(--primary, #2563eb);
+}
+
+#infetto.form-check-input:checked {
+  background-color: var(--primary, #2563eb);
+  border-color: var(--primary, #2563eb);
+}
+
+label[for="infetto"] {
+  color: var(--primary, #2563eb);
+  font-weight: bold;
+  margin-left: 0.5em;
+  letter-spacing: 0.5px;
+}
 /* Uniforma altezza input e select nei gruppi input di diagnosi e dimissione su desktop */
 @media (min-width: 768px) {
     #diagnosi-form .form-control,

@@ -151,6 +151,10 @@ export async function renderView() {
             if (viewToRender === 'list') {
                 const listData = await module.fetchListData();
                 currentViewCleanup = await module.initListView(listData);
+            } else if (viewToRender === 'diagnosi') {
+                // Accesso diretto all'inizializzatore per la vista diagnosi
+                console.log('Router: Accesso diretto a initDiagnosiView per ', viewToRender);
+                currentViewCleanup = await module.initDiagnosiView(urlParams);
             } else {
                 const initializer = Object.values(module).find(fn => typeof fn === 'function' && fn.name.startsWith('init'));
                 console.log('Router: Inizializzatore trovato per ', viewToRender, ':', !!initializer);

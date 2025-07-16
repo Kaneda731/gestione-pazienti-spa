@@ -62,12 +62,7 @@ class CustomDatepicker {
             }
             instance.destroy();
         });
-        
         this.instances = [];
-        if (datepickerInstance) {
-        datepickerInstance.destroy();
-        datepickerInstance = null;
-    }
     }
 }
 

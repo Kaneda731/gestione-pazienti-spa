@@ -47,14 +47,15 @@ export async function getFilterOptions(filterName) {
         .from('pazienti')
         .select(filterName)
         .not(filterName, 'is', null)
-        .order(filterName, { ascending: true })
-        .distinct();
+        .order(filterName, { ascending: true });
 
     if (error) {
         console.error(`Errore nel recupero delle opzioni per ${filterName}:`, error);
         return [];
     }
-    return data.map(item => item[filterName]);
+    // Filtra i duplicati usando Set
+    const unique = [...new Set(data.map(item => item[filterName]))];
+    return unique;
 }
 
 /**

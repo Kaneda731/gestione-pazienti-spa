@@ -2,7 +2,7 @@
 import { Modal } from 'bootstrap';
 import { signInWithGoogle, signOut, currentUser } from '../../../core/auth/authService.js';
 import { syncMobileAuth } from '../../../app/mobile/mobile-navigation.js';
-import authModalHtml from '../../../views/auth-modal.html?raw';
+
 
 export function updateAuthUI(session) {
     const authContainer = document.getElementById('auth-container');
@@ -86,10 +86,13 @@ function initAuthEventListeners() {
     });
 }
 
-function showLoginModal() {
+async function showLoginModal() {
     // Crea il modal se non esiste
     let modalElement = document.getElementById('auth-modal');
     if (!modalElement) {
+        // Carica dinamicamente il contenuto HTML del modal
+        const { default: authModalHtml } = await import('../../../views/auth-modal.html?raw');
+        
         // Crea il modal
         const modalContainer = document.createElement('div');
         modalContainer.innerHTML = authModalHtml;

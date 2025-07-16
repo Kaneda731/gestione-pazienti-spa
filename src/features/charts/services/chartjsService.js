@@ -147,7 +147,10 @@ export async function createPieChart(container, data, options = {}) {
         },
         options: chartOptions
     };
-    return new ChartJs(ctx, chartConfig);
+    return new Promise((resolve) => {
+        const chart = new ChartJs(ctx, chartConfig);
+        resolve(chart);
+    });
 }
 
 export { showLoadingInContainer, showErrorInContainer, showMessageInContainer } from './chartService.js';

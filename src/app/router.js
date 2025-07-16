@@ -155,6 +155,10 @@ export async function renderView() {
                 // Accesso diretto all'inizializzatore per la vista diagnosi
                 console.log('Router: Accesso diretto a initDiagnosiView per ', viewToRender);
                 currentViewCleanup = await module.initDiagnosiView(urlParams);
+            } else if (viewToRender === 'grafico') {
+                // Accesso diretto all'inizializzatore per la vista grafico
+                console.log('Router: Accesso diretto a initGraficoView per ', viewToRender);
+                currentViewCleanup = await module.initGraficoView(urlParams);
             } else {
                 const initializer = Object.values(module).find(fn => typeof fn === 'function' && fn.name.startsWith('init'));
                 console.log('Router: Inizializzatore trovato per ', viewToRender, ':', !!initializer);

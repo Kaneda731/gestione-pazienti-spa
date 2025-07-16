@@ -163,6 +163,10 @@ export async function renderView() {
                 // Accesso diretto all'inizializzatore per la vista inserimento
                 console.log('Router: Accesso diretto a initInserimentoView per ', viewToRender);
                 currentViewCleanup = await module.initInserimentoView(urlParams);
+            } else if (viewToRender === 'dimissione') {
+                // Accesso diretto all'inizializzatore per la vista dimissione
+                console.log('Router: Accesso diretto a initDimissioneView per ', viewToRender);
+                currentViewCleanup = await module.initDimissioneView(urlParams);
             } else {
                 const initializer = Object.values(module).find(fn => typeof fn === 'function' && fn.name.startsWith('init'));
                 console.log('Router: Inizializzatore trovato per ', viewToRender, ':', !!initializer);

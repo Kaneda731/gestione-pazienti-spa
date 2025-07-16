@@ -49,3 +49,9 @@
 @import "modules/components/flatpickr-light.scss";
 @import "modules/components/flatpickr-dark.scss";
 @import "modules/components/datepicker-override.scss";
+
+// Stili per il grafico
+#chart-container {
+    min-height: 350px;
+    width: 100%;
+}

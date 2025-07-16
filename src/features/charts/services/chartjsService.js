@@ -65,32 +65,33 @@ export async function createPieChart(container, data, options = {}) {
 
     // Funzione per generare le opzioni Chart.js
     function getChartOptions(options, isMobile) {
-        const legendLabels = isMobile
-            ? { boxWidth: 14, font: { size: 12, weight: 'bold' }, padding: 6 }
-            : { boxWidth: 20, font: { size: 15, weight: 'bold' }, padding: 10 };
-        const legendPosition = isMobile ? 'bottom' : 'right';
-        let legendOptions = options.plugins && options.plugins.legend ? options.plugins.legend : undefined;
-        let titleOptions = options.plugins && options.plugins.title ? options.plugins.title : undefined;
-        let tooltipOptions = options.plugins && options.plugins.tooltip ? options.plugins.tooltip : undefined;
+        const titleSize = isMobile ? 18 : 24;
+        const legendDisplay = !isMobile; // Mostra legenda solo su desktop
+        const legendPosition = 'right'; // Legenda sempre a destra su desktop
+
         return {
             responsive: true,
             maintainAspectRatio: false,
             cutout: options.cutout || '38%',
             plugins: {
-                title: titleOptions || {
+                title: {
                     display: true,
                     text: options.title || 'Grafico a Torta',
-                    font: { size: 24, weight: 'bold' },
-                    align: 'start',
-                    padding: { top: 0, bottom: 30, right: 40 }
+                    font: { size: titleSize, weight: 'bold' },
+                    align: 'center',
+                    padding: { top: 10, bottom: 20, right: 40 }
                 },
-                legend: legendOptions || {
-                    display: true,
+                legend: {
+                    display: legendDisplay,
                     position: legendPosition,
                     align: 'center',
-                    labels: legendLabels
+                    labels: {
+                        boxWidth: 20,
+                        font: { size: 15, weight: 'bold' },
+                        padding: 10
+                    }
                 },
-                tooltip: tooltipOptions || {
+                tooltip: {
                     enabled: true,
                     backgroundColor: '#222',
                     borderColor: '#fff',

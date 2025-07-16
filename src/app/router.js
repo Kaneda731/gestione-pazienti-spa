@@ -159,6 +159,10 @@ export async function renderView() {
                 // Accesso diretto all'inizializzatore per la vista grafico
                 console.log('Router: Accesso diretto a initGraficoView per ', viewToRender);
                 currentViewCleanup = await module.initGraficoView(urlParams);
+            } else if (viewToRender === 'inserimento') {
+                // Accesso diretto all'inizializzatore per la vista inserimento
+                console.log('Router: Accesso diretto a initInserimentoView per ', viewToRender);
+                currentViewCleanup = await module.initInserimentoView(urlParams);
             } else {
                 const initializer = Object.values(module).find(fn => typeof fn === 'function' && fn.name.startsWith('init'));
                 console.log('Router: Inizializzatore trovato per ', viewToRender, ':', !!initializer);

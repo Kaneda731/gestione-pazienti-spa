@@ -9,6 +9,7 @@ import { showDeleteConfirmModal } from '../../../shared/services/modalService.js
 import { supabase } from '../../../core/services/supabaseClient.js';
 import { currentUser } from '../../../core/auth/authService.js';
 import { getCurrentFilters } from './list-state-migrated.js';
+import { logger } from '../../../core/services/loggerService.js';
 
 async function fetchAndRender() {
     showLoading();
@@ -120,7 +121,7 @@ window.resetFiltersAndRefresh = function() {
 };
 
 export async function fetchListData() {
-    console.log('📡 Inizio caricamento dati per la vista lista...');
+    logger.log('📡 Inizio caricamento dati per la vista lista...');
     try {
         loadPersistedFilters();
 
@@ -130,7 +131,7 @@ export async function fetchListData() {
             getFilterOptions('diagnosi')
         ]);
 
-        console.log('✅ Dati per la lista caricati con successo.');
+        logger.log('✅ Dati per la lista caricati con successo.');
         return {
             pazienti: pazientiResult.data,
             count: pazientiResult.count,
@@ -144,10 +145,10 @@ export async function fetchListData() {
 }
 
 export async function initListView(listData) {
-    console.log('🏗️ Inizializzazione vista lista pazienti con dati pre-caricati...');
+    logger.log('🏗️ Inizializzazione vista lista pazienti con dati pre-caricati...');
     
     if (!currentUser.session) {
-        console.log("❌ Accesso a #list bloccato: utente non autenticato.");
+        logger.log("❌ Accesso a #list bloccato: utente non autenticato.");
         return;
     }
 
@@ -201,18 +202,18 @@ export async function initListView(listData) {
         fixedDebugBtn.style.cssText = 'position: fixed; top: 10px; right: 10px; z-index: 1000; padding: 10px; background: #ff9800; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.3);';
         document.body.appendChild(fixedDebugBtn);
         
-        console.log('🟠 Pulsanti debug attivati per localhost');
+        logger.log('🟠 Pulsanti debug attivati per localhost');
     }
 }
 
 // Debug function per verificare la connessione al database
 window.debugDatabaseConnection = async function() {
-    console.log('🔍 DEBUG: Verifica connessione database...');
+    logger.log('🔍 DEBUG: Verifica connessione database...');
     
     try {
         // Verifica connessione Supabase
         const { data: { user }, error: authError } = await supabase.auth.getUser();
-        console.log('👤 Utente autenticato:', user);
+        logger.log('👤 Utente autenticato:', user);
         if (authError) console.error('❌ Errore auth:', authError);
 
         // Verifica tabella pazienti
@@ -220,8 +221,8 @@ window.debugDatabaseConnection = async function() {
             .from('pazienti')
             .select('*', { count: 'exact' });
         
-        console.log('📊 Pazienti trovati:', count);
-        console.log('📋 Primi 5 pazienti:', pazienti?.slice(0, 5));
+        logger.log('📊 Pazienti trovati:', count);
+        logger.log('📋 Primi 5 pazienti:', pazienti?.slice(0, 5));
         if (dbError) console.error('❌ Errore database:', dbError);
 
         // Verifica struttura tabella
@@ -231,7 +232,7 @@ window.debugDatabaseConnection = async function() {
             .limit(1);
         
         if (tableInfo && tableInfo.length > 0) {
-            console.log('🏗️ Struttura tabella - colonne:', Object.keys(tableInfo[0]));
+            logger.log('🏗️ Struttura tabella - colonne:', Object.keys(tableInfo[0]));
         }
 
         alert(`Debug completato!

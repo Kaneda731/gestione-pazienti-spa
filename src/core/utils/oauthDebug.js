@@ -1,11 +1,13 @@
 // src/core/utils/oauthDebug.js
 
+import { logger } from '../services/loggerService.js';
+
 /**
  * Debug utilities per OAuth
  */
 
 function logOAuthState() {
-    console.log('OAuth Debug - Current State:', {
+    logger.log('OAuth Debug - Current State:', {
         location: window.location.href,
         hash: window.location.hash,
         search: window.location.search,
@@ -15,7 +17,7 @@ function logOAuthState() {
 }
 
 function clearOAuthState() {
-    console.log('OAuth Debug - Clearing state...');
+    logger.log('OAuth Debug - Clearing state...');
     localStorage.removeItem('supabase.auth.token');
     sessionStorage.removeItem('supabase.auth.token');
     window.location.hash = '';
@@ -23,6 +25,6 @@ function clearOAuthState() {
 
 // Log automatico all'avvio
 if (import.meta.env.VITE_OAUTH_DEBUG === 'true') {
-    console.log('OAuth Debug mode enabled');
+    logger.log('OAuth Debug mode enabled');
     logOAuthState();
 }

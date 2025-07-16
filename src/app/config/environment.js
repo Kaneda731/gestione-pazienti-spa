@@ -18,19 +18,11 @@ export const environment = {
     APP_NAME: 'Gestione Pazienti SPA',
     APP_VERSION: '1.0.0',
     
-    // API
-    API_TIMEOUT: 30000,
-    
     // UI
-    ITEMS_PER_PAGE: 10,
     MOBILE_BREAKPOINT: 767,
-    TABLET_BREAKPOINT: 1500,
     
     // Feature flags
     FEATURES: {
-        MOBILE_OPTIMIZATIONS: true,
-        ADVANCED_CHARTS: true,
-        EXPORT_FUNCTIONALITY: true,
         ROLE_BASED_ACCESS: true
     }
 };

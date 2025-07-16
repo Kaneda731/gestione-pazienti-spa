@@ -9,7 +9,6 @@ import { environment, isDevelopment } from './config/environment.js';
 import { STORAGE_KEYS } from './config/constants.js';
 
 // Importa tutti gli stili, nell'ordine corretto
-import 'bootstrap/dist/css/bootstrap.min.css';
 import 'flatpickr/dist/flatpickr.min.css';
 import '/src/css/desktop.scss';
 import '/src/css/mobile.scss';
@@ -19,6 +18,7 @@ import { initErrorHandling } from '../core/services/errorService.js';
 import { initAuth } from '../core/auth/authService.js';
 import { initTheme } from '../core/services/themeService.js';
 import { viteSupabaseMiddleware } from '../core/services/viteSupabaseMiddleware.js';
+import { logger } from '../core/services/loggerService.js';
 
 // Shared services
 import '../shared/components/ui/index.js';
@@ -50,7 +50,7 @@ if (isDevelopment && environment.OAUTH_DEBUG) {
  */
 async function initializeApp() {
     try {
-        console.log(`🚀 Inizializzazione ${environment.APP_NAME} v${environment.APP_VERSION}`);
+        logger.log(`🚀 Inizializzazione ${environment.APP_NAME} v${environment.APP_VERSION}`);
         
         await viteSupabaseMiddleware.onReady();
         
@@ -78,7 +78,7 @@ async function initializeApp() {
             }
         });
 
-        console.log('✅ Applicazione inizializzata con successo');
+        logger.log('✅ Applicazione inizializzata con successo');
         
     } catch (error) {
         console.error('❌ Errore durante l\'inizializzazione dell\'applicazione:', error);

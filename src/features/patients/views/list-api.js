@@ -3,73 +3,74 @@ import { supabase } from '../../../core/services/supabaseClient.js';
 import { state, domElements } from './list-state-migrated.js';
 import { convertToCSV } from '../../../shared/utils/index.js';
 import { patientService } from '../services/patientService.js';
+import { logger } from '../../../core/services/loggerService.js';
 
 const ITEMS_PER_PAGE = 10;
 
 function buildBaseQuery() {
-    console.log('🔍 Costruendo query base...');
+    logger.log('🔍 Costruendo query base...');
     
     let query = supabase.from('pazienti').select('*', { count: 'exact' }).not('user_id', 'is', null);
-    console.log('🔍 Query iniziale creata per tabella "pazienti" con filtro user_id not null');
+    logger.log('🔍 Query iniziale creata per tabella "pazienti" con filtro user_id not null');
 
     if (domElements.searchInput) {
         const searchTerm = domElements.searchInput.value.trim();
         if (searchTerm) {
-            console.log('🔍 Applicando filtro ricerca:', searchTerm);
+            logger.log('🔍 Applicando filtro ricerca:', searchTerm);
             query = query.or(`nome.ilike.%${searchTerm}%,cognome.ilike.%${searchTerm}%,diagnosi.ilike.%${searchTerm}%,codice_rad.ilike.%${searchTerm}%`);
         }
     }
     
     if (domElements.repartoFilter && domElements.repartoFilter.value) {
-        console.log('🔍 Applicando filtro reparto:', domElements.repartoFilter.value);
+        logger.log('🔍 Applicando filtro reparto:', domElements.repartoFilter.value);
         query = query.eq('reparto_appartenenza', domElements.repartoFilter.value);
     }
     
     if (domElements.diagnosiFilter && domElements.diagnosiFilter.value) {
-        console.log('🔍 Applicando filtro diagnosi:', domElements.diagnosiFilter.value);
+        logger.log('🔍 Applicando filtro diagnosi:', domElements.diagnosiFilter.value);
         query = query.eq('diagnosi', domElements.diagnosiFilter.value);
     }
     
     if (domElements.statoFilter) {
         if (domElements.statoFilter.value === 'attivo') {
-            console.log('🔍 Applicando filtro stato: attivo');
+            logger.log('🔍 Applicando filtro stato: attivo');
             query = query.is('data_dimissione', null);
         } else if (domElements.statoFilter.value === 'dimesso') {
-            console.log('🔍 Applicando filtro stato: dimesso');
+            logger.log('🔍 Applicando filtro stato: dimesso');
             query = query.not('data_dimissione', 'is', null);
         }
     }
     
     if (domElements.infettoFilter && domElements.infettoFilter.value !== '') {
         const isInfetto = domElements.infettoFilter.value === 'true';
-        console.log('🔍 Applicando filtro infetto:', isInfetto);
+        logger.log('🔍 Applicando filtro infetto:', isInfetto);
         query = query.eq('infetto', isInfetto);
     }
     
-    console.log('✅ Query base costruita con successo');
+    logger.log('✅ Query base costruita con successo');
     return query;
 }
 
 export async function fetchPazienti() {
-    console.log('📊 Iniziando fetchPazienti...');
-    console.log('📊 Stato corrente:', { 
+    logger.log('📊 Iniziando fetchPazienti...');
+    logger.log('📊 Stato corrente:', { 
         currentPage: state.currentPage, 
         sortColumn: state.sortColumn, 
         sortDirection: state.sortDirection 
     });
     
     let query = buildBaseQuery();
-    console.log('📊 Query base costruita');
+    logger.log('📊 Query base costruita');
 
     const startIndex = state.currentPage * ITEMS_PER_PAGE;
     const endIndex = startIndex + ITEMS_PER_PAGE - 1;
-    console.log('📊 Range paginazione:', { startIndex, endIndex });
+    logger.log('📊 Range paginazione:', { startIndex, endIndex });
     
     query = query.order(state.sortColumn, { ascending: state.sortDirection === 'asc' }).range(startIndex, endIndex);
-    console.log('📊 Query finale preparata, eseguendo...');
+    logger.log('📊 Query finale preparata, eseguendo...');
 
     const { data, error, count } = await query;
-    console.log('📊 Risposta Supabase:', {
+    logger.log('📊 Risposta Supabase:', {
         dataLength: data?.length,
         count,
         hasError: !!error,
@@ -83,7 +84,7 @@ export async function fetchPazienti() {
     
     // Debug: verifica se i dati hanno user_id (indicatore che sono reali)
     if (data && data.length > 0) {
-        console.log('🔍 Debug dati - Primo record:', {
+        logger.log('🔍 Debug dati - Primo record:', {
             hasUserId: !!data[0].user_id,
             hasCreatedAt: !!data[0].created_at,
             tableName: 'pazienti',
@@ -91,7 +92,7 @@ export async function fetchPazienti() {
         });
     }
     
-    console.log('✅ fetchPazienti completato con successo');
+    logger.log('✅ fetchPazienti completato con successo');
     return { data, count };
 }
 
@@ -142,7 +143,7 @@ export async function updatePazienteStatus(pazienteId, isDimissione) {
 
         if (!data || data.length === 0) {
             alert('Operazione non riuscita. Il paziente non è stato trovato o non si hanno i permessi per modificarlo.');
-            console.warn('Nessuna riga modificata per l-ID:', pazienteId);
+            logger.warn('Nessuna riga modificata per l-ID:', pazienteId);
             return;
         }
     } catch (error) {
@@ -153,13 +154,13 @@ export async function updatePazienteStatus(pazienteId, isDimissione) {
 
 export async function deletePaziente(pazienteId) {
     try {
-        console.log('🗑️ Inizio eliminazione paziente ID:', pazienteId);
+        logger.log('🗑️ Inizio eliminazione paziente ID:', pazienteId);
         
         // Verifica prima dell'eliminazione
         const { count: beforeCount } = await supabase
             .from('pazienti')
             .select('*', { count: 'exact' });
-        console.log('📊 Conteggio prima eliminazione:', beforeCount);
+        logger.log('📊 Conteggio prima eliminazione:', beforeCount);
         
         // Esegui eliminazione
         const { error } = await supabase
@@ -173,12 +174,12 @@ export async function deletePaziente(pazienteId) {
         const { count: afterCount } = await supabase
             .from('pazienti')
             .select('*', { count: 'exact' });
-        console.log('📊 Conteggio dopo eliminazione:', afterCount);
-        console.log('✅ Paziente eliminato correttamente. Differenza:', beforeCount - afterCount);
+        logger.log('📊 Conteggio dopo eliminazione:', afterCount);
+        logger.log('✅ Paziente eliminato correttamente. Differenza:', beforeCount - afterCount);
         
         // Invalida cache per forzare refresh
         patientService.invalidateCache();
-        console.log('🔄 Cache invalidata');
+        logger.log('🔄 Cache invalidata');
         
     } catch (error) {
         console.error('❌ Errore eliminazione paziente:', error);

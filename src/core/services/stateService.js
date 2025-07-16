@@ -1,5 +1,7 @@
 // src/js/services/stateService.js
 
+import { logger } from './loggerService.js';
+
 /**
  * Servizio centralizzato per la gestione dello stato dell'applicazione
  * Sostituisce l'uso frammentato di sessionStorage con un approccio più robusto
@@ -70,7 +72,7 @@ class StateService {
                 }
             });
         } catch (error) {
-            console.warn('Errore durante il caricamento dello stato persistente:', error);
+            logger.warn('Errore durante il caricamento dello stato persistente:', error);
         }
     }
 
@@ -85,7 +87,7 @@ class StateService {
                 }
             });
         } catch (error) {
-            console.warn('Errore durante il salvataggio dello stato persistente:', error);
+            logger.warn('Errore durante il salvataggio dello stato persistente:', error);
         }
     }
 

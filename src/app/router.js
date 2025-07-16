@@ -2,6 +2,7 @@
 
 import { supabase } from '../core/services/supabaseClient.js';
 import { currentUser } from '../core/auth/authService.js';
+import { logger } from '../core/services/loggerService.js';
 
 let currentViewCleanup = null;
 let isNavigating = false;
@@ -20,7 +21,7 @@ const views = import.meta.glob('/src/views/*.html', { query: '?raw', import: 'de
 
 function updateUIVisibility() {
     const userRole = currentUser.profile?.role;
-    console.log('Updating UI visibility based on role:', userRole);
+    logger.log('Updating UI visibility based on role:', userRole);
 
     const viewPermissions = {
         'inserimento': ['admin', 'editor'],
@@ -73,7 +74,7 @@ export function navigateTo(viewName) {
 
 export async function renderView() {
     if (isNavigating) {
-        console.warn('Navigazione già in corso, interrotta.');
+        logger.warn('Navigazione già in corso, interrotta.');
         return;
     }
     isNavigating = true;

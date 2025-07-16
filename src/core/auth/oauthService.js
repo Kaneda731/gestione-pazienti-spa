@@ -1,6 +1,7 @@
 // src/core/auth/oauthService.js
 import { supabase } from '../services/supabaseClient.js';
 import { viteSupabaseMiddleware } from '../services/viteSupabaseMiddleware.js';
+import { logger } from '../services/loggerService.js';
 
 /**
  * Gestisce i problemi comuni con OAuth in ambiente Vite
@@ -32,13 +33,13 @@ export class OAuthManager {
                                   fragment.has('error');
             
             if (hasOAuthParams) {
-                console.log('Rilevato redirect OAuth con parametri reali, gestisco la sessione...');
+                logger.log('Rilevato redirect OAuth con parametri reali, gestisco la sessione...');
                 this.authState = 'authenticating';
                 
                 // Lascia che Supabase gestisca automaticamente il callback
                 await this.handleOAuthCallback();
             } else {
-                console.log('Nessun parametro OAuth rilevato, inizializzazione normale');
+                logger.log('Nessun parametro OAuth rilevato, inizializzazione normale');
             }
             
             this.isInitialized = true;
@@ -51,7 +52,7 @@ export class OAuthManager {
 
     async handleOAuthCallback() {
         try {
-            console.log('Gestisco callback OAuth...');
+            logger.log('Gestisco callback OAuth...');
             
             // Supabase gestisce automaticamente il callback OAuth
             // Dobbiamo solo aspettare che il processo sia completato
@@ -64,7 +65,7 @@ export class OAuthManager {
             }
             
             if (data.session) {
-                console.log('Sessione OAuth recuperata con successo');
+                logger.log('Sessione OAuth recuperata con successo');
                 this.authState = 'authenticated';
                 
                 // Pulisci l'URL dai parametri OAuth
@@ -89,7 +90,7 @@ export class OAuthManager {
     }
 
     clearCorruptedState() {
-        console.log('Pulisco stato corrotto OAuth...');
+        logger.log('Pulisco stato corrotto OAuth...');
         
         // Usa il middleware per pulire lo stato
         viteSupabaseMiddleware.clearCorruptedState();
@@ -110,7 +111,7 @@ export class OAuthManager {
             const newUrl = window.location.pathname + (cleanHash && cleanHash !== '#' ? cleanHash : '');
 
             window.history.replaceState({}, document.title, newUrl);
-            console.log('URL pulito da parametri OAuth, nuovo URL:', newUrl);
+            logger.log('URL pulito da parametri OAuth, nuovo URL:', newUrl);
         }
     }
 
@@ -121,7 +122,7 @@ export class OAuthManager {
             
             // Se siamo già in uno stato di errore, proviamo a pulirlo
             if (this.authState === 'error') {
-                console.log('Stato di errore rilevato, pulisco...');
+                logger.log('Stato di errore rilevato, pulisco...');
                 this.clearCorruptedState();
                 
                 // Aspetta un po' per permettere la pulizia
@@ -134,7 +135,7 @@ export class OAuthManager {
             // Funziona sia in locale (http://localhost:5173) che in produzione.
             const redirectTo = window.location.origin;
             
-            console.log('Iniziando login OAuth con redirect:', redirectTo);
+            logger.log('Iniziando login OAuth con redirect:', redirectTo);
             
             const { data, error } = await supabase.auth.signInWithOAuth({ 
                 provider: 'google',
@@ -155,7 +156,7 @@ export class OAuthManager {
                 throw error;
             }
             
-            console.log('Login OAuth iniziato con successo:', data);
+            logger.log('Login OAuth iniziato con successo:', data);
             return { success: true, data };
             
         } catch (error) {
@@ -163,7 +164,7 @@ export class OAuthManager {
             
             // Se otteniamo un 401, è probabile che lo stato sia corrotto
             if (error.status === 401) {
-                console.log('Errore 401 rilevato, pulisco stato corrotto...');
+                logger.log('Errore 401 rilevato, pulisco stato corrotto...');
                 this.clearCorruptedState();
             }
             

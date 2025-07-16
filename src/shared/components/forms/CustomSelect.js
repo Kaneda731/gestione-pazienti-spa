@@ -94,8 +94,9 @@ export class CustomSelect {
         const selectOptions = this.selectElement.querySelectorAll('option');
         optionsContainer.innerHTML = '';
         let validOptionsCount = 0;
-        selectOptions.forEach(option => {
-            if (option.value === '') return;
+        selectOptions.forEach((option, idx) => {
+            // Mostra SEMPRE la prima opzione, anche se value="" (es. "Tutti")
+            if (option.value === '' && idx !== 0) return;
             validOptionsCount++;
             const optionElement = document.createElement('div');
             optionElement.className = 'custom-select-option';

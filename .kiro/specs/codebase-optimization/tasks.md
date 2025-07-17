@@ -153,21 +153,21 @@
   - Testare comportamento con connessioni lente o instabili
   - _Requisiti: 6.4_
 
-- [ ] 7. Implementazione strumenti analisi bundle
+- [-] 7. Implementazione strumenti analisi bundle
 
   - Configurare strumenti per monitorare le dimensioni del bundle nel tempo
   - Creare report automatici delle performance
   - Implementare metriche di monitoraggio continuo
   - _Requisiti: 7.1, 7.2, 7.3, 7.4, 7.5_
 
-- [ ] 7.1 Configurare bundle analyzer con metriche dettagliate
+- [x] 7.1 Configurare bundle analyzer con metriche dettagliate
 
   - Implementare generazione automatica report con dimensioni gzipped
   - Configurare apertura automatica del report dopo il build
   - Includere analisi delle dipendenze più pesanti
   - _Requisiti: 7.1, 7.2, 7.3_
 
-- [ ] 7.2 Creare script di monitoraggio performance
+- [x] 7.2 Creare script di monitoraggio performance
 
   - Implementare script per confrontare dimensioni bundle nel tempo
   - Creare metriche di baseline per monitoraggio continuo

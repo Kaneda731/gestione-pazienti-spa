@@ -83,12 +83,22 @@ export default defineConfig({
   
   // Plugins per analisi e ottimizzazione
   plugins: [
+    // Bundle analyzer principale con visualizzazione treemap
     visualizer({
-      filename: 'dist/stats.html',
+      filename: 'dist/bundle-analysis.html',
       open: true,
       gzipSize: true,
       brotliSize: true,
-      template: 'treemap' // Visualizzazione treemap per analisi dettagliata
+      template: 'treemap',
+      title: 'Bundle Analysis - Gestione Pazienti SPA',
+      projectRoot: process.cwd()
+    }),
+    // Generatore di dati JSON per analisi programmatica
+    visualizer({
+      filename: 'dist/bundle-analysis.json',
+      template: 'raw-data',
+      gzipSize: true,
+      brotliSize: true
     })
   ],
   

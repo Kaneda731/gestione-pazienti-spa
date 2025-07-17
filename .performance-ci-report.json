@@ -1,0 +1,51 @@
+{
+  "timestamp": "2025-07-17T01:01:47.758Z",
+  "status": "warning",
+  "exitCode": 1,
+  "metrics": {
+    "totalSize": 841264,
+    "totalGzipSize": 212729,
+    "totalBrotliSize": 181231,
+    "chunkCount": 18,
+    "largestChunk": {
+      "name": "supabase",
+      "size": 333901,
+      "gzipSize": 79991
+    }
+  },
+  "alerts": {
+    "total": 1,
+    "critical": 0,
+    "warning": 1,
+    "details": [
+      {
+        "type": "baseline_deviation",
+        "message": "Bundle 25.0% più grande della baseline",
+        "change": 25.00014690068926,
+        "impact": "low"
+      }
+    ]
+  },
+  "comparisons": {
+    "previousBuild": {
+      "totalSizeChange": 0,
+      "significantChunkChanges": []
+    },
+    "baseline": {
+      "totalSizeChange": 0
+    }
+  },
+  "metadata": {
+    "buildCount": 6,
+    "thresholds": {
+      "WARNING": 10,
+      "CRITICAL": 25,
+      "SEVERE": 50
+    },
+    "limits": {
+      "MAX_BUNDLE_SIZE": 2097152,
+      "MAX_CHUNK_SIZE": 512000,
+      "MAX_TOTAL_GZIP": 819200
+    }
+  }
+}

@@ -535,7 +535,7 @@ export async function createChart(
     const adaptedOptions = responsiveAdapter.adaptOptions(options);
 
     // Renderizza il grafico
-    const chart = chartTypeManager.renderChart(container, data, adaptedOptions);
+    const chart = chartTypeManager.renderChart(container, data, adaptedOptions, chartType);
 
     // Configura il gestore di ridimensionamento
     responsiveAdapter.handleResize(chart, options);

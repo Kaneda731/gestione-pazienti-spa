@@ -51,12 +51,15 @@ class ChartTypeManager {
    * @param {Object} options - Opzioni di configurazione
    * @returns {Object} - L'istanza del grafico creato
    */
-  renderChart(container, data, options = {}) {
+  renderChart(container, data, options = {}, chartType) {
     // Distruggi il grafico precedente se esiste
     if (this.currentChart) {
       this.currentChart.destroy();
       this.currentChart = null;
     }
+
+    // Imposta il tipo di grafico corrente
+    this.setChartType(chartType);
     
     // Usa il renderer specifico per il tipo corrente
     const renderer = this.chartTypes[this.currentType].renderer;
@@ -228,24 +231,8 @@ class ChartTypeManager {
             cornerRadius: 6,
             displayColors: true
           },
-          // Aggiungi etichette con percentuali direttamente sul grafico
-          datalabels: {
-            formatter: (value, context) => {
-              const dataset = context.chart.data.datasets[0];
-              const total = dataset.data.reduce((a, b) => a + b, 0);
-              const percentage = ((value / total) * 100).toFixed(0);
-              return percentage > 5 ? `${percentage}%` : ''; // Mostra solo se > 5%
-            },
-            color: '#fff',
-            font: {
-              weight: 'bold',
-              size: 12
-            },
-            textStrokeColor: 'rgba(0, 0, 0, 0.5)',
-            textStrokeWidth: 2,
-            textShadowBlur: 5,
-            textShadowColor: 'rgba(0, 0, 0, 0.5)'
-          }
+          // Etichette con percentuali disabilitate di default per evitare errori
+          datalabels: false
         },
         // Migliora l'interattività
         hover: {
@@ -268,7 +255,7 @@ class ChartTypeManager {
   }
   
   /**
-   * Renderizza un grafico a barre
+   * Renderizza un grafico a barre migliorato
    * @param {HTMLElement} container - Il container dove renderizzare il grafico
    * @param {Array} data - I dati da visualizzare
    * @param {Object} options - Opzioni di configurazione
@@ -279,14 +266,25 @@ class ChartTypeManager {
     const ctx = canvas.getContext('2d');
     const { labels, values } = this.prepareChartData(data);
     
+    // Genera una palette di colori armoniosa
+    const colorPalette = this.generateColorPalette(values.length);
+    
+    // Calcola il totale per le percentuali
+    const total = values.reduce((sum, value) => sum + value, 0);
+    
     const chartData = {
       labels: labels,
       datasets: [{
         label: options.datasetLabel || 'Valori',
         data: values,
-        backgroundColor: 'rgba(54, 162, 235, 0.7)',
-        borderColor: 'rgba(54, 162, 235, 1)',
-        borderWidth: 1
+        backgroundColor: options.singleColor ? 'rgba(54, 162, 235, 0.7)' : colorPalette,
+        borderColor: options.singleColor ? 'rgba(54, 162, 235, 1)' : colorPalette,
+        borderWidth: 1,
+        borderRadius: 4,
+        hoverBorderWidth: 2,
+        hoverBorderColor: '#fff',
+        // Aggiungi percentuali per ogni barra
+        percentages: values.map(value => ((value / total) * 100).toFixed(1))
       }]
     };
     
@@ -296,24 +294,99 @@ class ChartTypeManager {
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        indexAxis: options.horizontal ? 'y' : 'x', // Supporto per barre orizzontali
         scales: {
           y: {
             beginAtZero: true,
             ticks: {
-              precision: 0
+              precision: 0,
+              font: {
+                size: 12
+              }
+            },
+            grid: {
+              display: true,
+              color: 'rgba(0, 0, 0, 0.05)'
+            }
+          },
+          x: {
+            ticks: {
+              maxRotation: 45,
+              minRotation: 0,
+              font: {
+                size: 12
+              },
+              autoSkip: true,
+              maxTicksLimit: 15
+            },
+            grid: {
+              display: false
             }
           }
         },
         plugins: {
           legend: {
-            display: false
+            display: options.showLegend || false,
+            position: 'top',
+            labels: {
+              font: { size: 12 },
+              usePointStyle: true,
+              boxWidth: 10
+            }
+          },
+          title: {
+            display: !!options.title,
+            text: options.title || '',
+            font: {
+              size: 16,
+              weight: 'bold'
+            },
+            padding: {
+              top: 10,
+              bottom: 20
+            }
           },
           tooltip: {
+            enabled: true,
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            titleFont: { size: 14, weight: 'bold' },
+            bodyFont: { size: 13 },
+            padding: 12,
+            cornerRadius: 6,
+            displayColors: true,
             callbacks: {
+              title: (tooltipItems) => {
+                return tooltipItems[0].label || '';
+              },
               label: (context) => {
-                return `${context.parsed.y}`;
+                const label = context.dataset.label || '';
+                const value = context.parsed.y || context.parsed.x || 0;
+                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                const percentage = ((value / total) * 100).toFixed(1);
+                return `${label}: ${value} (${percentage}%)`;
+              },
+              afterLabel: (context) => {
+                // Aggiungi informazioni aggiuntive nel tooltip
+                const dataset = context.dataset;
+                const total = dataset.data.reduce((a, b) => a + b, 0);
+                return `Percentuale sul totale: ${((context.parsed.y / total) * 100).toFixed(1)}%`;
               }
             }
+          },
+          // Etichette con valori direttamente sulle barre (disabilitate di default)
+          datalabels: false
+        },
+        // Migliora l'interattività
+        hover: {
+          mode: 'index',
+          intersect: false
+        },
+        animation: {
+          duration: 800,
+          easing: 'easeOutQuart',
+          delay: (context) => {
+            // Aggiungi un leggero ritardo per creare un effetto a cascata
+            return context.dataIndex * 50;
           }
         }
       }

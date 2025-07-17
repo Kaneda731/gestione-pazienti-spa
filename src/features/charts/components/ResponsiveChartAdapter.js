@@ -51,7 +51,26 @@ class ResponsiveChartAdapter {
    */
   adaptOptions(options) {
     const device = this.detectDevice();
-    const adaptedOptions = JSON.parse(JSON.stringify(options)); // Deep clone
+    
+    // Safe deep clone without circular references
+    let adaptedOptions;
+    try {
+      // Try to deep clone the options
+      adaptedOptions = JSON.parse(JSON.stringify(options));
+    } catch (error) {
+      console.warn('Error cloning chart options, using shallow copy:', error);
+      // Fallback to shallow copy if deep clone fails
+      adaptedOptions = { ...options };
+      
+      // Ensure plugins and interaction objects exist
+      if (options.plugins) {
+        adaptedOptions.plugins = { ...options.plugins };
+      }
+      
+      if (options.interaction) {
+        adaptedOptions.interaction = { ...options.interaction };
+      }
+    }
     
     // Inizializza plugins se non esistono
     adaptedOptions.plugins = adaptedOptions.plugins || {};
@@ -400,49 +419,48 @@ class ResponsiveChartAdapter {
       };
       
       // Eventi hover avanzati
-      adaptedOptions.onHover = (event, activeElements) => {
-        // Cambia il cursore quando si passa sopra un elemento
-        event.native.target.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
-        
-        // Evidenzia l'elemento attivo
-        if (activeElements.length > 0) {
-          const chart = activeElements[0].chart;
-          const dataIndex = activeElements[0].index;
-          
-          // Evidenzia l'elemento nella legenda
-          const legendItems = chart.canvas.parentNode.querySelectorAll('.chart-legend-item');
-          if (legendItems && legendItems[dataIndex]) {
-            legendItems[dataIndex].classList.add('highlighted');
+      adaptedOptions.onHover = (event, activeElements, chart) => {
+        if (event.native) {
+          event.native.target.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
+        }
+
+        if (activeElements.length > 0 && activeElements[0]) {
+          if (chart && chart.canvas && chart.canvas.parentNode) {
+            const dataIndex = activeElements[0].index;
+            const legendItems = chart.canvas.parentNode.querySelectorAll('.chart-legend-item');
+            if (legendItems && legendItems[dataIndex]) {
+              legendItems.forEach(item => item.classList.remove('highlighted'));
+              legendItems[dataIndex].classList.add('highlighted');
+            }
           }
         }
       };
-      
+
       // Eventi click avanzati
-      adaptedOptions.onClick = (event, activeElements) => {
-        if (activeElements.length > 0) {
+      adaptedOptions.onClick = (event, activeElements, chart) => {
+        if (activeElements.length > 0 && activeElements[0]) {
           const element = activeElements[0];
-          const dataIndex = element.index;
-          const chart = element.chart;
-          const data = chart.data;
-          const dataset = data.datasets[0];
-          
-          // Gestisci diversi formati di backgroundColor (array, singolo colore, ecc.)
-          let color;
-          if (Array.isArray(dataset.backgroundColor)) {
-            color = dataset.backgroundColor[dataIndex] || dataset.borderColor || '#36A2EB';
-          } else {
-            color = dataset.backgroundColor || dataset.borderColor || '#36A2EB';
+          if (chart) {
+            const dataIndex = element.index;
+            const data = chart.data;
+            const dataset = data.datasets[0];
+
+            let color;
+            if (Array.isArray(dataset.backgroundColor)) {
+              color = dataset.backgroundColor[dataIndex] || dataset.borderColor || '#36A2EB';
+            } else {
+              color = dataset.backgroundColor || dataset.borderColor || '#36A2EB';
+            }
+
+            this.showDesktopDetailPanel({
+              label: data.labels[dataIndex],
+              value: dataset.data[dataIndex],
+              color: color,
+              total: dataset.data.reduce((sum, val) => sum + val, 0),
+              percentage: ((dataset.data[dataIndex] / dataset.data.reduce((sum, val) => sum + val, 0)) * 100).toFixed(1),
+              chart: chart
+            });
           }
-          
-          // Mostra dettagli avanzati per desktop
-          this.showDesktopDetailPanel({
-            label: data.labels[dataIndex],
-            value: dataset.data[dataIndex],
-            color: color,
-            total: dataset.data.reduce((sum, val) => sum + val, 0),
-            percentage: ((dataset.data[dataIndex] / dataset.data.reduce((sum, val) => sum + val, 0)) * 100).toFixed(1),
-            chart: chart
-          });
         }
       };
     }
@@ -1804,6 +1822,55 @@ class ResponsiveChartAdapter {
     if (toast) {
       toast.remove();
     }
+  }
+
+  /**
+   * Clona in modo sicuro un oggetto evitando riferimenti circolari
+   * @param {Object} obj - L'oggetto da clonare
+   * @param {Map} cache - Cache per evitare riferimenti circolari (uso interno)
+   * @returns {Object} - L'oggetto clonato
+   */
+  safeClone(obj, cache = new Map()) {
+    // Gestisci casi base: null, undefined, tipi primitivi, funzioni
+    if (obj === null || typeof obj !== 'object') {
+      return obj;
+    }
+    
+    // Evita riferimenti circolari
+    if (cache.has(obj)) {
+      return cache.get(obj);
+    }
+    
+    // Gestisci Date
+    if (obj instanceof Date) {
+      return new Date(obj);
+    }
+    
+    // Gestisci Array
+    if (Array.isArray(obj)) {
+      const arrCopy = [];
+      cache.set(obj, arrCopy);
+      
+      for (let i = 0; i < obj.length; i++) {
+        arrCopy[i] = this.safeClone(obj[i], cache);
+      }
+      
+      return arrCopy;
+    }
+    
+    // Gestisci oggetti
+    const objCopy = {};
+    cache.set(obj, objCopy);
+    
+    // Copia le proprietà dell'oggetto
+    for (const [key, value] of Object.entries(obj)) {
+      // Salta funzioni e proprietà che potrebbero causare problemi
+      if (typeof value !== 'function' && key !== 'chart' && key !== 'canvas') {
+        objCopy[key] = this.safeClone(value, cache);
+      }
+    }
+    
+    return objCopy;
   }
 }
 

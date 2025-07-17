@@ -248,21 +248,75 @@ class ResponsiveChartAdapter {
       // Configurazioni specifiche per desktop
       adaptedOptions.plugins.legend = {
         position: 'right',
-        align: 'center',
+        align: 'start',
         labels: {
           boxWidth: 20,
           font: { size: 14 },
           padding: 20,
-          usePointStyle: true
+          usePointStyle: true,
+          // Funzione personalizzata per generare le etichette della legenda
+          generateLabels: function(chart) {
+            const data = chart.data;
+            if (data.labels.length && data.datasets.length) {
+              return data.labels.map((label, i) => {
+                const dataset = data.datasets[0];
+                // Gestisci diversi formati di backgroundColor (array, singolo colore, ecc.)
+                let backgroundColor;
+                if (Array.isArray(dataset.backgroundColor)) {
+                  backgroundColor = dataset.backgroundColor[i] || dataset.borderColor || '#36A2EB';
+                } else {
+                  backgroundColor = dataset.backgroundColor || dataset.borderColor || '#36A2EB';
+                }
+                
+                // Verifica se l'elemento è nascosto
+                const meta = chart.getDatasetMeta(0);
+                const hidden = meta.data[i] ? meta.data[i].hidden : false;
+                
+                return {
+                  text: label,
+                  fillStyle: backgroundColor,
+                  strokeStyle: backgroundColor,
+                  lineWidth: 0,
+                  pointStyle: 'circle',
+                  hidden: hidden,
+                  index: i
+                };
+              });
+            }
+            return [];
+          }
+        },
+        // Gestione del click sulla legenda per filtrare i dati
+        onClick: (e, legendItem, legend) => {
+          const index = legendItem.index;
+          const chart = legend.chart;
+          const meta = chart.getDatasetMeta(0);
+          
+          // Toggle della visibilità dell'elemento
+          meta.data[index].hidden = !meta.data[index].hidden;
+          
+          // Aggiorna il grafico
+          chart.update();
+          
+          // Feedback visivo
+          const container = chart.canvas.parentNode;
+          if (container) {
+            const item = container.querySelector(`.chart-legend-item-${index}`);
+            if (item) {
+              item.classList.toggle('filtered');
+            }
+          }
         }
       };
       
       adaptedOptions.plugins.title = {
         ...adaptedOptions.plugins?.title,
         font: { size: 20, weight: 'bold' },
-        padding: 30
+        padding: 30,
+        display: true
       };
       
+      // Tooltip avanzati per desktop
       adaptedOptions.plugins.tooltip = {
         ...adaptedOptions.plugins?.tooltip,
         enabled: true,
@@ -273,16 +327,123 @@ class ResponsiveChartAdapter {
         bodyFont: { size: 14 },
         padding: 16,
         cornerRadius: 8,
-        displayColors: true
+        displayColors: true,
+        // Callback personalizzati per tooltip dettagliati
+        callbacks: {
+          ...adaptedOptions.plugins?.tooltip?.callbacks,
+          title: function(context) {
+            return context[0].label || '';
+          },
+          label: function(context) {
+            const label = context.dataset.label || '';
+            const value = context.parsed || context.raw;
+            const total = context.dataset.data.reduce((sum, val) => sum + val, 0);
+            const percentage = ((value / total) * 100).toFixed(1);
+            return [`${label}: ${value}`, `Percentuale: ${percentage}%`];
+          },
+          // Aggiungi informazioni aggiuntive nel tooltip
+          afterBody: function(context) {
+            // Aggiungi informazioni sul totale
+            const total = context[0].dataset.data.reduce((sum, val) => sum + val, 0);
+            return [`Totale: ${total}`, 'Click per esplorare'];
+          }
+        },
+        animation: {
+          duration: 150
+        }
       };
       
+      // Interazioni avanzate per desktop
       adaptedOptions.interaction = {
         mode: 'index',
-        intersect: false
+        intersect: false,
+        includeInvisible: false
       };
       
+      // Supporto per zoom con rotellina del mouse
+      adaptedOptions.plugins.zoom = {
+        zoom: {
+          wheel: {
+            enabled: true,
+            speed: 0.1
+          },
+          pinch: {
+            enabled: true
+          },
+          mode: 'xy',
+          onZoom: function() {
+            // Feedback visivo durante lo zoom
+            const container = document.querySelector('.chart-container');
+            if (container) {
+              container.classList.add('zooming');
+              setTimeout(() => {
+                container.classList.remove('zooming');
+              }, 300);
+            }
+          }
+        },
+        pan: {
+          enabled: true,
+          mode: 'xy',
+          threshold: 10
+        }
+      };
+      
+      // Animazioni fluide per desktop
+      adaptedOptions.animation = {
+        duration: 1000,
+        easing: 'easeOutQuart',
+        delay: (context) => {
+          // Aggiungi un leggero ritardo per creare un effetto a cascata
+          return context.dataIndex * 50;
+        }
+      };
+      
+      // Eventi hover avanzati
       adaptedOptions.onHover = (event, activeElements) => {
+        // Cambia il cursore quando si passa sopra un elemento
         event.native.target.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
+        
+        // Evidenzia l'elemento attivo
+        if (activeElements.length > 0) {
+          const chart = activeElements[0].chart;
+          const dataIndex = activeElements[0].index;
+          
+          // Evidenzia l'elemento nella legenda
+          const legendItems = chart.canvas.parentNode.querySelectorAll('.chart-legend-item');
+          if (legendItems && legendItems[dataIndex]) {
+            legendItems[dataIndex].classList.add('highlighted');
+          }
+        }
+      };
+      
+      // Eventi click avanzati
+      adaptedOptions.onClick = (event, activeElements) => {
+        if (activeElements.length > 0) {
+          const element = activeElements[0];
+          const dataIndex = element.index;
+          const chart = element.chart;
+          const data = chart.data;
+          const dataset = data.datasets[0];
+          
+          // Gestisci diversi formati di backgroundColor (array, singolo colore, ecc.)
+          let color;
+          if (Array.isArray(dataset.backgroundColor)) {
+            color = dataset.backgroundColor[dataIndex] || dataset.borderColor || '#36A2EB';
+          } else {
+            color = dataset.backgroundColor || dataset.borderColor || '#36A2EB';
+          }
+          
+          // Mostra dettagli avanzati per desktop
+          this.showDesktopDetailPanel({
+            label: data.labels[dataIndex],
+            value: dataset.data[dataIndex],
+            color: color,
+            total: dataset.data.reduce((sum, val) => sum + val, 0),
+            percentage: ((dataset.data[dataIndex] / dataset.data.reduce((sum, val) => sum + val, 0)) * 100).toFixed(1),
+            chart: chart
+          });
+        }
       };
     }
     
@@ -761,6 +922,411 @@ class ResponsiveChartAdapter {
   }
   
   /**
+   * Mostra un pannello dettagliato per desktop quando si fa clic su un elemento del grafico
+   * @param {Object} data - I dati da mostrare nel pannello
+   */
+  showDesktopDetailPanel(data) {
+    // Rimuovi pannello esistente se presente
+    const existingPanel = document.getElementById('desktop-chart-detail-panel');
+    if (existingPanel) {
+      existingPanel.remove();
+    }
+    
+    // Crea il pannello
+    const panel = document.createElement('div');
+    panel.id = 'desktop-chart-detail-panel';
+    panel.className = 'desktop-chart-panel';
+    panel.innerHTML = `
+      <div class="desktop-chart-panel-content">
+        <div class="desktop-chart-panel-header">
+          <h3>Dettagli Analitici</h3>
+          <button class="desktop-chart-panel-close" aria-label="Chiudi">&times;</button>
+        </div>
+        <div class="desktop-chart-panel-body">
+          <div class="chart-detail-item">
+            <div class="chart-detail-color" style="background-color: ${data.color}"></div>
+            <div class="chart-detail-info">
+              <h4>${data.label}</h4>
+              <div class="chart-detail-stats">
+                <div class="chart-detail-stat">
+                  <span class="stat-label">Valore</span>
+                  <span class="stat-value">${data.value}</span>
+                </div>
+                <div class="chart-detail-stat">
+                  <span class="stat-label">Percentuale</span>
+                  <span class="stat-value">${data.percentage}%</span>
+                </div>
+                <div class="chart-detail-stat">
+                  <span class="stat-label">Totale</span>
+                  <span class="stat-value">${data.total}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="chart-detail-actions">
+            <button class="btn btn-sm btn-outline-primary chart-detail-action" data-action="highlight">
+              <i class="fas fa-highlighter"></i> Evidenzia
+            </button>
+            <button class="btn btn-sm btn-outline-secondary chart-detail-action" data-action="isolate">
+              <i class="fas fa-filter"></i> Isola
+            </button>
+            <button class="btn btn-sm btn-outline-info chart-detail-action" data-action="export">
+              <i class="fas fa-download"></i> Esporta
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    // Aggiungi gli stili inline se non esistono già
+    if (!document.getElementById('desktop-chart-panel-styles')) {
+      const styles = document.createElement('style');
+      styles.id = 'desktop-chart-panel-styles';
+      styles.textContent = `
+        .desktop-chart-panel {
+          position: absolute;
+          top: 10px;
+          right: 10px;
+          width: 300px;
+          background: var(--bs-body-bg, white);
+          border-radius: 8px;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+          z-index: 1000;
+          overflow: hidden;
+          animation: panelSlideIn 0.3s ease-out;
+        }
+        
+        .desktop-chart-panel-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 0.75rem 1rem;
+          border-bottom: 1px solid var(--bs-border-color, #dee2e6);
+          background: var(--bs-light, #f8f9fa);
+        }
+        
+        .desktop-chart-panel-header h3 {
+          margin: 0;
+          font-size: 1rem;
+          font-weight: 600;
+          color: var(--bs-body-color, #333);
+        }
+        
+        .desktop-chart-panel-close {
+          background: none;
+          border: none;
+          font-size: 1.25rem;
+          color: var(--bs-secondary, #6c757d);
+          cursor: pointer;
+          padding: 0;
+          width: 24px;
+          height: 24px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        
+        .desktop-chart-panel-body {
+          padding: 1rem;
+        }
+        
+        .chart-detail-item {
+          display: flex;
+          align-items: flex-start;
+          gap: 1rem;
+          margin-bottom: 1rem;
+        }
+        
+        .chart-detail-color {
+          width: 24px;
+          height: 24px;
+          border-radius: 4px;
+          flex-shrink: 0;
+        }
+        
+        .chart-detail-info h4 {
+          margin: 0 0 0.5rem 0;
+          font-size: 1rem;
+          font-weight: 600;
+          color: var(--bs-body-color, #333);
+        }
+        
+        .chart-detail-stats {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 0.5rem;
+        }
+        
+        .chart-detail-stat {
+          display: flex;
+          flex-direction: column;
+        }
+        
+        .stat-label {
+          font-size: 0.75rem;
+          color: var(--bs-secondary, #6c757d);
+        }
+        
+        .stat-value {
+          font-size: 0.9rem;
+          font-weight: 500;
+          color: var(--bs-primary, #0d6efd);
+        }
+        
+        .chart-detail-actions {
+          display: flex;
+          gap: 0.5rem;
+          margin-top: 1rem;
+        }
+        
+        .chart-detail-action {
+          flex: 1;
+          font-size: 0.8rem;
+          padding: 0.25rem 0.5rem;
+        }
+        
+        @keyframes panelSlideIn {
+          from {
+            opacity: 0;
+            transform: translateX(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+        
+        @keyframes panelSlideOut {
+          from {
+            opacity: 1;
+            transform: translateX(0);
+          }
+          to {
+            opacity: 0;
+            transform: translateX(20px);
+          }
+        }
+        
+        @media (prefers-color-scheme: dark) {
+          .desktop-chart-panel {
+            background: #212529;
+            color: #fff;
+          }
+          
+          .desktop-chart-panel-header {
+            background: #343a40;
+          }
+        }
+      `;
+      document.head.appendChild(styles);
+    }
+    
+    // Trova il container del grafico e aggiungi il pannello
+    const chartContainer = data.chart.canvas.parentNode;
+    if (chartContainer) {
+      chartContainer.style.position = 'relative';
+      chartContainer.appendChild(panel);
+    } else {
+      document.body.appendChild(panel);
+    }
+    
+    // Aggiungi gli event listener
+    const closeBtn = panel.querySelector('.desktop-chart-panel-close');
+    
+    const closePanel = () => {
+      panel.style.animation = 'panelSlideOut 0.2s ease-in forwards';
+      setTimeout(() => {
+        if (panel.parentNode) {
+          panel.remove();
+        }
+      }, 200);
+    };
+    
+    closeBtn.addEventListener('click', closePanel);
+    
+    // Aggiungi event listener per i pulsanti di azione
+    const actionButtons = panel.querySelectorAll('.chart-detail-action');
+    actionButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const action = button.dataset.action;
+        
+        switch (action) {
+          case 'highlight':
+            // Evidenzia l'elemento nel grafico
+            this.highlightChartElement(data.chart, data.label);
+            break;
+          case 'isolate':
+            // Isola l'elemento nel grafico (nascondi gli altri)
+            this.isolateChartElement(data.chart, data.label);
+            break;
+          case 'export':
+            // Esporta i dati dell'elemento
+            this.exportElementData(data);
+            break;
+        }
+      });
+    });
+    
+    // Supporto per il tasto ESC
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') {
+        closePanel();
+        document.removeEventListener('keydown', handleEscape);
+      }
+    };
+    document.addEventListener('keydown', handleEscape);
+  }
+  
+  /**
+   * Evidenzia un elemento specifico nel grafico
+   * @param {Chart} chart - L'istanza del grafico
+   * @param {string} label - L'etichetta dell'elemento da evidenziare
+   */
+  highlightChartElement(chart, label) {
+    const datasetIndex = 0; // Assumiamo che ci sia un solo dataset
+    const labelIndex = chart.data.labels.findIndex(l => l === label);
+    
+    if (labelIndex === -1) return;
+    
+    // Ripristina tutti gli elementi alla loro opacità normale
+    chart.data.datasets[datasetIndex].backgroundColor.forEach((color, i) => {
+      const meta = chart.getDatasetMeta(datasetIndex);
+      if (meta.data[i]) {
+        meta.data[i].options.backgroundColor = color;
+      }
+    });
+    
+    // Evidenzia l'elemento selezionato
+    const meta = chart.getDatasetMeta(datasetIndex);
+    if (meta.data[labelIndex]) {
+      // Salva il colore originale se non è già stato salvato
+      if (!meta.data[labelIndex]._originalBackgroundColor) {
+        meta.data[labelIndex]._originalBackgroundColor = meta.data[labelIndex].options.backgroundColor;
+      }
+      
+      // Applica un effetto di evidenziazione
+      meta.data[labelIndex].options.backgroundColor = this.adjustColor(meta.data[labelIndex]._originalBackgroundColor, 20);
+      meta.data[labelIndex].options.borderWidth = 2;
+      meta.data[labelIndex].options.borderColor = '#fff';
+    }
+    
+    chart.update();
+    
+    // Mostra un toast di conferma
+    this.showMobileToast(`Elemento "${label}" evidenziato`);
+  }
+  
+  /**
+   * Isola un elemento specifico nel grafico (nasconde gli altri)
+   * @param {Chart} chart - L'istanza del grafico
+   * @param {string} label - L'etichetta dell'elemento da isolare
+   */
+  isolateChartElement(chart, label) {
+    const datasetIndex = 0; // Assumiamo che ci sia un solo dataset
+    const labelIndex = chart.data.labels.findIndex(l => l === label);
+    
+    if (labelIndex === -1) return;
+    
+    // Nascondi tutti gli elementi tranne quello selezionato
+    const meta = chart.getDatasetMeta(datasetIndex);
+    meta.data.forEach((dataElement, i) => {
+      dataElement.hidden = i !== labelIndex;
+    });
+    
+    chart.update();
+    
+    // Mostra un toast di conferma
+    this.showMobileToast(`Elemento "${label}" isolato`);
+  }
+  
+  /**
+   * Esporta i dati di un elemento specifico
+   * @param {Object} data - I dati dell'elemento
+   */
+  exportElementData(data) {
+    // Crea un oggetto con i dati da esportare
+    const exportData = {
+      label: data.label,
+      value: data.value,
+      percentage: data.percentage,
+      total: data.total,
+      timestamp: new Date().toISOString()
+    };
+    
+    // Converti in JSON
+    const jsonData = JSON.stringify(exportData, null, 2);
+    
+    // Crea un blob con i dati
+    const blob = new Blob([jsonData], { type: 'application/json' });
+    
+    // Crea un URL per il blob
+    const url = URL.createObjectURL(blob);
+    
+    // Crea un link per il download
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `chart-data-${data.label.replace(/\s+/g, '-').toLowerCase()}.json`;
+    
+    // Aggiungi il link al DOM e simula il click
+    document.body.appendChild(a);
+    a.click();
+    
+    // Rimuovi il link dal DOM
+    document.body.removeChild(a);
+    
+    // Rilascia l'URL
+    URL.revokeObjectURL(url);
+    
+    // Mostra un toast di conferma
+    this.showMobileToast(`Dati esportati per "${data.label}"`);
+  }
+  
+  /**
+   * Schiarisce o scurisce un colore
+   * @param {string} color - Il colore da modificare (formato hex o rgba)
+   * @param {number} percent - La percentuale di schiarimento (positivo) o scurimento (negativo)
+   * @returns {string} - Il colore modificato
+   */
+  adjustColor(color, percent) {
+    // Se il colore è in formato rgba
+    if (color.startsWith('rgba')) {
+      const rgbaMatch = color.match(/rgba\((\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\)/);
+      if (rgbaMatch) {
+        let [, r, g, b, a] = rgbaMatch;
+        r = parseInt(r);
+        g = parseInt(g);
+        b = parseInt(b);
+        a = parseFloat(a);
+        
+        // Schiarisci o scurisci il colore
+        r = Math.min(255, Math.max(0, r + (percent / 100) * 255));
+        g = Math.min(255, Math.max(0, g + (percent / 100) * 255));
+        b = Math.min(255, Math.max(0, b + (percent / 100) * 255));
+        
+        return `rgba(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)}, ${a})`;
+      }
+    }
+    
+    // Se il colore è in formato hex
+    if (color.startsWith('#')) {
+      let r = parseInt(color.substring(1, 3), 16);
+      let g = parseInt(color.substring(3, 5), 16);
+      let b = parseInt(color.substring(5, 7), 16);
+      
+      // Schiarisci o scurisci il colore
+      r = Math.min(255, Math.max(0, r + (percent / 100) * 255));
+      g = Math.min(255, Math.max(0, g + (percent / 100) * 255));
+      b = Math.min(255, Math.max(0, b + (percent / 100) * 255));
+      
+      // Converti in hex
+      return `#${Math.round(r).toString(16).padStart(2, '0')}${Math.round(g).toString(16).padStart(2, '0')}${Math.round(b).toString(16).padStart(2, '0')}`;
+    }
+    
+    // Se il formato non è riconosciuto, restituisci il colore originale
+    return color;
+  }
+  
+  /**
    * Implementa il layout responsive specifico per mobile
    * @param {HTMLElement} container - Il container del grafico
    * @param {Chart} chart - L'istanza del grafico Chart.js
@@ -776,6 +1342,323 @@ class ResponsiveChartAdapter {
     
     // Implementa controlli touch-friendly
     this.setupMobileTouchOptimizations(container, chart);
+  }
+  
+  /**
+   * Implementa il layout responsive specifico per desktop
+   * @param {HTMLElement} container - Il container del grafico
+   * @param {Chart} chart - L'istanza del grafico Chart.js
+   */
+  implementDesktopLayout(container, chart) {
+    if (this.detectDevice() !== 'desktop') return;
+    
+    // Ottimizza le dimensioni del container per schermi grandi
+    this.optimizeContainerForLargeScreens(container);
+    
+    // Posiziona la legenda a lato del grafico
+    this.positionLegendBesideChart(container, chart);
+    
+    // Implementa interazioni avanzate
+    this.setupDesktopInteractions(container, chart);
+    
+    // Aggiungi stili CSS per desktop
+    this.addDesktopStyles();
+  }
+  
+  /**
+   * Ottimizza le dimensioni del container per schermi grandi
+   * @param {HTMLElement} container - Il container del grafico
+   */
+  optimizeContainerForLargeScreens(container) {
+    if (!container) return;
+    
+    // Imposta dimensioni ottimali per desktop
+    container.style.width = '100%';
+    container.style.maxWidth = '100%';
+    container.style.minHeight = '500px';
+    container.style.height = '80vh';
+    container.style.maxHeight = '800px';
+    
+    // Aggiungi padding per migliorare la leggibilità
+    container.style.padding = '1rem';
+    container.style.boxSizing = 'border-box';
+    
+    // Aggiungi classe per styling CSS specifico
+    container.classList.add('chart-desktop-optimized');
+  }
+  
+  /**
+   * Posiziona la legenda a lato del grafico per desktop
+   * @param {HTMLElement} container - Il container del grafico
+   * @param {Chart} chart - L'istanza del grafico Chart.js
+   */
+  positionLegendBesideChart(container, chart) {
+    if (!chart || this.detectDevice() !== 'desktop') return;
+    
+    // La configurazione della legenda è già gestita in adaptOptions
+    // Qui possiamo aggiungere ottimizzazioni specifiche del layout
+    
+    // Aggiungi classe per styling CSS specifico
+    container.classList.add('chart-legend-right');
+    
+    // Crea un wrapper per il grafico e la legenda se non esiste
+    if (!container.querySelector('.chart-legend-wrapper')) {
+      // Salva il canvas originale
+      const canvas = chart.canvas;
+      
+      // Crea un wrapper per il grafico e la legenda
+      const wrapper = document.createElement('div');
+      wrapper.className = 'chart-legend-wrapper';
+      wrapper.style.display = 'flex';
+      wrapper.style.flexDirection = 'row';
+      wrapper.style.alignItems = 'center';
+      wrapper.style.width = '100%';
+      wrapper.style.height = '100%';
+      
+      // Crea un container per il grafico
+      const chartContainer = document.createElement('div');
+      chartContainer.className = 'chart-canvas-container';
+      chartContainer.style.flex = '1';
+      chartContainer.style.minWidth = '0';
+      chartContainer.style.height = '100%';
+      
+      // Sposta il canvas nel nuovo container
+      if (canvas.parentNode === container) {
+        canvas.remove();
+        chartContainer.appendChild(canvas);
+      }
+      
+      // Aggiungi il container del grafico al wrapper
+      wrapper.appendChild(chartContainer);
+      
+      // Aggiungi il wrapper al container principale
+      container.appendChild(wrapper);
+    }
+  }
+  
+  /**
+   * Setup interazioni avanzate per desktop
+   * @param {HTMLElement} container - Il container del grafico
+   * @param {Chart} chart - L'istanza del grafico Chart.js
+   */
+  setupDesktopInteractions(container, chart) {
+    if (!container || !chart) return;
+    
+    // Aggiungi supporto per zoom con rotellina del mouse
+    container.addEventListener('wheel', (e) => {
+      // Previeni lo scroll della pagina
+      if (e.ctrlKey) {
+        e.preventDefault();
+      }
+    }, { passive: false });
+    
+    // Aggiungi supporto per hover avanzato
+    container.addEventListener('mousemove', (e) => {
+      const rect = chart.canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      // Trova l'elemento attivo
+      const activeElements = chart.getElementsAtEventForMode(
+        { x, y },
+        'nearest',
+        { intersect: true },
+        false
+      );
+      
+      // Resetta lo stato di tutti gli elementi
+      this.resetChartElementsState(chart);
+      
+      // Evidenzia l'elemento attivo
+      if (activeElements.length > 0) {
+        const element = activeElements[0];
+        this.highlightChartElement(chart, chart.data.labels[element.index], false);
+      }
+    });
+    
+    // Aggiungi supporto per click
+    container.addEventListener('click', (e) => {
+      const rect = chart.canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      // Trova l'elemento attivo
+      const activeElements = chart.getElementsAtEventForMode(
+        { x, y },
+        'nearest',
+        { intersect: true },
+        false
+      );
+      
+      // Mostra dettagli per l'elemento attivo
+      if (activeElements.length > 0) {
+        const element = activeElements[0];
+        const dataIndex = element.index;
+        const label = chart.data.labels[dataIndex];
+        const dataset = chart.data.datasets[0];
+        const value = dataset.data[dataIndex];
+        const total = dataset.data.reduce((sum, val) => sum + val, 0);
+        const percentage = ((value / total) * 100).toFixed(1);
+        
+        // Gestisci diversi formati di backgroundColor
+        let color;
+        if (Array.isArray(dataset.backgroundColor)) {
+          color = dataset.backgroundColor[dataIndex] || dataset.borderColor || '#36A2EB';
+        } else {
+          color = dataset.backgroundColor || dataset.borderColor || '#36A2EB';
+        }
+        
+        // Mostra dettagli avanzati
+        this.showDesktopDetailPanel({
+          label,
+          value,
+          color,
+          total,
+          percentage,
+          chart
+        });
+      }
+    });
+  }
+  
+  /**
+   * Resetta lo stato di tutti gli elementi del grafico
+   * @param {Chart} chart - L'istanza del grafico
+   */
+  resetChartElementsState(chart) {
+    if (!chart || !chart.data || !chart.data.datasets || chart.data.datasets.length === 0) return;
+    
+    const datasetIndex = 0; // Assumiamo che ci sia un solo dataset
+    const meta = chart.getDatasetMeta(datasetIndex);
+    
+    // Ripristina tutti gli elementi alla loro opacità normale
+    meta.data.forEach((dataElement, i) => {
+      if (dataElement._savedOptions) {
+        Object.assign(dataElement.options, dataElement._savedOptions);
+        delete dataElement._savedOptions;
+      }
+    });
+    
+    chart.update('none'); // Aggiorna senza animazione
+  }
+  
+  /**
+   * Aggiungi stili CSS per desktop
+   */
+  addDesktopStyles() {
+    // Aggiungi gli stili inline se non esistono già
+    if (!document.getElementById('desktop-chart-styles')) {
+      const styles = document.createElement('style');
+      styles.id = 'desktop-chart-styles';
+      styles.textContent = `
+        .chart-desktop-optimized {
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+          border-radius: 8px;
+          background: var(--bs-body-bg, white);
+          transition: all 0.3s ease;
+        }
+        
+        .chart-desktop-optimized:hover {
+          box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+        }
+        
+        .chart-legend-right .chart-legend-wrapper {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+        }
+        
+        .chart-legend-right .chart-canvas-container {
+          flex: 1;
+          min-width: 0;
+          height: 100%;
+        }
+        
+        .chart-legend-right .chart-legend-container {
+          width: 200px;
+          padding-left: 1rem;
+          border-left: 1px solid var(--bs-border-color, #dee2e6);
+          margin-left: 1rem;
+        }
+        
+        .chart-legend-item {
+          display: flex;
+          align-items: center;
+          padding: 0.25rem 0;
+          cursor: pointer;
+          border-radius: 4px;
+          transition: background-color 0.2s ease;
+        }
+        
+        .chart-legend-item:hover {
+          background-color: rgba(0, 0, 0, 0.05);
+        }
+        
+        .chart-legend-item.highlighted {
+          background-color: rgba(0, 0, 0, 0.1);
+        }
+        
+        .chart-legend-item.filtered {
+          opacity: 0.5;
+        }
+        
+        .chart-legend-color {
+          width: 12px;
+          height: 12px;
+          border-radius: 50%;
+          margin-right: 8px;
+        }
+        
+        .chart-legend-text {
+          font-size: 0.9rem;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        
+        /* Effetto di zoom */
+        .zooming {
+          position: relative;
+        }
+        
+        .zooming::after {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.05);
+          border-radius: 8px;
+          pointer-events: none;
+          animation: zoomPulse 0.3s ease-out;
+        }
+        
+        @keyframes zoomPulse {
+          0% { opacity: 0.5; }
+          100% { opacity: 0; }
+        }
+        
+        @media (prefers-color-scheme: dark) {
+          .chart-desktop-optimized {
+            background: #212529;
+          }
+          
+          .chart-legend-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+          }
+          
+          .chart-legend-item.highlighted {
+            background-color: rgba(255, 255, 255, 0.15);
+          }
+          
+          .zooming::after {
+            background: rgba(255, 255, 255, 0.05);
+          }
+        }
+      `;
+      document.head.appendChild(styles);
+    }
   }
   
   /**

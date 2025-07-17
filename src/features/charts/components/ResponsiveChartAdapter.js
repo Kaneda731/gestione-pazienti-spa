@@ -780,14 +780,18 @@ class ResponsiveChartAdapter {
     let touchEndY = 0;
     
     const handleTouchStart = (e) => {
-      touchStartX = e.changedTouches[0].screenX;
-      touchStartY = e.changedTouches[0].screenY;
+      if (e.changedTouches && e.changedTouches.length > 0) {
+        touchStartX = e.changedTouches[0].screenX;
+        touchStartY = e.changedTouches[0].screenY;
+      }
     };
     
     const handleTouchEnd = (e) => {
-      touchEndX = e.changedTouches[0].screenX;
-      touchEndY = e.changedTouches[0].screenY;
-      this.handleSwipeGesture();
+      if (e.changedTouches && e.changedTouches.length > 0) {
+        touchEndX = e.changedTouches[0].screenX;
+        touchEndY = e.changedTouches[0].screenY;
+        this.handleSwipeGesture();
+      }
     };
     
     const handleSwipeGesture = () => {
@@ -1359,7 +1363,10 @@ class ResponsiveChartAdapter {
     this.positionLegendBelowChart(container, chart);
     
     // Implementa controlli touch-friendly
-    this.setupMobileTouchOptimizations(container, chart);
+    this.setupMobileTouchControls(container, chart);
+
+    // Ottimizza per orientamento
+    this.optimizeForOrientation(container);
   }
   
   /**
@@ -1702,6 +1709,8 @@ class ResponsiveChartAdapter {
       container.style.paddingLeft = 'max(0.5rem, env(safe-area-inset-left))';
       container.style.paddingRight = 'max(0.5rem, env(safe-area-inset-right))';
     }
+
+    container.classList.add('chart-mobile-optimized');
   }
   
   /**
@@ -1711,19 +1720,12 @@ class ResponsiveChartAdapter {
    */
   positionLegendBelowChart(container, chart) {
     if (!chart || this.detectDevice() !== 'mobile') return;
-    
-    // La configurazione della legenda è già gestita in adaptOptions
-    // Qui possiamo aggiungere ottimizzazioni specifiche del layout
-    
-    // Assicurati che ci sia spazio sufficiente per la legenda
-    const legendHeight = 80; // Altezza stimata della legenda
-    const currentHeight = parseInt(container.style.height) || 300;
-    const newHeight = currentHeight + legendHeight;
-    
-    container.style.height = `${newHeight}px`;
-    
-    // Aggiungi classe per styling CSS specifico
-    container.classList.add('chart-legend-bottom');
+
+    const legendContainer = document.createElement('div');
+    legendContainer.className = 'mobile-chart-legend';
+    legendContainer.setAttribute('role', 'list');
+    legendContainer.setAttribute('aria-label', 'Legenda del grafico');
+    container.appendChild(legendContainer);
   }
   
   /**
@@ -1785,6 +1787,12 @@ class ResponsiveChartAdapter {
     // Aggiungi classe per styling CSS specifico
     container.classList.toggle('landscape', isLandscape);
     container.classList.toggle('portrait', !isLandscape);
+
+    const controlsContainer = container.querySelector('.mobile-chart-controls');
+    if (controlsContainer) {
+      controlsContainer.classList.toggle('controls-landscape', isLandscape);
+      controlsContainer.classList.toggle('controls-portrait', !isLandscape);
+    }
   }
   
   /**

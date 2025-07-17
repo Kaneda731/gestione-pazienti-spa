@@ -1,6 +1,6 @@
 # Implementation Plan
 
-- [ ] 1. Setup iniziale e refactoring
+- [x] 1. Setup iniziale e refactoring
 
   - [x] 1.1 Creare la struttura di base per i nuovi componenti
 
@@ -13,7 +13,7 @@
     - Implementare il lazy loading ottimizzato della libreria Chart.js
     - _Requirements: 3.1, 5.5_
 
-- [-] 2. Implementazione del ResponsiveChartAdapter
+- [ ] 2. Implementazione del ResponsiveChartAdapter
 
   - [x] 2.1 Creare la classe ResponsiveChartAdapter
 
@@ -28,7 +28,7 @@
     - Implementare controlli touch-friendly
     - _Requirements: 1.1, 1.2, 1.3, 1.4_
 
-  - [x] 2.3 Implementare layout responsive per desktop
+  - [ ] 2.3 Implementare layout responsive per desktop
     - Ottimizzare la visualizzazione per schermi grandi
     - Posizionare la legenda a lato del grafico su desktop
     - Implementare interazioni avanzate (hover, click)
@@ -48,7 +48,7 @@
     - Migliorare l'interattività e i tooltip
     - _Requirements: 2.1, 3.5_
 
-  - [ ] 3.3 Implementare il grafico a barre
+  - [x] 3.3 Implementare il grafico a barre
 
     - Creare la logica di rendering per il grafico a barre
     - Aggiungere etichette chiare per ogni barra
@@ -61,13 +61,13 @@
 
 - [ ] 4. Implementazione del ChartExportService
 
-  - [ ] 4.1 Creare la classe ChartExportService
+  - [x] 4.1 Creare la classe ChartExportService
 
     - Implementare la logica di base per l'esportazione
     - Implementare la generazione di link condivisibili
     - _Requirements: 4.1, 4.3_
 
-  - [ ] 4.2 Implementare l'esportazione come immagine
+  - [x] 4.2 Implementare l'esportazione come immagine
 
     - Aggiungere il supporto per l'esportazione in PNG/JPG
     - Includere timestamp e parametri di filtro nell'immagine
@@ -80,7 +80,7 @@
 
 - [ ] 5. Ottimizzazioni di performance
 
-  - [ ] 5.1 Implementare il caching dei dati
+  - [x] 5.1 Implementare il caching dei dati
 
     - Memorizzare i risultati delle query recenti
     - Implementare la logica di invalidazione della cache
@@ -92,14 +92,14 @@
     - Ottimizzare le animazioni per dispositivi meno potenti
     - _Requirements: 2.5, 5.2_
 
-  - [ ] 5.3 Implementare tecniche di throttling e debouncing
+  - [x] 5.3 Implementare tecniche di throttling e debouncing
     - Aggiungere throttling per gli eventi di resize
     - Aggiungere debouncing per gli eventi di interazione
     - _Requirements: 5.3, 5.4_
 
 - [ ] 6. Gestione degli errori e accessibilità
 
-  - [ ] 6.1 Implementare la gestione degli errori
+  - [x] 6.1 Implementare la gestione degli errori
 
     - Aggiungere messaggi di errore user-friendly
     - Implementare retry automatico con backoff esponenziale

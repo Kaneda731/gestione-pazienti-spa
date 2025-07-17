@@ -20,6 +20,9 @@ import { initTheme } from '../core/services/themeService.js';
 import { viteSupabaseMiddleware } from '../core/services/viteSupabaseMiddleware.js';
 import { logger } from '../core/services/loggerService.js';
 
+// Extension error handling
+import '../core/utils/extensionErrorHandler.js';
+
 // Shared services
 import '../shared/components/ui/index.js';
 import '../core/services/bootstrapService.js';
@@ -97,10 +100,19 @@ async function initializeApp() {
 
 window.addEventListener('load', initializeApp);
 
+// Gestione degli errori globali (gli errori delle estensioni sono gestiti da ExtensionErrorHandler)
 window.addEventListener('error', (event) => {
-    console.error('Errore non catturato:', event.error);
+    // Solo logga errori che non sono delle estensioni
+    if (!event.message || !event.message.includes('extension')) {
+        console.error('Errore non catturato:', event.error);
+    }
 });
 
 window.addEventListener('unhandledrejection', (event) => {
-    console.error('Promise rifiutata non gestita:', event.reason);
+    // Solo logga promise rejection che non sono delle estensioni
+    const reason = event.reason;
+    const message = reason instanceof Error ? reason.message : String(reason);
+    if (!message.includes('extension') && !message.includes('message channel')) {
+        console.error('Promise rifiutata non gestita:', event.reason);
+    }
 });

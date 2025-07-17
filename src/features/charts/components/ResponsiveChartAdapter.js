@@ -198,7 +198,7 @@ class ResponsiveChartAdapter {
         }
       };
       
-      adaptedOptions.onClick = (event, activeElements) => {
+            adaptedOptions.onClick = (event, activeElements) => {
         if (activeElements.length > 0) {
           if (navigator.vibrate) {
             navigator.vibrate(20);
@@ -206,7 +206,7 @@ class ResponsiveChartAdapter {
           
           const element = activeElements[0];
           const dataIndex = element.index;
-          const chart = element.chart;
+          const chart = event.chart;
           const data = chart.data;
           const dataset = data.datasets[0];
           
@@ -770,7 +770,7 @@ class ResponsiveChartAdapter {
    * Implementa controlli touch-friendly per mobile
    * @param {HTMLElement} container - Il container del grafico
    */
-  setupMobileTouchControls(container) {
+  _setupMobileTouchControls(container) {
     if (this.detectDevice() !== 'mobile') return;
     
     // Aggiungi supporto per swipe gestures
@@ -790,22 +790,7 @@ class ResponsiveChartAdapter {
       if (e.changedTouches && e.changedTouches.length > 0) {
         touchEndX = e.changedTouches[0].screenX;
         touchEndY = e.changedTouches[0].screenY;
-        this.handleSwipeGesture();
-      }
-    };
-    
-    const handleSwipeGesture = () => {
-      const deltaX = touchEndX - touchStartX;
-      const deltaY = touchEndY - touchStartY;
-      const minSwipeDistance = 50;
-      
-      // Swipe orizzontale per cambiare tipo di grafico
-      if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > minSwipeDistance) {
-        if (deltaX > 0) {
-          this.triggerChartTypeChange('previous');
-        } else {
-          this.triggerChartTypeChange('next');
-        }
+        this._handleSwipeGesture(touchStartX, touchStartY, touchEndX, touchEndY);
       }
     };
     
@@ -828,6 +813,28 @@ class ResponsiveChartAdapter {
     this.optimizeMobileContainer(container);
   }
   
+  /**
+   * Gestisce il gesto di swipe per cambiare il tipo di grafico.
+   * @param {number} touchStartX - Coordinata X iniziale del tocco.
+   * @param {number} touchStartY - Coordinata Y iniziale del tocco.
+   * @param {number} touchEndX - Coordinata X finale del tocco.
+   * @param {number} touchEndY - Coordinata Y finale del tocco.
+   */
+  _handleSwipeGesture(touchStartX, touchStartY, touchEndX, touchEndY) {
+    const deltaX = touchEndX - touchStartX;
+    const deltaY = touchEndY - touchStartY;
+    const minSwipeDistance = 50;
+
+    // Swipe orizzontale per cambiare tipo di grafico
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > minSwipeDistance) {
+      if (deltaX > 0) {
+        this.triggerChartTypeChange('previous');
+      } else {
+        this.triggerChartTypeChange('next');
+      }
+    }
+  }
+
   /**
    * Ottimizza il container del grafico per dispositivi mobile
    * @param {HTMLElement} container - Il container del grafico
@@ -856,12 +863,65 @@ class ResponsiveChartAdapter {
     // Aggiungi classe per styling CSS specifico
     container.classList.add('chart-mobile-optimized');
   }
+
+  /**
+   * Gestisce il gesto di swipe per cambiare il tipo di grafico.
+   * @param {number} touchStartX - Coordinata X iniziale del tocco.
+   * @param {number} touchStartY - Coordinata Y iniziale del tocco.
+   * @param {number} touchEndX - Coordinata X finale del tocco.
+   * @param {number} touchEndY - Coordinata Y finale del tocco.
+   */
+  _handleSwipeGesture(touchStartX, touchStartY, touchEndX, touchEndY) {
+    const deltaX = touchEndX - touchStartX;
+    const deltaY = touchEndY - touchStartY;
+    const minSwipeDistance = 50;
+
+    // Swipe orizzontale per cambiare tipo di grafico
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > minSwipeDistance) {
+      if (deltaX > 0) {
+        this.triggerChartTypeChange('previous');
+      } else {
+        this.triggerChartTypeChange('next');
+      }
+    }
+  }
   
   /**
-   * Mostra un toast di feedback per azioni su mobile
-   * @param {string} message - Il messaggio da mostrare
+   * Mostra una notifica di feedback all'utente, adattandosi al dispositivo.
+   * @param {string} message - Il messaggio da mostrare.
+   * @param {string} type - Il tipo di notifica ('success', 'error', 'info').
    */
-  showMobileToast(message) {
+  showNotification(message, type = 'info') {
+    const device = this.detectDevice();
+
+    if (device === 'mobile') {
+      this._showMobileToast(message, type);
+    } else {
+      this._showDesktopToast(message, type);
+    }
+  }
+
+  /**
+   * Mostra un toast di feedback per azioni su mobile (implementazione interna).
+   * @param {string} message - Il messaggio da mostrare.
+   * @param {string} type - Il tipo di notifica ('success', 'error', 'info').
+   */
+  showNotification(message, type = 'info') {
+    const device = this.detectDevice();
+
+    if (device === 'mobile') {
+      this._showMobileToast(message, type);
+    } else {
+      this._showDesktopToast(message, type);
+    }
+  }
+
+  /**
+   * Mostra un toast di feedback per azioni su mobile (implementazione interna).
+   * @param {string} message - Il messaggio da mostrare.
+   * @param {string} type - Il tipo di notifica ('success', 'error', 'info').
+   */
+  _showMobileToast(message, type) {
     // Rimuovi toast esistente
     const existingToast = document.getElementById('mobile-chart-toast');
     if (existingToast) {
@@ -871,7 +931,7 @@ class ResponsiveChartAdapter {
     // Crea il toast
     const toast = document.createElement('div');
     toast.id = 'mobile-chart-toast';
-    toast.className = 'mobile-chart-toast';
+    toast.className = `mobile-chart-toast mobile-chart-toast-${type}`;
     toast.textContent = message;
     
     // Aggiungi gli stili inline se non esistono già
@@ -892,6 +952,9 @@ class ResponsiveChartAdapter {
           z-index: 1060;
           animation: toastSlideIn 0.3s ease-out;
         }
+        .mobile-chart-toast-success { background-color: #28a745; }
+        .mobile-chart-toast-error { background-color: #dc3545; }
+        .mobile-chart-toast-info { background-color: #17a2b8; }
         
         @keyframes toastSlideIn {
           from {
@@ -931,16 +994,260 @@ class ResponsiveChartAdapter {
       }, 300);
     }, 2000);
   }
+
+  /**
+   * Mostra un toast di feedback per azioni su desktop (implementazione interna).
+   * @param {string} message - Il messaggio da mostrare.
+   * @param {string} type - Il tipo di notifica ('success', 'error', 'info').
+   */
+  _showDesktopToast(message, type) {
+    // Rimuovi toast esistente
+    const existingToast = document.getElementById('desktop-chart-toast');
+    if (existingToast) {
+      existingToast.remove();
+    }
+    
+    // Crea il toast
+    const toast = document.createElement('div');
+    toast.id = 'desktop-chart-toast';
+    toast.className = `desktop-chart-toast desktop-chart-toast-${type}`;
+    toast.innerHTML = `<i class="fas fa-info-circle me-2"></i>${message}`;
+    
+    // Aggiungi gli stili inline se non esistono già
+    if (!document.getElementById('desktop-toast-styles')) {
+      const styles = document.createElement('style');
+      styles.id = 'desktop-toast-styles';
+      styles.textContent = `
+        .desktop-chart-toast {
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          background: rgba(0, 0, 0, 0.8);
+          color: white;
+          padding: 12px 20px;
+          border-radius: 8px;
+          font-size: 14px;
+          z-index: 1060;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          display: flex;
+          align-items: center;
+          animation: toastSlideInRight 0.3s ease-out;
+        }
+        .desktop-chart-toast-success { background-color: #28a745; }
+        .desktop-chart-toast-error { background-color: #dc3545; }
+        .desktop-chart-toast-info { background-color: #17a2b8; }
+        
+        @keyframes toastSlideInRight {
+          from {
+            opacity: 0;
+            transform: translateX(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+        
+        @keyframes toastSlideOutRight {
+          from {
+            opacity: 1;
+            transform: translateX(0);
+          }
+          to {
+            opacity: 0;
+            transform: translateX(20px);
+          }
+        }
+      `;
+      document.head.appendChild(styles);
+    }
+    
+    // Aggiungi il toast al DOM
+    document.body.appendChild(toast);
+    
+    // Rimuovi il toast dopo 3 secondi
+    setTimeout(() => {
+      toast.style.animation = 'toastSlideOutRight 0.3s ease-in forwards';
+      setTimeout(() => {
+        if (toast.parentNode) {
+          toast.remove();
+        }
+      }, 300);
+    }, 3000);
+  }
   
   /**
-   * Trigger per il cambio del tipo di grafico
-   * @param {string} direction - 'next' o 'previous'
+   * Setup del listener per i gesti di swipe su mobile
    */
-  triggerChartTypeChange(direction) {
-    const event = new CustomEvent('chartTypeSwipe', {
-      detail: { direction }
+  _setupMobileSwipeListener() {
+    // Ascolta l'evento personalizzato per il cambio tipo di grafico via swipe
+    document.addEventListener('chartTypeSwipe', async (event) => {
+        const direction = event.detail.direction;
+        
+        try {
+            const chartTypes = await getAvailableChartTypes();
+            const currentIndex = chartTypes.findIndex(type => type.id === currentChartType);
+            
+            let newIndex;
+            if (direction === 'next') {
+                newIndex = (currentIndex + 1) % chartTypes.length;
+            } else {
+                newIndex = currentIndex === 0 ? chartTypes.length - 1 : currentIndex - 1;
+            }
+            
+            const newChartType = chartTypes[newIndex].id;
+            
+            // Aggiorna il selettore se esiste
+            if (dom.chartTypeSelector) {
+                dom.chartTypeSelector.value = newChartType;
+            }
+            
+            // Aggiorna il tipo corrente
+            currentChartType = newChartType;
+            
+            // Ridisegna il grafico se esiste
+            if (currentChart) {
+                const filters = getFilters();
+                await drawChartWithCurrentData(filters);
+                
+                // Mostra feedback all'utente
+                if (this) {
+                    this.showNotification(`Grafico cambiato: ${chartTypes[newIndex].name}`);
+                }
+            }
+        } catch (error) {
+            console.error('Errore nel cambio tipo di grafico via swipe:', error);
+        }
     });
-    document.dispatchEvent(event);
+  }
+
+  /**
+   * Setup del listener per eventi di esportazione e condivisione da mobile
+   */
+  _setupMobileChartEventListeners() {
+    // Listener per eventi di esportazione da mobile
+    document.addEventListener('chartExportRequested', async (event) => {
+        const chart = event.detail.chart;
+        if (chart) {
+            try {
+                await downloadChartAsImage(chart, 'png', {
+                    timestamp: new Date().toLocaleString('it-IT'),
+                    filters: getFilters()
+                });
+                
+                if (this) {
+                    this.showNotification('Grafico esportato con successo!');
+                }
+            } catch (error) {
+                console.error('Errore nell\'esportazione da mobile:', error);
+                if (this) {
+                    this.showNotification('Errore nell\'esportazione');
+                }
+            }
+        }
+    });
+    
+    // Listener per eventi di condivisione da mobile
+    document.addEventListener('chartShareRequested', async (event) => {
+        const chart = event.detail.chart;
+        if (chart) {
+            try {
+                const shareableLink = await generateShareableLink(getFilters(), currentChartType);
+                
+                // Usa Web Share API se disponibile
+                if (navigator.share) {
+                    try {
+                        await navigator.share({
+                            title: 'Grafico Pazienti',
+                            text: 'Visualizza questo grafico dei dati pazienti',
+                            url: shareableLink
+                        });
+                        
+                        if (this) {
+                            this.showNotification('Condiviso con successo!');
+                        }
+                    } catch (shareError) {
+                        // Fallback alla copia negli appunti
+                        await navigator.clipboard.writeText(shareableLink);
+                        if (this) {
+                            this.showNotification('Link copiato negli appunti!');
+                        }
+                    }
+                } else {
+                    // Fallback per browser che non supportano Web Share API
+                    await navigator.clipboard.writeText(shareableLink);
+                    if (this) {
+                        this.showNotification('Link copiato negli appunti!');
+                    }
+                }
+            } catch (error) {
+                console.error('Errore nella condivisione da mobile:', error);
+                if (this) {
+                    this.showNotification('Errore nella condivisione');
+                }
+            }
+        }
+    });
+    
+    // Listener per eventi personalizzati dal ResponsiveChartAdapter
+    document.addEventListener('exportChart', () => {
+        if (currentChart) {
+            document.dispatchEvent(new CustomEvent('chartExportRequested', {
+                detail: { chart: currentChart }
+            }));
+        }
+    });
+    
+    document.addEventListener('shareChart', () => {
+        if (currentChart) {
+            document.dispatchEvent(new CustomEvent('chartShareRequested', {
+                detail: { chart: currentChart }
+            }));
+        }
+    });
+    
+    // Listener per il selettore del tipo di grafico da mobile
+    document.addEventListener('showChartTypeSelector', () => {
+        showMobileChartTypeSelector();
+    });
+  }
+
+  /**
+   * Setup del listener per il cambio di orientamento su mobile
+   */
+  _setupOrientationChangeListener() {
+    if (!this) return;
+    
+    const handleOrientationChange = () => {
+        setTimeout(() => {
+            if (dom.chartContainer) {
+                // Ottimizza per il nuovo orientamento
+                this.optimizeForOrientation(dom.chartContainer);
+                
+                // Aggiorna il grafico se esiste
+                if (currentChart) {
+                    // Adatta le opzioni per il nuovo orientamento
+                    const adaptedOptions = this.adaptOptions(currentChart.options);
+                    currentChart.options = { ...currentChart.options, ...adaptedOptions };
+                    
+                    // Ridimensiona il grafico
+                    currentChart.resize();
+                    currentChart.update();
+                }
+                
+                // Riposiziona la legenda se necessario
+                if (currentChart && this.detectDevice() === 'mobile') {
+                    this.positionLegendBelowChart(dom.chartContainer, currentChart);
+                }
+            }
+        }, 150); // Delay per permettere al browser di aggiornare le dimensioni
+    };
+    
+    // Ascolta i cambi di orientamento
+    window.addEventListener('orientationchange', handleOrientationChange);
+    
+    // Ascolta anche i resize per dispositivi che non supportano orientationchange
+    window.addEventListener('resize', this.throttle(handleOrientationChange, 300));
   }
   
   /**
@@ -970,18 +1277,12 @@ class ResponsiveChartAdapter {
             <div class="chart-detail-info">
               <h4>${data.label}</h4>
               <div class="chart-detail-stats">
-                <div class="chart-detail-stat">
-                  <span class="stat-label">Valore</span>
-                  <span class="stat-value">${data.value}</span>
-                </div>
-                <div class="chart-detail-stat">
-                  <span class="stat-label">Percentuale</span>
-                  <span class="stat-value">${data.percentage}%</span>
-                </div>
-                <div class="chart-detail-stat">
-                  <span class="stat-label">Totale</span>
-                  <span class="stat-value">${data.total}</span>
-                </div>
+                <div class="stat-label">Valore</div>
+                <div class="stat-value">${data.value}</div>
+                <div class="stat-label">Percentuale</div>
+                <div class="stat-value">${data.percentage}%</div>
+                <div class="stat-label">Totale</div>
+                <div class="stat-value">${data.total}</div>
               </div>
             </div>
           </div>
@@ -1235,7 +1536,7 @@ class ResponsiveChartAdapter {
     chart.update();
     
     // Mostra un toast di conferma
-    this.showMobileToast(`Elemento "${label}" evidenziato`);
+    this.showNotification(`Elemento "${label}" evidenziato`);
   }
   
   /**
@@ -1258,7 +1559,7 @@ class ResponsiveChartAdapter {
     chart.update();
     
     // Mostra un toast di conferma
-    this.showMobileToast(`Elemento "${label}" isolato`);
+    this.showNotification(`Elemento "${label}" isolato`);
   }
   
   /**
@@ -1300,7 +1601,7 @@ class ResponsiveChartAdapter {
     URL.revokeObjectURL(url);
     
     // Mostra un toast di conferma
-    this.showMobileToast(`Dati esportati per "${data.label}"`);
+    this.showNotification(`Dati esportati per "${data.label}"`);
   }
   
   /**
@@ -1363,10 +1664,25 @@ class ResponsiveChartAdapter {
     this.positionLegendBelowChart(container, chart);
     
     // Implementa controlli touch-friendly
-    this.setupMobileTouchControls(container, chart);
+    this._setupMobileTouchControls(container);
+
+    // Aggiungi listener per swipe gestures su mobile
+    this._setupMobileSwipeListener();
+    
+    // Setup listener per eventi di esportazione e condivisione da mobile
+    this._setupMobileChartEventListeners();
+    
+    // Setup listener per orientamento su mobile
+    this._setupOrientationChangeListener();
 
     // Ottimizza per orientamento
     this.optimizeForOrientation(container);
+
+    // Setup listener per eventi di esportazione e condivisione da mobile
+    this._setupMobileChartEventListeners();
+    
+    // Setup listener per orientamento su mobile
+    this._setupOrientationChangeListener();
   }
   
   /**
@@ -1374,7 +1690,7 @@ class ResponsiveChartAdapter {
    * @param {HTMLElement} container - Il container del grafico
    * @param {Chart} chart - L'istanza del grafico Chart.js
    */
-  implementDesktopLayout(container, chart) {
+  implementDesktopResponsiveLayout(container, chart) {
     if (this.detectDevice() !== 'desktop') return;
     
     // Ottimizza le dimensioni del container per schermi grandi
@@ -1733,7 +2049,7 @@ class ResponsiveChartAdapter {
    * @param {HTMLElement} container - Il container del grafico
    * @param {Chart} chart - L'istanza del grafico Chart.js
    */
-  setupMobileTouchOptimizations(container, chart) {
+  _setupMobileTouchOptimizations(container, chart) {
     if (!container) return;
     
     // Ottimizza il touch target
@@ -1795,20 +2111,7 @@ class ResponsiveChartAdapter {
     }
   }
   
-  /**
-   * Implementa controlli touch-friendly specifici per mobile
-   * @param {HTMLElement} container - Il container del grafico
-   * @param {Chart} chart - L'istanza del grafico Chart.js
-   */
-  implementMobileTouchControls(container, chart) {
-    if (this.detectDevice() !== 'mobile') return;
-    
-    // Setup ottimizzazioni touch
-    this.setupMobileTouchOptimizations(container, chart);
-    
-    // Implementa layout responsive specifico per mobile
-    this.implementMobileResponsiveLayout(container, chart);
-  }
+  
   
   /**
    * Cleanup delle risorse

@@ -1,5 +1,5 @@
 // src/shared/components/ui/AuthUI.js
-import { Modal } from 'bootstrap';
+import { Modal } from '../../../core/services/bootstrapService.js';
 import { signInWithGoogle, signOut, currentUser } from '../../../core/auth/authService.js';
 import { syncMobileAuth } from '../../../app/mobile/mobile-navigation.js';
 import { logger } from '../../../core/services/loggerService.js';

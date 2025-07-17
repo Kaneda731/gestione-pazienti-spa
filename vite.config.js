@@ -73,10 +73,9 @@ export default defineConfig({
           vendor: ['bootstrap', '@popperjs/core'],
           // Supabase - authentication and database operations
           supabase: ['@supabase/supabase-js'],
-          // Charts - only loaded when needed for chart views
-          charts: ['google-charts'],
           // Utils - form utilities and date pickers
           utils: ['flatpickr']
+          // Note: google-charts removed as it's loaded dynamically via script tag
         }
       }
     }

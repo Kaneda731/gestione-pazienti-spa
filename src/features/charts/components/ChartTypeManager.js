@@ -120,7 +120,7 @@ class ChartTypeManager {
   }
   
   /**
-   * Renderizza un grafico a torta
+   * Renderizza un grafico a torta migliorato
    * @param {HTMLElement} container - Il container dove renderizzare il grafico
    * @param {Array} data - I dati da visualizzare
    * @param {Object} options - Opzioni di configurazione
@@ -131,44 +131,132 @@ class ChartTypeManager {
     const ctx = canvas.getContext('2d');
     const { labels, values } = this.prepareChartData(data);
     
+    // Calcola il totale per le percentuali
+    const total = values.reduce((sum, value) => sum + value, 0);
+    
+    // Genera una palette di colori più ampia e armoniosa
+    const colorPalette = this.generateColorPalette(values.length);
+    
     const chartData = {
       labels: labels,
       datasets: [{
         data: values,
-        backgroundColor: [
-          '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
-          '#FF9F40', '#43e97b', '#f9ea8f', '#f67019', '#a259f7', '#e14eca', '#00c9a7'
-        ],
+        backgroundColor: colorPalette,
         borderWidth: 2,
         borderColor: '#fff',
-        hoverOffset: 15
+        hoverOffset: 20,
+        hoverBorderWidth: 3,
+        hoverBorderColor: '#fff',
+        // Aggiungi percentuali per ogni segmento
+        percentages: values.map(value => ((value / total) * 100).toFixed(1))
       }]
     };
     
+    // Determina se usare doughnut o pie in base alle opzioni
+    const chartType = options.chartType || options.type || 'doughnut';
+    
     const defaultOptions = {
-      type: 'doughnut',
+      type: chartType,
       data: chartData,
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        cutout: chartType === 'doughnut' ? '60%' : 0, // Personalizza il cutout per doughnut
         plugins: {
           legend: {
             position: 'right',
             labels: {
-              font: { size: 14 }
+              font: { size: 14 },
+              generateLabels: (chart) => {
+                const data = chart.data;
+                if (data.labels.length && data.datasets.length) {
+                  return data.labels.map((label, i) => {
+                    const dataset = data.datasets[0];
+                    const value = dataset.data[i];
+                    const percentage = dataset.percentages[i];
+                    const backgroundColor = dataset.backgroundColor[i];
+                    
+                    return {
+                      text: `${label} (${percentage}%)`,
+                      fillStyle: backgroundColor,
+                      strokeStyle: backgroundColor,
+                      lineWidth: 0,
+                      hidden: false,
+                      index: i
+                    };
+                  });
+                }
+                return [];
+              }
+            },
+            onClick: (e, legendItem, legend) => {
+              // Implementa toggle della visibilità per interattività
+              const index = legendItem.index;
+              const chart = legend.chart;
+              const meta = chart.getDatasetMeta(0);
+              
+              // Toggle della visibilità dell'elemento
+              meta.data[index].hidden = !meta.data[index].hidden;
+              
+              // Aggiorna il grafico
+              chart.update();
             }
           },
           tooltip: {
             callbacks: {
+              title: (tooltipItems) => {
+                return tooltipItems[0].label || '';
+              },
               label: (context) => {
                 const label = context.label || '';
                 const value = context.parsed || 0;
                 const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
-                const percentage = Math.round((value / total) * 100);
+                const percentage = ((value / total) * 100).toFixed(1);
                 return `${label}: ${value} (${percentage}%)`;
+              },
+              afterLabel: (context) => {
+                // Aggiungi informazioni aggiuntive nel tooltip
+                const dataset = context.chart.data.datasets[0];
+                const total = dataset.data.reduce((a, b) => a + b, 0);
+                return `Percentuale sul totale: ${((context.parsed / total) * 100).toFixed(1)}%`;
               }
-            }
+            },
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            titleFont: { size: 14, weight: 'bold' },
+            bodyFont: { size: 13 },
+            padding: 12,
+            cornerRadius: 6,
+            displayColors: true
+          },
+          // Aggiungi etichette con percentuali direttamente sul grafico
+          datalabels: {
+            formatter: (value, context) => {
+              const dataset = context.chart.data.datasets[0];
+              const total = dataset.data.reduce((a, b) => a + b, 0);
+              const percentage = ((value / total) * 100).toFixed(0);
+              return percentage > 5 ? `${percentage}%` : ''; // Mostra solo se > 5%
+            },
+            color: '#fff',
+            font: {
+              weight: 'bold',
+              size: 12
+            },
+            textStrokeColor: 'rgba(0, 0, 0, 0.5)',
+            textStrokeWidth: 2,
+            textShadowBlur: 5,
+            textShadowColor: 'rgba(0, 0, 0, 0.5)'
           }
+        },
+        // Migliora l'interattività
+        hover: {
+          mode: 'nearest',
+          intersect: true
+        },
+        animation: {
+          animateRotate: true,
+          animateScale: true,
+          duration: 800,
+          easing: 'easeOutQuart'
         }
       }
     };
@@ -364,6 +452,129 @@ class ChartTypeManager {
     }
     
     this.currentChart.update();
+  }
+  
+  /**
+   * Genera una palette di colori armoniosa per il grafico
+   * @param {number} count - Il numero di colori da generare
+   * @returns {Array} - Array di colori in formato esadecimale o rgba
+   */
+  generateColorPalette(count) {
+    // Colori base predefiniti
+    const baseColors = [
+      '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+      '#FF9F40', '#43e97b', '#f9ea8f', '#f67019', '#a259f7', 
+      '#e14eca', '#00c9a7', '#4d79ff', '#ff4d4d', '#ffcc00',
+      '#00cc99', '#cc00cc', '#3399ff', '#ff9933', '#00ffcc'
+    ];
+    
+    // Se abbiamo abbastanza colori base, usiamo quelli
+    if (count <= baseColors.length) {
+      return baseColors.slice(0, count);
+    }
+    
+    // Altrimenti, generiamo colori aggiuntivi con variazioni di tonalità
+    const palette = [...baseColors];
+    
+    // Numero di colori aggiuntivi da generare
+    const additionalColors = count - baseColors.length;
+    
+    // Genera colori aggiuntivi con variazioni di tonalità
+    for (let i = 0; i < additionalColors; i++) {
+      // Usa un colore base come riferimento e varia la tonalità
+      const baseIndex = i % baseColors.length;
+      const baseColor = baseColors[baseIndex];
+      
+      // Converti il colore esadecimale in HSL
+      const hsl = this.hexToHSL(baseColor);
+      
+      // Varia la tonalità
+      hsl.h = (hsl.h + (360 / additionalColors) * i) % 360;
+      
+      // Converti di nuovo in esadecimale
+      palette.push(this.hslToHex(hsl));
+    }
+    
+    return palette;
+  }
+  
+  /**
+   * Converte un colore esadecimale in HSL
+   * @param {string} hex - Il colore in formato esadecimale
+   * @returns {Object} - Oggetto con proprietà h, s, l
+   */
+  hexToHSL(hex) {
+    // Rimuovi il carattere # se presente
+    hex = hex.replace(/^#/, '');
+    
+    // Converti in RGB
+    let r = parseInt(hex.substring(0, 2), 16) / 255;
+    let g = parseInt(hex.substring(2, 4), 16) / 255;
+    let b = parseInt(hex.substring(4, 6), 16) / 255;
+    
+    // Trova il minimo e il massimo dei valori RGB
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    
+    // Calcola la luminosità
+    let l = (max + min) / 2;
+    
+    // Calcola la saturazione
+    let s = 0;
+    if (max !== min) {
+      s = l > 0.5 ? (max - min) / (2 - max - min) : (max - min) / (max + min);
+    }
+    
+    // Calcola la tonalità
+    let h = 0;
+    if (max !== min) {
+      if (max === r) {
+        h = (g - b) / (max - min) + (g < b ? 6 : 0);
+      } else if (max === g) {
+        h = (b - r) / (max - min) + 2;
+      } else {
+        h = (r - g) / (max - min) + 4;
+      }
+      h *= 60;
+    }
+    
+    return { h, s, l };
+  }
+  
+  /**
+   * Converte un colore HSL in esadecimale
+   * @param {Object} hsl - Oggetto con proprietà h, s, l
+   * @returns {string} - Il colore in formato esadecimale
+   */
+  hslToHex(hsl) {
+    const { h, s, l } = hsl;
+    
+    // Converti HSL in RGB
+    const c = (1 - Math.abs(2 * l - 1)) * s;
+    const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+    const m = l - c / 2;
+    
+    let r, g, b;
+    if (h < 60) {
+      [r, g, b] = [c, x, 0];
+    } else if (h < 120) {
+      [r, g, b] = [x, c, 0];
+    } else if (h < 180) {
+      [r, g, b] = [0, c, x];
+    } else if (h < 240) {
+      [r, g, b] = [0, x, c];
+    } else if (h < 300) {
+      [r, g, b] = [x, 0, c];
+    } else {
+      [r, g, b] = [c, 0, x];
+    }
+    
+    // Converti RGB in esadecimale
+    r = Math.round((r + m) * 255).toString(16).padStart(2, '0');
+    g = Math.round((g + m) * 255).toString(16).padStart(2, '0');
+    b = Math.round((b + m) * 255).toString(16).padStart(2, '0');
+    
+    return `#${r}${g}${b}`;
   }
   
   /**

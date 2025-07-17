@@ -80,18 +80,43 @@ class ChartTypeManager {
   
   /**
    * Prepara i dati per Chart.js
-   * @param {Array} data - I dati nel formato [['Label', 'Value'], ...]
+   * @param {Array|Object} data - I dati nel formato [['Label', 'Value'], ...] o {labels: [], datasets: [{data: []}]}
    * @returns {Object} - I dati formattati per Chart.js
    */
   prepareChartData(data) {
-    // Estrai header e righe
-    const [headers, ...rows] = data;
+    // Verifica se i dati sono già nel formato Chart.js
+    if (data && typeof data === 'object' && data.labels && data.datasets) {
+      return {
+        labels: data.labels,
+        values: data.datasets[0].data
+      };
+    }
     
-    // Estrai labels e valori
-    const labels = rows.map(row => row[0]);
-    const values = rows.map(row => row[1]);
+    // Verifica se i dati sono un array
+    if (Array.isArray(data)) {
+      // Se è un array di array (formato [['Label', 'Value'], ...])
+      if (data.length > 0 && Array.isArray(data[0])) {
+        // Estrai header e righe
+        const [headers, ...rows] = data;
+        
+        // Estrai labels e valori
+        const labels = rows.map(row => row[0]);
+        const values = rows.map(row => row[1]);
+        
+        return { labels, values };
+      } 
+      // Se è un array di oggetti (formato [{label: 'Label', value: 'Value'}, ...])
+      else if (data.length > 0 && typeof data[0] === 'object') {
+        const labels = data.map(item => item.label || item.diagnosi || item.name || 'Non specificato');
+        const values = data.map(item => item.value || item.count || 1);
+        
+        return { labels, values };
+      }
+    }
     
-    return { labels, values };
+    // Fallback: restituisci array vuoti per evitare errori
+    console.warn('Formato dati non riconosciuto in prepareChartData:', data);
+    return { labels: [], values: [] };
   }
   
   /**

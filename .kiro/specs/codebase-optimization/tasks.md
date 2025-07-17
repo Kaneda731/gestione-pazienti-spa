@@ -76,35 +76,35 @@
   - Aggiornare tutti i file che utilizzano logging diretto
   - _Requisiti: 3.1, 3.2, 3.3_
 
-- [ ] 3.3 Configurare rimozione automatica log in build
+- [x] 3.3 Configurare rimozione automatica log in build
 
   - Aggiornare vite.config.js per rimuovere console statements in produzione
   - Configurare terser per drop_console e drop_debugger
   - Testare che il build di produzione non contenga log di sviluppo
   - _Requisiti: 3.5_
 
-- [ ] 4. Ottimizzazione configurazione build Vite
+- [x] 4. Ottimizzazione configurazione build Vite
 
   - Migliorare la configurazione di Vite per build più efficienti
   - Implementare chunk splitting ottimale
   - Aggiungere analisi del bundle
   - _Requisiti: 4.1, 4.2, 4.3, 4.4, 4.5_
 
-- [ ] 4.1 Configurare manual chunks ottimali
+- [x] 4.1 Configurare manual chunks ottimali
 
   - Implementare chunking strategico per vendor, supabase, charts, utils
   - Ottimizzare la separazione delle dipendenze per caching efficiente
   - Testare che i chunk si carichino correttamente
   - _Requisiti: 4.1_
 
-- [ ] 4.2 Abilitare tree shaking e minificazione
+- [x] 4.2 Abilitare tree shaking e minificazione
 
   - Configurare terser per minificazione ottimale
   - Abilitare tree shaking per eliminare codice non utilizzato
   - Rimuovere `force: true` da optimizeDeps per evitare rebuild inutili
   - _Requisiti: 4.2, 4.5_
 
-- [ ] 4.3 Implementare analisi bundle con visualizer
+- [x] 4.3 Implementare analisi bundle con visualizer
 
   - Aggiungere rollup-plugin-visualizer alla configurazione
   - Configurare generazione automatica del report di analisi

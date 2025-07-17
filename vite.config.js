@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite';
+import { visualizer } from 'rollup-plugin-visualizer';
 
 export default defineConfig({
   // Configurazione per il server di sviluppo
@@ -28,16 +29,69 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
+    // Configurazione minificazione con terser
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        // Rimuovi debugger statements
+        drop_debugger: true,
+        // Rimuovi console statements ma mantieni console.error
+        drop_console: false, // Gestito da pure_funcs per maggiore controllo
+        // Rimuovi codice morto e semplifica condizioni
+        dead_code: true,
+        // Ottimizza le condizioni booleane
+        conditionals: true,
+        // Rimuovi codice non raggiungibile
+        unused: true,
+        // Abilita tree shaking aggressivo
+        side_effects: false,
+        // Ottimizza le chiamate di funzione
+        inline: 2,
+        // Rimuovi specifici console statements ma mantieni console.error
+        pure_funcs: ['console.log', 'console.warn', 'console.info', 'console.debug'],
+        // Ottimizza le stringhe
+        join_vars: true,
+        // Rimuovi codice non utilizzato
+        pure_getters: true
+      },
+      mangle: {
+        // Mantieni nomi delle funzioni per stack traces leggibili in produzione
+        keep_fnames: false,
+        // Abilita mangling delle proprietà per riduzione dimensioni
+        properties: false
+      },
+      format: {
+        // Rimuovi commenti per ridurre dimensioni
+        comments: false
+      }
+    },
     // Mantieni i nomi dei file per debugging
     rollupOptions: {
       output: {
         manualChunks: {
-          vendor: ['bootstrap'],
-          supabase: ['@supabase/supabase-js']
+          // Core vendor libraries - loaded on every page
+          vendor: ['bootstrap', '@popperjs/core'],
+          // Supabase - authentication and database operations
+          supabase: ['@supabase/supabase-js'],
+          // Charts - only loaded when needed for chart views
+          charts: ['google-charts'],
+          // Utils - form utilities and date pickers
+          utils: ['flatpickr']
         }
       }
     }
   },
+  
+  // Plugins per analisi e ottimizzazione
+  plugins: [
+    visualizer({
+      filename: 'dist/stats.html',
+      open: true,
+      gzipSize: true,
+      brotliSize: true,
+      template: 'treemap' // Visualizzazione treemap per analisi dettagliata
+    })
+  ],
   
   // Configurazione per la risoluzione dei moduli
   resolve: {
@@ -48,9 +102,8 @@ export default defineConfig({
   
   // Configurazione per ottimizzare le dipendenze
   optimizeDeps: {
-    include: ['bootstrap', 'google-charts', '@supabase/supabase-js'],
-    // Forza la pre-bundling di Supabase per evitare problemi di timing
-    force: true
+    include: ['bootstrap', '@popperjs/core', '@supabase/supabase-js', 'flatpickr']
+    // Rimosso force: true per evitare rebuild inutili
   },
   
   // Configurazione per gestire meglio i reload durante lo sviluppo

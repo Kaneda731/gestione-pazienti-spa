@@ -3,11 +3,14 @@
     "test": "vitest run",
     "dev": "vite",
     "build": "vite build",
+    "build:analyze": "vite build && echo 'Bundle analysis report generated at dist/stats.html'",
     "preview": "vite preview"
   },
   "devDependencies": {
     "jsdom": "^26.1.0",
+    "rollup-plugin-visualizer": "^6.0.3",
     "sass": "^1.89.2",
+    "terser": "^5.43.1",
     "vite": "^7.0.4",
     "vitest": "^3.2.4"
   },

@@ -11,8 +11,8 @@
     - Implementare il lazy loading ottimizzato della libreria Chart.js
     - _Requirements: 3.1, 5.5_
 
-- [ ] 2. Implementazione del ResponsiveChartAdapter
-  - [ ] 2.1 Creare la classe ResponsiveChartAdapter
+- [-] 2. Implementazione del ResponsiveChartAdapter
+  - [x] 2.1 Creare la classe ResponsiveChartAdapter
     - Implementare la logica di rilevamento del dispositivo
     - Implementare l'adattamento delle opzioni in base al dispositivo
     - _Requirements: 1.1, 1.5, 2.4_

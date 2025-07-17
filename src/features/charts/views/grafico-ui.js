@@ -10,10 +10,12 @@ import {
     generateShareableLink,
     cleanupChartComponents
 } from '../services/chartjsService.js';
+import ResponsiveChartAdapter from '../components/ResponsiveChartAdapter.js';
 
 let datepickerInstance = null;
 let currentChart = null;
 let currentChartType = 'pie';
+let responsiveAdapter = null;
 
 // Contiene gli elementi del DOM per un accesso più facile
 export const dom = {

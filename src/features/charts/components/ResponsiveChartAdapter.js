@@ -24,8 +24,22 @@ class ResponsiveChartAdapter {
    */
   detectDevice() {
     const width = window.innerWidth;
-    if (width <= this.breakpoints.mobile) return 'mobile';
-    if (width <= this.breakpoints.tablet) return 'tablet';
+    const height = window.innerHeight;
+    
+    // Considera anche l'orientamento e le caratteristiche del dispositivo
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    const isPortrait = height > width;
+    
+    if (width <= this.breakpoints.mobile) {
+      return 'mobile';
+    } else if (width <= this.breakpoints.tablet) {
+      // Se è un dispositivo touch in modalità landscape, trattalo come mobile
+      if (isTouchDevice && !isPortrait && width <= 1024) {
+        return 'mobile';
+      }
+      return 'tablet';
+    }
+    
     return 'desktop';
   }
   
@@ -36,55 +50,145 @@ class ResponsiveChartAdapter {
    */
   adaptOptions(options) {
     const device = this.detectDevice();
-    const adaptedOptions = { ...options };
+    const adaptedOptions = JSON.parse(JSON.stringify(options)); // Deep clone
     
-    // Adatta le opzioni in base al dispositivo
+    // Inizializza plugins se non esistono
+    adaptedOptions.plugins = adaptedOptions.plugins || {};
+    adaptedOptions.interaction = adaptedOptions.interaction || {};
+    
     if (device === 'mobile') {
       // Configurazioni specifiche per mobile
-      adaptedOptions.plugins = adaptedOptions.plugins || {};
       adaptedOptions.plugins.legend = {
         position: 'bottom',
         align: 'center',
         labels: {
           boxWidth: 15,
-          font: { size: 12 }
+          font: { size: 12 },
+          padding: 15,
+          usePointStyle: true
         }
       };
+      
       adaptedOptions.plugins.title = {
         ...adaptedOptions.plugins?.title,
-        font: { size: 16, weight: 'bold' }
+        font: { size: 16, weight: 'bold' },
+        padding: 20
       };
+      
+      // Tooltip ottimizzati per touch
+      adaptedOptions.plugins.tooltip = {
+        ...adaptedOptions.plugins?.tooltip,
+        enabled: true,
+        mode: 'nearest',
+        intersect: false,
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        titleFont: { size: 14, weight: 'bold' },
+        bodyFont: { size: 13 },
+        padding: 12,
+        cornerRadius: 8,
+        displayColors: true,
+        callbacks: {
+          ...adaptedOptions.plugins?.tooltip?.callbacks,
+          title: function(context) {
+            return context[0].label || '';
+          },
+          label: function(context) {
+            const label = context.dataset.label || '';
+            const value = context.parsed || context.raw;
+            return `${label}: ${value}`;
+          }
+        }
+      };
+      
+      // Interazioni ottimizzate per touch
+      adaptedOptions.interaction = {
+        mode: 'nearest',
+        intersect: false,
+        includeInvisible: false
+      };
+      
       adaptedOptions.maintainAspectRatio = false;
       adaptedOptions.responsive = true;
+      adaptedOptions.devicePixelRatio = window.devicePixelRatio || 1;
+      
     } else if (device === 'tablet') {
       // Configurazioni specifiche per tablet
-      adaptedOptions.plugins = adaptedOptions.plugins || {};
       adaptedOptions.plugins.legend = {
         position: 'bottom',
         align: 'center',
         labels: {
           boxWidth: 18,
-          font: { size: 14 }
+          font: { size: 14 },
+          padding: 18,
+          usePointStyle: true
         }
       };
+      
       adaptedOptions.plugins.title = {
         ...adaptedOptions.plugins?.title,
-        font: { size: 18, weight: 'bold' }
+        font: { size: 18, weight: 'bold' },
+        padding: 25
       };
+      
+      // Tooltip per tablet
+      adaptedOptions.plugins.tooltip = {
+        ...adaptedOptions.plugins?.tooltip,
+        enabled: true,
+        mode: 'index',
+        intersect: false,
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        titleFont: { size: 15, weight: 'bold' },
+        bodyFont: { size: 14 },
+        padding: 15,
+        cornerRadius: 8
+      };
+      
+      adaptedOptions.interaction = {
+        mode: 'index',
+        intersect: false
+      };
+      
     } else {
       // Configurazioni specifiche per desktop
-      adaptedOptions.plugins = adaptedOptions.plugins || {};
       adaptedOptions.plugins.legend = {
         position: 'right',
         align: 'center',
         labels: {
           boxWidth: 20,
-          font: { size: 14 }
+          font: { size: 14 },
+          padding: 20,
+          usePointStyle: true
         }
       };
+      
       adaptedOptions.plugins.title = {
         ...adaptedOptions.plugins?.title,
-        font: { size: 20, weight: 'bold' }
+        font: { size: 20, weight: 'bold' },
+        padding: 30
+      };
+      
+      // Tooltip avanzati per desktop
+      adaptedOptions.plugins.tooltip = {
+        ...adaptedOptions.plugins?.tooltip,
+        enabled: true,
+        mode: 'index',
+        intersect: false,
+        backgroundColor: 'rgba(0, 0, 0, 0.9)',
+        titleFont: { size: 16, weight: 'bold' },
+        bodyFont: { size: 14 },
+        padding: 16,
+        cornerRadius: 8,
+        displayColors: true
+      };
+      
+      // Interazioni avanzate per desktop (hover, click)
+      adaptedOptions.interaction = {
+        mode: 'index',
+        intersect: false
+      };
+      
+      adaptedOptions.onHover = (event, activeElements) => {
+        event.native.target.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
       };
     }
     

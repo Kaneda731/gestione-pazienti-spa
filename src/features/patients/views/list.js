@@ -10,6 +10,7 @@ import { supabase } from '../../../core/services/supabaseClient.js';
 import { currentUser } from '../../../core/auth/authService.js';
 import { getCurrentFilters } from './list-state-migrated.js';
 import { logger } from '../../../core/services/loggerService.js';
+import { stateService } from '../../../core/services/stateService.js';
 
 async function fetchAndRender() {
     showLoading();
@@ -84,7 +85,7 @@ function setupEventListeners() {
     document.getElementById('pazienti-cards-container').addEventListener('click', handleAction);
 
     domElements.backButton.addEventListener('click', () => {
-        sessionStorage.removeItem('listFilters');
+        // Non rimuovere i filtri quando si torna alla home, mantieni lo stato
         navigateTo('home');
     });
     
@@ -166,12 +167,13 @@ export async function initListView(listData) {
         populateSelectWithOptions(domElements.repartoFilter, repartoOptions);
         populateSelectWithOptions(domElements.diagnosiFilter, diagnosiOptions);
         
-        const persistedFilters = JSON.parse(sessionStorage.getItem('listFilters')) || {};
+        // Usa stateService invece di sessionStorage diretto per coerenza
+        const persistedFilters = stateService.getFilters();
         if (domElements.repartoFilter) domElements.repartoFilter.value = persistedFilters.reparto || '';
         if (domElements.diagnosiFilter) domElements.diagnosiFilter.value = persistedFilters.diagnosi || '';
-        if (domElements.statoFilter) domElements.statoFilter.value = persistedFilters.stato || 'attivo';
+        if (domElements.statoFilter) domElements.statoFilter.value = persistedFilters.stato || '';
         if (domElements.infettoFilter) domElements.infettoFilter.value = persistedFilters.infetto || '';
-        if (domElements.searchFilter) domElements.searchFilter.value = persistedFilters.searchTerm || '';
+        if (domElements.searchInput) domElements.searchInput.value = persistedFilters.search || '';
 
         initCustomSelects('#list-filter-reparto, #list-filter-diagnosi, #list-filter-stato, #list-filter-infetto');
 

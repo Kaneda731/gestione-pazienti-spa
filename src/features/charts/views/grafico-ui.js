@@ -24,7 +24,7 @@ export const dom = {
  * Inizializza i componenti della UI (datepicker, custom selects).
  */
 export function initializeUI() {
-    initCustomSelects('#filter-reparto, #filter-provenienza, #filter-diagnosi, #filter-assistenza');
+    initCustomSelects('#filter-reparto, #filter-provenienza, #filter-diagnosi, #filter-assistenza, #filter-infetto');
     datepickerInstance = new CustomDatepicker('[data-datepicker]', {
         dateFormat: "d/m/Y",
     });
@@ -62,6 +62,7 @@ export function populateFilters(options) {
             <option value="true">Sì</option>
             <option value="false">No</option>
         `;
+        updateCustomSelect('#filter-infetto');
     }
 }
 
@@ -85,7 +86,7 @@ export function getFilters() {
  * Resetta tutti i filtri ai loro valori di default.
  */
 export function resetFilters() {
-    const filterIds = ['filter-reparto', 'filter-provenienza', 'filter-diagnosi', 'filter-assistenza'];
+    const filterIds = ['filter-reparto', 'filter-provenienza', 'filter-diagnosi', 'filter-assistenza', 'filter-infetto'];
     filterIds.forEach(id => {
         const select = document.getElementById(id);
         if (select) {

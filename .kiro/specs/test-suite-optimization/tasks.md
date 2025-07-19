@@ -184,14 +184,14 @@
   - Creare test per gestione errori
   - _Requirements: 5.1, 5.2, 5.3_
 
-- [ ] 7.1 Analizzare coverage attuale
+- [x] 7.1 Analizzare coverage attuale
 
   - Creare script analisi coverage dettagliata
   - Identificare file e funzioni senza test
   - Prioritizzare aree critiche per coverage
   - _Requirements: 5.1, 5.2_
 
-- [ ] 7.2 Implementare test mancanti per core
+- [x] 7.2 Implementare test mancanti per core
 
   - Creare test per funzioni critiche senza coverage
   - Implementare test per gestione errori

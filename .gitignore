@@ -39,6 +39,9 @@ Thumbs.db
 *.temp
 temp/
 
+# Test coverage reports
+coverage/
+
 # Dependency lock files
 # package-lock.json
 yarn.lock

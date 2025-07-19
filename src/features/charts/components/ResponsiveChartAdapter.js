@@ -122,7 +122,11 @@ class ResponsiveChartAdapter {
    * @param {Object} data - I dati da mostrare nel modal
    */
   showMobileDetailModal(data) {
-    this.currentAdapter.modals.showMobileDetailModal(data);
+    if (this.currentAdapter && this.currentAdapter.modals) {
+      this.currentAdapter.modals.showMobileDetailModal(data);
+    } else {
+      console.warn('Modal non disponibile: currentAdapter o modals non inizializzato');
+    }
   }
 
   /**
@@ -130,7 +134,11 @@ class ResponsiveChartAdapter {
    * @param {Object} data - I dati da mostrare nel pannello
    */
   showDesktopDetailPanel(data) {
-    this.currentAdapter.modals.showDesktopDetailPanel(data);
+    if (this.currentAdapter && this.currentAdapter.modals) {
+      this.currentAdapter.modals.showDesktopDetailPanel(data);
+    } else {
+      console.warn('Panel non disponibile: currentAdapter o modals non inizializzato');
+    }
   }
 
   /**
@@ -139,7 +147,11 @@ class ResponsiveChartAdapter {
    * @param {string} type - Il tipo di notifica ('success', 'error', 'info', 'warning')
    */
   showNotification(message, type = 'info') {
-    this.currentAdapter.showNotification(message, type);
+    if (this.currentAdapter) {
+      this.currentAdapter.showNotification(message, type);
+    } else {
+      console.warn('Notifica non disponibile: currentAdapter non inizializzato');
+    }
   }
 
   /**

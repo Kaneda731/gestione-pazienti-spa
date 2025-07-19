@@ -42,6 +42,19 @@ temp/
 # Test coverage reports
 coverage/
 
+# Performance and bundle analysis files
+.bundle-*.json
+.performance-*.json
+
+# Kiro settings and specs
+.kiro/
+
+# Scripts directory
+scripts/
+
+# Test files at root
+tests/
+
 # Dependency lock files
 # package-lock.json
 yarn.lock

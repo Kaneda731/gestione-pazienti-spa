@@ -128,7 +128,7 @@
   - Creare validazione struttura test
   - _Requirements: 1.1, 7.3, 8.2_
 
-- [ ] 5.1 Creare TestSuiteGenerator
+- [x] 5.1 Creare TestSuiteGenerator
 
   - Implementare `tests/__helpers__/TestSuiteGenerator.js`
   - Creare template per test CRUD, componenti, servizi

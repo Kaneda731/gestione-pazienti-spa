@@ -173,6 +173,14 @@ class ResponsiveChartAdapter {
   isDesktop() {
     return this.adapterFactory.isDesktop();
   }
+
+  /**
+   * Rileva il tipo di dispositivo corrente
+   * @returns {string} - Il tipo di dispositivo ('mobile', 'tablet', 'desktop')
+   */
+  detectDevice() {
+    return this.adapterFactory.getCurrentDeviceType();
+  }
 }
 
 export default ResponsiveChartAdapter;

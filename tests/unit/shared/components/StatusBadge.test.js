@@ -1,315 +1,205 @@
 /**
  * Test migrato per StatusBadge usando infrastruttura ottimizzata
+ * Basato sulla struttura reale del componente che prende un patient come parametro
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { createMockElement } from '../../../__helpers__/dom-helpers.js';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { samplePatients } from '../../../__fixtures__/patients.js';
 
 // Import del componente da testare
 import { StatusBadge } from '../../../../src/shared/components/ui/StatusBadge.js';
 
 describe('StatusBadge Component', () => {
-  let mockContainer;
-  
   beforeEach(() => {
-    // Setup DOM mock
-    mockContainer = createMockElement('div', { id: 'test-container' });
-    document.body.appendChild(mockContainer);
-  });
-  
-  afterEach(() => {
-    // Cleanup DOM
-    if (mockContainer.parentNode) {
-      mockContainer.parentNode.removeChild(mockContainer);
-    }
-    
     vi.clearAllMocks();
   });
   
   describe('Instantiation', () => {
-    it('should be instantiated with status', () => {
-      const badge = new StatusBadge({ status: 'active' });
+    it('should be instantiated with patient data', () => {
+      const patient = samplePatients.basic;
+      const badge = new StatusBadge(patient);
       
       expect(badge).toBeInstanceOf(StatusBadge);
-      expect(badge.options.status).toBe('active');
+      expect(badge.patient).toBe(patient);
     });
     
-    it('should handle different status types', () => {
-      const statuses = ['active', 'inactive', 'pending', 'error', 'success'];
+    it('should handle different patient types', () => {
+      const patients = [
+        samplePatients.basic,
+        samplePatients.discharged,
+        samplePatients.complex
+      ];
       
-      statuses.forEach(status => {
-        const badge = new StatusBadge({ status });
+      patients.forEach(patient => {
+        const badge = new StatusBadge(patient);
         expect(badge).toBeInstanceOf(StatusBadge);
-        expect(badge.options.status).toBe(status);
+        expect(badge.patient).toBe(patient);
       });
     });
     
-    it('should handle empty options', () => {
-      expect(() => new StatusBadge({})).not.toThrow();
+    it('should handle patient without discharge date', () => {
+      const patient = { ...samplePatients.basic, data_dimissione: null };
       
-      const badge = new StatusBadge({});
+      expect(() => new StatusBadge(patient)).not.toThrow();
+      
+      const badge = new StatusBadge(patient);
       expect(badge).toBeInstanceOf(StatusBadge);
     });
     
-    it('should set default status when not provided', () => {
-      const badge = new StatusBadge({});
+    it('should handle patient with discharge date', () => {
+      const patient = samplePatients.discharged;
       
-      expect(badge.options.status).toBeDefined();
-      // Default status dovrebbe essere definito
-      expect(typeof badge.options.status).toBe('string');
+      const badge = new StatusBadge(patient);
+      expect(badge.patient.data_dimissione).toBeDefined();
+      expect(badge.getStatusClass()).toBe('dimesso');
     });
   });
   
   describe('Rendering', () => {
-    it('should render HTML string', () => {
-      const badge = new StatusBadge({ status: 'active' });
+    it('should render HTML string for active patient', () => {
+      const patient = samplePatients.basic; // Non ha data_dimissione
+      const badge = new StatusBadge(patient);
       
-      if (badge.render) {
-        const html = badge.render();
-        
-        expect(typeof html).toBe('string');
-        expect(html.length).toBeGreaterThan(0);
-      }
+      const html = badge.render();
+      
+      expect(typeof html).toBe('string');
+      expect(html.length).toBeGreaterThan(0);
+      expect(html).toContain('badge bg-success');
+      expect(html).toContain('Attivo');
     });
     
-    it('should include status in rendered HTML', () => {
-      const status = 'active';
-      const badge = new StatusBadge({ status });
+    it('should render HTML string for discharged patient', () => {
+      const patient = samplePatients.discharged; // Ha data_dimissione
+      const badge = new StatusBadge(patient);
       
-      if (badge.render) {
-        const html = badge.render();
-        
-        // Il badge dovrebbe contenere informazioni sullo status
-        expect(html).toMatch(/active|attivo/i);
-      }
+      const html = badge.render();
+      
+      expect(html).toContain('badge bg-secondary');
+      expect(html).toContain('Dimesso');
     });
     
-    it('should apply correct CSS classes for different statuses', () => {
-      const statusMappings = {
-        'active': 'success',
-        'inactive': 'secondary',
-        'pending': 'warning',
-        'error': 'danger'
-      };
+    it('should render for card with correct classes', () => {
+      const activePatient = samplePatients.basic;
+      const dischargedPatient = samplePatients.discharged;
       
-      Object.entries(statusMappings).forEach(([status, expectedClass]) => {
-        const badge = new StatusBadge({ status });
-        
-        if (badge.render) {
-          const html = badge.render();
-          
-          // Verifica che la classe CSS appropriata sia presente
-          expect(html).toMatch(new RegExp(expectedClass, 'i'));
-        }
-      });
+      const activeBadge = new StatusBadge(activePatient);
+      const dischargedBadge = new StatusBadge(dischargedPatient);
+      
+      const activeHtml = activeBadge.renderForCard();
+      const dischargedHtml = dischargedBadge.renderForCard();
+      
+      expect(activeHtml).toContain('patient-status attivo');
+      expect(dischargedHtml).toContain('patient-status dimesso');
     });
     
     it('should generate valid HTML structure', () => {
-      const badge = new StatusBadge({ status: 'active' });
+      const patient = samplePatients.basic;
+      const badge = new StatusBadge(patient);
       
-      if (badge.render) {
-        const html = badge.render();
-        
-        // Verifica struttura HTML base
-        expect(html).toContain('<');
-        expect(html).toContain('>');
-        
-        // Dovrebbe essere un elemento badge/span
-        expect(html).toMatch(/<(span|div|badge)/i);
-      }
+      const html = badge.render();
+      
+      // Verifica struttura HTML base
+      expect(html).toContain('<span');
+      expect(html).toContain('</span>');
+      expect(html).toContain('class="badge');
     });
   });
   
-  describe('Status Types', () => {
-    it('should handle patient status correctly', () => {
-      const patientStatuses = ['ricoverato', 'dimesso', 'trasferito'];
+  describe('Status Methods', () => {
+    it('should get correct status class for active patient', () => {
+      const patient = samplePatients.basic;
+      const badge = new StatusBadge(patient);
       
-      patientStatuses.forEach(status => {
-        const badge = new StatusBadge({ status });
-        
-        expect(badge).toBeInstanceOf(StatusBadge);
-        expect(badge.options.status).toBe(status);
-      });
+      expect(badge.getStatusClass()).toBe('attivo');
     });
     
-    it('should handle boolean status values', () => {
-      const badge1 = new StatusBadge({ status: true });
-      const badge2 = new StatusBadge({ status: false });
+    it('should get correct status class for discharged patient', () => {
+      const patient = samplePatients.discharged;
+      const badge = new StatusBadge(patient);
       
-      expect(badge1).toBeInstanceOf(StatusBadge);
-      expect(badge2).toBeInstanceOf(StatusBadge);
+      expect(badge.getStatusClass()).toBe('dimesso');
     });
     
-    it('should handle numeric status values', () => {
-      const badge1 = new StatusBadge({ status: 1 });
-      const badge2 = new StatusBadge({ status: 0 });
+    it('should get correct status text', () => {
+      const activePatient = samplePatients.basic;
+      const dischargedPatient = samplePatients.discharged;
       
-      expect(badge1).toBeInstanceOf(StatusBadge);
-      expect(badge2).toBeInstanceOf(StatusBadge);
-    });
-  });
-  
-  describe('Customization', () => {
-    it('should support custom text', () => {
-      const badge = new StatusBadge({ 
-        status: 'active',
-        text: 'Custom Status Text'
-      });
+      const activeBadge = new StatusBadge(activePatient);
+      const dischargedBadge = new StatusBadge(dischargedPatient);
       
-      if (badge.render) {
-        const html = badge.render();
-        expect(html).toContain('Custom Status Text');
-      }
-    });
-    
-    it('should support custom CSS classes', () => {
-      const badge = new StatusBadge({ 
-        status: 'active',
-        className: 'custom-badge-class'
-      });
-      
-      if (badge.render) {
-        const html = badge.render();
-        
-        if (badge.options.className) {
-          expect(html).toContain(badge.options.className);
-        }
-      }
-    });
-    
-    it('should support custom colors', () => {
-      const badge = new StatusBadge({ 
-        status: 'active',
-        color: '#custom-color'
-      });
-      
-      if (badge.render) {
-        const html = badge.render();
-        
-        if (badge.options.color) {
-          expect(html).toContain(badge.options.color);
-        }
-      }
+      expect(activeBadge.getStatusText()).toBe('Attivo');
+      expect(dischargedBadge.getStatusText()).toBe('Dimesso');
     });
   });
   
   describe('Integration with Patient Data', () => {
-    it('should display patient admission status', () => {
-      const patient = samplePatients.basic;
-      const status = patient.data_dimissione ? 'dimesso' : 'ricoverato';
+    it('should correctly determine status from patient data', () => {
+      const activePatient = samplePatients.basic;
+      const dischargedPatient = samplePatients.discharged;
       
-      const badge = new StatusBadge({ status });
+      const activeBadge = new StatusBadge(activePatient);
+      const dischargedBadge = new StatusBadge(dischargedPatient);
       
-      expect(badge.options.status).toBe(status);
+      expect(activeBadge.getStatusClass()).toBe('attivo');
+      expect(dischargedBadge.getStatusClass()).toBe('dimesso');
     });
     
-    it('should handle discharged patient status', () => {
-      const patient = samplePatients.discharged;
-      const badge = new StatusBadge({ status: 'dimesso' });
+    it('should handle complex patient data', () => {
+      const patient = samplePatients.complex;
+      const badge = new StatusBadge(patient);
       
-      if (badge.render) {
-        const html = badge.render();
-        expect(html).toMatch(/dimesso|discharged/i);
-      }
+      // Il paziente complex non ha data_dimissione, quindi dovrebbe essere attivo
+      expect(badge.getStatusClass()).toBe('attivo');
+      expect(badge.getStatusText()).toBe('Attivo');
     });
     
-    it('should handle active patient status', () => {
-      const patient = samplePatients.basic;
-      const badge = new StatusBadge({ status: 'ricoverato' });
+    it('should work with different patient scenarios', () => {
+      const scenarios = [
+        { patient: samplePatients.basic, expectedClass: 'attivo', expectedText: 'Attivo' },
+        { patient: samplePatients.discharged, expectedClass: 'dimesso', expectedText: 'Dimesso' },
+        { patient: samplePatients.pediatric, expectedClass: 'attivo', expectedText: 'Attivo' }
+      ];
       
-      if (badge.render) {
-        const html = badge.render();
-        expect(html).toMatch(/ricoverato|active|admitted/i);
-      }
-    });
-  });
-  
-  describe('Accessibility', () => {
-    it('should have proper ARIA attributes', () => {
-      const badge = new StatusBadge({ status: 'active' });
-      
-      if (badge.render) {
-        const html = badge.render();
-        
-        // Verifica attributi accessibilità
-        expect(html).toMatch(/aria-label|role|title/i);
-      }
-    });
-    
-    it('should provide meaningful text for screen readers', () => {
-      const badge = new StatusBadge({ 
-        status: 'active',
-        ariaLabel: 'Patient is currently active'
+      scenarios.forEach(({ patient, expectedClass, expectedText }) => {
+        const badge = new StatusBadge(patient);
+        expect(badge.getStatusClass()).toBe(expectedClass);
+        expect(badge.getStatusText()).toBe(expectedText);
       });
-      
-      if (badge.render) {
-        const html = badge.render();
-        
-        if (badge.options.ariaLabel) {
-          expect(html).toContain(badge.options.ariaLabel);
-        }
-      }
     });
   });
   
-  describe('Methods', () => {
-    it('should update status dynamically', () => {
-      const badge = new StatusBadge({ status: 'active' });
+  describe('Edge Cases', () => {
+    it('should handle patient with null discharge date', () => {
+      const patient = { ...samplePatients.basic, data_dimissione: null };
       
-      if (badge.updateStatus) {
-        badge.updateStatus('inactive');
-        expect(badge.options.status).toBe('inactive');
-      }
-    });
-    
-    it('should get current status', () => {
-      const badge = new StatusBadge({ status: 'pending' });
+      expect(() => new StatusBadge(patient)).not.toThrow();
       
-      if (badge.getStatus) {
-        expect(badge.getStatus()).toBe('pending');
-      } else {
-        expect(badge.options.status).toBe('pending');
-      }
+      const badge = new StatusBadge(patient);
+      expect(badge.getStatusClass()).toBe('attivo');
     });
     
-    it('should validate status values', () => {
-      const badge = new StatusBadge({ status: 'active' });
+    it('should handle patient with empty discharge date', () => {
+      const patient = { ...samplePatients.basic, data_dimissione: '' };
       
-      if (badge.isValidStatus) {
-        expect(badge.isValidStatus('active')).toBe(true);
-        expect(badge.isValidStatus('invalid-status')).toBe(false);
-      }
-    });
-  });
-  
-  describe('Error Handling', () => {
-    it('should handle null status', () => {
-      expect(() => {
-        new StatusBadge({ status: null });
-      }).not.toThrow();
+      const badge = new StatusBadge(patient);
+      expect(badge.getStatusClass()).toBe('attivo');
     });
     
-    it('should handle undefined status', () => {
-      expect(() => {
-        new StatusBadge({ status: undefined });
-      }).not.toThrow();
-    });
-    
-    it('should handle empty string status', () => {
-      expect(() => {
-        new StatusBadge({ status: '' });
-      }).not.toThrow();
-    });
-    
-    it('should handle invalid status types', () => {
-      expect(() => {
-        new StatusBadge({ status: {} });
-      }).not.toThrow();
+    it('should handle patient with undefined discharge date', () => {
+      const patient = { ...samplePatients.basic };
+      delete patient.data_dimissione;
       
-      expect(() => {
-        new StatusBadge({ status: [] });
-      }).not.toThrow();
+      const badge = new StatusBadge(patient);
+      expect(badge.getStatusClass()).toBe('attivo');
+    });
+    
+    it('should handle minimal patient data', () => {
+      const minimalPatient = { id: 1, nome: 'Test', cognome: 'Patient' };
+      
+      expect(() => new StatusBadge(minimalPatient)).not.toThrow();
+      
+      const badge = new StatusBadge(minimalPatient);
+      expect(badge.getStatusClass()).toBe('attivo');
     });
   });
   
@@ -317,12 +207,12 @@ describe('StatusBadge Component', () => {
     it('should render quickly with many badges', () => {
       const startTime = performance.now();
       
-      // Crea molti badge
+      // Crea molti badge con dati realistici
       for (let i = 0; i < 100; i++) {
-        const badge = new StatusBadge({ status: 'active' });
-        if (badge.render) {
-          badge.render();
-        }
+        const patient = { ...samplePatients.basic, id: i };
+        const badge = new StatusBadge(patient);
+        badge.render();
+        badge.renderForCard();
       }
       
       const endTime = performance.now();
@@ -332,24 +222,31 @@ describe('StatusBadge Component', () => {
       expect(duration).toBeLessThan(100);
     });
     
-    it('should not cause memory leaks', () => {
-      const badges = [];
+    it('should handle different patient types efficiently', () => {
+      const patients = [
+        samplePatients.basic,
+        samplePatients.discharged,
+        samplePatients.complex,
+        samplePatients.pediatric,
+        samplePatients.elderly
+      ];
       
-      // Crea e distruggi badge
+      const startTime = performance.now();
+      
+      // Testa con diversi tipi di pazienti
       for (let i = 0; i < 50; i++) {
-        const badge = new StatusBadge({ status: 'active' });
-        badges.push(badge);
+        const patient = patients[i % patients.length];
+        const badge = new StatusBadge(patient);
+        badge.render();
+        badge.getStatusClass();
+        badge.getStatusText();
       }
       
-      // Cleanup
-      badges.forEach(badge => {
-        if (badge.destroy) {
-          badge.destroy();
-        }
-      });
+      const endTime = performance.now();
+      const duration = endTime - startTime;
       
-      // Non dovrebbero esserci riferimenti rimasti
-      expect(badges.length).toBe(50);
+      // Dovrebbe essere veloce anche con dati diversi
+      expect(duration).toBeLessThan(50);
     });
   });
 });

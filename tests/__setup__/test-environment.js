@@ -9,9 +9,15 @@ setupDOMEnvironment();
 
 // Setup automatic cleanup
 beforeEach(() => {
-  // Reset DOM
-  document.body.innerHTML = '';
-  document.head.innerHTML = '';
+  // Reset DOM safely
+  if (document.body) {
+    document.body.innerHTML = '';
+  }
+  if (document.head) {
+    // Rimuovi solo elementi aggiunti dai test
+    const testElements = document.head.querySelectorAll('[data-test]');
+    testElements.forEach(el => el.remove());
+  }
   
   // Reset window dimensions
   Object.defineProperty(window, 'innerWidth', {
@@ -100,28 +106,7 @@ function setupDOMEnvironment() {
   Element.prototype.focus = vi.fn();
   Element.prototype.blur = vi.fn();
   
-  // Mock classList methods
-  const originalClassList = Element.prototype.classList;
-  Object.defineProperty(Element.prototype, 'classList', {
-    get() {
-      const classList = originalClassList || {
-        add: vi.fn(),
-        remove: vi.fn(),
-        contains: vi.fn(() => false),
-        toggle: vi.fn(),
-        replace: vi.fn()
-      };
-      
-      // Ensure all methods are mocked
-      classList.add = vi.fn(classList.add);
-      classList.remove = vi.fn(classList.remove);
-      classList.contains = vi.fn(classList.contains);
-      classList.toggle = vi.fn(classList.toggle);
-      classList.replace = vi.fn(classList.replace);
-      
-      return classList;
-    }
-  });
+  // classList è già disponibile in jsdom, non serve mock
   
   // Mock URL constructor
   global.URL = class URL {

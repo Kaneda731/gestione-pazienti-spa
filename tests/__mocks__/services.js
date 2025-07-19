@@ -385,7 +385,7 @@ export function createCustomServiceMock(serviceName, methods = {}) {
       if (typeof defaultReturn === 'function') {
         mockService[methodName].mockImplementation(defaultReturn);
       } else if (defaultReturn instanceof Promise) {
-        mockService[methodName].mockResolvedValue(await defaultReturn);
+        mockService[methodName].mockResolvedValue(defaultReturn);
       } else {
         mockService[methodName].mockReturnValue(defaultReturn);
       }

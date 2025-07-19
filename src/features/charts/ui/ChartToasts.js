@@ -15,11 +15,11 @@ class ChartToasts {
    * @private
    */
   _ensureStylesLoaded() {
-    if (!document.getElementById('chart-toasts-styles')) {
-      const link = document.createElement('link');
-      link.id = 'chart-toasts-styles';
-      link.rel = 'stylesheet';
-      link.href = '../styles/chart-toasts.css';
+    if (!document.getElementById("chart-toasts-styles")) {
+      const link = document.createElement("link");
+      link.id = "chart-toasts-styles";
+      link.rel = "stylesheet";
+      link.href = "../styles/chart-toasts.css";
       document.head.appendChild(link);
     }
   }
@@ -32,46 +32,46 @@ class ChartToasts {
    * @param {number} duration - La durata in millisecondi (default: 3000)
    * @returns {HTMLElement} - L'elemento toast creato
    */
-  showToast(message, type = 'info', device = 'desktop', duration = 3000) {
+  showToast(message, type = "info", device = "desktop", duration = 3000) {
     // Rimuovi toast esistenti dello stesso tipo
     this._removeExistingToasts(type);
-    
+
     // Crea il toast
-    const toast = document.createElement('div');
+    const toast = document.createElement("div");
     const toastId = `chart-toast-${Date.now()}`;
     toast.id = toastId;
     toast.className = `chart-toast ${type} ${device}-chart-toast`;
-    toast.setAttribute('role', 'alert');
-    toast.setAttribute('aria-live', 'assertive');
+    toast.setAttribute("role", "alert");
+    toast.setAttribute("aria-live", "assertive");
     toast.textContent = message;
-    
+
     // Aggiungi il toast al DOM
     document.body.appendChild(toast);
-    
+
     // Tieni traccia del toast attivo
     this.activeToasts.push({
       id: toastId,
       element: toast,
       type: type,
-      timer: null
+      timer: null,
     });
-    
+
     // Imposta il timer per la rimozione automatica
     const timer = setTimeout(() => {
       this._removeToast(toastId);
     }, duration);
-    
+
     // Aggiorna il timer nell'array dei toast attivi
-    const toastIndex = this.activeToasts.findIndex(t => t.id === toastId);
+    const toastIndex = this.activeToasts.findIndex((t) => t.id === toastId);
     if (toastIndex !== -1) {
       this.activeToasts[toastIndex].timer = timer;
     }
-    
+
     // Aggiungi event listener per la rimozione al click
-    toast.addEventListener('click', () => {
+    toast.addEventListener("click", () => {
       this._removeToast(toastId);
     });
-    
+
     return toast;
   }
 
@@ -82,8 +82,8 @@ class ChartToasts {
    * @param {number} duration - La durata in millisecondi
    * @returns {HTMLElement} - L'elemento toast creato
    */
-  showSuccessToast(message, device = 'desktop', duration = 3000) {
-    return this.showToast(message, 'success', device, duration);
+  showSuccessToast(message, device = "desktop", duration = 3000) {
+    return this.showToast(message, "success", device, duration);
   }
 
   /**
@@ -93,8 +93,8 @@ class ChartToasts {
    * @param {number} duration - La durata in millisecondi
    * @returns {HTMLElement} - L'elemento toast creato
    */
-  showErrorToast(message, device = 'desktop', duration = 4000) {
-    return this.showToast(message, 'error', device, duration);
+  showErrorToast(message, device = "desktop", duration = 4000) {
+    return this.showToast(message, "error", device, duration);
   }
 
   /**
@@ -104,8 +104,8 @@ class ChartToasts {
    * @param {number} duration - La durata in millisecondi
    * @returns {HTMLElement} - L'elemento toast creato
    */
-  showInfoToast(message, device = 'desktop', duration = 3000) {
-    return this.showToast(message, 'info', device, duration);
+  showInfoToast(message, device = "desktop", duration = 3000) {
+    return this.showToast(message, "info", device, duration);
   }
 
   /**
@@ -115,8 +115,8 @@ class ChartToasts {
    * @param {number} duration - La durata in millisecondi
    * @returns {HTMLElement} - L'elemento toast creato
    */
-  showWarningToast(message, device = 'desktop', duration = 4000) {
-    return this.showToast(message, 'warning', device, duration);
+  showWarningToast(message, device = "desktop", duration = 4000) {
+    return this.showToast(message, "warning", device, duration);
   }
 
   /**
@@ -125,24 +125,24 @@ class ChartToasts {
    * @private
    */
   _removeToast(toastId) {
-    const toastIndex = this.activeToasts.findIndex(t => t.id === toastId);
+    const toastIndex = this.activeToasts.findIndex((t) => t.id === toastId);
     if (toastIndex !== -1) {
       const toast = this.activeToasts[toastIndex];
-      
+
       // Cancella il timer se esiste
       if (toast.timer) {
         clearTimeout(toast.timer);
       }
-      
+
       // Anima la rimozione
-      toast.element.style.animation = 'toastFadeOut 0.3s ease-in forwards';
-      
+      toast.element.style.animation = "toastFadeOut 0.3s ease-in forwards";
+
       // Rimuovi l'elemento dopo l'animazione
       setTimeout(() => {
         if (toast.element.parentNode) {
           toast.element.remove();
         }
-        
+
         // Rimuovi dall'array dei toast attivi
         this.activeToasts.splice(toastIndex, 1);
       }, 300);
@@ -155,9 +155,9 @@ class ChartToasts {
    * @private
    */
   _removeExistingToasts(type) {
-    const toastsToRemove = this.activeToasts.filter(t => t.type === type);
-    
-    toastsToRemove.forEach(toast => {
+    const toastsToRemove = this.activeToasts.filter((t) => t.type === type);
+
+    toastsToRemove.forEach((toast) => {
       this._removeToast(toast.id);
     });
   }
@@ -166,7 +166,7 @@ class ChartToasts {
    * Rimuove tutti i toast attivi
    */
   removeAllToasts() {
-    [...this.activeToasts].forEach(toast => {
+    [...this.activeToasts].forEach((toast) => {
       this._removeToast(toast.id);
     });
   }

@@ -2,6 +2,7 @@
 import { supabase } from '../services/supabaseClient.js';
 import { updateAuthUI } from '../../shared/components/ui/AuthUI.js';
 import { oauthManager } from './oauthService.js';
+import { logger } from '../services/loggerService.js';
 
 // Esporta una variabile per contenere lo stato dell'utente e del suo profilo
 export let currentUser = {
@@ -72,14 +73,14 @@ export async function initAuth(authCallback) {
     oauthManager.init();
 
     const { data: { session } } = await supabase.auth.getSession();
-    console.log('Sessione iniziale recuperata:', session);
+    logger.log('Sessione iniziale recuperata:', session);
     await updateUserState(session);
     if (authCallback) {
         authCallback(session);
     }
     
     supabase.auth.onAuthStateChange(async (event, session) => {
-        console.log('Auth event:', event, 'Session:', session);
+        logger.log('Auth event:', event, 'Session:', session);
         
         if (event === 'SIGNED_OUT' && oauthManager.getAuthState().state === 'error') {
             oauthManager.clearCorruptedState();
@@ -93,5 +94,5 @@ export async function initAuth(authCallback) {
         }
     });
     
-    console.log('Sistema di autenticazione inizializzato');
+    logger.log('Sistema di autenticazione inizializzato');
 }

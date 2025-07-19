@@ -1,0 +1,20 @@
+/**
+ * Charts Module - Main file
+ * 
+ * This file imports all chart-related styles from separate files
+ * to improve maintainability and organization.
+ */
+
+// Import base styles
+@import "charts/base";
+
+// Import device-specific styles
+@import "charts/mobile";
+@import "charts/tablet";
+@import "charts/desktop";
+
+// Import component-specific styles
+@import "charts/modals";
+
+// Import accessibility styles
+@import "charts/accessibility";

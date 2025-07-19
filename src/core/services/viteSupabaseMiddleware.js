@@ -5,6 +5,7 @@
  */
 
 import { supabase } from './supabaseClient.js';
+import { logger } from './loggerService.js';
 
 class ViteSupabaseMiddleware {
     constructor() {
@@ -24,12 +25,12 @@ class ViteSupabaseMiddleware {
     async waitForViteReady() {
         return new Promise((resolve) => {
             if (document.readyState === 'complete') {
-                console.log('Vite è pronto');
+                logger.log('Vite è pronto');
                 resolve();
             } else {
                 window.addEventListener('load', () => {
                     setTimeout(() => {
-                        console.log('Vite è pronto (dopo load)');
+                        logger.log('Vite è pronto (dopo load)');
                         resolve();
                     }, 100);
                 }, { once: true });
@@ -41,7 +42,7 @@ class ViteSupabaseMiddleware {
         return new Promise(async (resolve) => {
             try {
                 await supabase.auth.getSession();
-                console.log('Supabase è pronto');
+                logger.log('Supabase è pronto');
                 resolve();
             } catch (error) {
                 console.error('Errore nell\'inizializzazione Supabase:', error);
@@ -49,7 +50,7 @@ class ViteSupabaseMiddleware {
                 setTimeout(async () => {
                     try {
                         await supabase.auth.getSession();
-                        console.log('Supabase è pronto (dopo retry)');
+                        logger.log('Supabase è pronto (dopo retry)');
                         resolve();
                     } catch (retryError) {
                         console.error('Errore nel retry Supabase:', retryError);
@@ -61,7 +62,7 @@ class ViteSupabaseMiddleware {
     }
 
     clearCorruptedState() {
-        console.log('Pulisco stato corrotto...');
+        logger.log('Pulisco stato corrotto...');
         ['supabase.auth.token', 'sb-aiguzywadjzyrwandgba-auth-token'].forEach(key => {
             localStorage.removeItem(key);
             sessionStorage.removeItem(key);
@@ -84,7 +85,7 @@ class ViteSupabaseMiddleware {
     }
 
     notifyReady() {
-        console.log('Middleware Vite-Supabase pronto');
+        logger.log('Middleware Vite-Supabase pronto');
         this.resolveReady();
     }
 }

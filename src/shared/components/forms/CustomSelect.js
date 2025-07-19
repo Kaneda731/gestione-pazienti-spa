@@ -119,26 +119,53 @@ export class CustomSelect {
         trigger.addEventListener('touchstart', () => { this.isScrolling = false; }, { passive: true });
         trigger.addEventListener('touchmove', () => { this.isScrolling = true; }, { passive: true });
         trigger.addEventListener('click', (e) => {
-            if (this.isScrolling) {
-                this.isScrolling = false;
-                return;
+            try {
+                if (this.isScrolling) {
+                    this.isScrolling = false;
+                    return;
+                }
+                e.stopPropagation();
+                this.toggle();
+            } catch (error) {
+                window.appLogger?.error('Errore nel click handler del CustomSelect:', error);
             }
-            e.stopPropagation();
-            this.toggle();
         });
+        
         this.outsideClickHandler = (e) => {
-            if (!this.wrapper.contains(e.target) && !this.mobileModal?.contains(e.target)) {
-                this.close();
+            try {
+                if (!this.wrapper.contains(e.target) && !this.mobileModal?.contains(e.target)) {
+                    this.close();
+                }
+            } catch (error) {
+                window.appLogger?.error('Errore nel outside click handler:', error);
             }
         };
+        
         this.outsideTouchHandler = (e) => {
-            if (this.isOpen && !this.wrapper.contains(e.target) && !this.mobileModal?.contains(e.target)) {
-                setTimeout(() => { if (this.isOpen) this.close(); }, 50);
+            try {
+                if (this.isOpen && !this.wrapper.contains(e.target) && !this.mobileModal?.contains(e.target)) {
+                    setTimeout(() => { 
+                        try {
+                            if (this.isOpen) this.close(); 
+                        } catch (error) {
+                            window.appLogger?.error('Errore nel timeout del touch handler:', error);
+                        }
+                    }, 50);
+                }
+            } catch (error) {
+                window.appLogger?.error('Errore nel outside touch handler:', error);
             }
         };
+        
         document.addEventListener('click', this.outsideClickHandler);
         document.addEventListener('touchstart', this.outsideTouchHandler, { passive: true });
-        this.wrapper.addEventListener('keydown', (e) => { this.handleKeyboard(e); });
+        this.wrapper.addEventListener('keydown', (e) => { 
+            try {
+                this.handleKeyboard(e); 
+            } catch (error) {
+                window.appLogger?.error('Errore nel keyboard handler:', error);
+            }
+        });
         this.wrapper.setAttribute('tabindex', '0');
     }
     

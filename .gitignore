@@ -24,7 +24,6 @@ Thumbs.db
 # Folders to ignore for deployment
 /backup/
 /archive/
-/tests/
 /docs/
 /.netlify/
 
@@ -39,6 +38,9 @@ Thumbs.db
 *.tmp
 *.temp
 temp/
+
+# Test coverage reports
+coverage/
 
 # Dependency lock files
 # package-lock.json

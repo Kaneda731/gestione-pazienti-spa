@@ -1,17 +1,19 @@
-// src/js/services/bootstrapService.js
+// src/core/services/bootstrapService.js
 
 /**
  * Servizio centralizzato per gestire Bootstrap
- * Importa tutti i componenti necessari
+ * Importa solo i componenti effettivamente utilizzati per ottimizzare il bundle
  */
 
-// Importa i componenti Bootstrap che servono nell'app
-import { Modal, Tooltip, Dropdown, Collapse } from 'bootstrap';
+// Importa solo i componenti Bootstrap effettivamente utilizzati nell'app
+// Modal: utilizzato in ConfirmModal, AuthUI, modalService
+// Collapse: utilizzato in ErrorMessage per mostrare/nascondere dettagli errore
+import { Modal, Collapse } from 'bootstrap';
 
 // Esporta i componenti per uso in altri moduli
-export { Modal, Tooltip, Dropdown, Collapse };
+export { Modal, Collapse };
 
 // Rende Bootstrap disponibile globalmente se necessario
 if (typeof window !== 'undefined') {
-    window.bootstrap = { Modal, Tooltip, Dropdown, Collapse };
+    window.bootstrap = { Modal, Collapse };
 }

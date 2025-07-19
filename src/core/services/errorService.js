@@ -1,5 +1,7 @@
 // src/js/services/errorService.js
 
+import { logger } from './loggerService.js';
+
 /**
  * Inizializza la gestione centralizzata degli errori e del logging.
  */
@@ -77,11 +79,11 @@ function initPromiseRejectionHandler() {
 function initAppLogger() {
     window.appLogger = {
         info: (message, data = null) => {
-            console.log(`[APP] ${message}`, data || '');
+            logger.log(`[APP] ${message}`, data || '');
         },
         
         warn: (message, data = null) => {
-            console.warn(`[APP WARNING] ${message}`, data || '');
+            logger.warn(`[APP WARNING] ${message}`, data || '');
         },
         
         error: (message, error = null) => {
@@ -91,7 +93,7 @@ function initAppLogger() {
         
         debug: (message, data = null) => {
             if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-                console.debug(`[APP DEBUG] ${message}`, data || '');
+                logger.log(`[APP DEBUG] ${message}`, data || '');
             }
         }
     };

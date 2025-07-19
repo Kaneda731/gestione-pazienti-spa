@@ -1,11 +1,13 @@
 // src/core/utils/oauthTest.js
 
+import { logger } from '../services/loggerService.js';
+
 /**
  * Test utilities per OAuth
  */
 
 function testOAuthFlow() {
-    console.log('OAuth Test - Testing flow...');
+    logger.log('OAuth Test - Testing flow...');
     
     // Simula un test del flusso OAuth
     const testData = {
@@ -14,24 +16,24 @@ function testOAuthFlow() {
         timestamp: new Date().toISOString()
     };
     
-    console.log('OAuth Test - Data:', testData);
+    logger.log('OAuth Test - Data:', testData);
     
     return testData;
 }
 
 function validateOAuthResponse(response) {
-    console.log('OAuth Test - Validating response:', response);
+    logger.log('OAuth Test - Validating response:', response);
     
     const requiredFields = ['access_token', 'token_type', 'expires_in'];
     const hasRequiredFields = requiredFields.every(field => response[field]);
     
-    console.log('OAuth Test - Validation result:', hasRequiredFields);
+    logger.log('OAuth Test - Validation result:', hasRequiredFields);
     
     return hasRequiredFields;
 }
 
 // Auto-test all'avvio se in modalità debug
 if (import.meta.env.VITE_OAUTH_DEBUG === 'true') {
-    console.log('OAuth Test mode enabled');
+    logger.log('OAuth Test mode enabled');
     testOAuthFlow();
 }

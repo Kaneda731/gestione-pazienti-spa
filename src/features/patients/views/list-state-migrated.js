@@ -6,6 +6,7 @@
  */
 
 import { stateService } from '../../../core/services/stateService.js';
+import { logger } from '../../../core/services/loggerService.js';
 
 // Cache degli elementi DOM
 export const domElements = {};
@@ -25,7 +26,7 @@ export function initListState() {
  * Caching degli elementi DOM della vista lista
  */
 export function cacheDOMElements(viewContainer) {
-    console.log('🗂️ Caching DOM elements...', { viewContainer });
+    logger.log('🗂️ Caching DOM elements...', { viewContainer });
     
     domElements.repartoFilter = document.getElementById('list-filter-reparto');
     domElements.diagnosiFilter = document.getElementById('list-filter-diagnosi');
@@ -44,7 +45,7 @@ export function cacheDOMElements(viewContainer) {
     domElements.exportButton = document.getElementById('export-csv-btn');
     
     // Debug: verifica se gli elementi critici esistono
-    console.log('🗂️ DOM elements cached:', {
+    logger.log('🗂️ DOM elements cached:', {
         tableBody: !!domElements.tableBody,
         cardsContainer: !!domElements.cardsContainer,
         repartoFilter: !!domElements.repartoFilter,
@@ -67,7 +68,7 @@ export function cacheDOMElements(viewContainer) {
             cardsContainer: !!domElements.cardsContainer
         });
     } else {
-        console.log('✅ Elementi DOM critici trovati');
+        logger.log('✅ Elementi DOM critici trovati');
     }
     
     // Validazione elementi critici

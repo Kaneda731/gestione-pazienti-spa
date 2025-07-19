@@ -9,16 +9,15 @@ import {
     getFilters,
     resetFilters,
     drawChart,
+    drawChartWithCurrentData,
     showLoading,
     showError
 } from './grafico-ui.js';
 
 async function applyFiltersAndDrawChart() {
     const filters = getFilters();
-    showLoading();
     try {
-        const data = await getChartData(filters);
-        await drawChart(data);
+        await drawChartWithCurrentData(filters);
     } catch (error) {
         showError(error.message);
     }

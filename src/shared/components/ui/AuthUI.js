@@ -1,7 +1,8 @@
 // src/shared/components/ui/AuthUI.js
-import { Modal } from 'bootstrap';
+import { Modal } from '../../../core/services/bootstrapService.js';
 import { signInWithGoogle, signOut, currentUser } from '../../../core/auth/authService.js';
 import { syncMobileAuth } from '../../../app/mobile/mobile-navigation.js';
+import { logger } from '../../../core/services/loggerService.js';
 
 
 export function updateAuthUI(session) {
@@ -55,7 +56,7 @@ function initAuthEventListeners() {
         
         if (event.target.closest('#google-login-btn')) {
             event.preventDefault();
-            console.log('Pulsante Google cliccato');
+            logger.log('Pulsante Google cliccato');
             const button = event.target.closest('#google-login-btn');
             const spinner = button.querySelector('.spinner-border');
             const icon = button.querySelector('.material-icons');

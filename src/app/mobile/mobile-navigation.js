@@ -1,5 +1,6 @@
 // src/app/mobile/mobile-navigation.js
 import { signOut, currentUser } from '../../core/auth/authService.js';
+import { logger } from '../../core/services/loggerService.js';
 
 let isCurrentlyMobile = window.innerWidth <= 767;
 
@@ -27,7 +28,7 @@ function handleNavbarVisibility() {
     // La modalità è cambiata, aggiorna lo stato e invia l'evento
     isCurrentlyMobile = isMobile;
 
-    console.log(`Mode changed to: ${isMobile ? 'mobile' : 'desktop'}`); // Per debug
+    logger.log(`Mode changed to: ${isMobile ? 'mobile' : 'desktop'}`); // Per debug
 
     const event = new CustomEvent('mode:change', {
         detail: { isMobile }

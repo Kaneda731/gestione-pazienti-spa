@@ -1,0 +1,209 @@
+// Modern Chart Modal Design
+.chart-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 1rem;
+  backdrop-filter: blur(4px);
+}
+
+.desktop-chart-panel {
+  position: fixed;
+  top: 50%;
+  left: 60%;
+  transform: translate(-50%, -50%);
+  width: 360px;
+  max-height: 80vh;
+  background: var(--bs-body-bg, #fff);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  z-index: 9998;
+  overflow: hidden;
+  animation: modalSlideIn 0.4s ease-out;
+}
+
+.chart-modal-content {
+  background: var(--bs-body-bg, #fff);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 360px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: modalSlideIn 0.4s ease-out;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+  position: relative;
+}
+
+.chart-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 1.5rem 1rem;
+  border-bottom: 1px solid rgba(var(--bs-border-color-rgb, 0, 0, 0), 0.1);
+  
+  h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--bs-body-color);
+  }
+}
+
+.chart-modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--bs-secondary);
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: var(--bs-secondary-bg);
+    color: var(--bs-danger);
+  }
+}
+
+.chart-modal-content {
+  border-top: 4px solid var(--color, #0d6efd);
+}
+
+.chart-modal-body {
+  padding: 1.5rem;
+}
+
+.chart-detail-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1rem;
+  
+  .diagnosis-name {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--bs-body-color);
+    line-height: 1.3;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    hyphens: auto;
+    margin: 0;
+  }
+  
+  .stats-container {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    gap: 1rem;
+    margin-top: 0.5rem;
+    
+    .stat-item {
+      text-align: center;
+      
+      .stat-value {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--bs-primary);
+        display: block;
+      }
+      
+      .stat-label {
+        font-size: 0.85rem;
+        color: var(--bs-secondary);
+        margin-top: 0.25rem;
+      }
+    }
+  }
+  
+  .additional-info {
+    width: 100%;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(var(--bs-border-color-rgb, 0, 0, 0), 0.1);
+    
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0;
+      font-size: 0.9rem;
+      
+      &:not(:last-child) {
+        border-bottom: 1px solid rgba(var(--bs-border-color-rgb, 0, 0, 0), 0.05);
+      }
+      
+      .info-label {
+        color: var(--bs-secondary);
+        font-weight: 500;
+      }
+      
+      .info-value {
+        color: var(--bs-body-color);
+        font-weight: 600;
+      }
+    }
+  }
+}
+
+// Animations
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-30px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+// Dark mode support
+@media (prefers-color-scheme: dark) {
+  .chart-modal-content {
+    background: var(--bs-dark);
+    color: var(--bs-light);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .chart-modal-header {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 480px) {
+  .chart-modal {
+    padding: 0.5rem;
+  }
+  
+  .chart-modal-content {
+    max-width: 100%;
+    margin: 0.5rem;
+    border-radius: 12px;
+  }
+  
+  .chart-modal-body {
+    padding: 1.25rem;
+  }
+  
+  .diagnosis-name {
+    font-size: 1.3rem;
+  }
+  
+  .stat-value {
+    font-size: 1.1rem;
+  }
+}

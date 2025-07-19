@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Custom Select - Scroll Mobile</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="src/css/modules/variables.css">
+    <link rel="stylesheet" href="src/css/modules/base.css">
+    <link rel="stylesheet" href="src/css/modules/components/forms.css">
+    <link rel="stylesheet" href="src/css/modules/mobile/forms-mobile.css">
+    <style>
+        body {
+            padding: 2rem;
+            background: #f8f9fa;
+            min-height: 100vh;
+        }
+        .test-container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .test-title {
+            color: #343a40;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        .test-section {
+            margin-bottom: 2rem;
+        }
+        .test-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 0.75rem;
+            display: block;
+        }
+        .info-text {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-top: 0.5rem;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h2 class="test-title">Test Scroll Custom Select Mobile</h2>
+        
+        <div class="test-section">
+            <label class="test-label">Select con molte opzioni (20+):</label>
+            <select class="form-select" data-custom="true" data-label="Città">
+                <option value="">Seleziona una città</option>
+                <option value="roma">Roma</option>
+                <option value="milano">Milano</option>
+                <option value="napoli">Napoli</option>
+                <option value="torino">Torino</option>
+                <option value="palermo">Palermo</option>
+                <option value="genova">Genova</option>
+                <option value="bologna">Bologna</option>
+                <option value="firenze">Firenze</option>
+                <option value="catania">Catania</option>
+                <option value="bari">Bari</option>
+                <option value="venezia">Venezia</option>
+                <option value="verona">Verona</option>
+                <option value="messina">Messina</option>
+                <option value="padova">Padova</option>
+                <option value="trieste">Trieste</option>
+                <option value="brescia">Brescia</option>
+                <option value="taranto">Taranto</option>
+                <option value="prato">Prato</option>
+                <option value="parma">Parma</option>
+                <option value="modena">Modena</option>
+                <option value="reggio_calabria">Reggio Calabria</option>
+                <option value="reggio_emilia">Reggio Emilia</option>
+                <option value="perugia">Perugia</option>
+                <option value="livorno">Livorno</option>
+                <option value="ravenna">Ravenna</option>
+                <option value="cagliari">Cagliari</option>
+                <option value="foggia">Foggia</option>
+                <option value="rimini">Rimini</option>
+                <option value="salerno">Salerno</option>
+                <option value="ferrara">Ferrara</option>
+            </select>
+            <div class="info-text">Su mobile dovrebbe aprire un modal scrollabile</div>
+        </div>
+        
+        <div class="test-section">
+            <label class="test-label">Select normale (poche opzioni):</label>
+            <select class="form-select" data-custom="true" data-label="Sesso">
+                <option value="">Seleziona sesso</option>
+                <option value="M">Maschio</option>
+                <option value="F">Femmina</option>
+                <option value="X">Altro</option>
+            </select>
+            <div class="info-text">Su mobile dovrebbe aprire un modal senza scroll</div>
+        </div>
+        
+        <div class="test-section">
+            <label class="test-label">Test elementi dietro modal:</label>
+            <input type="text" class="form-control" placeholder="Questo input deve essere bloccato quando modal aperto">
+            <div class="info-text">Quando modal aperto, questo input non deve rispondere</div>
+        </div>
+    </div>
+
+    <script src="src/js/components/CustomSelect.js"></script>
+    <script>
+        // Log per debug
+        console.log('Test Custom Select Scroll avviato');
+        
+        // Test responsiveness
+        window.addEventListener('resize', () => {
+            console.log('Finestra ridimensionata:', window.innerWidth);
+        });
+        
+        // Test interazioni
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('custom-select-mobile-option')) {
+                console.log('Opzione mobile selezionata:', e.target.textContent);
+            }
+        });
+    </script>
+</body>
+</html>

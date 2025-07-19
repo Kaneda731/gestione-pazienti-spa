@@ -24,7 +24,6 @@ Thumbs.db
 # Folders to ignore for deployment
 /backup/
 /archive/
-/tests/
 /docs/
 /.netlify/
 

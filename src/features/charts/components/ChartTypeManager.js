@@ -206,38 +206,139 @@ class ChartTypeManager {
             }
           },
           tooltip: {
-            callbacks: {
-              title: (tooltipItems) => {
-                return tooltipItems[0].label || '';
-              },
-              label: (context) => {
-                const label = context.label || '';
-                const value = context.parsed || 0;
-                const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
-                const percentage = ((value / total) * 100).toFixed(1);
-                return `${label}: ${value} (${percentage}%)`;
-              },
-              afterLabel: (context) => {
-                // Aggiungi informazioni aggiuntive nel tooltip
-                const dataset = context.chart.data.datasets[0];
-                const total = dataset.data.reduce((a, b) => a + b, 0);
-                return `Percentuale sul totale: ${((context.parsed / total) * 100).toFixed(1)}%`;
-              }
-            },
-            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-            titleFont: { size: 14, weight: 'bold' },
-            bodyFont: { size: 13 },
-            padding: 12,
-            cornerRadius: 6,
-            displayColors: true
+            enabled: false // Disabilita il tooltip di default
           },
           // Etichette con percentuali disabilitate di default per evitare errori
           datalabels: false
         },
-        // Migliora l'interattività
+// Configura l'interattività per evitare tooltip su fette errate
         hover: {
           mode: 'nearest',
           intersect: true
+        },
+        events: ['mousemove', 'mouseout', 'click', 'touchstart', 'touchmove'],
+        onHover: (event, activeElements) => {
+          // Gestione hover personalizzata
+          if (!event || !event.chart) return;
+          
+          const canvas = event.chart.canvas;
+          const chartContainer = canvas.parentElement;
+          
+          // Rimuovi tooltip esistente
+          const existingTooltip = chartContainer.querySelector('.custom-pie-tooltip');
+          if (existingTooltip) {
+            existingTooltip.remove();
+          }
+          
+          if (activeElements && activeElements.length > 0) {
+            const element = activeElements[0];
+            const datasetIndex = element.datasetIndex;
+            const index = element.index;
+            
+            const label = event.chart.data.labels[index];
+            const value = event.chart.data.datasets[datasetIndex].data[index];
+            const total = event.chart.data.datasets[datasetIndex].data.reduce((a, b) => a + b, 0);
+            const percentage = ((value / total) * 100).toFixed(1);
+            
+            // Crea tooltip HTML personalizzato con stili migliorati
+            const tooltip = document.createElement('div');
+            tooltip.className = 'custom-pie-tooltip';
+            tooltip.style.cssText = `
+              position: fixed;
+              background: rgba(0, 0, 0, 0.9);
+              color: white;
+              padding: 12px 16px;
+              border-radius: 8px;
+              font-size: 14px;
+              pointer-events: none;
+              box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+              z-index: 9999;
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+              line-height: 1.4;
+              max-width: 200px;
+              word-wrap: break-word;
+            `;
+            
+            tooltip.innerHTML = `
+              <div style="font-weight: bold; margin-bottom: 4px;">${label}</div>
+              <div>${value} pazienti</div>
+              <div style="font-size: 12px; opacity: 0.9;">${percentage}% del totale</div>
+            `;
+            
+            // Posiziona il tooltip vicino al mouse
+            const rect = canvas.getBoundingClientRect();
+            const x = event.native.clientX + 10;
+            const y = event.native.clientY - 10;
+            
+            tooltip.style.left = x + 'px';
+            tooltip.style.top = y + 'px';
+            
+            document.body.appendChild(tooltip);
+            
+            // Assicurati che il tooltip non esca dallo schermo
+            const tooltipRect = tooltip.getBoundingClientRect();
+            if (x + tooltipRect.width > window.innerWidth) {
+              tooltip.style.left = (x - tooltipRect.width - 20) + 'px';
+            }
+            if (y + tooltipRect.height > window.innerHeight) {
+              tooltip.style.top = (y - tooltipRect.height - 20) + 'px';
+            }
+          }
+        },
+        onLeave: (event) => {
+          // Rimuovi tutti i tooltip quando il mouse lascia
+          const tooltips = document.querySelectorAll('.custom-pie-tooltip');
+          tooltips.forEach(tooltip => tooltip.remove());
+        },
+        onClick: (event, activeElements) => {
+          // Gestione click per evitare modalità errata
+          if (activeElements && activeElements.length > 0) {
+            const element = activeElements[0];
+            const datasetIndex = element.datasetIndex;
+            const index = element.index;
+            
+            const label = event.chart.data.labels[index];
+            const value = event.chart.data.datasets[datasetIndex].data[index];
+            const total = event.chart.data.datasets[datasetIndex].data.reduce((a, b) => a + b, 0);
+            const percentage = ((value / total) * 100).toFixed(1);
+            
+            // Mostra brevemente il tooltip al click se non già visibile
+            if (!document.querySelector('.custom-pie-tooltip')) {
+              const tooltip = document.createElement('div');
+              tooltip.className = 'custom-pie-tooltip';
+              tooltip.style.cssText = `
+                position: fixed;
+                background: rgba(0, 0, 0, 0.9);
+                color: white;
+                padding: 12px 16px;
+                border-radius: 8px;
+                font-size: 14px;
+                pointer-events: none;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+                z-index: 9999;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                line-height: 1.4;
+              `;
+              
+              tooltip.innerHTML = `
+                <div style="font-weight: bold; margin-bottom: 4px;">${label}</div>
+                <div>${value} pazienti</div>
+                <div style="font-size: 12px; opacity: 0.9;">${percentage}% del totale</div>
+              `;
+              
+              const x = event.native.clientX + 10;
+              const y = event.native.clientY - 10;
+              tooltip.style.left = x + 'px';
+              tooltip.style.top = y + 'px';
+              
+              document.body.appendChild(tooltip);
+              
+              // Rimuovi dopo 2 secondi
+              setTimeout(() => {
+                tooltip.remove();
+              }, 2000);
+            }
+          }
         },
         animation: {
           animateRotate: true,
@@ -347,7 +448,7 @@ class ChartTypeManager {
             }
           },
           tooltip: {
-            enabled: true,
+            enabled: false,
             backgroundColor: 'rgba(0, 0, 0, 0.8)',
             titleFont: { size: 14, weight: 'bold' },
             bodyFont: { size: 13 },

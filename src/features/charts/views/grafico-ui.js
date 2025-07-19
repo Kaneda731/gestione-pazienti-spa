@@ -113,16 +113,17 @@ async function initChartTypeSelector() {
         if (!dom.chartTypeSelector) {
             const selectorContainer = document.createElement('div');
             selectorContainer.className = 'chart-type-selector-container';
-            
+
             const selectorLabel = document.createElement('label');
             selectorLabel.htmlFor = 'chart-type-selector';
             selectorLabel.className = 'me-2';
             selectorLabel.textContent = 'Tipo di grafico:';
-            
+
+            // Crea il select nativo
             const selector = document.createElement('select');
             selector.id = 'chart-type-selector';
             selector.className = 'form-select form-select-sm';
-            
+
             // Aggiungi le opzioni
             chartTypes.forEach(type => {
                 const option = document.createElement('option');
@@ -130,17 +131,22 @@ async function initChartTypeSelector() {
                 option.innerHTML = `${type.icon} ${type.name}`;
                 selector.appendChild(option);
             });
-            
+
             // Imposta il valore predefinito
             selector.value = currentChartType;
-            
-            // Aggiungi l'evento change
-            selector.addEventListener('change', handleChartTypeChange);
-            
+
             // Aggiungi gli elementi al DOM
             selectorContainer.appendChild(selectorLabel);
             selectorContainer.appendChild(selector);
             dom.chartControls.appendChild(selectorContainer);
+
+            // Inizializza CustomSelect (selezione semplice)
+            import('../../../shared/components/forms/CustomSelect.js').then(mod => {
+                new mod.CustomSelect(selector, { searchable: false });
+            });
+
+            // Gestione evento change
+            selector.addEventListener('change', handleChartTypeChange);
         }
     } catch (error) {
         console.error('Errore nell\'inizializzazione del selettore del tipo di grafico:', error);
@@ -325,21 +331,18 @@ function prepareChartData(data) {
         return { labels: [], dataPoints: [] };
     }
 
-    const counts = data.reduce((acc, { diagnosi }) => {
+    const counts = new Map();
+    data.forEach(({ diagnosi }) => {
         const key = diagnosi ? String(diagnosi).trim() : 'Non specificata';
         if (key) {
-            acc[key] = (acc[key] || 0) + 1;
+            counts.set(key, (counts.get(key) || 0) + 1);
         }
-        return acc;
-    }, {});
+    });
 
-    const entries = Object.entries(counts)
-        .sort((a, b) => b[1] - a[1]); // Ordina per valore decrescente
+    const labels = Array.from(counts.keys());
+    const dataPoints = Array.from(counts.values());
 
-    return {
-        labels: entries.map(e => e[0]),
-        dataPoints: entries.map(e => e[1])
-    };
+    return { labels, dataPoints };
 }
 
 
@@ -374,22 +377,7 @@ export async function drawChart(data) {
                     // Implementa l'interazione click qui
                     // console.log('Click su legenda:', legendItem);
                 }
-            },
-            tooltip: {
-                callbacks: {
-                    label: function(context) {
-                        let label = context.dataset.label || '';
-                        if (label) {
-                            label += ': ';
-                        }
-                        if (context.parsed.y !== null) {
-                            label += context.parsed.y;
-                        }
-                        return label;
-                    }
-                }
-            }
-        },
+            }        },
     };
 
     // Opzioni specifiche per il grafico a barre
@@ -409,18 +397,7 @@ export async function drawChart(data) {
             }
         };
         chartOptions.plugins.tooltip = {
-            callbacks: {
-                label: function(context) {
-                    let label = context.dataset.label || '';
-                    if (label) {
-                        label += ': ';
-                    }
-                    if (context.parsed.y !== null) {
-                        label += context.parsed.y;
-                    }
-                    return label;
-                }
-            }
+            enabled: false // Disabilita tooltip per barre
         };
     }
 

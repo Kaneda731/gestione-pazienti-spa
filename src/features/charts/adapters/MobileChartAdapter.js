@@ -143,7 +143,7 @@ class MobileChartAdapter {
   _getTooltipOptions(existingOptions = {}) {
     return {
       ...existingOptions,
-      enabled: true,
+      enabled: false,
       mode: 'nearest',
       intersect: false,
       backgroundColor: 'rgba(0, 0, 0, 0.9)',

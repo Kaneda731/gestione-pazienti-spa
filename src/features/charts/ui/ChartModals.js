@@ -10,6 +10,19 @@ class ChartModals {
   }
 
   /**
+   * Converte colore hex in RGB per CSS custom properties
+   * @param {string} hex - Colore hex
+   * @returns {string} - Valore RGB
+   * @private
+   */
+  hexToRgb(hex) {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? 
+      `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : 
+      '13, 110, 253';
+  }
+
+  /**
    * Assicura che gli stili CSS siano caricati
    * @private
    */
@@ -40,7 +53,7 @@ class ChartModals {
     // Crea il modal
     const modal = document.createElement('div');
     modal.id = 'mobile-chart-detail-modal';
-    modal.className = 'chart-modal mobile-chart-modal';
+    modal.className = 'chart-modal';
     modal.innerHTML = this._getMobileModalTemplate(data, percentage);
     
     // Aggiungi il modal al DOM
@@ -143,23 +156,31 @@ class ChartModals {
    */
   _getMobileModalTemplate(data, percentage) {
     return `
-      <div class="chart-modal-content">
+      <div class="chart-modal-content" style="border-top: 4px solid ${data.color};" >
         <div class="chart-modal-header">
-          <h3>Dettagli Sezione</h3>
+          <h3>Dettagli</h3>
           <button class="chart-modal-close" aria-label="Chiudi">&times;</button>
         </div>
         <div class="chart-modal-body">
-          <div class="chart-detail-item">
-            <div class="chart-detail-color" style="background-color: ${data.color}"></div>
-            <div class="chart-detail-info">
-              <h4>${data.label}</h4>
-              <p class="chart-detail-value">${data.value} pazienti</p>
-              <p class="chart-detail-percentage">${percentage}% del totale</p>
+          <div class="chart-detail-card">
+            <h4 class="diagnosis-name">${data.label}</h4>
+            <div class="stats-container">
+              <div class="stat-item">
+                <span class="stat-value">${data.value}</span>
+                <span class="stat-label">Pazienti</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-value">${percentage}%</span>
+                <span class="stat-label">Percentuale</span>
+              </div>
+            </div>
+            <div class="additional-info">
+              <div class="info-row">
+                <span class="info-label">Totale complessivo</span>
+                <span class="info-value">${data.total} pazienti</span>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="chart-modal-footer">
-          <button class="btn btn-primary chart-modal-ok">OK</button>
         </div>
       </div>
     `;
@@ -173,23 +194,23 @@ class ChartModals {
    */
   _getDesktopPanelTemplate(data) {
     return `
-      <div class="chart-modal-header">
-        <h3>Dettagli Grafico</h3>
-        <button class="chart-modal-close" aria-label="Chiudi">&times;</button>
-      </div>
-      <div class="chart-modal-body">
-        <div class="chart-detail-item">
-          <div class="chart-detail-color" style="background-color: ${data.color}"></div>
-          <div class="chart-detail-info">
-            <h4>${data.label}</h4>
-            <p class="chart-detail-value">${data.value} pazienti</p>
-            <p class="chart-detail-percentage">${data.percentage}% del totale</p>
-          </div>
+      <div class="chart-modal-content" style="border-top: 4px solid ${data.color};">
+        <div class="chart-modal-header">
+          <h3>Dettagli Grafico</h3>
+          <button class="chart-modal-close" aria-label="Chiudi">&times;</button>
         </div>
-        <div class="chart-detail-additional">
-          <h5>Informazioni aggiuntive</h5>
-          <p>Totale complessivo: ${data.total} pazienti</p>
-          <p>Selezionato: ${data.label}</p>
+        <div class="chart-modal-body">
+          <div class="chart-detail-vertical">
+            <div class="chart-detail-color" style="background-color: ${data.color}"></div>
+            <div class="chart-detail-info">
+              <h4>${data.label}</h4>
+              <p class="chart-detail-value">${data.value} pazienti</p>
+              <p class="chart-detail-percentage">${data.percentage}% del totale</p>
+            </div>
+          </div>
+          <div class="chart-detail-additional">
+            <p><strong>Totale complessivo:</strong> ${data.total} pazienti</p>
+          </div>
         </div>
       </div>
     `;

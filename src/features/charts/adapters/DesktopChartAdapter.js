@@ -163,7 +163,7 @@ class DesktopChartAdapter {
   _getTooltipOptions(existingOptions = {}) {
     return {
       ...existingOptions,
-      enabled: true,
+      enabled: false,
       mode: 'index',
       intersect: false,
       backgroundColor: 'rgba(0, 0, 0, 0.9)',

@@ -3,20 +3,19 @@
 ## Sommario
 
 - **File sorgente totali**: 70
-- **File con test**: 25
-- **File senza test**: 45
-- **Coverage stimata**: 35.7%
+- **File con test**: 27
+- **File senza test**: 43
+- **Coverage stimata**: 38.6%
 
 ## File senza test per priorità
 
-### 🔴 Alta Priorità (40 file)
+### 🔴 Alta Priorità (38 file)
+
 - `src/app/main.js`
 - `src/app/mobile/mobile-navigation.js`
 - `src/app/router.js`
 - `src/core/services/bootstrapService.js`
 - `src/core/services/navigationService.js`
-- `src/core/services/notificationService.js`
-- `src/core/services/supabaseClient.js`
 - `src/core/services/viteSupabaseMiddleware.js`
 - `src/core/utils/extensionErrorHandler.js`
 - `src/core/utils/oauthDebug.js`
@@ -53,8 +52,8 @@
 
 ### 🟡 Media Priorità (0 file)
 
-
 ### 🟢 Bassa Priorità (5 file)
+
 - `src/app/config/constants.js`
 - `src/app/config/environment.js`
 - `src/features/charts/views/grafico.js`
@@ -76,6 +75,7 @@
 ### Template per test mancanti:
 
 Per ogni file ad alta priorità, considera di implementare:
+
 - Test di istanziazione/inizializzazione
 - Test dei metodi pubblici principali
 - Test di gestione errori
@@ -84,6 +84,7 @@ Per ogni file ad alta priorità, considera di implementare:
 ## File di test esistenti
 
 I seguenti test sono già implementati e funzionanti:
+
 - `tests/ChartTypeManager-bar.test.js`
 - `tests/ConfirmModal.test.js`
 - `tests/EmptyState.test.js`
@@ -131,7 +132,9 @@ I seguenti test sono già implementati e funzionanti:
 - `tests/uiStateService.test.js`
 - `tests/unit/core/authService.test.js`
 - `tests/unit/core/errorService.test.js`
+- `tests/unit/core/notificationService.test.js`
 - `tests/unit/core/stateService.test.js`
+- `tests/unit/core/supabaseClient.test.js`
 - `tests/unit/shared/components/ActionButtons.test.js`
 - `tests/unit/shared/components/LoadingSpinner.test.js`
 - `tests/unit/shared/components/StatusBadge.simple.test.js`
@@ -141,4 +144,5 @@ I seguenti test sono già implementati e funzionanti:
 - `tests/unit/tools/TestSuiteGenerator.test.js`
 
 ---
-*Report generato il 19/07/2025, 17:55:39*
+
+_Report generato il 19/07/2025, 18:15:44_

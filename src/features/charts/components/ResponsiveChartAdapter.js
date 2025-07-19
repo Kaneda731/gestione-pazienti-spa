@@ -181,6 +181,44 @@ class ResponsiveChartAdapter {
   detectDevice() {
     return this.adapterFactory.getCurrentDeviceType();
   }
+
+  /**
+   * Implementa il layout responsive per dispositivi mobili
+   * @param {HTMLElement} container - Il container del grafico
+   * @param {Chart} chart - L'istanza del grafico (opzionale)
+   * @deprecated Utilizzare adaptLayout() invece
+   */
+  implementMobileResponsiveLayout(container, chart) {
+    console.warn('implementMobileResponsiveLayout è deprecato. Utilizzare adaptLayout() invece.');
+    if (this.adapterFactory.isMobile()) {
+      this.adaptLayout(container);
+    }
+  }
+
+  /**
+   * Implementa il layout responsive per dispositivi desktop
+   * @param {HTMLElement} container - Il container del grafico
+   * @param {Chart} chart - L'istanza del grafico (opzionale)
+   * @deprecated Utilizzare adaptLayout() invece
+   */
+  implementDesktopResponsiveLayout(container, chart) {
+    console.warn('implementDesktopResponsiveLayout è deprecato. Utilizzare adaptLayout() invece.');
+    if (this.adapterFactory.isDesktop()) {
+      this.adaptLayout(container);
+    }
+  }
+
+  /**
+   * Pulisce le risorse utilizzate dall'adapter
+   * @deprecated Non più necessario nella nuova implementazione
+   */
+  cleanup() {
+    console.warn('cleanup è deprecato. Le risorse vengono gestite automaticamente.');
+    if (this.resizeHandler) {
+      window.removeEventListener('resize', this.resizeHandler);
+      this.resizeHandler = null;
+    }
+  }
 }
 
 export default ResponsiveChartAdapter;

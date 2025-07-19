@@ -1,0 +1,65 @@
+// Tablet-specific chart styles
+.chart-tablet {
+  .chart-container {
+    padding: 1rem;
+    min-height: 400px;
+  }
+  
+  .chart-controls {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    
+    .chart-type-selector {
+      display: flex;
+      gap: 0.75rem;
+      
+      button {
+        padding: 0.75rem 1.25rem;
+        font-size: 1rem;
+        border: 2px solid var(--bs-border-color);
+        border-radius: 8px;
+        background: var(--bs-body-bg);
+        color: var(--bs-body-color);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        min-height: 44px;
+        
+        &:hover, &:focus {
+          border-color: var(--bs-primary);
+          background: var(--bs-primary-bg-subtle);
+        }
+        
+        &.active {
+          background: var(--bs-primary);
+          color: var(--bs-white);
+          border-color: var(--bs-primary);
+        }
+      }
+    }
+    
+    .chart-export-controls {
+      display: flex;
+      gap: 0.75rem;
+      margin-left: auto;
+      
+      button {
+        padding: 0.75rem 1rem;
+        font-size: 0.95rem;
+        border: 1px solid var(--bs-border-color);
+        border-radius: 6px;
+        background: var(--bs-body-bg);
+        color: var(--bs-body-color);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        
+        &:hover, &:focus {
+          background: var(--bs-secondary-bg);
+          border-color: var(--bs-secondary);
+        }
+      }
+    }
+  }
+}

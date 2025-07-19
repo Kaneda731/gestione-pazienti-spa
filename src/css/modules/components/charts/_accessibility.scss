@@ -1,0 +1,83 @@
+// Accessibility improvements for mobile
+@media (prefers-reduced-motion: reduce) {
+  .mobile-chart-btn,
+  .mobile-legend-item,
+  .context-menu-item,
+  .swipe-indicator {
+    transition: none !important;
+    animation: none !important;
+  }
+  
+  .chart-mobile-optimized .swipe-indicator {
+    animation: none !important;
+  }
+}
+
+// High contrast mode support
+@media (prefers-contrast: high) {
+  .mobile-chart-controls,
+  .mobile-chart-legend,
+  .mobile-context-menu {
+    border-width: 2px;
+    border-color: var(--bs-body-color);
+  }
+  
+  .mobile-chart-btn,
+  .mobile-legend-item {
+    border-width: 2px;
+  }
+  
+  .legend-color-indicator {
+    border-width: 3px;
+    border-color: var(--bs-body-color) !important;
+  }
+}
+
+// Print styles for mobile charts
+@media print {
+  .mobile-chart-controls,
+  .swipe-indicator,
+  .mobile-context-menu {
+    display: none !important;
+  }
+  
+  .chart-mobile-optimized {
+    box-shadow: none;
+    border: 1px solid #000;
+  }
+  
+  .mobile-chart-legend {
+    page-break-inside: avoid;
+    border: 1px solid #000;
+    background: white !important;
+  }
+}
+
+// High DPI optimizations
+.chart-high-dpi {
+  canvas {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}
+
+// Dark mode support
+[data-bs-theme="dark"] {
+  .chart-mobile, .chart-tablet, .chart-desktop {
+    .chart-controls button {
+      border-color: var(--bs-border-color);
+      background: var(--bs-body-bg);
+      color: var(--bs-body-color);
+      
+      &:hover, &:focus {
+        background: var(--bs-secondary-bg);
+        border-color: var(--bs-secondary);
+      }
+    }
+  }
+  
+  .chart-desktop .chart-legend-sidebar {
+    background: var(--bs-body-bg);
+    border-color: var(--bs-border-color);
+  }
+}

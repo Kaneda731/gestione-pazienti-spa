@@ -1,0 +1,96 @@
+// Base chart styles
+.chart-container {
+  position: relative;
+  width: 100%;
+  margin: 0 auto;
+  padding: 1rem;
+  
+  canvas {
+    max-width: 100%;
+    height: auto !important;
+  }
+}
+
+// Animation classes for smooth transitions
+.chart-transition {
+  transition: all 0.3s ease-in-out;
+}
+
+.chart-fade-in {
+  animation: chartFadeIn 0.5s ease-in-out;
+}
+
+@keyframes chartFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Loading state
+.chart-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  
+  .loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--bs-border-color);
+    border-top: 4px solid var(--bs-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+// Touch optimized elements
+.touch-optimized {
+  min-height: 44px !important;
+  min-width: 44px !important;
+  
+  &:not(input) {
+    padding: 0.75rem !important;
+  }
+}
+
+// Zoom states
+.chart-zoomed {
+  overflow: auto;
+  
+  canvas {
+    cursor: grab;
+    transition: transform 0.3s ease;
+    
+    &:active {
+      cursor: grabbing;
+    }
+  }
+}
+
+// Touch feedback states
+.chart-touching {
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
+  
+  canvas {
+    filter: brightness(0.95);
+  }
+}
+
+.chart-dragging {
+  cursor: grabbing;
+  
+  canvas {
+    pointer-events: none;
+  }
+}

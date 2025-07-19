@@ -18,7 +18,7 @@ class ChartModals {
       const link = document.createElement('link');
       link.id = 'chart-modals-styles';
       link.rel = 'stylesheet';
-      link.href = '/src/features/charts/styles/chart-modals.css';
+      link.href = '../styles/chart-modals.css';
       document.head.appendChild(link);
     }
   }

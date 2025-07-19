@@ -19,7 +19,7 @@ class ChartToasts {
       const link = document.createElement('link');
       link.id = 'chart-toasts-styles';
       link.rel = 'stylesheet';
-      link.href = '/src/features/charts/styles/chart-toasts.css';
+      link.href = '../styles/chart-toasts.css';
       document.head.appendChild(link);
     }
   }

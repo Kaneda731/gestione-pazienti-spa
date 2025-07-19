@@ -39,7 +39,7 @@ class ResponsiveChartAdapter {
       const link = document.createElement('link');
       link.id = 'chart-responsive-styles';
       link.rel = 'stylesheet';
-      link.href = '/src/features/charts/styles/chart-responsive.css';
+      link.href = '../styles/chart-responsive.css';
       document.head.appendChild(link);
     }
   }

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Custom Select Gestione Pazienti</title>
+    <link rel="stylesheet" href="./src/css/style.css">
+    <style>
+        body {
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .test-section {
+            background: #f5f5f5;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+        }
+        .debug-info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Custom Select - Gestione Pazienti</h1>
+    
+    <div class="debug-info">
+        <strong>Debug Info:</strong><br>
+        Viewport width: <span id="viewport-width"></span><br>
+        User agent: <span id="user-agent"></span><br>
+        Touch support: <span id="touch-support"></span><br>
+        MobileCardManager loaded: <span id="mobile-manager-loaded"></span><br>
+        CustomSelect loaded: <span id="custom-select-loaded"></span>
+    </div>
+
+    <div class="test-section">
+        <h3>Select come nell'Elenco Pazienti</h3>
+        <p>Queste sono copie esatte delle select dell'elenco pazienti:</p>
+        
+        <div class="row">
+            <div class="col-md-3">
+                <label for="list-filter-reparto" class="form-label">Reparto</label>
+                <select id="list-filter-reparto" class="form-select form-select-sm" data-custom="true">
+                    <option value="">Tutti i reparti</option>
+                    <option value="cardiologia">Cardiologia</option>
+                    <option value="neurologia">Neurologia</option>
+                    <option value="ortopedia">Ortopedia</option>
+                    <option value="pediatria">Pediatria</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="list-filter-diagnosi" class="form-label">Diagnosi</label>
+                <select id="list-filter-diagnosi" class="form-select form-select-sm" data-custom="true">
+                    <option value="">Tutte le diagnosi</option>
+                    <option value="ipertensione">Ipertensione</option>
+                    <option value="diabete">Diabete</option>
+                    <option value="polmonite">Polmonite</option>
+                    <option value="frattura">Frattura</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="list-filter-stato" class="form-label">Stato</label>
+                <select id="list-filter-stato" class="form-select form-select-sm" data-custom="true">
+                    <option value="">Tutti gli stati</option>
+                    <option value="stabile">Stabile</option>
+                    <option value="critico">Critico</option>
+                    <option value="dimesso">Dimesso</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h3>Select come nel Form Pazienti</h3>
+        <p>Queste sono copie delle select del form di inserimento:</p>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <label for="diagnosi" class="form-label">Diagnosi</label>
+                <select class="form-select" id="diagnosi" name="diagnosi" required data-custom="true">
+                    <option value="">Seleziona diagnosi</option>
+                    <option value="ipertensione">Ipertensione</option>
+                    <option value="diabete">Diabete</option>
+                    <option value="polmonite">Polmonite</option>
+                    <option value="frattura">Frattura</option>
+                    <option value="infarto">Infarto</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label for="reparto_appartenenza" class="form-label">Reparto di appartenenza</label>
+                <select class="form-select" id="reparto_appartenenza" name="reparto_appartenenza" required data-custom="true">
+                    <option value="">Seleziona reparto</option>
+                    <option value="cardiologia">Cardiologia</option>
+                    <option value="neurologia">Neurologia</option>
+                    <option value="ortopedia">Ortopedia</option>
+                    <option value="pediatria">Pediatria</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h3>Test con Modal Forzato</h3>
+        <p>Select con data-modal="true" per forzare il modal anche su desktop:</p>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <label for="test-modal-select" class="form-label">Test Modal Select</label>
+                <select id="test-modal-select" class="form-select" data-custom="true" data-modal="true" data-label="Test">
+                    <option value="">Seleziona opzione...</option>
+                    <option value="1">Opzione 1</option>
+                    <option value="2">Opzione 2</option>
+                    <option value="3">Opzione 3</option>
+                    <option value="4">Opzione 4</option>
+                    <option value="5">Opzione 5</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="debug-info">
+        <strong>Initialization Status:</strong><br>
+        <div id="init-status">Initializing...</div>
+    </div>
+
+    <script src="./src/js/mobile-card-manager.js"></script>
+    <script src="./src/js/components/CustomSelect.js"></script>
+    <script>
+        // Mock logger per evitare errori
+        window.appLogger = {
+            debug: (...args) => console.log('[DEBUG]', ...args),
+            error: (...args) => console.error('[ERROR]', ...args),
+            info: (...args) => console.info('[INFO]', ...args)
+        };
+
+        // Debug caricamento script
+        console.log('Scripts loaded, checking what is available...');
+        console.log('window.CustomSelect:', typeof window.CustomSelect);
+        console.log('window.initCustomSelects:', typeof window.initCustomSelects);
+        console.log('window.MobileCardManager:', typeof window.MobileCardManager);
+        
+        // Controlla se ci sono errori nella console
+        window.addEventListener('error', (e) => {
+            console.error('JavaScript Error:', e.error);
+            document.getElementById('init-status').innerHTML += '<br>❌ JavaScript Error: ' + e.message;
+        });
+
+        // Aggiorna le info di debug
+        function updateDebugInfo() {
+            document.getElementById('viewport-width').textContent = window.innerWidth + 'px';
+            document.getElementById('user-agent').textContent = navigator.userAgent.slice(0, 50) + '...';
+            document.getElementById('touch-support').textContent = 'ontouchstart' in window ? 'Yes' : 'No';
+            document.getElementById('mobile-manager-loaded').textContent = typeof MobileCardManager !== 'undefined' ? 'Yes' : 'No';
+            document.getElementById('custom-select-loaded').textContent = typeof CustomSelect !== 'undefined' ? 'Yes' : 'No';
+        }
+
+        updateDebugInfo();
+
+        // Inizializza le custom select e monitora errori
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM loaded, checking again...');
+            console.log('window.initCustomSelects:', typeof window.initCustomSelects);
+            console.log('CustomSelect class:', typeof CustomSelect);
+            
+            try {
+                if (window.initCustomSelects) {
+                    const result = window.initCustomSelects();
+                    document.getElementById('init-status').innerHTML = `
+                        ✅ Custom selects initialized<br>
+                        Success: ${result.success}, Errors: ${result.errors}
+                    `;
+                    console.log('Custom selects init result:', result);
+                } else {
+                    document.getElementById('init-status').innerHTML = `
+                        ❌ window.initCustomSelects not found<br>
+                        Available on window: ${Object.keys(window).filter(k => k.includes('Custom') || k.includes('init')).join(', ')}
+                    `;
+                    
+                    // Prova inizializzazione manuale
+                    console.log('Trying manual initialization...');
+                    if (typeof CustomSelect !== 'undefined') {
+                        const selects = document.querySelectorAll('.form-select[data-custom="true"]');
+                        console.log('Found selects for manual init:', selects.length);
+                        let success = 0;
+                        selects.forEach(select => {
+                            try {
+                                if (!select.customSelectInstance) {
+                                    select.customSelectInstance = new CustomSelect(select);
+                                    success++;
+                                }
+                            } catch (error) {
+                                console.error('Manual init error:', error);
+                            }
+                        });
+                        document.getElementById('init-status').innerHTML += `<br>🔧 Manual init: ${success} selects`;
+                    }
+                }
+            } catch (error) {
+                document.getElementById('init-status').textContent = '❌ Error during initialization: ' + error.message;
+                console.error('Custom selects initialization error:', error);
+            }
+
+            // Test click sui trigger delle custom select
+            setTimeout(() => {
+                const triggers = document.querySelectorAll('.custom-select-trigger');
+                console.log('Found custom select triggers:', triggers.length);
+                
+                triggers.forEach((trigger, index) => {
+                    console.log(`Trigger ${index}:`, trigger);
+                    
+                    // Aggiungi listener per debug
+                    trigger.addEventListener('click', (e) => {
+                        console.log(`Custom select ${index} clicked:`, e);
+                    });
+                });
+            }, 1000);
+        });
+
+        // Aggiorna debug info su resize
+        window.addEventListener('resize', updateDebugInfo);
+    </script>
+</body>
+</html>

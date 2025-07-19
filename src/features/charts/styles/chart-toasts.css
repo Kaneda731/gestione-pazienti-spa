@@ -1,0 +1,98 @@
+/**
+ * Stili per i toast dei grafici
+ */
+
+/* Stili base per i toast */
+.chart-toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  z-index: 1100;
+  min-width: 250px;
+  text-align: center;
+  animation: toastFadeIn 0.3s ease-out;
+}
+
+.chart-toast.success {
+  background-color: rgba(40, 167, 69, 0.9);
+}
+
+.chart-toast.error {
+  background-color: rgba(220, 53, 69, 0.9);
+}
+
+.chart-toast.info {
+  background-color: rgba(23, 162, 184, 0.9);
+}
+
+.chart-toast.warning {
+  background-color: rgba(255, 193, 7, 0.9);
+}
+
+/* Stili specifici per toast mobile */
+.mobile-chart-toast {
+  bottom: 10px;
+  padding: 10px 15px;
+  min-width: 200px;
+  font-size: 0.9rem;
+}
+
+/* Stili specifici per toast desktop */
+.desktop-chart-toast {
+  bottom: 30px;
+  padding: 15px 25px;
+  min-width: 300px;
+  font-size: 1rem;
+}
+
+/* Animazioni */
+@keyframes toastFadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes toastFadeOut {
+  from {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+  }
+}
+
+/* Supporto per tema scuro */
+@media (prefers-color-scheme: dark) {
+  .chart-toast {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  }
+  
+  .chart-toast.success {
+    background-color: rgba(40, 167, 69, 0.8);
+  }
+  
+  .chart-toast.error {
+    background-color: rgba(220, 53, 69, 0.8);
+  }
+  
+  .chart-toast.info {
+    background-color: rgba(23, 162, 184, 0.8);
+  }
+  
+  .chart-toast.warning {
+    background-color: rgba(255, 193, 7, 0.8);
+  }
+}

@@ -14,17 +14,17 @@ class ChartTypeManager {
       pie: { 
         name: 'Torta', 
         renderer: this.renderPieChart.bind(this),
-        icon: '<i class="fas fa-chart-pie"></i>'
+        icon: '<span class="material-icons">pie_chart</span>'
       },
       bar: { 
         name: 'Barre', 
         renderer: this.renderBarChart.bind(this),
-        icon: '<i class="fas fa-chart-bar"></i>'
+        icon: '<span class="material-icons">bar_chart</span>'
       },
       line: { 
         name: 'Linee', 
         renderer: this.renderLineChart.bind(this),
-        icon: '<i class="fas fa-chart-line"></i>'
+        icon: '<span class="material-icons">show_chart</span>'
       }
     };
     this.currentType = 'pie';

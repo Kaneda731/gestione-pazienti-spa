@@ -172,14 +172,14 @@ function initExportButtons() {
     const exportBtn = document.createElement('button');
     exportBtn.id = 'chart-export-btn';
     exportBtn.className = 'btn btn-sm btn-outline-primary me-2';
-    exportBtn.innerHTML = '<i class="fas fa-download"></i> Esporta';
+    exportBtn.innerHTML = '<span class="material-icons">download</span> Esporta';
     exportBtn.addEventListener('click', handleExportChart);
     
     // Crea il pulsante di condivisione
     const shareBtn = document.createElement('button');
     shareBtn.id = 'chart-share-btn';
     shareBtn.className = 'btn btn-sm btn-outline-secondary';
-    shareBtn.innerHTML = '<i class="fas fa-share-alt"></i> Condividi';
+    shareBtn.innerHTML = '<span class="material-icons">share</span> Condividi';
     shareBtn.addEventListener('click', handleShareChart);
     
     // Aggiungi i pulsanti al container

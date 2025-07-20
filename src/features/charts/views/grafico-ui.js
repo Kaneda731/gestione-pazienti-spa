@@ -124,11 +124,12 @@ async function initChartTypeSelector() {
             selector.className = 'form-select form-select-sm';
             selector.setAttribute('data-custom', 'true');
             
-            // Aggiungi le opzioni
+            // Aggiungi le opzioni (solo testo, le icone verranno aggiunte tramite CSS)
             chartTypes.forEach(type => {
                 const option = document.createElement('option');
                 option.value = type.id;
-                option.textContent = `${type.icon} ${type.name}`;
+                option.textContent = type.name;
+                option.setAttribute('data-icon', type.icon);
                 selector.appendChild(option);
             });
             

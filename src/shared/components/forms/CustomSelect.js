@@ -101,7 +101,12 @@ export class CustomSelect {
             const optionElement = document.createElement('div');
             optionElement.className = 'custom-select-option';
             optionElement.dataset.value = option.value;
-            optionElement.textContent = option.textContent;
+            // Supporta icone tramite data-icon attribute
+            if (option.hasAttribute('data-icon')) {
+                optionElement.innerHTML = `${option.getAttribute('data-icon')} ${option.textContent}`;
+            } else {
+                optionElement.textContent = option.textContent;
+            }
             optionElement.addEventListener('click', (e) => {
                 if (this.mobileModal) return;
                 this.selectOption(option.value, option.textContent);
@@ -213,7 +218,15 @@ export class CustomSelect {
         this.selectedValue = value;
         this.selectedText = text;
         const label = this.wrapper.querySelector('.custom-select-label');
-        if (label) label.textContent = text;
+        if (label) {
+            // Supporta icone tramite data-icon attribute
+            const option = this.selectElement.querySelector(`option[value="${value}"]`);
+            if (option && option.hasAttribute('data-icon')) {
+                label.innerHTML = `${option.getAttribute('data-icon')} ${text}`;
+            } else {
+                label.textContent = text;
+            }
+        }
         this.selectElement.value = value;
         const changeEvent = new Event('change', { bubbles: true });
         this.selectElement.dispatchEvent(changeEvent);

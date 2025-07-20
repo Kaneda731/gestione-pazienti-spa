@@ -102,7 +102,7 @@ async function initChartControls() {
 }
 
 /**
- * Inizializza il selettore del tipo di grafico
+ * Inizializza il selettore del tipo di grafico con CustomSelect
  */
 async function initChartTypeSelector() {
     try {
@@ -112,22 +112,23 @@ async function initChartTypeSelector() {
         // Crea il selettore se non esiste
         if (!dom.chartTypeSelector) {
             const selectorContainer = document.createElement('div');
-            selectorContainer.className = 'chart-type-selector-container';
+            selectorContainer.className = 'chart-type-selector-container mb-3';
             
             const selectorLabel = document.createElement('label');
             selectorLabel.htmlFor = 'chart-type-selector';
-            selectorLabel.className = 'me-2';
+            selectorLabel.className = 'form-label mb-2';
             selectorLabel.textContent = 'Tipo di grafico:';
             
             const selector = document.createElement('select');
             selector.id = 'chart-type-selector';
             selector.className = 'form-select form-select-sm';
+            selector.setAttribute('data-custom', 'true');
             
             // Aggiungi le opzioni
             chartTypes.forEach(type => {
                 const option = document.createElement('option');
                 option.value = type.id;
-                option.innerHTML = `${type.icon} ${type.name}`;
+                option.textContent = `${type.icon} ${type.name}`;
                 selector.appendChild(option);
             });
             
@@ -141,6 +142,17 @@ async function initChartTypeSelector() {
             selectorContainer.appendChild(selectorLabel);
             selectorContainer.appendChild(selector);
             dom.chartControls.appendChild(selectorContainer);
+            
+            // Inizializza CustomSelect per questo elemento specifico
+            initCustomSelects('#chart-type-selector');
+            
+            // Aggiorna il CustomSelect con il valore corrente
+            setTimeout(() => {
+                updateCustomSelect('#chart-type-selector');
+            }, 100);
+            
+            // Aggiungi listener per eventi di cambio tipo grafico da mobile (swipe)
+            document.addEventListener('chartTypeChange', handleMobileChartTypeChange);
         }
     } catch (error) {
         console.error('Errore nell\'inizializzazione del selettore del tipo di grafico:', error);
@@ -178,11 +190,51 @@ function initExportButtons() {
 }
 
 /**
- * Gestisce il cambio del tipo di grafico
+ * Gestisce il cambio del tipo di grafico dal selettore
  * @param {Event} event - L'evento change
  */
 function handleChartTypeChange(event) {
     currentChartType = event.target.value;
+    
+    // Se c'è un grafico attivo, ridisegnalo con il nuovo tipo
+    if (currentChart) {
+        const filters = getFilters();
+        drawChartWithCurrentData(filters);
+    }
+}
+
+/**
+ * Gestisce il cambio del tipo di grafico da mobile (swipe)
+ * @param {CustomEvent} event - L'evento personalizzato con direction
+ */
+function handleMobileChartTypeChange(event) {
+    const direction = event.detail.direction;
+    const availableTypes = ['pie', 'bar', 'line'];
+    const currentIndex = availableTypes.indexOf(currentChartType);
+    
+    let newIndex;
+    if (direction === 'next') {
+        newIndex = (currentIndex + 1) % availableTypes.length;
+    } else {
+        newIndex = currentIndex === 0 ? availableTypes.length - 1 : currentIndex - 1;
+    }
+    
+    const newChartType = availableTypes[newIndex];
+    currentChartType = newChartType;
+    
+    // Aggiorna il CustomSelect con il nuovo valore
+    const selector = dom.chartTypeSelector;
+    if (selector) {
+        selector.value = newChartType;
+        
+        // Aggiorna il CustomSelect se è inizializzato
+        if (selector.customSelectInstance) {
+            selector.customSelectInstance.setValue(newChartType);
+        } else {
+            // Fallback: aggiorna usando la funzione updateCustomSelect
+            updateCustomSelect('#chart-type-selector');
+        }
+    }
     
     // Se c'è un grafico attivo, ridisegnalo con il nuovo tipo
     if (currentChart) {
@@ -244,6 +296,9 @@ export function cleanupUI() {
         datepickerInstance.destroy();
         datepickerInstance = null;
     }
+    
+    // Rimuovi il listener per eventi di cambio tipo grafico da mobile
+    document.removeEventListener('chartTypeChange', handleMobileChartTypeChange);
     
     // Pulisci i componenti del grafico
     cleanupChartComponents();

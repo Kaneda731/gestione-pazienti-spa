@@ -358,14 +358,15 @@
 }
 
 /**
- * Desktop chart panel mixin (side panel style)
+ * Desktop chart panel mixin (side panel style) - Transparent version
  */
 @mixin chart-panel-desktop {
   position: absolute;
   top: 0;
   right: 0;
   width: 300px;
-  background: var(--card-bg);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
   border-left: 1px solid var(--border-color);
   height: 100%;
   box-shadow: var(--shadow-lg);
@@ -374,7 +375,7 @@
   overflow-y: auto;
   
   @media (prefers-color-scheme: dark) {
-    background: var(--dark-color);
+    background: rgba(30, 41, 59, 0.95);
     border-left-color: rgba(255, 255, 255, 0.1);
   }
 }

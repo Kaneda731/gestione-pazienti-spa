@@ -385,11 +385,16 @@ $modal-z-indices: (
 // =============================================================================
 
 @media (prefers-color-scheme: dark) {
-  .chart-modal-content,
-  .desktop-chart-panel {
+  .chart-modal-content {
     background: var(--dark-color);
     color: var(--light-color);
     border-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .desktop-chart-panel {
+    background: rgba(30, 41, 59, 0.95);
+    color: var(--light-color);
+    border-left-color: rgba(255, 255, 255, 0.1);
   }
   
   .chart-modal-header {

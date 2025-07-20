@@ -333,3 +333,40 @@ select.custom-select-original {
         color: var(--text-muted);
     }
 }
+
+/* Uniforma altezza per pulsanti Applica/Resetta e selettore tipo grafico */
+.chart-type-selector-container {
+    .custom-select-trigger,
+    .form-select {
+        height: 48px !important;
+        min-height: 48px !important;
+        display: flex;
+        align-items: center;
+    }
+}
+
+#apply-filters-btn,
+#reset-filters-btn {
+    height: 48px !important;
+    min-height: 48px !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Media query per mobile - uniforma altezza */
+@media (max-width: 767px) {
+    .chart-type-selector-container {
+        .custom-select-trigger,
+        .form-select {
+            height: 44px !important;
+            min-height: 44px !important;
+        }
+    }
+    
+    #apply-filters-btn,
+    #reset-filters-btn {
+        height: 44px !important;
+        min-height: 44px !important;
+    }
+}

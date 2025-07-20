@@ -83,21 +83,10 @@ export async function initializeUI() {
  * Inizializza i controlli del grafico (selettore tipo, pulsanti esportazione)
  */
 async function initChartControls() {
-    // Verifica se i controlli del grafico esistono già
-    if (!dom.chartControls) {
-        // Crea il container dei controlli se non esiste
-        const controlsContainer = document.createElement('div');
-        controlsContainer.id = 'chart-controls';
-        controlsContainer.className = 'chart-controls d-flex justify-content-between align-items-center mb-3';
-        
-        // Inserisci il container prima del container del grafico
-        dom.chartContainer.parentNode.insertBefore(controlsContainer, dom.chartContainer);
-    }
-    
     // Aggiungi il selettore del tipo di grafico
     await initChartTypeSelector();
     
-    // Aggiungi i pulsanti di esportazione
+    // Aggiungi i pulsanti di esportazione sotto al grafico
     initExportButtons();
 }
 
@@ -111,13 +100,12 @@ async function initChartTypeSelector() {
         
         // Crea il selettore se non esiste
         if (!dom.chartTypeSelector) {
-            const selectorContainer = document.createElement('div');
-            selectorContainer.className = 'chart-type-selector-container mb-3';
+            // Trova la riga con i pulsanti apply/reset
+            const buttonsRow = document.querySelector('.filters-fieldset .row.mt-3 .col-12.d-flex.justify-content-center');
             
-            const selectorLabel = document.createElement('label');
-            selectorLabel.htmlFor = 'chart-type-selector';
-            selectorLabel.className = 'form-label mb-2';
-            selectorLabel.textContent = 'Tipo di grafico:';
+            // Crea il container per il selettore tipo grafico
+            const selectorContainer = document.createElement('div');
+            selectorContainer.className = 'chart-type-selector-container ms-0 ms-md-3 mt-3 mt-md-0';
             
             const selector = document.createElement('select');
             selector.id = 'chart-type-selector';
@@ -139,10 +127,13 @@ async function initChartTypeSelector() {
             // Aggiungi l'evento change
             selector.addEventListener('change', handleChartTypeChange);
             
-            // Aggiungi gli elementi al DOM
-            selectorContainer.appendChild(selectorLabel);
+            // Aggiungi solo il selettore al DOM (senza label)
             selectorContainer.appendChild(selector);
-            dom.chartControls.appendChild(selectorContainer);
+            
+            // Inserisci il selettore accanto ai pulsanti esistenti
+            if (buttonsRow) {
+                buttonsRow.appendChild(selectorContainer);
+            }
             
             // Inizializza CustomSelect per questo elemento specifico
             initCustomSelects('#chart-type-selector');
@@ -164,14 +155,18 @@ async function initChartTypeSelector() {
  * Inizializza i pulsanti di esportazione
  */
 function initExportButtons() {
-    // Crea il container dei pulsanti se non esiste
+    // Trova il container sotto il grafico
+    const chartButtonsContainer = document.getElementById('chart-buttons-container');
+    if (!chartButtonsContainer) return;
+    
+    // Crea il container interno per centrare i pulsanti
     const buttonsContainer = document.createElement('div');
-    buttonsContainer.className = 'chart-export-buttons';
+    buttonsContainer.className = 'chart-export-buttons d-inline-flex gap-2';
     
     // Crea il pulsante di esportazione
     const exportBtn = document.createElement('button');
     exportBtn.id = 'chart-export-btn';
-    exportBtn.className = 'btn btn-sm btn-outline-primary me-2';
+    exportBtn.className = 'btn btn-sm btn-outline-primary';
     exportBtn.innerHTML = '<span class="material-icons">download</span> Esporta';
     exportBtn.addEventListener('click', handleExportChart);
     
@@ -186,8 +181,8 @@ function initExportButtons() {
     buttonsContainer.appendChild(exportBtn);
     buttonsContainer.appendChild(shareBtn);
     
-    // Aggiungi il container al DOM
-    dom.chartControls.appendChild(buttonsContainer);
+    // Aggiungi il container al DOM sotto il grafico
+    chartButtonsContainer.appendChild(buttonsContainer);
 }
 
 /**

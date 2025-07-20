@@ -1,25 +1,178 @@
 /**
- * Charts Module - Main file
+ * Charts Module - Main Entry Point
  * 
- * This file imports all chart-related styles from separate files
- * to improve maintainability and organization.
+ * Comprehensive chart styling system featuring:
+ * - Modular architecture for maintainability
+ * - Responsive design patterns
+ * - Accessibility enhancements
+ * - Performance optimizations
+ * - Dark mode support
+ * 
+ * Import Order:
+ * 1. Mixins and functions (dependencies for other modules)
+ * 2. Base styles (foundation)
+ * 3. Device-specific styles (responsive layers)
+ * 4. Component-specific styles (features)
+ * 5. Accessibility styles (enhancements)
+ * 
+ * @author Chart Team
+ * @version 2.0
+ * @since 1.0
  */
 
-// Import mixins first (needed by other modules)
+// =============================================================================
+// DEPENDENCIES - Import mixins and functions first
+// =============================================================================
+
+/**
+ * Chart mixins provide reusable patterns for:
+ * - Container styling with responsive behavior
+ * - Modal components with accessibility features
+ * - Toast notifications with type variants
+ * - Animation and interaction patterns
+ */
 @import "charts/chart-mixins";
 
-// Import base styles
+// =============================================================================
+// FOUNDATION - Base styles that other modules depend on
+// =============================================================================
+
+/**
+ * Base chart styles include:
+ * - Core container patterns
+ * - Animation system
+ * - Loading states
+ * - Touch optimizations
+ */
 @import "charts/base";
 
-// Import device-specific styles
+// =============================================================================
+// RESPONSIVE LAYERS - Device-specific optimizations
+// =============================================================================
+
+/**
+ * Mobile-first responsive design with:
+ * - Touch-optimized interactions
+ * - Performance optimizations
+ * - Gesture support
+ */
 @import "charts/mobile";
+
+/**
+ * Tablet-specific enhancements:
+ * - Balanced touch and hover interactions
+ * - Optimized layout patterns
+ */
 @import "charts/tablet";
+
+/**
+ * Desktop-specific features:
+ * - Advanced hover effects
+ * - Keyboard navigation
+ * - Enhanced interactions
+ */
 @import "charts/desktop";
 
-// Import component-specific styles
+// =============================================================================
+// COMPONENT FEATURES - Specific chart functionality
+// =============================================================================
+
+/**
+ * Modal system for chart interactions:
+ * - Responsive modal patterns
+ * - Accessibility features
+ * - Animation system
+ */
 @import "charts/modals";
+
+/**
+ * Responsive behavior system:
+ * - Breakpoint management
+ * - Device detection
+ * - Performance optimizations
+ */
 @import "charts/responsive";
+
+/**
+ * Toast notification system:
+ * - Multiple positioning options
+ * - Type variants (success, error, info, warning)
+ * - Enhanced accessibility
+ */
 @import "charts/toasts";
 
-// Import accessibility styles
+// =============================================================================
+// ACCESSIBILITY ENHANCEMENTS - Final layer for inclusive design
+// =============================================================================
+
+/**
+ * Accessibility improvements:
+ * - High contrast mode support
+ * - Reduced motion preferences
+ * - Screen reader optimizations
+ * - Keyboard navigation
+ */
 @import "charts/accessibility";
+
+// =============================================================================
+// CHART MODULE UTILITIES - Helper classes and overrides
+// =============================================================================
+
+/**
+ * Utility classes for common chart patterns
+ * These can be used to quickly apply consistent styling
+ */
+.chart-elevated {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+.chart-interactive {
+  cursor: pointer;
+  transition: var(--transition);
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.chart-disabled {
+  opacity: 0.6;
+  pointer-events: none;
+  filter: grayscale(50%);
+}
+
+/**
+ * Performance optimization classes
+ */
+.chart-optimized {
+  contain: layout style paint;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/**
+ * Print-specific styles
+ */
+@media print {
+  .chart-container {
+    box-shadow: none !important;
+    border: 1px solid #000 !important;
+    background: white !important;
+    
+    canvas {
+      max-height: 400px !important;
+    }
+  }
+  
+  .chart-controls,
+  .chart-toast,
+  .chart-modal {
+    display: none !important;
+  }
+}

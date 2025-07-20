@@ -1,29 +1,87 @@
-// Base chart styles
+/**
+ * Base Chart Styles - Foundation Module
+ * 
+ * Core styling patterns for all chart components including:
+ * - Base container styles
+ * - Animation system
+ * - Loading states
+ * - Touch optimizations
+ * 
+ * @author Chart Team
+ * @version 2.0
+ */
+
+// =============================================================================
+// BASE CHART CONTAINER - Enhanced with consistent patterns
+// =============================================================================
+
 .chart-container {
   position: relative;
   width: 100%;
   margin: 0 auto;
-  padding: 1rem;
+  padding: var(--spacing-md);
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
   
+  // Enhanced canvas styling with consistent patterns
   canvas {
     max-width: 100%;
     height: auto !important;
+    border-radius: calc(var(--border-radius) - 2px);
+    transition: var(--transition-fast);
+    
+    // Accessibility focus styles
+    &:focus {
+      outline: var(--focus-outline);
+      outline-offset: var(--focus-outline-offset);
+    }
+  }
+  
+  // Hover enhancements
+  &:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+  }
+  
+  // Dark mode support
+  @media (prefers-color-scheme: dark) {
+    background: var(--dark-color);
+    border-color: rgba(255, 255, 255, 0.1);
   }
 }
 
-// Animation classes for smooth transitions
+// =============================================================================
+// ANIMATION SYSTEM - Consolidated and enhanced
+// =============================================================================
+
+// Base transition class with consistent timing
 .chart-transition {
-  transition: all 0.3s ease-in-out;
+  transition: var(--transition);
 }
 
+// Enhanced fade-in animation
 .chart-fade-in {
-  animation: chartFadeIn 0.5s ease-in-out;
+  animation: chartFadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+// Slide-in animation for dynamic content
+.chart-slide-in {
+  animation: chartSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+// Scale animation for interactive elements
+.chart-scale-in {
+  animation: chartScaleIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+// Enhanced keyframe animations
 @keyframes chartFadeIn {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(var(--spacing-md));
   }
   to {
     opacity: 1;
@@ -31,26 +89,97 @@
   }
 }
 
-// Loading state
-.chart-loading {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 300px;
-  
-  .loading-spinner {
-    width: 40px;
-    height: 40px;
-    border: 4px solid var(--bs-border-color);
-    border-top: 4px solid var(--bs-primary);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
+@keyframes chartSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-var(--spacing-lg));
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
 }
 
+@keyframes chartScaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+// =============================================================================
+// LOADING STATES - Enhanced with consistent design
+// =============================================================================
+
+.chart-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  padding: var(--spacing-xl);
+  
+  .loading-spinner {
+    width: var(--spinner-size);
+    height: var(--spinner-size);
+    border: var(--spinner-border);
+    border-top: var(--spinner-border-top);
+    border-radius: 50%;
+    animation: spin var(--spinner-speed) linear infinite;
+    margin-bottom: var(--spacing-md);
+  }
+  
+  .loading-text {
+    color: var(--text-muted);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-bold);
+    text-align: center;
+    animation: pulse 2s ease-in-out infinite;
+  }
+}
+
+// Enhanced loading skeleton for better UX
+.chart-skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--bg-secondary);
+  border-radius: var(--border-radius);
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.4),
+      transparent
+    );
+    animation: shimmer 1.5s ease-in-out infinite;
+  }
+}
+
+// Enhanced keyframe animations
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }
 
 // Touch optimized elements

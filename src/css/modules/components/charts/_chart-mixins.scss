@@ -2,30 +2,95 @@
  * Chart Mixins - Reusable SCSS mixins for chart components
  * 
  * This file contains mixins for common chart patterns including:
- * - Chart containers
- * - Modal components
- * - Toast notifications
- * - Responsive behavior
+ * - Chart containers with responsive behavior
+ * - Modal components with accessibility features
+ * - Toast notifications with type variants
+ * - Animation and interaction patterns
+ * 
+ * @author Chart Team
+ * @version 2.0
  */
+
+// =============================================================================
+// SCSS FUNCTIONS FOR CHART CALCULATIONS
+// =============================================================================
+
+/**
+ * Calculate responsive chart height based on viewport and device type
+ * @param {string} $device - Device type (mobile, tablet, desktop)
+ * @param {number} $base-height - Base height in pixels
+ * @return {string} - Calculated height value
+ */
+@function calc-chart-height($device: 'mobile', $base-height: 300) {
+  $multiplier: 1;
+  
+  @if $device == 'mobile' {
+    $multiplier: 0.8;
+  } @else if $device == 'tablet' {
+    $multiplier: 1.2;
+  } @else if $device == 'desktop' {
+    $multiplier: 1.5;
+  }
+  
+  @return #{$base-height * $multiplier}px;
+}
+
+/**
+ * Generate color variants for chart elements
+ * @param {color} $base-color - Base color
+ * @param {number} $opacity - Opacity level (0-1)
+ * @return {color} - RGBA color value
+ */
+@function chart-color-variant($base-color, $opacity: 0.9) {
+  @return rgba($base-color, $opacity);
+}
 
 // =============================================================================
 // CHART CONTAINER MIXINS
 // =============================================================================
 
 /**
- * Base chart container mixin
+ * Base chart container mixin with enhanced features
  * @param {string} $min-height - Minimum height for the chart container
+ * @param {boolean} $enable-animations - Enable fade-in animations
+ * @param {boolean} $enable-touch - Enable touch optimizations
  */
-@mixin chart-container($min-height: 300px) {
+@mixin chart-container($min-height: 300px, $enable-animations: true, $enable-touch: false) {
   position: relative;
   box-sizing: border-box;
   min-height: $min-height;
   transition: var(--transition);
   border-radius: var(--border-radius);
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
   
+  // Enhanced canvas styling
   canvas {
     max-width: 100%;
     height: auto !important;
+    border-radius: calc(var(--border-radius) - 2px);
+    
+    // Focus management for accessibility
+    &:focus {
+      outline: var(--focus-outline);
+      outline-offset: var(--focus-outline-offset);
+    }
+  }
+  
+  // Optional animations
+  @if $enable-animations {
+    @include chart-fade-in;
+  }
+  
+  // Optional touch optimizations
+  @if $enable-touch {
+    @include chart-container-touch;
+  }
+  
+  // Dark mode support
+  @media (prefers-color-scheme: dark) {
+    background: var(--dark-color);
+    border-color: rgba(255, 255, 255, 0.1);
   }
 }
 
@@ -83,23 +148,54 @@
 // =============================================================================
 
 /**
- * Responsive chart sizing mixin
+ * Enhanced responsive chart sizing mixin with calculated heights
  * @param {string} $device - Device type (mobile, tablet, desktop)
+ * @param {boolean} $enable-touch - Enable touch optimizations for mobile
+ * @param {string} $aspect-ratio - Optional aspect ratio (16:9, 4:3, etc.)
  */
-@mixin responsive-chart($device: 'mobile') {
+@mixin responsive-chart($device: 'mobile', $enable-touch: true, $aspect-ratio: null) {
+  $base-height: 300;
+  
   @if $device == 'mobile' {
-    min-height: 300px;
+    min-height: calc-chart-height('mobile', $base-height);
     height: 60vh;
     padding: var(--spacing-sm);
-    @include chart-container-touch;
+    
+    @if $enable-touch {
+      @include chart-container-touch;
+    }
+    
+    // Mobile-specific optimizations
+    will-change: transform;
+    backface-visibility: hidden;
+    
   } @else if $device == 'tablet' {
-    min-height: 400px;
+    min-height: calc-chart-height('tablet', $base-height);
     height: 70vh;
     padding: var(--spacing-md);
+    
+    // Tablet hover effects
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+    
   } @else if $device == 'desktop' {
-    min-height: 500px;
+    min-height: calc-chart-height('desktop', $base-height);
     height: 80vh;
     padding: var(--spacing-lg);
+    
+    // Desktop advanced interactions
+    &:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-xl);
+    }
+  }
+  
+  // Optional aspect ratio constraint
+  @if $aspect-ratio {
+    aspect-ratio: #{$aspect-ratio};
+    height: auto;
   }
 }
 
@@ -288,49 +384,100 @@
 // =============================================================================
 
 /**
- * Base chart toast mixin
+ * Enhanced chart toast mixin with consistent color system
  * @param {string} $type - Toast type (default, success, error, info, warning)
+ * @param {string} $position - Toast position (bottom, top, top-right, etc.)
+ * @param {boolean} $enable-progress - Show progress bar for auto-dismiss
  */
-@mixin chart-toast($type: 'default') {
+@mixin chart-toast($type: 'default', $position: 'bottom', $enable-progress: false) {
   position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 12px 20px;
-  border-radius: var(--border-radius-sm);
-  box-shadow: var(--shadow-md);
   z-index: 1100;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius-sm);
+  box-shadow: var(--shadow-lg);
   min-width: 250px;
+  max-width: 400px;
   text-align: center;
   animation: toastFadeIn 0.3s ease-out;
   color: white;
+  font-weight: var(--font-weight-bold);
+  backdrop-filter: blur(8px);
   
+  // Position variants
+  @if $position == 'bottom' {
+    bottom: var(--spacing-md);
+    left: 50%;
+    transform: translateX(-50%);
+  } @else if $position == 'top' {
+    top: var(--spacing-md);
+    left: 50%;
+    transform: translateX(-50%);
+  } @else if $position == 'top-right' {
+    top: var(--spacing-md);
+    right: var(--spacing-md);
+  } @else if $position == 'bottom-right' {
+    bottom: var(--spacing-md);
+    right: var(--spacing-md);
+  }
+  
+  // Type-based styling using CSS custom properties
   @if $type == 'success' {
-    background-color: rgba(16, 185, 129, 0.9);
+    background-color: chart-color-variant(var(--success-color), 0.95);
+    border-left: 4px solid var(--success-light);
     
     @media (prefers-color-scheme: dark) {
-      background-color: rgba(16, 185, 129, 0.8);
+      background-color: chart-color-variant(var(--success-color), 0.85);
     }
   } @else if $type == 'error' {
-    background-color: rgba(239, 68, 68, 0.9);
+    background-color: chart-color-variant(var(--danger-color), 0.95);
+    border-left: 4px solid var(--danger-light);
     
     @media (prefers-color-scheme: dark) {
-      background-color: rgba(239, 68, 68, 0.8);
+      background-color: chart-color-variant(var(--danger-color), 0.85);
     }
   } @else if $type == 'info' {
-    background-color: rgba(6, 182, 212, 0.9);
+    background-color: chart-color-variant(var(--info-color), 0.95);
+    border-left: 4px solid var(--info-light);
     
     @media (prefers-color-scheme: dark) {
-      background-color: rgba(6, 182, 212, 0.8);
+      background-color: chart-color-variant(var(--info-color), 0.85);
     }
   } @else if $type == 'warning' {
-    background-color: rgba(245, 158, 11, 0.9);
+    background-color: chart-color-variant(var(--warning-color), 0.95);
+    border-left: 4px solid var(--warning-light);
     
     @media (prefers-color-scheme: dark) {
-      background-color: rgba(245, 158, 11, 0.8);
+      background-color: chart-color-variant(var(--warning-color), 0.85);
     }
   } @else {
-    background-color: rgba(0, 0, 0, 0.8);
+    background-color: rgba(0, 0, 0, 0.85);
+    border-left: 4px solid var(--secondary-color);
+  }
+  
+  // Optional progress bar
+  @if $enable-progress {
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 3px;
+      background: rgba(255, 255, 255, 0.4);
+      border-radius: 0 0 var(--border-radius-sm) var(--border-radius-sm);
+      animation: toastProgress 3s linear;
+    }
+  }
+  
+  // Accessibility improvements
+  &:focus {
+    outline: var(--focus-outline);
+    outline-offset: var(--focus-outline-offset);
+  }
+  
+  // Reduced motion support
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+    transition: opacity 0.2s ease;
   }
 }
 

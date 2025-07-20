@@ -1,44 +1,112 @@
 /**
- * Chart Responsive Styles
+ * Chart Responsive Styles - Optimized Module
  * 
- * Responsive styling for chart components across different devices.
- * Converted from chart-responsive.css and integrated with existing SCSS variables.
+ * Comprehensive responsive system for chart components featuring:
+ * - Mobile-first responsive design
+ * - Touch-optimized interactions
+ * - Performance optimizations
+ * - Accessibility enhancements
+ * 
+ * @author Chart Team
+ * @version 2.0
  */
 
 // Import chart mixins for reusable patterns
 @import 'chart-mixins';
 
 // =============================================================================
+// RESPONSIVE CONFIGURATION
+// =============================================================================
+
+$breakpoints: (
+  'mobile': 767px,
+  'tablet': 991px,
+  'desktop': 1200px
+);
+
+$chart-heights: (
+  'mobile': (min: 280px, preferred: 60vh, max: 400px),
+  'tablet': (min: 360px, preferred: 70vh, max: 500px),
+  'desktop': (min: 450px, preferred: 80vh, max: 600px)
+);
+
+// =============================================================================
 // BASE CHART CONTAINER STYLES
 // =============================================================================
 
 .chart-container {
-  @include chart-container;
-  @include chart-fade-in;
+  @include chart-container($enable-animations: true);
   
-  // Enhanced zoom state using existing primary color
+  // Enhanced interaction states
   &.zooming {
-    box-shadow: 0 0 0 2px var(--primary-color);
+    box-shadow: 0 0 0 3px var(--primary-color);
+    transform: scale(1.02);
+  }
+  
+  &.loading {
+    opacity: 0.7;
+    pointer-events: none;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 40px;
+      height: 40px;
+      margin: -20px 0 0 -20px;
+      border: 3px solid var(--border-color);
+      border-top-color: var(--primary-color);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
   }
 }
 
 // =============================================================================
-// DEVICE-SPECIFIC CHART STYLES
+// DEVICE-SPECIFIC CHART STYLES WITH ENHANCED FEATURES
 // =============================================================================
 
-// Mobile chart styles
 .chart-mobile {
-  @include responsive-chart('mobile');
+  @include responsive-chart('mobile', $enable-touch: true);
+  
+  // Mobile-specific enhancements
+  min-height: map-get(map-get($chart-heights, 'mobile'), 'min');
+  max-height: map-get(map-get($chart-heights, 'mobile'), 'max');
+  
+  // Performance optimizations for mobile
+  contain: layout style paint;
+  will-change: transform;
 }
 
-// Tablet chart styles  
 .chart-tablet {
-  @include responsive-chart('tablet');
+  @include responsive-chart('tablet', $enable-touch: false);
+  
+  min-height: map-get(map-get($chart-heights, 'tablet'), 'min');
+  max-height: map-get(map-get($chart-heights, 'tablet'), 'max');
+  
+  // Tablet hover enhancements
+  &:hover {
+    box-shadow: var(--shadow-lg);
+  }
 }
 
-// Desktop chart styles
 .chart-desktop {
-  @include responsive-chart('desktop');
+  @include responsive-chart('desktop', $enable-touch: false);
+  
+  min-height: map-get(map-get($chart-heights, 'desktop'), 'min');
+  max-height: map-get(map-get($chart-heights, 'desktop'), 'max');
+  
+  // Desktop advanced interactions
+  cursor: crosshair;
+  
+  &:hover {
+    box-shadow: var(--shadow-xl);
+    
+    canvas {
+      filter: brightness(1.05);
+    }
+  }
 }
 
 // =============================================================================
@@ -58,38 +126,123 @@
 }
 
 // =============================================================================
-// RESPONSIVE MEDIA QUERIES
+// RESPONSIVE MEDIA QUERIES WITH ENHANCED PATTERNS
 // =============================================================================
 
-// Mobile optimizations (max-width: 767px)
-@media (max-width: 767px) {
+// Mobile-first responsive approach
+@media (max-width: #{map-get($breakpoints, 'mobile')}) {
   .chart-legend {
     flex-direction: column;
     align-items: flex-start;
+    padding: var(--spacing-sm);
+    max-height: 200px;
+    overflow-y: auto;
     
     .chart-legend-item {
-      margin: var(--spacing-xs);
+      width: 100%;
+      margin: var(--spacing-xs) 0;
+      padding: var(--spacing-sm);
+      border-radius: var(--border-radius-sm);
+      background: var(--bg-secondary);
+      
+      &:hover {
+        background: var(--bg-tertiary);
+      }
     }
   }
   
   .chart-container {
-    // Enhanced mobile performance
+    // Enhanced mobile performance optimizations
     will-change: transform;
     backface-visibility: hidden;
+    contain: layout style paint;
+    
+    // Reduce motion for better performance
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
+      transform: none !important;
+    }
+  }
+  
+  // Mobile-specific chart controls
+  .chart-controls {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    
+    .chart-type-selector {
+      order: 1;
+    }
+    
+    .chart-export-controls {
+      order: 2;
+      justify-content: center;
+    }
   }
 }
 
-// Tablet optimizations (768px - 991px)
-@media (min-width: 768px) and (max-width: 991px) {
+// Tablet optimizations
+@media (min-width: #{map-get($breakpoints, 'mobile') + 1px}) and (max-width: #{map-get($breakpoints, 'tablet')}) {
   .chart-legend {
     justify-content: center;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    
+    .chart-legend-item {
+      flex: 0 1 auto;
+      min-width: 120px;
+    }
+  }
+  
+  .chart-controls {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
   }
 }
 
-// Desktop optimizations (min-width: 992px)
-@media (min-width: 992px) {
+// Desktop optimizations
+@media (min-width: #{map-get($breakpoints, 'tablet') + 1px}) {
   .chart-legend {
     justify-content: flex-end;
+    
+    .chart-legend-item {
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-sm);
+      }
+    }
+  }
+  
+  .chart-container {
+    // Desktop-specific enhancements
+    &:hover {
+      .chart-controls {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  }
+  
+  .chart-controls {
+    opacity: 0.8;
+    transform: translateY(-5px);
+    transition: var(--transition);
+  }
+}
+
+// Large desktop optimizations
+@media (min-width: #{map-get($breakpoints, 'desktop')}) {
+  .chart-container {
+    &.chart-desktop {
+      // Enhanced desktop interactions
+      &:hover {
+        transform: translateY(-5px);
+        
+        .chart-legend {
+          transform: translateX(10px);
+        }
+      }
+    }
   }
 }
 

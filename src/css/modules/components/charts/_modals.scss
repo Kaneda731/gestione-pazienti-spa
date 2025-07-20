@@ -1,10 +1,35 @@
 /**
- * Chart Modal Styles - Integrated SCSS version
- * Combines existing modal styles with converted chart-modals.css
+ * Chart Modal Styles - Optimized SCSS Module
+ * 
+ * Comprehensive modal system for chart interactions with:
+ * - Responsive design patterns
+ * - Accessibility features
+ * - Dark mode support
+ * - Animation system
+ * 
+ * @author Chart Team
+ * @version 2.0
  */
 
 // Import chart mixins for reusable patterns
 @import 'chart-mixins';
+
+// =============================================================================
+// MODAL CONFIGURATION VARIABLES
+// =============================================================================
+
+$modal-sizes: (
+  'sm': 350px,
+  'md': 400px,
+  'lg': 500px,
+  'xl': 600px
+);
+
+$modal-z-indices: (
+  'overlay': 99999,
+  'content': 100000,
+  'close-btn': 100001
+);
 
 // =============================================================================
 // BASE MODAL STYLES
@@ -12,23 +37,38 @@
 
 .chart-modal {
   @include chart-modal-overlay;
+  z-index: map-get($modal-z-indices, 'overlay');
   
-  // Mobile-specific adjustments
-  &.mobile-chart-modal {
+  // Responsive padding adjustments
+  padding: var(--spacing-md);
+  
+  @media (max-width: 480px) {
     padding: var(--spacing-sm);
+  }
+  
+  // Enhanced backdrop blur for modern browsers
+  @supports (backdrop-filter: blur(8px)) {
+    backdrop-filter: blur(8px);
+    background: rgba(0, 0, 0, 0.7);
   }
 }
 
 .chart-modal-content {
-  @include chart-modal-content(400px);
+  @include chart-modal-content(map-get($modal-sizes, 'md'));
+  z-index: map-get($modal-z-indices, 'content');
   
-  & {
-    border-top: 4px solid var(--primary-color);
-  }
+  // Enhanced visual hierarchy
+  border-top: 4px solid var(--primary-color);
   
-  // Mobile adjustments
-  .mobile-chart-modal & {
-    max-width: 350px;
+  // Size variants
+  &.modal-sm { max-width: map-get($modal-sizes, 'sm'); }
+  &.modal-lg { max-width: map-get($modal-sizes, 'lg'); }
+  &.modal-xl { max-width: map-get($modal-sizes, 'xl'); }
+  
+  // Mobile-first responsive design
+  @media (max-width: 480px) {
+    max-width: calc(100vw - #{var(--spacing-md)});
+    margin: var(--spacing-sm);
   }
 }
 
@@ -100,84 +140,161 @@
   @include chart-detail-item;
 }
 
-// Enhanced chart detail card (from existing styles)
+// =============================================================================
+// CHART DETAIL COMPONENTS - Optimized with consistent patterns
+// =============================================================================
+
+/**
+ * Enhanced chart detail card with responsive design
+ * Consolidates common patterns and improves maintainability
+ */
 .chart-detail-card {
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
   gap: var(--spacing-md);
+  padding: var(--spacing-lg);
   
+  // Main title with responsive typography
   .diagnosis-name {
-    font-size: var(--font-size-xl);
+    font-size: clamp(var(--font-size-lg), 4vw, var(--font-size-xl));
     font-weight: var(--font-weight-extra-bold);
     color: var(--text-primary);
     line-height: 1.3;
+    
+    // Enhanced text wrapping for better readability
     word-wrap: break-word;
     overflow-wrap: break-word;
     word-break: break-word;
     hyphens: auto;
     margin: 0;
+    
+    // Subtle text shadow for better contrast
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   }
   
+  // Statistics container with improved layout
   .stats-container {
-    display: flex;
-    justify-content: space-around;
-    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
     gap: var(--spacing-md);
+    width: 100%;
     margin-top: var(--spacing-sm);
     
     .stat-item {
-      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: var(--spacing-sm);
+      border-radius: var(--border-radius-sm);
+      background: var(--bg-secondary);
+      transition: var(--transition-fast);
+      
+      &:hover {
+        background: var(--bg-tertiary);
+        transform: translateY(-2px);
+      }
       
       .stat-value {
         font-size: var(--font-size-lg);
         font-weight: var(--font-weight-extra-bold);
         color: var(--primary-color);
-        display: block;
+        margin-bottom: var(--spacing-xs);
+        
+        // Add subtle animation
+        transition: color var(--transition-fast);
       }
       
       .stat-label {
         font-size: var(--font-size-xs);
         color: var(--text-muted);
-        margin-top: var(--spacing-xs);
+        font-weight: var(--font-weight-bold);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
       }
     }
   }
   
+  // Additional information section with enhanced styling
   .additional-info {
     width: 100%;
     padding-top: var(--spacing-md);
-    border-top: 1px solid var(--border-color);
+    border-top: 2px solid var(--border-color);
     
     .info-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: var(--spacing-sm) 0;
+      padding: var(--spacing-sm) var(--spacing-md);
       font-size: var(--font-size-sm);
+      border-radius: var(--border-radius-sm);
+      margin-bottom: var(--spacing-xs);
+      transition: var(--transition-fast);
       
-      &:not(:last-child) {
-        border-bottom: 1px solid var(--border-color-light);
+      &:hover {
+        background: var(--bg-secondary);
+      }
+      
+      &:last-child {
+        margin-bottom: 0;
       }
       
       .info-label {
         color: var(--text-muted);
         font-weight: var(--font-weight-bold);
+        flex: 1;
       }
       
       .info-value {
         color: var(--text-primary);
         font-weight: var(--font-weight-bold);
+        text-align: right;
+        flex: 0 0 auto;
+      }
+    }
+  }
+  
+  // Mobile optimizations
+  @media (max-width: 480px) {
+    padding: var(--spacing-md);
+    gap: var(--spacing-sm);
+    
+    .stats-container {
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--spacing-sm);
+      
+      .stat-item {
+        padding: var(--spacing-xs);
+        
+        .stat-value {
+          font-size: var(--font-size-base);
+        }
       }
     }
     
-    @media (prefers-color-scheme: dark) {
-      border-top-color: rgba(255, 255, 255, 0.1);
+    .additional-info .info-row {
+      padding: var(--spacing-xs) var(--spacing-sm);
+      font-size: var(--font-size-xs);
+    }
+  }
+  
+  // Dark mode enhancements
+  @media (prefers-color-scheme: dark) {
+    .additional-info {
+      border-top-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    .stats-container .stat-item {
+      background: rgba(255, 255, 255, 0.05);
       
-      .info-row:not(:last-child) {
-        border-bottom-color: rgba(255, 255, 255, 0.05);
+      &:hover {
+        background: rgba(255, 255, 255, 0.1);
       }
+    }
+    
+    .additional-info .info-row:hover {
+      background: rgba(255, 255, 255, 0.05);
     }
   }
 }

@@ -11,17 +11,13 @@ class ChartToasts {
   }
 
   /**
-   * Assicura che gli stili CSS siano caricati
+   * Styles are now included through SCSS compilation
+   * No need to load CSS file separately
    * @private
    */
   _ensureStylesLoaded() {
-    if (!document.getElementById("chart-toasts-styles")) {
-      const link = document.createElement("link");
-      link.id = "chart-toasts-styles";
-      link.rel = "stylesheet";
-      link.href = "../styles/chart-toasts.css";
-      document.head.appendChild(link);
-    }
+    // Styles are now included in the main SCSS compilation
+    // This method is kept for backward compatibility but no longer loads external CSS
   }
 
   /**

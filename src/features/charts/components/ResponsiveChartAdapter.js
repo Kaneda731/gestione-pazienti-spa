@@ -25,24 +25,9 @@ class ResponsiveChartAdapter {
     
     // Handler per il ridimensionamento
     this.resizeHandler = null;
-    
-    // Assicurati che gli stili CSS siano caricati
-    this._ensureStylesLoaded();
   }
 
-  /**
-   * Assicura che gli stili CSS siano caricati
-   * @private
-   */
-  _ensureStylesLoaded() {
-    if (!document.getElementById('chart-responsive-styles')) {
-      const link = document.createElement('link');
-      link.id = 'chart-responsive-styles';
-      link.rel = 'stylesheet';
-      link.href = '../styles/chart-responsive.css';
-      document.head.appendChild(link);
-    }
-  }
+
 
   /**
    * Adatta le opzioni del grafico al dispositivo corrente

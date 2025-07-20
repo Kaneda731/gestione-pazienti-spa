@@ -1,0 +1,217 @@
+/**
+ * Chart Toast Styles - SCSS Module
+ * 
+ * Toast notification styles for chart components
+ * Converted from chart-toasts.css and integrated with existing SCSS architecture
+ */
+
+// Variables are already available through the main SCSS compilation
+// No need to import them separately
+
+// =============================================================================
+// BASE TOAST STYLES
+// =============================================================================
+
+.chart-toast {
+  @include chart-toast('default');
+  
+  // Override default mixin with specific styling
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  box-shadow: var(--shadow-md);
+  
+  // Dark mode support
+  @media (prefers-color-scheme: dark) {
+    box-shadow: var(--shadow-lg);
+  }
+}
+
+// =============================================================================
+// TOAST TYPE VARIANTS
+// =============================================================================
+
+.chart-toast.success {
+  @include chart-toast('success');
+}
+
+.chart-toast.error {
+  @include chart-toast('error');
+}
+
+.chart-toast.info {
+  @include chart-toast('info');
+}
+
+.chart-toast.warning {
+  @include chart-toast('warning');
+}
+
+// =============================================================================
+// RESPONSIVE TOAST STYLES
+// =============================================================================
+
+.mobile-chart-toast {
+  @include chart-toast-mobile;
+}
+
+.desktop-chart-toast {
+  @include chart-toast-desktop;
+}
+
+// =============================================================================
+// ANIMATIONS
+// =============================================================================
+
+// Toast fade-in animation (already defined in mixins, but keeping for reference)
+@keyframes toastFadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+// Toast fade-out animation
+@keyframes toastFadeOut {
+  from {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+  }
+}
+
+// =============================================================================
+// ADDITIONAL TOAST ENHANCEMENTS
+// =============================================================================
+
+// Enhanced toast with icon support
+.chart-toast-with-icon {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  text-align: left;
+  
+  .toast-icon {
+    font-size: var(--icon-size-base);
+    flex-shrink: 0;
+  }
+  
+  .toast-content {
+    flex: 1;
+  }
+}
+
+// Toast close button
+.chart-toast-close {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  font-size: var(--font-size-lg);
+  padding: 0;
+  margin-left: var(--spacing-sm);
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: var(--transition-fast);
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+  }
+}
+
+// Toast progress bar (for auto-dismiss)
+.chart-toast-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 0 0 var(--border-radius-sm) var(--border-radius-sm);
+  animation: toastProgress 3s linear;
+}
+
+@keyframes toastProgress {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
+
+// =============================================================================
+// ACCESSIBILITY ENHANCEMENTS
+// =============================================================================
+
+.chart-toast {
+  // Ensure proper focus management
+  &:focus {
+    outline: var(--focus-outline);
+    outline-offset: var(--focus-outline-offset);
+  }
+  
+  // Screen reader support
+  &[role="alert"] {
+    // Announced immediately by screen readers
+  }
+  
+  &[role="status"] {
+    // Announced politely by screen readers
+  }
+}
+
+// High contrast mode support
+@media (prefers-contrast: high) {
+  .chart-toast {
+    border: 2px solid white;
+    
+    &.success {
+      border-color: var(--success-light);
+    }
+    
+    &.error {
+      border-color: var(--danger-light);
+    }
+    
+    &.info {
+      border-color: var(--info-light);
+    }
+    
+    &.warning {
+      border-color: var(--warning-light);
+    }
+  }
+}
+
+// Reduced motion support
+@media (prefers-reduced-motion: reduce) {
+  .chart-toast {
+    animation: none;
+    transition: none;
+  }
+  
+  @keyframes toastFadeIn {
+    from, to {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+  }
+  
+  @keyframes toastFadeOut {
+    from, to {
+      opacity: 0;
+      transform: translate(-50%, 0);
+    }
+  }
+}

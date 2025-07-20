@@ -6,7 +6,8 @@ class ChartModals {
    * Inizializza il gestore dei modal
    */
   constructor() {
-    this._ensureStylesLoaded();
+    // Styles are now integrated into the main SCSS system
+    // No need to load separate CSS file
   }
 
   /**
@@ -22,19 +23,7 @@ class ChartModals {
       '13, 110, 253';
   }
 
-  /**
-   * Assicura che gli stili CSS siano caricati
-   * @private
-   */
-  _ensureStylesLoaded() {
-    if (!document.getElementById('chart-modals-styles')) {
-      const link = document.createElement('link');
-      link.id = 'chart-modals-styles';
-      link.rel = 'stylesheet';
-      link.href = '../styles/chart-modals.css';
-      document.head.appendChild(link);
-    }
-  }
+
 
   /**
    * Mostra un modal con dettagli per dispositivi mobile

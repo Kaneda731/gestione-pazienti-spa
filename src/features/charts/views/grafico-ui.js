@@ -113,17 +113,16 @@ async function initChartTypeSelector() {
         if (!dom.chartTypeSelector) {
             const selectorContainer = document.createElement('div');
             selectorContainer.className = 'chart-type-selector-container';
-
+            
             const selectorLabel = document.createElement('label');
             selectorLabel.htmlFor = 'chart-type-selector';
             selectorLabel.className = 'me-2';
             selectorLabel.textContent = 'Tipo di grafico:';
-
-            // Crea il select nativo
+            
             const selector = document.createElement('select');
             selector.id = 'chart-type-selector';
             selector.className = 'form-select form-select-sm';
-
+            
             // Aggiungi le opzioni
             chartTypes.forEach(type => {
                 const option = document.createElement('option');
@@ -131,22 +130,17 @@ async function initChartTypeSelector() {
                 option.innerHTML = `${type.icon} ${type.name}`;
                 selector.appendChild(option);
             });
-
+            
             // Imposta il valore predefinito
             selector.value = currentChartType;
-
+            
+            // Aggiungi l'evento change
+            selector.addEventListener('change', handleChartTypeChange);
+            
             // Aggiungi gli elementi al DOM
             selectorContainer.appendChild(selectorLabel);
             selectorContainer.appendChild(selector);
             dom.chartControls.appendChild(selectorContainer);
-
-            // Inizializza CustomSelect (selezione semplice)
-            import('../../../shared/components/forms/CustomSelect.js').then(mod => {
-                new mod.CustomSelect(selector, { searchable: false });
-            });
-
-            // Gestione evento change
-            selector.addEventListener('change', handleChartTypeChange);
         }
     } catch (error) {
         console.error('Errore nell\'inizializzazione del selettore del tipo di grafico:', error);

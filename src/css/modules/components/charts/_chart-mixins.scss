@@ -1,0 +1,509 @@
+/**
+ * Chart Mixins - Reusable SCSS mixins for chart components
+ * 
+ * This file contains mixins for common chart patterns including:
+ * - Chart containers
+ * - Modal components
+ * - Toast notifications
+ * - Responsive behavior
+ */
+
+// =============================================================================
+// CHART CONTAINER MIXINS
+// =============================================================================
+
+/**
+ * Base chart container mixin
+ * @param {string} $min-height - Minimum height for the chart container
+ */
+@mixin chart-container($min-height: 300px) {
+  position: relative;
+  box-sizing: border-box;
+  min-height: $min-height;
+  transition: var(--transition);
+  border-radius: var(--border-radius);
+  
+  canvas {
+    max-width: 100%;
+    height: auto !important;
+  }
+}
+
+/**
+ * Chart container with zoom capabilities
+ */
+@mixin chart-container-zoomable {
+  overflow: auto;
+  
+  canvas {
+    cursor: grab;
+    transition: transform 0.3s ease;
+    
+    &:active {
+      cursor: grabbing;
+    }
+  }
+  
+  &.zooming {
+    box-shadow: 0 0 0 2px var(--primary-color);
+  }
+}
+
+/**
+ * Touch-optimized chart container for mobile devices
+ */
+@mixin chart-container-touch {
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  will-change: transform;
+  backface-visibility: hidden;
+  
+  &.chart-touching {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+    
+    canvas {
+      filter: brightness(0.95);
+    }
+  }
+  
+  &.chart-dragging {
+    cursor: grabbing;
+    
+    canvas {
+      pointer-events: none;
+    }
+  }
+}
+
+// =============================================================================
+// RESPONSIVE CHART MIXINS
+// =============================================================================
+
+/**
+ * Responsive chart sizing mixin
+ * @param {string} $device - Device type (mobile, tablet, desktop)
+ */
+@mixin responsive-chart($device: 'mobile') {
+  @if $device == 'mobile' {
+    min-height: 300px;
+    height: 60vh;
+    padding: var(--spacing-sm);
+    @include chart-container-touch;
+  } @else if $device == 'tablet' {
+    min-height: 400px;
+    height: 70vh;
+    padding: var(--spacing-md);
+  } @else if $device == 'desktop' {
+    min-height: 500px;
+    height: 80vh;
+    padding: var(--spacing-lg);
+  }
+}
+
+/**
+ * Chart legend mixin with responsive behavior
+ */
+@mixin chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: var(--spacing-md);
+  
+  .chart-legend-item {
+    display: flex;
+    align-items: center;
+    margin: var(--spacing-sm);
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+    
+    &.filtered {
+      opacity: 0.5;
+    }
+    
+    &.highlighted {
+      transform: scale(1.05);
+      font-weight: var(--font-weight-bold);
+    }
+  }
+  
+  .chart-legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: var(--spacing-sm);
+  }
+  
+  // Responsive adjustments
+  @media (max-width: 767px) {
+    flex-direction: column;
+    align-items: flex-start;
+    
+    .chart-legend-item {
+      margin: var(--spacing-xs);
+    }
+  }
+  
+  @media (min-width: 768px) and (max-width: 991px) {
+    justify-content: center;
+  }
+  
+  @media (min-width: 992px) {
+    justify-content: flex-end;
+  }
+}
+
+// =============================================================================
+// MODAL MIXINS
+// =============================================================================
+
+/**
+ * Base chart modal overlay mixin
+ */
+@mixin chart-modal-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: rgba(0, 0, 0, 0.9) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 99999 !important;
+  padding: var(--spacing-md) !important;
+  pointer-events: auto !important;
+  backdrop-filter: blur(4px);
+}
+
+/**
+ * Chart modal content container mixin
+ * @param {string} $max-width - Maximum width of the modal
+ */
+@mixin chart-modal-content($max-width: 400px) {
+  background: var(--card-bg);
+  border-radius: var(--border-radius);
+  width: 100%;
+  max-width: $max-width;
+  box-shadow: var(--shadow-xl);
+  animation: modalSlideIn 0.3s ease-out;
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  
+  @media (prefers-color-scheme: dark) {
+    background: var(--dark-color);
+    color: var(--light-color);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+/**
+ * Chart modal header mixin
+ */
+@mixin chart-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-bottom: 1px solid var(--border-color);
+  background: linear-gradient(135deg, 
+    rgba(37, 99, 235, 0.05) 0%, 
+    rgba(37, 99, 235, 0.02) 100%);
+  
+  h3 {
+    margin: 0;
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-extra-bold);
+    color: var(--primary-color);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+  
+  @media (prefers-color-scheme: dark) {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+    background: linear-gradient(135deg, 
+      rgba(37, 99, 235, 0.15) 0%, 
+      rgba(37, 99, 235, 0.08) 100%);
+    
+    h3 {
+      color: var(--primary-light);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    }
+  }
+}
+
+/**
+ * Chart modal close button mixin
+ */
+@mixin chart-modal-close {
+  background: none;
+  border: none;
+  font-size: var(--font-size-xl);
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: var(--transition-fast);
+  
+  &:hover {
+    background: var(--bg-secondary);
+    color: var(--danger-color);
+  }
+  
+  @media (prefers-color-scheme: dark) {
+    color: var(--text-light);
+  }
+}
+
+/**
+ * Desktop chart panel mixin (side panel style)
+ */
+@mixin chart-panel-desktop {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 300px;
+  background: var(--card-bg);
+  border-left: 1px solid var(--border-color);
+  height: 100%;
+  box-shadow: var(--shadow-lg);
+  animation: panelSlideIn 0.3s ease-out;
+  z-index: 9998;
+  overflow-y: auto;
+  
+  @media (prefers-color-scheme: dark) {
+    background: var(--dark-color);
+    border-left-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+// =============================================================================
+// TOAST MIXINS
+// =============================================================================
+
+/**
+ * Base chart toast mixin
+ * @param {string} $type - Toast type (default, success, error, info, warning)
+ */
+@mixin chart-toast($type: 'default') {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 20px;
+  border-radius: var(--border-radius-sm);
+  box-shadow: var(--shadow-md);
+  z-index: 1100;
+  min-width: 250px;
+  text-align: center;
+  animation: toastFadeIn 0.3s ease-out;
+  color: white;
+  
+  @if $type == 'success' {
+    background-color: rgba(16, 185, 129, 0.9);
+    
+    @media (prefers-color-scheme: dark) {
+      background-color: rgba(16, 185, 129, 0.8);
+    }
+  } @else if $type == 'error' {
+    background-color: rgba(239, 68, 68, 0.9);
+    
+    @media (prefers-color-scheme: dark) {
+      background-color: rgba(239, 68, 68, 0.8);
+    }
+  } @else if $type == 'info' {
+    background-color: rgba(6, 182, 212, 0.9);
+    
+    @media (prefers-color-scheme: dark) {
+      background-color: rgba(6, 182, 212, 0.8);
+    }
+  } @else if $type == 'warning' {
+    background-color: rgba(245, 158, 11, 0.9);
+    
+    @media (prefers-color-scheme: dark) {
+      background-color: rgba(245, 158, 11, 0.8);
+    }
+  } @else {
+    background-color: rgba(0, 0, 0, 0.8);
+  }
+}
+
+/**
+ * Mobile-specific toast mixin
+ */
+@mixin chart-toast-mobile {
+  bottom: 10px;
+  padding: 10px 15px;
+  min-width: 200px;
+  font-size: var(--font-size-sm);
+}
+
+/**
+ * Desktop-specific toast mixin
+ */
+@mixin chart-toast-desktop {
+  bottom: 30px;
+  padding: 15px 25px;
+  min-width: 300px;
+  font-size: var(--font-size-base);
+}
+
+// =============================================================================
+// CHART DETAIL MIXINS
+// =============================================================================
+
+/**
+ * Chart detail item mixin (for modal content)
+ */
+@mixin chart-detail-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  
+  .chart-detail-color {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--border-radius-sm);
+    flex-shrink: 0;
+  }
+  
+  .chart-detail-info {
+    h4 {
+      margin: 0 0 var(--spacing-sm) 0;
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-bold);
+      color: var(--text-primary);
+    }
+    
+    .chart-detail-value {
+      margin: 0 0 var(--spacing-xs) 0;
+      font-size: var(--font-size-base);
+      font-weight: var(--font-weight-bold);
+      color: var(--primary-color);
+    }
+    
+    .chart-detail-percentage {
+      margin: 0;
+      font-size: var(--font-size-sm);
+      color: var(--text-muted);
+    }
+  }
+}
+
+// =============================================================================
+// ANIMATION MIXINS
+// =============================================================================
+
+/**
+ * Chart fade-in animation mixin
+ */
+@mixin chart-fade-in {
+  animation: chartFadeIn 0.5s ease-out;
+}
+
+/**
+ * Chart tooltip mixin
+ */
+@mixin chart-tooltip {
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  border-radius: var(--border-radius-sm);
+  padding: 10px;
+  box-shadow: var(--shadow-md);
+  pointer-events: none;
+  z-index: 1000;
+  
+  @media (prefers-color-scheme: dark) {
+    background-color: rgba(30, 30, 30, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: var(--shadow-lg);
+  }
+}
+
+// =============================================================================
+// KEYFRAME ANIMATIONS
+// =============================================================================
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes modalSlideOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+}
+
+@keyframes panelSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes panelSlideOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
+@keyframes toastFadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes toastFadeOut {
+  from {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+  }
+}
+
+@keyframes chartFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

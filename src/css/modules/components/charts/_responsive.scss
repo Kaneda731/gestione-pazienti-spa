@@ -1,0 +1,121 @@
+/**
+ * Chart Responsive Styles
+ * 
+ * Responsive styling for chart components across different devices.
+ * Converted from chart-responsive.css and integrated with existing SCSS variables.
+ */
+
+// Import chart mixins for reusable patterns
+@import 'chart-mixins';
+
+// =============================================================================
+// BASE CHART CONTAINER STYLES
+// =============================================================================
+
+.chart-container {
+  @include chart-container;
+  @include chart-fade-in;
+  
+  // Enhanced zoom state using existing primary color
+  &.zooming {
+    box-shadow: 0 0 0 2px var(--primary-color);
+  }
+}
+
+// =============================================================================
+// DEVICE-SPECIFIC CHART STYLES
+// =============================================================================
+
+// Mobile chart styles
+.chart-mobile {
+  @include responsive-chart('mobile');
+}
+
+// Tablet chart styles  
+.chart-tablet {
+  @include responsive-chart('tablet');
+}
+
+// Desktop chart styles
+.chart-desktop {
+  @include responsive-chart('desktop');
+}
+
+// =============================================================================
+// CHART LEGEND STYLES
+// =============================================================================
+
+.chart-legend {
+  @include chart-legend;
+}
+
+// =============================================================================
+// CHART TOOLTIP STYLES
+// =============================================================================
+
+.chart-tooltip {
+  @include chart-tooltip;
+}
+
+// =============================================================================
+// RESPONSIVE MEDIA QUERIES
+// =============================================================================
+
+// Mobile optimizations (max-width: 767px)
+@media (max-width: 767px) {
+  .chart-legend {
+    flex-direction: column;
+    align-items: flex-start;
+    
+    .chart-legend-item {
+      margin: var(--spacing-xs);
+    }
+  }
+  
+  .chart-container {
+    // Enhanced mobile performance
+    will-change: transform;
+    backface-visibility: hidden;
+  }
+}
+
+// Tablet optimizations (768px - 991px)
+@media (min-width: 768px) and (max-width: 991px) {
+  .chart-legend {
+    justify-content: center;
+  }
+}
+
+// Desktop optimizations (min-width: 992px)
+@media (min-width: 992px) {
+  .chart-legend {
+    justify-content: flex-end;
+  }
+}
+
+// =============================================================================
+// DARK MODE SUPPORT
+// =============================================================================
+
+@media (prefers-color-scheme: dark) {
+  .chart-tooltip {
+    background-color: rgba(30, 30, 30, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .chart-container {
+    background-color: rgba(30, 30, 30, 0.5);
+  }
+}
+
+// Bootstrap dark theme support
+[data-bs-theme="dark"] {
+  .chart-tooltip {
+    background-color: rgba(30, 30, 30, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .chart-container {
+    background-color: rgba(30, 30, 30, 0.5);
+  }
+}

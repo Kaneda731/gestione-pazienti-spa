@@ -1,101 +1,117 @@
-// Modern Chart Modal Design
-.chart-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.75);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-  padding: 1rem;
-  backdrop-filter: blur(4px);
-}
+/**
+ * Chart Modal Styles - Integrated SCSS version
+ * Combines existing modal styles with converted chart-modals.css
+ */
 
-.desktop-chart-panel {
-  position: fixed;
-  top: 50%;
-  left: 60%;
-  transform: translate(-50%, -50%);
-  width: 360px;
-  max-height: 80vh;
-  background: var(--bs-body-bg, #fff);
-  border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  z-index: 9998;
-  overflow: hidden;
-  animation: modalSlideIn 0.4s ease-out;
+// Import chart mixins for reusable patterns
+@import 'chart-mixins';
+
+// =============================================================================
+// BASE MODAL STYLES
+// =============================================================================
+
+.chart-modal {
+  @include chart-modal-overlay;
+  
+  // Mobile-specific adjustments
+  &.mobile-chart-modal {
+    padding: var(--spacing-sm);
+  }
 }
 
 .chart-modal-content {
-  background: var(--bs-body-bg, #fff);
-  border-radius: 16px;
-  width: 100%;
-  max-width: 360px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  animation: modalSlideIn 0.4s ease-out;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  overflow: hidden;
-  position: relative;
+  @include chart-modal-content(400px);
+  
+  & {
+    border-top: 4px solid var(--primary-color);
+  }
+  
+  // Mobile adjustments
+  .mobile-chart-modal & {
+    max-width: 350px;
+  }
 }
 
 .chart-modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.5rem 1.5rem 1rem;
-  border-bottom: 1px solid rgba(var(--bs-border-color-rgb, 0, 0, 0), 0.1);
+  @include chart-modal-header;
   
-  h3 {
-    margin: 0;
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: var(--bs-body-color);
+  // Mobile adjustments
+  .mobile-chart-modal & {
+    h3 {
+      font-size: var(--font-size-base);
+    }
   }
 }
 
 .chart-modal-close {
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  color: var(--bs-secondary);
-  cursor: pointer;
-  padding: 0;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  transition: all 0.2s ease;
-  
-  &:hover {
-    background: var(--bs-secondary-bg);
-    color: var(--bs-danger);
-  }
-}
-
-.chart-modal-content {
-  border-top: 4px solid var(--color, #0d6efd);
+  @include chart-modal-close;
 }
 
 .chart-modal-body {
-  padding: 1.5rem;
+  padding: var(--spacing-lg);
 }
 
+.chart-modal-footer {
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-top: 1px solid var(--border-color);
+  text-align: right;
+  
+  @media (prefers-color-scheme: dark) {
+    border-top-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.chart-modal-ok {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  padding: var(--spacing-sm) var(--spacing-xl);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-base);
+  cursor: pointer;
+  min-height: 44px;
+  font-weight: var(--font-weight-bold);
+  transition: var(--transition-fast);
+  
+  &:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+// =============================================================================
+// DESKTOP CHART PANEL (SIDE PANEL STYLE)
+// =============================================================================
+
+.desktop-chart-panel {
+  @include chart-panel-desktop;
+}
+
+// =============================================================================
+// CHART DETAIL COMPONENTS
+// =============================================================================
+
+.chart-detail-item {
+  @include chart-detail-item;
+}
+
+// Enhanced chart detail card (from existing styles)
 .chart-detail-card {
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 1rem;
+  gap: var(--spacing-md);
   
   .diagnosis-name {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--bs-body-color);
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-extra-bold);
+    color: var(--text-primary);
     line-height: 1.3;
     word-wrap: break-word;
     overflow-wrap: break-word;
@@ -108,57 +124,202 @@
     display: flex;
     justify-content: space-around;
     width: 100%;
-    gap: 1rem;
-    margin-top: 0.5rem;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-sm);
     
     .stat-item {
       text-align: center;
       
       .stat-value {
-        font-size: 1.25rem;
-        font-weight: 700;
-        color: var(--bs-primary);
+        font-size: var(--font-size-lg);
+        font-weight: var(--font-weight-extra-bold);
+        color: var(--primary-color);
         display: block;
       }
       
       .stat-label {
-        font-size: 0.85rem;
-        color: var(--bs-secondary);
-        margin-top: 0.25rem;
+        font-size: var(--font-size-xs);
+        color: var(--text-muted);
+        margin-top: var(--spacing-xs);
       }
     }
   }
   
   .additional-info {
     width: 100%;
-    padding-top: 1rem;
-    border-top: 1px solid rgba(var(--bs-border-color-rgb, 0, 0, 0), 0.1);
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--border-color);
     
     .info-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 0.5rem 0;
-      font-size: 0.9rem;
+      padding: var(--spacing-sm) 0;
+      font-size: var(--font-size-sm);
       
       &:not(:last-child) {
-        border-bottom: 1px solid rgba(var(--bs-border-color-rgb, 0, 0, 0), 0.05);
+        border-bottom: 1px solid var(--border-color-light);
       }
       
       .info-label {
-        color: var(--bs-secondary);
-        font-weight: 500;
+        color: var(--text-muted);
+        font-weight: var(--font-weight-bold);
       }
       
       .info-value {
-        color: var(--bs-body-color);
-        font-weight: 600;
+        color: var(--text-primary);
+        font-weight: var(--font-weight-bold);
+      }
+    }
+    
+    @media (prefers-color-scheme: dark) {
+      border-top-color: rgba(255, 255, 255, 0.1);
+      
+      .info-row:not(:last-child) {
+        border-bottom-color: rgba(255, 255, 255, 0.05);
       }
     }
   }
 }
 
-// Animations
+// Chart detail info styles (from converted CSS)
+.chart-detail-info {
+  h4 {
+    margin: 0 0 var(--spacing-sm) 0;
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    color: var(--text-primary);
+  }
+  
+  .chart-detail-value {
+    margin: 0 0 var(--spacing-xs) 0;
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-bold);
+    color: var(--primary-color);
+  }
+  
+  .chart-detail-percentage {
+    margin: 0;
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+  }
+}
+
+.chart-detail-color {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--border-radius-sm);
+  flex-shrink: 0;
+}
+
+// =============================================================================
+// RESPONSIVE ADJUSTMENTS
+// =============================================================================
+
+// Mobile-specific modal styles
+@media (max-width: 480px) {
+  .chart-modal {
+    padding: var(--spacing-sm);
+  }
+  
+  .chart-modal-content {
+    max-width: 100%;
+    margin: var(--spacing-sm);
+    border-radius: var(--border-radius);
+  }
+  
+  .chart-modal-body {
+    padding: var(--spacing-md);
+  }
+  
+  .chart-detail-card .diagnosis-name {
+    font-size: var(--font-size-lg);
+  }
+  
+  .chart-detail-card .stats-container .stat-item .stat-value {
+    font-size: var(--font-size-base);
+  }
+}
+
+// Tablet adjustments
+@media (min-width: 481px) and (max-width: 768px) {
+  .chart-modal-content {
+    max-width: 450px;
+  }
+  
+  .desktop-chart-panel {
+    width: 320px;
+  }
+}
+
+// Desktop adjustments
+@media (min-width: 769px) {
+  .chart-modal-content {
+    max-width: 500px;
+  }
+  
+  .desktop-chart-panel {
+    width: 360px;
+  }
+}
+
+// =============================================================================
+// DARK MODE SUPPORT
+// =============================================================================
+
+@media (prefers-color-scheme: dark) {
+  .chart-modal-content,
+  .desktop-chart-panel {
+    background: var(--dark-color);
+    color: var(--light-color);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .chart-modal-header {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+    background: linear-gradient(135deg, 
+      rgba(37, 99, 235, 0.15) 0%, 
+      rgba(37, 99, 235, 0.08) 100%);
+    
+    h3 {
+      color: var(--primary-light);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    }
+  }
+  
+  .chart-modal-footer {
+    border-top-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .chart-detail-info h4 {
+    color: var(--light-color);
+  }
+  
+  .chart-detail-percentage {
+    color: var(--text-light);
+  }
+  
+  .chart-modal-close {
+    color: var(--text-light);
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--danger-color);
+    }
+  }
+  
+  .chart-modal-ok {
+    &:hover {
+      background: var(--primary-light);
+    }
+  }
+}
+
+// =============================================================================
+// ANIMATIONS (Enhanced from original CSS)
+// =============================================================================
+
+// Modal slide-in animation (enhanced)
 @keyframes modalSlideIn {
   from {
     opacity: 0;
@@ -170,40 +331,56 @@
   }
 }
 
-// Dark mode support
-@media (prefers-color-scheme: dark) {
-  .chart-modal-content {
-    background: var(--bs-dark);
-    color: var(--bs-light);
-    border-color: rgba(255, 255, 255, 0.1);
+// Modal slide-out animation
+@keyframes modalSlideOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
-  
-  .chart-modal-header {
-    border-bottom-color: rgba(255, 255, 255, 0.1);
+  to {
+    opacity: 0;
+    transform: translateY(-30px) scale(0.9);
   }
 }
 
-// Responsive adjustments
-@media (max-width: 480px) {
-  .chart-modal {
-    padding: 0.5rem;
+// Panel slide-in animation (enhanced)
+@keyframes panelSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
   }
-  
-  .chart-modal-content {
-    max-width: 100%;
-    margin: 0.5rem;
-    border-radius: 12px;
-  }
-  
-  .chart-modal-body {
-    padding: 1.25rem;
-  }
-  
-  .diagnosis-name {
-    font-size: 1.3rem;
-  }
-  
-  .stat-value {
-    font-size: 1.1rem;
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
 }
+
+// Panel slide-out animation
+@keyframes panelSlideOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
+// Animation classes for JavaScript control
+.chart-modal-entering {
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+.chart-modal-leaving {
+  animation: modalSlideOut 0.3s ease-out;
+}
+
+.chart-panel-entering {
+  animation: panelSlideIn 0.3s ease-out;
+}
+
+.chart-panel-leaving {
+  animation: panelSlideOut 0.3s ease-out;
+}
+

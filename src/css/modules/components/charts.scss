@@ -5,6 +5,9 @@
  * to improve maintainability and organization.
  */
 
+// Import mixins first (needed by other modules)
+@import "charts/chart-mixins";
+
 // Import base styles
 @import "charts/base";
 
@@ -15,6 +18,8 @@
 
 // Import component-specific styles
 @import "charts/modals";
+@import "charts/responsive";
+@import "charts/toasts";
 
 // Import accessibility styles
 @import "charts/accessibility";

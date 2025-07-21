@@ -10,9 +10,9 @@ export default defineConfig({
 
     // Setup files - usa la nostra infrastruttura ottimizzata
     setupFiles: [
-      "./tests/__setup__/global-setup.js",
-      "./tests/__setup__/test-environment.js",
-      "./tests/__setup__/matchers.js",
+      "./tests/__config__/global-setup.js",
+      "./tests/__config__/test-environment.js",
+      "./tests/__config__/matchers.js",
     ],
 
     // Performance optimizations
@@ -32,7 +32,7 @@ export default defineConfig({
     // File patterns
     include: ["tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
     exclude: [
-      "tests/__setup__/**",
+      "tests/__config__/**",
       "tests/__mocks__/**",
       "tests/__fixtures__/**",
       "tests/__helpers__/**",

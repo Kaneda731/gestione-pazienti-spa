@@ -9,8 +9,8 @@ import { supabase } from '../../../core/services/supabaseClient.js';
 export async function searchActivePatients(searchTerm) {
     const { data, error } = await supabase
         .from('pazienti')
-        .select('id, nome, cognome, data_ricovero')
-        .ilike('cognome', `%${searchTerm}%`)
+        .select('id, nome, cognome, data_ricovero, codice_rad')
+        .or(`cognome.ilike.%${searchTerm}%,nome.ilike.%${searchTerm}%,codice_rad.ilike.%${searchTerm}%`)
         .is('data_dimissione', null) // Cerca solo pazienti non ancora dimessi
         .order('cognome');
 

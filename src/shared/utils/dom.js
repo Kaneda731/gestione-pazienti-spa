@@ -138,3 +138,18 @@ export function ready() {
         }
     });
 }
+
+/**
+ * Funzione di debounce per ritardare l'esecuzione di una funzione.
+ * @param {function} func - La funzione da debouncare.
+ * @param {number} delay - Il ritardo in millisecondi.
+ * @returns {function} La funzione debouncata.
+ */
+export function debounce(func, delay) {
+    let timeout;
+    return function(...args) {
+        const context = this;
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(context, args), delay);
+    };
+}

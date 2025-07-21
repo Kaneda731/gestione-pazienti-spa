@@ -14,33 +14,27 @@ import {
 
 let selectedPatient = null;
 
-async function handleSearch() {
+async function handleSearch(query) {
     if (!dom.searchInput) {
         console.error('Elemento searchInput non trovato');
         return;
     }
     
-    const searchTerm = dom.searchInput.value.trim();
-    if (searchTerm.length < 2) {
-        showFeedback('Inserisci almeno 2 caratteri per la ricerca.', 'info');
+    if (query.length < 2) {
+        renderSearchResults([], () => {}); // Pulisce i risultati se la query è troppo corta
         return;
     }
     
     setLoading(true);
     try {
-        const patients = await searchActivePatients(searchTerm);
+        const patients = await searchActivePatients(query);
         renderSearchResults(patients, (patient) => {
             selectedPatient = patient;
             displayDischargeForm(patient);
         });
     } catch (error) {
         showFeedback(error.message, 'error');
-    } finally {
-        // Se non ci sono risultati, setLoading(false) non è necessario
-        // perché renderSearchResults gestisce il contenitore.
-        if (dom.resultsContainer && dom.resultsContainer.innerHTML.includes('spinner')) {
-             setLoading(false);
-        }
+        setLoading(false); // Interrompi il caricamento solo in caso di errore
     }
 }
 
@@ -71,29 +65,13 @@ async function handleDischargeSubmit(event) {
 }
 
 function setupEventListeners() {
-    if (dom.searchButton) {
-        dom.searchButton.addEventListener('click', handleSearch);
-    }
-    
-    if (dom.searchInput) {
-        dom.searchInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                handleSearch();
-            }
-        });
-    }
-    
     if (dom.dischargeForm) {
         dom.dischargeForm.addEventListener('submit', handleDischargeSubmit);
     }
-    
-    // Il back button è gestito globalmente, ma se serve logica specifica va qui.
-    // dom.backButton.addEventListener('click', () => navigateTo('home'));
 }
 
 export function initDimissioneView() {
-    initializeUI();
+    initializeUI(handleSearch);
     setupEventListeners();
     
     if (dom.searchInput) {
@@ -104,7 +82,5 @@ export function initDimissioneView() {
     return () => {
         cleanupUI();
         selectedPatient = null;
-        // Qui si potrebbero rimuovere gli event listener se necessario,
-        // ma dato che la vista viene distrutta, non è strettamente obbligatorio.
     };
 }

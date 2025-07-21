@@ -1,8 +1,11 @@
 // src/features/patients/views/dimissione-ui.js
 import CustomDatepicker from '../../../shared/components/forms/CustomDatepicker.js';
 import { mostraMessaggio } from '../../../shared/utils/helpers.js';
+import { debounce } from '../../../shared/utils/dom.js';
+
 
 let datepickerInstance = null;
+let debouncedSearch;
 
 // Contiene gli elementi del DOM per un accesso più facile
 export const dom = {
@@ -17,13 +20,34 @@ export const dom = {
     get messageContainer() { return document.getElementById('messaggio-container-dimissione'); }
 };
 
+function clearSearchResults() {
+    if (dom.resultsContainer) {
+        dom.resultsContainer.innerHTML = '';
+    }
+}
+
 /**
  * Inizializza i componenti della UI, come il datepicker.
  */
-export function initializeUI() {
+export function initializeUI(searchCallback) {
     datepickerInstance = new CustomDatepicker('[data-datepicker]', {
         dateFormat: "d/m/Y",
     });
+
+    debouncedSearch = debounce(searchCallback, 300);
+
+    if (dom.searchInput) {
+        dom.searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.trim();
+            if (query.length > 2) {
+                setLoading(true);
+                debouncedSearch(query);
+            } else {
+                clearSearchResults();
+            }
+        });
+    }
+    
     resetView();
 }
 
@@ -53,7 +77,8 @@ export function renderSearchResults(patients, onSelect) {
     patients.forEach(p => {
         const item = document.createElement('button');
         item.className = 'list-group-item list-group-item-action';
-        item.textContent = `${p.cognome} ${p.nome} (Ricovero: ${new Date(p.data_ricovero).toLocaleDateString()})`;
+        const radText = p.codice_rad ? ` (RAD: ${p.codice_rad})` : '';
+        item.textContent = `${p.cognome} ${p.nome}${radText} (Ricovero: ${new Date(p.data_ricovero).toLocaleDateString()})`;
         item.onclick = () => onSelect(p);
         dom.resultsContainer.appendChild(item);
     });

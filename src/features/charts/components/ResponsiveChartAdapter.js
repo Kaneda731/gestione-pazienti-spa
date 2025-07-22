@@ -61,7 +61,9 @@ class ResponsiveChartAdapter {
     
     // Crea un nuovo handler con throttling
     this.resizeHandler = ChartUtils.throttle(() => {
-      const newDevice = this.adapterFactory.getCurrentDeviceType();
+          // Se il grafico o il canvas non esistono più, non fare nulla
+          if (!chart || !chart.canvas) return;
+          const newDevice = this.adapterFactory.getCurrentDeviceType();
       
       // Aggiorna solo se il tipo di dispositivo è cambiato
       if (newDevice !== this.currentDevice) {

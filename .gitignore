@@ -6,6 +6,28 @@ dist/
 build/
 out/
 
+# Coverage, test, report, benchmark, script, backup, analysis
+coverage*/
+manual-coverage-report*/
+tests*/
+test*/
+scripts/
+.nyc_output/
+.kiro/
+.claude/
+*.md
+*.json
+*.js
+!vite.config.js
+!package.json
+!package-lock.json
+!netlify.toml
+!index.html
+!src/**
+!dist/**
+!.env.example
+!README.md
+
 # Environment variables
 .env*
 !.env.example

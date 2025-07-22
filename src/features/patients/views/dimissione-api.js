@@ -48,10 +48,17 @@ export async function dischargePatient(patientId, dischargeDate) {
         throw new Error('Paziente non trovato o già dimesso.');
     }
 
+    // Normalizza la data come nell'inserimento paziente
+    let normalizedDate = dischargeDate;
+    if (typeof normalizedDate === 'string' && normalizedDate.includes('/')) {
+        const [day, month, year] = normalizedDate.split('/');
+        normalizedDate = `${year}-${month}-${day}`;
+    }
+
     // Procediamo con l'aggiornamento
     const { data, error } = await supabase
         .from('pazienti')
-        .update({ data_dimissione: dischargeDate })
+        .update({ data_dimissione: normalizedDate })
         .eq('id', patientId)
         .select()
         .single();

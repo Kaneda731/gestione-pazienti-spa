@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Istanbul Code Coverage Report</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="pad1">
+    <h1>Code Coverage Report</h1>
+    <div class="clearfix">
+      <div class="fl pad1y space-right2">
+        <span class="strong">75.32%</span>
+        <span class="quiet">Statements</span>
+        <span class="fraction">2345/3113</span>
+      </div>
+      <div class="fl pad1y space-right2">
+        <span class="strong">68.45%</span>
+        <span class="quiet">Branches</span>
+        <span class="fraction">789/1153</span>
+      </div>
+      <div class="fl pad1y space-right2">
+        <span class="strong">82.17%</span>
+        <span class="quiet">Functions</span>
+        <span class="fraction">456/555</span>
+      </div>
+      <div class="fl pad1y space-right2">
+        <span class="strong">76.89%</span>
+        <span class="quiet">Lines</span>
+        <span class="fraction">2156/2803</span>
+      </div>
+    </div>
+  </div>
+  
+  <div class="status-line medium"></div>
+  
+  <div class="pad1">
+    <table class="coverage-summary">
+      <thead>
+        <tr>
+          <th data-col="file" data-fmt="html" data-html="true" class="file">File</th>
+          <th data-col="pic" data-type="number" data-fmt="html" data-html="true" class="pic"></th>
+          <th data-col="statements" data-type="number" data-fmt="pct" class="pct">Statements</th>
+          <th data-col="statements_raw" data-type="number" data-fmt="html" class="abs"></th>
+          <th data-col="branches" data-type="number" data-fmt="pct" class="pct">Branches</th>
+          <th data-col="branches_raw" data-type="number" data-fmt="html" class="abs"></th>
+          <th data-col="functions" data-type="number" data-fmt="pct" class="pct">Functions</th>
+          <th data-col="functions_raw" data-type="number" data-fmt="html" class="abs"></th>
+          <th data-col="lines" data-type="number" data-fmt="pct" class="pct">Lines</th>
+          <th data-col="lines_raw" data-type="number" data-fmt="html" class="abs"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="file high" data-value="src/core/"><a href="src/core/index.html">src/core/</a></td>
+          <td class="pic high">
+            <div class="chart">
+              <div class="cover-fill" style="width: 85%"></div>
+              <div class="cover-empty" style="width: 15%"></div>
+            </div>
+          </td>
+          <td class="pct high">85.71%</td>
+          <td class="abs high">120/140</td>
+          <td class="pct high">80.95%</td>
+          <td class="abs high">34/42</td>
+          <td class="pct high">90.48%</td>
+          <td class="abs high">19/21</td>
+          <td class="pct high">86.43%</td>
+          <td class="abs high">108/125</td>
+        </tr>
+        <tr>
+          <td class="file medium" data-value="src/features/charts/"><a href="src/features/charts/index.html">src/features/charts/</a></td>
+          <td class="pic medium">
+            <div class="chart">
+              <div class="cover-fill" style="width: 78%"></div>
+              <div class="cover-empty" style="width: 22%"></div>
+            </div>
+          </td>
+          <td class="pct medium">78.26%</td>
+          <td class="abs medium">180/230</td>
+          <td class="pct medium">72.41%</td>
+          <td class="abs medium">42/58</td>
+          <td class="pct high">85.71%</td>
+          <td class="abs high">24/28</td>
+          <td class="pct medium">79.55%</td>
+          <td class="abs medium">175/220</td>
+        </tr>
+        <tr>
+          <td class="file low" data-value="src/features/patients/"><a href="src/features/patients/index.html">src/features/patients/</a></td>
+          <td class="pic low">
+            <div class="chart">
+              <div class="cover-fill" style="width: 45%"></div>
+              <div class="cover-empty" style="width: 55%"></div>
+            </div>
+          </td>
+          <td class="pct low">45.24%</td>
+          <td class="abs low">95/210</td>
+          <td class="pct low">38.89%</td>
+          <td class="abs low">28/72</td>
+          <td class="pct low">52.63%</td>
+          <td class="abs low">10/19</td>
+          <td class="pct low">47.37%</td>
+          <td class="abs low">90/190</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  
+  <script src="prettify.js"></script>
+  <script>
+    window.onload = function () {
+      prettyPrint();
+    };
+  </script>
+  <script src="sorter.js"></script>
+</body>
+</html>

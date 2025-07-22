@@ -43,19 +43,61 @@ export default defineConfig({
       ".idea/**",
       ".git/**",
       "backup/**",
+      "tests-backup*/**",
+      "**/temp/**",
+      "**/legacy/**",
+      "**/deprecated/**",
     ],
 
     // Coverage configuration
     coverage: {
       provider: "v8",
-      reporter: ["text", "json", "html"],
+      reporter: ["text", "text-summary", "json", "html", "lcov", "cobertura"],
       reportsDirectory: "./coverage",
+      // Abilita il report dettagliato per ogni file
+      all: true,
+      // Includi i file sorgente anche se non sono stati testati
+      include: ["src/**/*.{js,jsx,ts,tsx,vue}"],
       exclude: [
+        // Test files e cartelle di supporto
         "tests/**",
-        "node_modules/**",
-        "dist/**",
+        "tests-backup*/**",
+
+        // File di configurazione
         "**/*.config.js",
         "**/*.config.ts",
+
+        // Cartelle di build e dipendenze
+        "node_modules/**",
+        "dist/**",
+
+        // Risorse statiche e asset
+        "src/css/**",
+        "src/favicon.svg",
+        "**/*.svg",
+        "**/*.png",
+        "**/*.jpg",
+        "**/*.jpeg",
+        "**/*.gif",
+        "**/*.ico",
+
+        // Cartelle di sistema e strumenti
+        "backup/**",
+        "**/temp/**",
+        "**/legacy/**",
+        "**/deprecated/**",
+        ".github/**",
+        ".netlify/**",
+        "docs/**",
+        "scripts/**",
+        ".kiro/**",
+        ".vscode/**",
+        ".git/**",
+        ".DS_Store",
+
+        // Eventuali file di mock o fixture
+        "**/__mocks__/**",
+        "**/__fixtures__/**",
       ],
       thresholds: {
         global: {
@@ -64,7 +106,24 @@ export default defineConfig({
           lines: 70,
           statements: 70,
         },
+        // Soglie per directory specifiche (più stringenti per componenti critici)
+        './src/core/': {
+          branches: 80,
+          functions: 85,
+          lines: 80,
+          statements: 80,
+        },
+        './src/features/': {
+          branches: 75,
+          functions: 80,
+          lines: 75,
+          statements: 75,
+        },
       },
+      // Genera report per ogni file
+      perFile: true,
+      // Mostra i file che non hanno coverage
+      skipFull: false,
     },
 
     // Reporter configuration

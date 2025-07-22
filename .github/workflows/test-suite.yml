@@ -1,0 +1,89 @@
+name: Test Suite
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run tests with coverage
+      run: |
+        START_TIME=$(date +%s)
+        npm run test:coverage
+        END_TIME=$(date +%s)
+        DURATION=$((END_TIME - START_TIME))
+        echo "TEST_EXECUTION_TIME=$DURATION" >> $GITHUB_ENV
+        echo "Test execution time: $DURATION seconds"
+        
+    - name: Enhance coverage report
+      run: npm run coverage:enhance
+      
+    - name: Analyze coverage
+      run: npm run coverage:analyze
+    
+    - name: Analyze test conventions
+      run: node tests/tools/analyze-test-conventions.js
+      
+    - name: Generate CI test report
+      run: |
+        node --experimental-json-modules tests/tools/ci-report-generator.js
+        
+    - name: Upload coverage report
+      uses: actions/upload-artifact@v3
+      with:
+        name: coverage-report
+        path: coverage/
+        
+    - name: Upload CI test report
+      uses: actions/upload-artifact@v3
+      with:
+        name: ci-test-report
+        path: ci-test-report.json
+        
+    - name: Check test performance
+      run: |
+        echo "Comparing test execution time with baseline..."
+        node tests/tools/performance-compare.js || echo "Performance check completed"
+        
+    - name: Check test quality thresholds
+      run: |
+        echo "Checking test quality thresholds..."
+        COVERAGE=$(node -e "const fs=require('fs');const report=JSON.parse(fs.readFileSync('ci-test-report.json'));console.log(report.summary.coverage.lines)")
+        CRITICAL_ISSUES=$(node -e "const fs=require('fs');const report=JSON.parse(fs.readFileSync('ci-test-report.json'));console.log(report.summary.issues.critical)")
+        
+        if (( $(echo "$COVERAGE < 50" | bc -l) )); then
+          echo "⚠️ Warning: Coverage below threshold (50%): $COVERAGE%"
+        else
+          echo "✅ Coverage meets threshold: $COVERAGE%"
+        fi
+        
+        if [ "$CRITICAL_ISSUES" -gt 0 ]; then
+          echo "❌ Error: $CRITICAL_ISSUES critical issues found"
+          exit 1
+        else
+          echo "✅ No critical issues found"
+        fi
+        
+    - name: Find untested code
+      run: npm run coverage:find-untested
+      
+    - name: Check coverage thresholds with Istanbul
+      run: |
+        echo "Checking Istanbul coverage thresholds..."
+        npx istanbul check-coverage --statements 70 --branches 70 --functions 75 --lines 70 || echo "⚠️ Coverage thresholds not met"

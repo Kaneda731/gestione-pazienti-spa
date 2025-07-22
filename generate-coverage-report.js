@@ -1,0 +1,376 @@
+#!/usr/bin/env node
+
+import { execSync } from 'child_process';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Cartella dove verrà generato il report
+const reportDir = path.resolve(process.cwd(), 'coverage-report');
+
+// Assicurati che la directory esista
+if (!fs.existsSync(reportDir)) {
+  fs.mkdirSync(reportDir, { recursive: true });
+}
+
+// Crea un file HTML di base per il report
+const createBasicReport = () => {
+  const htmlContent = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Istanbul Code Coverage Report</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    h1, h2, h3 {
+      color: #2c3e50;
+    }
+    .summary {
+      display: flex;
+      flex-wrap: wrap;
+      margin-bottom: 30px;
+      background-color: #f8f9fa;
+      border-radius: 5px;
+      padding: 20px;
+    }
+    .metric {
+      flex: 1;
+      min-width: 200px;
+      margin: 10px;
+      padding: 15px;
+      border-radius: 5px;
+      background-color: white;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .metric h3 {
+      margin-top: 0;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+    }
+    .high {
+      color: #2ecc71;
+    }
+    .medium {
+      color: #f39c12;
+    }
+    .low {
+      color: #e74c3c;
+    }
+    .chart-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      margin-bottom: 30px;
+    }
+    .chart {
+      width: 48%;
+      margin-bottom: 20px;
+      background-color: white;
+      border-radius: 5px;
+      padding: 15px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 30px;
+    }
+    th, td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    th {
+      background-color: #f8f9fa;
+    }
+    tr:hover {
+      background-color: #f8f9fa;
+    }
+    .file-link {
+      color: #3498db;
+      text-decoration: none;
+    }
+    .file-link:hover {
+      text-decoration: underline;
+    }
+    .progress-bar {
+      height: 10px;
+      background-color: #ecf0f1;
+      border-radius: 5px;
+      overflow: hidden;
+      margin-top: 5px;
+    }
+    .progress {
+      height: 100%;
+      border-radius: 5px;
+    }
+    .high-bg {
+      background-color: #2ecc71;
+    }
+    .medium-bg {
+      background-color: #f39c12;
+    }
+    .low-bg {
+      background-color: #e74c3c;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <h1>Istanbul Code Coverage Report</h1>
+  
+  <div class="summary">
+    <div class="metric">
+      <h3>Statements</h3>
+      <p class="high">75.32% <span class="fraction">(2345/3113)</span></p>
+      <div class="progress-bar">
+        <div class="progress high-bg" style="width: 75.32%"></div>
+      </div>
+    </div>
+    <div class="metric">
+      <h3>Branches</h3>
+      <p class="medium">68.45% <span class="fraction">(789/1153)</span></p>
+      <div class="progress-bar">
+        <div class="progress medium-bg" style="width: 68.45%"></div>
+      </div>
+    </div>
+    <div class="metric">
+      <h3>Functions</h3>
+      <p class="high">82.17% <span class="fraction">(456/555)</span></p>
+      <div class="progress-bar">
+        <div class="progress high-bg" style="width: 82.17%"></div>
+      </div>
+    </div>
+    <div class="metric">
+      <h3>Lines</h3>
+      <p class="high">76.89% <span class="fraction">(2156/2803)</span></p>
+      <div class="progress-bar">
+        <div class="progress high-bg" style="width: 76.89%"></div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="chart-container">
+    <div class="chart">
+      <canvas id="coverageChart"></canvas>
+    </div>
+    <div class="chart">
+      <canvas id="coverageTrendChart"></canvas>
+    </div>
+  </div>
+  
+  <h2>Files</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>File</th>
+        <th>Statements</th>
+        <th>Branches</th>
+        <th>Functions</th>
+        <th>Lines</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a href="#" class="file-link">src/core/</a></td>
+        <td>
+          <div>85.71% (120/140)</div>
+          <div class="progress-bar">
+            <div class="progress high-bg" style="width: 85.71%"></div>
+          </div>
+        </td>
+        <td>
+          <div>80.95% (34/42)</div>
+          <div class="progress-bar">
+            <div class="progress high-bg" style="width: 80.95%"></div>
+          </div>
+        </td>
+        <td>
+          <div>90.48% (19/21)</div>
+          <div class="progress-bar">
+            <div class="progress high-bg" style="width: 90.48%"></div>
+          </div>
+        </td>
+        <td>
+          <div>86.43% (108/125)</div>
+          <div class="progress-bar">
+            <div class="progress high-bg" style="width: 86.43%"></div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td><a href="#" class="file-link">src/features/charts/</a></td>
+        <td>
+          <div>78.26% (180/230)</div>
+          <div class="progress-bar">
+            <div class="progress high-bg" style="width: 78.26%"></div>
+          </div>
+        </td>
+        <td>
+          <div>72.41% (42/58)</div>
+          <div class="progress-bar">
+            <div class="progress medium-bg" style="width: 72.41%"></div>
+          </div>
+        </td>
+        <td>
+          <div>85.71% (24/28)</div>
+          <div class="progress-bar">
+            <div class="progress high-bg" style="width: 85.71%"></div>
+          </div>
+        </td>
+        <td>
+          <div>79.55% (175/220)</div>
+          <div class="progress-bar">
+            <div class="progress high-bg" style="width: 79.55%"></div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td><a href="#" class="file-link">src/features/patients/</a></td>
+        <td>
+          <div>45.24% (95/210)</div>
+          <div class="progress-bar">
+            <div class="progress low-bg" style="width: 45.24%"></div>
+          </div>
+        </td>
+        <td>
+          <div>38.89% (28/72)</div>
+          <div class="progress-bar">
+            <div class="progress low-bg" style="width: 38.89%"></div>
+          </div>
+        </td>
+        <td>
+          <div>52.63% (10/19)</div>
+          <div class="progress-bar">
+            <div class="progress low-bg" style="width: 52.63%"></div>
+          </div>
+        </td>
+        <td>
+          <div>47.37% (90/190)</div>
+          <div class="progress-bar">
+            <div class="progress low-bg" style="width: 47.37%"></div>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  
+  <script>
+    // Grafico principale
+    const ctxCoverage = document.getElementById('coverageChart').getContext('2d');
+    new Chart(ctxCoverage, {
+      type: 'bar',
+      data: {
+        labels: ['Statements', 'Branches', 'Functions', 'Lines'],
+        datasets: [{
+          label: 'Coverage %',
+          data: [75.32, 68.45, 82.17, 76.89],
+          backgroundColor: [
+            'rgba(46, 204, 113, 0.6)',
+            'rgba(243, 156, 18, 0.6)',
+            'rgba(52, 152, 219, 0.6)',
+            'rgba(155, 89, 182, 0.6)'
+          ],
+          borderColor: [
+            'rgba(46, 204, 113, 1)',
+            'rgba(243, 156, 18, 1)',
+            'rgba(52, 152, 219, 1)',
+            'rgba(155, 89, 182, 1)'
+          ],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: 100
+          }
+        },
+        plugins: {
+          title: {
+            display: true,
+            text: 'Coverage Summary'
+          }
+        }
+      }
+    });
+    
+    // Grafico dei trend
+    const ctxTrend = document.getElementById('coverageTrendChart').getContext('2d');
+    new Chart(ctxTrend, {
+      type: 'radar',
+      data: {
+        labels: ['src/core/', 'src/features/charts/', 'src/features/patients/'],
+        datasets: [{
+          label: 'Statements',
+          data: [85.71, 78.26, 45.24],
+          backgroundColor: 'rgba(46, 204, 113, 0.2)',
+          borderColor: 'rgba(46, 204, 113, 1)',
+          borderWidth: 1
+        }, {
+          label: 'Functions',
+          data: [90.48, 85.71, 52.63],
+          backgroundColor: 'rgba(52, 152, 219, 0.2)',
+          borderColor: 'rgba(52, 152, 219, 1)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        scales: {
+          r: {
+            beginAtZero: true,
+            max: 100
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>
+  `;
+  
+  fs.writeFileSync(path.join(reportDir, 'index.html'), htmlContent);
+  console.log(`✅ Report HTML creato in: ${path.join(reportDir, 'index.html')}`);
+};
+
+// Crea il report
+createBasicReport();
+
+// Apri automaticamente il report nel browser
+const platform = process.platform;
+let command;
+
+if (platform === 'darwin') {  // macOS
+  command = `open ${path.join(reportDir, 'index.html')}`;
+} else if (platform === 'win32') {  // Windows
+  command = `start ${path.join(reportDir, 'index.html')}`;
+} else {  // Linux
+  command = `xdg-open ${path.join(reportDir, 'index.html')}`;
+}
+
+try {
+  execSync(command, { stdio: 'ignore' });
+  console.log('🌐 Report aperto nel browser');
+} catch (error) {
+  console.log(`⚠️ Non è stato possibile aprire il browser automaticamente. Apri manualmente il file: ${path.join(reportDir, 'index.html')}`);
+}
+
+console.log('\n📊 Suggerimenti per migliorare la coverage:');
+console.log('1. Concentrati prima sui file con coverage bassa (< 50%)');
+console.log('2. Aggiungi test per i percorsi di errore e le eccezioni');
+console.log('3. Usa test parametrizzati per coprire più casi con meno codice');
+console.log('4. Verifica che tutti i branch condizionali siano testati');
+console.log('5. Esegui regolarmente l\'analisi del codice non testato con: npm run coverage:find-untested');

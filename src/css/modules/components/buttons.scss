@@ -1,3 +1,45 @@
+/* Fix: uniforma altezza e padding dei bottoni resetta/esporta nella barra azioni filtri (desktop) */
+#filter-actions-container > #reset-filters-btn.btn,
+#filter-actions-container > #export-csv-btn.btn {
+  min-height: var(--btn-height) !important;
+  height: var(--btn-height) !important;
+  padding: var(--btn-padding-y) var(--btn-padding-x) !important;
+  font-size: var(--btn-font-size) !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+/* === STANDARD DIMENSIONI BOTTONI DESKTOP & MOBILE === */
+:root {
+  --btn-height: 40px;
+  --btn-padding-y: 0.5rem;
+  --btn-padding-x: 1.2rem;
+  --btn-font-size: 1rem;
+}
+
+@media (max-width: 767px) {
+  :root {
+    --btn-height: 44px;
+    --btn-padding-y: 0.75rem;
+    --btn-padding-x: 1.5rem;
+    --btn-font-size: 1.05rem;
+  }
+}
+
+/* Applica dimensioni standard a tutti i bottoni principali */
+.btn, button, [type="button"], [type="submit"] {
+    min-height: var(--btn-height);
+    padding: var(--btn-padding-y) var(--btn-padding-x);
+    font-size: var(--btn-font-size);
+    box-sizing: border-box;
+    outline: none;
+    box-shadow: none;
+    font-family: var(--font-family-base);
+    font-weight: var(--btn-font-weight);
+    letter-spacing: 0.01em;
+    transition: var(--transition);
+}
 /* Miglioramento accessibilità e focus per tutti i pulsanti */
 .btn, button, [type="button"], [type="submit"] {
     outline: none;

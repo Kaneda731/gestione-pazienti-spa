@@ -58,43 +58,47 @@ class ResponsiveChartAdapter {
     if (this.resizeHandler) {
       window.removeEventListener('resize', this.resizeHandler);
     }
-    
+
     // Crea un nuovo handler con throttling
     this.resizeHandler = ChartUtils.throttle(() => {
+      // Se il grafico o il canvas non esistono più, non fare nulla
+      if (!chart || !chart.canvas) return;
       const newDevice = this.adapterFactory.getCurrentDeviceType();
-      
+
       // Aggiorna solo se il tipo di dispositivo è cambiato
       if (newDevice !== this.currentDevice) {
         this.currentDevice = newDevice;
-        
+
         // Ottieni il nuovo adapter
         this.currentAdapter = this.adapterFactory.getAdapterForDevice(this.currentDevice);
-        
+
         // Adatta il container
         if (chart.canvas && chart.canvas.parentNode) {
           this.adaptLayout(chart.canvas.parentNode);
         }
-        
+
         // Aggiorna le opzioni del grafico
         const adaptedOptions = this.adaptOptions(options);
         chart.options = { ...chart.options, ...adaptedOptions };
         chart.update();
       }
     }, 250);
-    
+
     // Aggiungi il nuovo handler
     window.addEventListener('resize', this.resizeHandler);
-    
+
     // Registra anche un listener per il cambio di dispositivo
     this.adapterFactory.onDeviceChange((newDevice) => {
+      // Se il grafico o il canvas non esistono più, non fare nulla
+      if (!chart || !chart.canvas) return;
       // Ottieni il nuovo adapter
       this.currentAdapter = this.adapterFactory.getAdapterForDevice(newDevice);
-      
+
       // Adatta il container
       if (chart.canvas && chart.canvas.parentNode) {
         this.adaptLayout(chart.canvas.parentNode);
       }
-      
+
       // Aggiorna le opzioni del grafico
       const adaptedOptions = this.adaptOptions(options);
       chart.options = { ...chart.options, ...adaptedOptions };

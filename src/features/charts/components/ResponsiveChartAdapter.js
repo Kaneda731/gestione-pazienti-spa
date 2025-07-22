@@ -54,6 +54,12 @@ class ResponsiveChartAdapter {
    * @param {Object} options - Le opzioni originali del grafico
    */
   handleResize(chart, options) {
+    // Verifica che chart e options siano validi
+    if (!chart || !options) {
+      console.warn('Chart o options non validi in handleResize');
+      return;
+    }
+    
     // Rimuovi handler precedente se esiste
     if (this.resizeHandler) {
       window.removeEventListener('resize', this.resizeHandler);
@@ -61,47 +67,64 @@ class ResponsiveChartAdapter {
     
     // Crea un nuovo handler con throttling
     this.resizeHandler = ChartUtils.throttle(() => {
-          // Se il grafico o il canvas non esistono più, non fare nulla
-          if (!chart || !chart.canvas) return;
-          const newDevice = this.adapterFactory.getCurrentDeviceType();
-      
-      // Aggiorna solo se il tipo di dispositivo è cambiato
-      if (newDevice !== this.currentDevice) {
-        this.currentDevice = newDevice;
+      try {
+        // Se il grafico o il canvas non esistono più, non fare nulla
+        if (!chart || !chart.canvas) return;
+        const newDevice = this.adapterFactory.getCurrentDeviceType();
         
-        // Ottieni il nuovo adapter
-        this.currentAdapter = this.adapterFactory.getAdapterForDevice(this.currentDevice);
-        
-        // Adatta il container
-        if (chart.canvas && chart.canvas.parentNode) {
-          this.adaptLayout(chart.canvas.parentNode);
+        // Aggiorna solo se il tipo di dispositivo è cambiato
+        if (newDevice !== this.currentDevice) {
+          this.currentDevice = newDevice;
+          
+          // Ottieni il nuovo adapter
+          this.currentAdapter = this.adapterFactory.getAdapterForDevice(this.currentDevice);
+          
+          // Adatta il container
+          if (chart.canvas && chart.canvas.parentNode) {
+            this.adaptLayout(chart.canvas.parentNode);
+          }
+          
+          // Aggiorna le opzioni del grafico
+          const adaptedOptions = this.adaptOptions(options);
+          chart.options = { ...chart.options, ...adaptedOptions };
+          chart.update();
         }
-        
-        // Aggiorna le opzioni del grafico
-        const adaptedOptions = this.adaptOptions(options);
-        chart.options = { ...chart.options, ...adaptedOptions };
-        chart.update();
+      } catch (error) {
+        console.error('Errore durante l\'esecuzione del listener di resize:', error);
       }
     }, 250);
     
-    // Aggiungi il nuovo handler
-    window.addEventListener('resize', this.resizeHandler);
-    
-    // Registra anche un listener per il cambio di dispositivo
-    this.adapterFactory.onDeviceChange((newDevice) => {
-      // Ottieni il nuovo adapter
-      this.currentAdapter = this.adapterFactory.getAdapterForDevice(newDevice);
+    try {
+      // Aggiungi il nuovo handler
+      window.addEventListener('resize', this.resizeHandler);
       
-      // Adatta il container
-      if (chart.canvas && chart.canvas.parentNode) {
-        this.adaptLayout(chart.canvas.parentNode);
+      // Registra anche un listener per il cambio di dispositivo
+      if (this.adapterFactory && typeof this.adapterFactory.onDeviceChange === 'function') {
+        this.adapterFactory.onDeviceChange((newDevice) => {
+          try {
+            // Verifica che chart sia ancora valido
+            if (!chart || !chart.canvas) return;
+            
+            // Ottieni il nuovo adapter
+            this.currentAdapter = this.adapterFactory.getAdapterForDevice(newDevice);
+            
+            // Adatta il container
+            if (chart.canvas && chart.canvas.parentNode) {
+              this.adaptLayout(chart.canvas.parentNode);
+            }
+            
+            // Aggiorna le opzioni del grafico
+            const adaptedOptions = this.adaptOptions(options);
+            chart.options = { ...chart.options, ...adaptedOptions };
+            chart.update();
+          } catch (error) {
+            console.error('Errore durante l\'esecuzione del listener di cambio dispositivo:', error);
+          }
+        });
       }
-      
-      // Aggiorna le opzioni del grafico
-      const adaptedOptions = this.adaptOptions(options);
-      chart.options = { ...chart.options, ...adaptedOptions };
-      chart.update();
-    });
+    } catch (error) {
+      console.error('Errore durante la registrazione dei listener:', error);
+    }
   }
 
   /**

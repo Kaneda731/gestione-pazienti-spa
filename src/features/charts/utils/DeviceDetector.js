@@ -22,24 +22,48 @@ class DeviceDetector {
    * @returns {string} - Il tipo di dispositivo (mobile/tablet/desktop)
    */
   detectDevice() {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    
-    // Considera anche l'orientamento e le caratteristiche del dispositivo
-    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    const isPortrait = height > width;
-    
-    if (width <= this.breakpoints.mobile) {
-      return 'mobile';
-    } else if (width <= this.breakpoints.tablet) {
-      // Se è un dispositivo touch in modalità landscape, trattalo come mobile
-      if (isTouchDevice && !isPortrait && width <= 1024) {
-        return 'mobile';
+    try {
+      // Verifica che window sia disponibile
+      if (typeof window === 'undefined') {
+        console.warn('Window non disponibile, impossibile rilevare il dispositivo');
+        return 'desktop'; // Fallback a desktop
       }
-      return 'tablet';
+      
+      // Ottieni le dimensioni della finestra in modo sicuro
+      const width = window.innerWidth || document.documentElement.clientWidth || 1024;
+      const height = window.innerHeight || document.documentElement.clientHeight || 768;
+      
+      // Verifica che i breakpoints siano definiti correttamente
+      const mobileBreakpoint = this.breakpoints && typeof this.breakpoints.mobile === 'number' ? 
+        this.breakpoints.mobile : 767;
+      const tabletBreakpoint = this.breakpoints && typeof this.breakpoints.tablet === 'number' ? 
+        this.breakpoints.tablet : 991;
+      
+      // Considera anche l'orientamento e le caratteristiche del dispositivo
+      let isTouchDevice = false;
+      try {
+        isTouchDevice = 'ontouchstart' in window || (window.navigator && navigator.maxTouchPoints > 0);
+      } catch (e) {
+        console.warn('Errore nel rilevamento touch:', e);
+      }
+      
+      const isPortrait = height > width;
+      
+      if (width <= mobileBreakpoint) {
+        return 'mobile';
+      } else if (width <= tabletBreakpoint) {
+        // Se è un dispositivo touch in modalità landscape, trattalo come mobile
+        if (isTouchDevice && !isPortrait && width <= 1024) {
+          return 'mobile';
+        }
+        return 'tablet';
+      }
+      
+      return 'desktop';
+    } catch (error) {
+      console.error('Errore durante il rilevamento del dispositivo:', error);
+      return 'desktop'; // Fallback a desktop in caso di errore
     }
-    
-    return 'desktop';
   }
 
   /**
@@ -113,6 +137,12 @@ class DeviceDetector {
    * @private
    */
   _setupResizeListener() {
+    // Verifica che window sia disponibile (per evitare errori in ambienti SSR)
+    if (typeof window === 'undefined') {
+      console.warn('Window non disponibile, impossibile configurare i listener di resize');
+      return;
+    }
+    
     // Funzione di throttling per limitare la frequenza di esecuzione
     const throttle = (func, limit) => {
       let inThrottle;
@@ -120,7 +150,11 @@ class DeviceDetector {
         const args = arguments;
         const context = this;
         if (!inThrottle) {
-          func.apply(context, args);
+          try {
+            func.apply(context, args);
+          } catch (error) {
+            console.error('Errore nella funzione throttled:', error);
+          }
           inThrottle = true;
           setTimeout(() => inThrottle = false, limit);
         }
@@ -129,26 +163,36 @@ class DeviceDetector {
 
     // Handler per il ridimensionamento con throttling
     const handleResize = throttle(() => {
-      const previousDevice = this.currentDevice;
-      this.currentDevice = this.detectDevice();
-      
-      // Notifica i listener solo se il tipo di dispositivo è cambiato
-      if (previousDevice !== this.currentDevice) {
-        this.resizeListeners.forEach(listener => {
-          try {
-            listener(this.currentDevice, previousDevice);
-          } catch (error) {
-            console.error('Errore durante l\'esecuzione del listener di resize:', error);
-          }
-        });
+      try {
+        const previousDevice = this.currentDevice;
+        this.currentDevice = this.detectDevice();
+        
+        // Notifica i listener solo se il tipo di dispositivo è cambiato
+        if (previousDevice !== this.currentDevice && Array.isArray(this.resizeListeners)) {
+          this.resizeListeners.forEach(listener => {
+            if (typeof listener === 'function') {
+              try {
+                listener(this.currentDevice, previousDevice);
+              } catch (error) {
+                console.error('Errore durante l\'esecuzione del listener di resize:', error);
+              }
+            }
+          });
+        }
+      } catch (error) {
+        console.error('Errore durante la gestione del resize:', error);
       }
     }, 250);
 
-    // Aggiungi il listener per il ridimensionamento
-    window.addEventListener('resize', handleResize);
-    
-    // Aggiungi anche un listener per il cambio di orientamento sui dispositivi mobili
-    window.addEventListener('orientationchange', handleResize);
+    try {
+      // Aggiungi il listener per il ridimensionamento
+      window.addEventListener('resize', handleResize);
+      
+      // Aggiungi anche un listener per il cambio di orientamento sui dispositivi mobili
+      window.addEventListener('orientationchange', handleResize);
+    } catch (error) {
+      console.error('Errore durante l\'aggiunta dei listener di resize:', error);
+    }
   }
 }
 

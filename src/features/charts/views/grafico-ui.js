@@ -40,11 +40,33 @@ export const dom = {
  */
 export async function initializeUI() {
     try {
-        // Inizializza i select e datepicker
-        initCustomSelects('#filter-reparto, #filter-provenienza, #filter-diagnosi, #filter-assistenza, #filter-infetto');
-        datepickerInstance = new CustomDatepicker('[data-datepicker]', {
-            dateFormat: "d/m/Y",
-        });
+        // Verifica che gli elementi necessari esistano prima di inizializzare
+        const requiredElements = [
+            { id: 'chart-container', name: 'Container del grafico' },
+            { id: 'filter-reparto', name: 'Filtro reparto' },
+            { id: 'filter-provenienza', name: 'Filtro provenienza' },
+            { id: 'filter-diagnosi', name: 'Filtro diagnosi' }
+        ];
+        
+        // Verifica elementi richiesti
+        for (const element of requiredElements) {
+            if (!document.getElementById(element.id)) {
+                console.warn(`Elemento ${element.name} (${element.id}) non trovato nel DOM`);
+            }
+        }
+        
+        // Inizializza i select e datepicker (solo se esistono)
+        const selectorsExist = document.querySelector('#filter-reparto, #filter-provenienza, #filter-diagnosi, #filter-assistenza, #filter-infetto');
+        if (selectorsExist) {
+            initCustomSelects('#filter-reparto, #filter-provenienza, #filter-diagnosi, #filter-assistenza, #filter-infetto');
+        }
+        
+        const datepickerElements = document.querySelectorAll('[data-datepicker]');
+        if (datepickerElements.length > 0) {
+            datepickerInstance = new CustomDatepicker('[data-datepicker]', {
+                dateFormat: "d/m/Y",
+            });
+        }
         
         // Inizializza il responsive adapter
         responsiveAdapter = new ResponsiveChartAdapter();
@@ -54,14 +76,22 @@ export async function initializeUI() {
         
         // Adatta il layout iniziale
         if (dom.chartContainer) {
-            responsiveAdapter.adaptLayout(dom.chartContainer);
-            
-            // Implementa il layout responsive specifico per mobile o desktop
-            if (responsiveAdapter.detectDevice() === 'mobile') {
-                responsiveAdapter.implementMobileResponsiveLayout(dom.chartContainer, null);
-            } else if (responsiveAdapter.detectDevice() === 'desktop') {
-                responsiveAdapter.implementDesktopResponsiveLayout(dom.chartContainer, null);
+            try {
+                responsiveAdapter.adaptLayout(dom.chartContainer);
+                
+                // Implementa il layout responsive specifico per mobile o desktop
+                const deviceType = responsiveAdapter.detectDevice();
+                if (deviceType === 'mobile') {
+                    responsiveAdapter.implementMobileResponsiveLayout(dom.chartContainer, null);
+                } else if (deviceType === 'desktop') {
+                    responsiveAdapter.implementDesktopResponsiveLayout(dom.chartContainer, null);
+                }
+            } catch (layoutError) {
+                console.error('Errore nell\'adattamento del layout:', layoutError);
+                // Continua l'esecuzione anche in caso di errore nel layout
             }
+        } else {
+            console.warn('Container del grafico non trovato, impossibile adattare il layout');
         }
         
         showInitialMessage();
@@ -396,11 +426,24 @@ function prepareChartData(data) {
  * @param {Array} data - I dati da visualizzare.
  */
 export async function drawChart(data) {
+    // Verifica che il container del grafico esista
+    if (!dom.chartContainer) {
+        console.error('Container del grafico non trovato');
+        return null;
+    }
+    
+    // Verifica che i dati siano validi
+    if (!data || !Array.isArray(data)) {
+        console.warn('Dati non validi per il grafico:', data);
+        showMessage('Dati non validi per visualizzare il grafico.');
+        return null;
+    }
+    
     const { labels, dataPoints } = prepareChartData(data);
 
     if (labels.length === 0) {
         showMessage('Nessun dato valido per visualizzare il grafico.');
-        return;
+        return null;
     }
 
     const chartOptions = {
@@ -413,7 +456,9 @@ export async function drawChart(data) {
                 font: { size: 18, weight: 'bold' }
             },
             legend: {
-                position: responsiveAdapter.detectDevice() === 'desktop' ? 'right' : 'top',
+                position: responsiveAdapter && typeof responsiveAdapter.detectDevice === 'function' ? 
+                    (responsiveAdapter.detectDevice() === 'desktop' ? 'right' : 'top') : 
+                    'top',
                 onHover: function(event, legendItem, legend) {
                     // Implementa l'interazione hover qui
                     // console.log('Hover su legenda:', legendItem);
@@ -422,7 +467,8 @@ export async function drawChart(data) {
                     // Implementa l'interazione click qui
                     // console.log('Click su legenda:', legendItem);
                 }
-            }        },
+            }
+        },
     };
 
     // Opzioni specifiche per il grafico a barre
@@ -447,6 +493,16 @@ export async function drawChart(data) {
     }
 
     try {
+        // Pulisci il grafico precedente se esiste
+        if (currentChart) {
+            try {
+                currentChart.destroy();
+            } catch (destroyError) {
+                console.warn('Errore durante la distruzione del grafico precedente:', destroyError);
+            }
+        }
+        
+        // Crea il nuovo grafico
         currentChart = await createChart(
             dom.chartContainer, {
                 labels,
@@ -459,19 +515,36 @@ export async function drawChart(data) {
             currentChartType
         );
 
+        // Applica le opzioni responsive se possibile
         if (responsiveAdapter && currentChart) {
-            const adaptedOptions = responsiveAdapter.adaptOptions(currentChart.options);
-            currentChart.options = { ...currentChart.options, ...adaptedOptions };
-            responsiveAdapter.handleResize(currentChart, chartOptions);
-            currentChart.update();
+            try {
+                const adaptedOptions = responsiveAdapter.adaptOptions(currentChart.options);
+                currentChart.options = { ...currentChart.options, ...adaptedOptions };
+                
+                // Gestisci il resize solo se tutti i componenti necessari sono disponibili
+                if (typeof responsiveAdapter.handleResize === 'function') {
+                    responsiveAdapter.handleResize(currentChart, chartOptions);
+                }
+                
+                currentChart.update();
+            } catch (adaptError) {
+                console.error('Errore durante l\'adattamento del grafico:', adaptError);
+                // Continua l'esecuzione anche in caso di errore nell'adattamento
+            }
         }
 
+        // Abilita i pulsanti di esportazione/condivisione se esistono
         if (dom.chartExportBtn) dom.chartExportBtn.disabled = false;
         if (dom.chartShareBtn) dom.chartShareBtn.disabled = false;
 
-        document.dispatchEvent(new CustomEvent('chartUpdated', {
-            detail: { chart: currentChart }
-        }));
+        // Notifica che il grafico è stato aggiornato
+        try {
+            document.dispatchEvent(new CustomEvent('chartUpdated', {
+                detail: { chart: currentChart }
+            }));
+        } catch (eventError) {
+            console.warn('Errore durante la generazione dell\'evento chartUpdated:', eventError);
+        }
 
         return currentChart;
     } catch (chartError) {

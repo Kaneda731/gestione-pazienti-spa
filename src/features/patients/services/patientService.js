@@ -467,9 +467,9 @@ class PatientService {
       if (error) throw error;
 
       const stats = {
-        total: data.length,
-        active: data.filter((p) => !p.data_dimissione).length,
-        discharged: data.filter((p) => p.data_dimissione).length,
+        total: Array.isArray(data) ? data.length : 0,
+        active: Array.isArray(data) ? data.filter((p) => !p.data_dimissione).length : 0,
+        discharged: Array.isArray(data) ? data.filter((p) => p.data_dimissione).length : 0,
         byDiagnosis: {},
         byDepartment: {},
       };

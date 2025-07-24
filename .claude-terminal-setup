@@ -1,0 +1,56 @@
+# Terminal Setup Configuration
+# This file contains recommended terminal setup for this codebase
+
+## Shell Configuration
+# Add these aliases to your shell profile (.zshrc, .bashrc, etc.)
+
+# Development shortcuts
+alias gps-dev='npm run dev'
+alias gps-build='npm run build'
+alias gps-preview='npm run preview'
+alias gps-analyze='npm run analyze'
+
+# Testing shortcuts
+alias gps-test='npm run test'
+alias gps-test-unit='npm run test:unit'
+alias gps-test-watch='npm run test:unit:watch'
+alias gps-test-coverage='npm run test:coverage'
+alias gps-test-e2e='npm run test:e2e'
+alias gps-test-e2e-ui='npm run test:e2e:ui'
+alias gps-test-all='npm run test:all'
+
+# Quality shortcuts
+alias gps-lint='npm run lint'
+alias gps-lint-fix='npm run lint:fix'
+alias gps-coverage='npm run coverage:full'
+
+# Git shortcuts
+alias gps-push='git push origin main'
+alias gps-pull='git pull origin main'
+alias gps-status='git status'
+
+## Environment Variables
+# Add to your shell profile for consistent development experience
+export NODE_ENV=development
+export VITE_PORT=5173
+
+## Development Workflow
+# Recommended terminal setup for optimal development:
+# 1. Primary terminal: npm run dev (development server)
+# 2. Secondary terminal: npm run test:unit:watch (TDD)
+# 3. Third terminal: git operations and general commands
+
+## VS Code Integration
+# If using VS Code, these extensions are recommended:
+# - ESLint
+# - Vitest
+# - Playwright Test
+# - GitLens
+# - SCSS IntelliSense
+# - JavaScript (ES6) code snippets
+
+## Common Issues and Solutions
+# 1. Port already in use: kill -9 $(lsof -t -i:5173)
+# 2. Clear all caches: rm -rf node_modules .vite && npm install
+# 3. Reset test snapshots: npm run test:unit -- --update
+# 4. Debug E2E tests: npm run test:e2e -- --debug

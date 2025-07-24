@@ -18,6 +18,19 @@ let searchCache = new Map();
 let searchTimeout = null;
 const SEARCH_DEBOUNCE_MS = 300;
 
+// Advanced search state
+let currentFilters = {
+  paziente_search: '',
+  tipo_evento: '',
+  data_da: '',
+  data_a: '',
+  reparto: ''
+};
+
+// Debounced search functions
+let filterTimeout = null;
+const FILTER_DEBOUNCE_MS = 500;
+
 /**
  * Carica tutti gli eventi clinici con filtri e paginazione
  */
@@ -370,6 +383,262 @@ function getTipoEventoLabel(tipo) {
     'infezione': 'Infezione'
   };
   return labels[tipo] || tipo;
+}
+
+/**
+ * Implementa ricerca avanzata con debouncing per eventi clinici
+ */
+export function searchEventiWithDebounce(filters, callback) {
+  return new Promise((resolve, reject) => {
+    // Clear existing timeout
+    if (filterTimeout) {
+      clearTimeout(filterTimeout);
+    }
+
+    // Update current filters
+    currentFilters = { ...currentFilters, ...filters };
+
+    // Set new timeout for debouncing
+    filterTimeout = setTimeout(async () => {
+      try {
+        logger.log('🔍 Ricerca avanzata eventi con filtri:', currentFilters);
+
+        const result = await fetchEventiClinici(currentFilters, 0);
+        
+        if (callback) {
+          callback(result);
+        }
+        
+        resolve(result);
+      } catch (error) {
+        logger.error('❌ Errore ricerca avanzata eventi:', error);
+        reject(error);
+      }
+    }, FILTER_DEBOUNCE_MS);
+  });
+}
+
+/**
+ * Applica filtri per tipo evento con aggiornamento immediato UI
+ */
+export async function applyEventTypeFilter(tipoEvento) {
+  try {
+    logger.log('🎯 Applicazione filtro tipo evento:', tipoEvento);
+
+    const filters = { ...currentFilters, tipo_evento: tipoEvento };
+    const result = await fetchEventiClinici(filters, 0);
+
+    // Update current filters
+    currentFilters.tipo_evento = tipoEvento;
+
+    logger.log('✅ Filtro tipo evento applicato:', {
+      tipo: tipoEvento,
+      risultati: result.eventi.length
+    });
+
+    return result;
+  } catch (error) {
+    logger.error('❌ Errore applicazione filtro tipo evento:', error);
+    handleApiError(error, 'Errore nell\'applicazione del filtro');
+    throw error;
+  }
+}
+
+/**
+ * Applica filtri per range di date
+ */
+export async function applyDateRangeFilter(dataDa, dataA) {
+  try {
+    logger.log('📅 Applicazione filtro range date:', { dataDa, dataA });
+
+    // Validate date range
+    if (dataDa && dataA) {
+      const startDate = new Date(dataDa);
+      const endDate = new Date(dataA);
+      
+      if (startDate > endDate) {
+        throw new Error('La data di inizio non può essere successiva alla data di fine');
+      }
+    }
+
+    const filters = { 
+      ...currentFilters, 
+      data_da: dataDa || '', 
+      data_a: dataA || '' 
+    };
+    
+    const result = await fetchEventiClinici(filters, 0);
+
+    // Update current filters
+    currentFilters.data_da = dataDa || '';
+    currentFilters.data_a = dataA || '';
+
+    logger.log('✅ Filtro range date applicato:', {
+      da: dataDa,
+      a: dataA,
+      risultati: result.eventi.length
+    });
+
+    return result;
+  } catch (error) {
+    logger.error('❌ Errore applicazione filtro date:', error);
+    handleApiError(error, 'Errore nell\'applicazione del filtro date');
+    throw error;
+  }
+}
+
+/**
+ * Applica filtro per reparto (per trasferimenti)
+ */
+export async function applyDepartmentFilter(reparto) {
+  try {
+    logger.log('🏥 Applicazione filtro reparto:', reparto);
+
+    const filters = { ...currentFilters, reparto: reparto || '' };
+    const result = await fetchEventiClinici(filters, 0);
+
+    // Update current filters
+    currentFilters.reparto = reparto || '';
+
+    logger.log('✅ Filtro reparto applicato:', {
+      reparto,
+      risultati: result.eventi.length
+    });
+
+    return result;
+  } catch (error) {
+    logger.error('❌ Errore applicazione filtro reparto:', error);
+    handleApiError(error, 'Errore nell\'applicazione del filtro reparto');
+    throw error;
+  }
+}
+
+/**
+ * Ricerca pazienti in tempo reale con debouncing
+ */
+export function searchPatientsRealTime(searchTerm, callback) {
+  return new Promise((resolve, reject) => {
+    // Clear existing timeout
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+
+    // Check for short search terms immediately
+    if (!searchTerm || searchTerm.trim().length < 2) {
+      const emptyResult = [];
+      if (callback) callback(emptyResult);
+      resolve(emptyResult);
+      return;
+    }
+
+    // Set new timeout for debouncing
+    searchTimeout = setTimeout(async () => {
+      try {
+        logger.log('🔍 Ricerca pazienti real-time:', searchTerm);
+
+        const pazienti = await searchPazientiForEvents(searchTerm.trim(), true);
+        
+        if (callback) {
+          callback(pazienti);
+        }
+        
+        resolve(pazienti);
+      } catch (error) {
+        logger.error('❌ Errore ricerca pazienti real-time:', error);
+        reject(error);
+      }
+    }, SEARCH_DEBOUNCE_MS);
+  });
+}
+
+/**
+ * Applica ricerca paziente e filtra eventi
+ */
+export async function applyPatientSearch(searchTerm) {
+  try {
+    logger.log('👤 Applicazione ricerca paziente:', searchTerm);
+
+    const filters = { ...currentFilters, paziente_search: searchTerm || '' };
+    const result = await fetchEventiClinici(filters, 0);
+
+    // Update current filters
+    currentFilters.paziente_search = searchTerm || '';
+
+    logger.log('✅ Ricerca paziente applicata:', {
+      termine: searchTerm,
+      risultati: result.eventi.length
+    });
+
+    return result;
+  } catch (error) {
+    logger.error('❌ Errore ricerca paziente:', error);
+    handleApiError(error, 'Errore nella ricerca paziente');
+    throw error;
+  }
+}
+
+/**
+ * Ottiene i filtri correnti
+ */
+export function getCurrentFilters() {
+  return { ...currentFilters };
+}
+
+/**
+ * Resetta tutti i filtri
+ */
+export async function resetAllFilters() {
+  try {
+    logger.log('🔄 Reset di tutti i filtri');
+
+    currentFilters = {
+      paziente_search: '',
+      tipo_evento: '',
+      data_da: '',
+      data_a: '',
+      reparto: ''
+    };
+
+    const result = await fetchEventiClinici(currentFilters, 0);
+
+    logger.log('✅ Filtri resettati:', {
+      risultati: result.eventi.length
+    });
+
+    return result;
+  } catch (error) {
+    logger.error('❌ Errore reset filtri:', error);
+    handleApiError(error, 'Errore nel reset dei filtri');
+    throw error;
+  }
+}
+
+/**
+ * Ottiene lista reparti per filtro
+ */
+export async function getDepartmentsList() {
+  try {
+    logger.log('🏥 Caricamento lista reparti');
+
+    // Import supabase directly since we need it here
+    const { supabase } = await import('../../../core/services/supabaseClient.js');
+    const { data, error } = await supabase
+      .from('pazienti')
+      .select('reparto_appartenenza')
+      .not('reparto_appartenenza', 'is', null)
+      .order('reparto_appartenenza');
+
+    if (error) throw error;
+
+    // Get unique departments
+    const reparti = [...new Set(data.map(p => p.reparto_appartenenza))];
+
+    logger.log('✅ Lista reparti caricata:', reparti.length);
+    return reparti;
+  } catch (error) {
+    logger.error('❌ Errore caricamento reparti:', error);
+    return [];
+  }
 }
 
 /**

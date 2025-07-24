@@ -25,6 +25,7 @@ export function initializeDOMElements() {
     filterType: document.getElementById("eventi-filter-type"),
     filterDateFrom: document.getElementById("eventi-filter-date-from"),
     filterDateTo: document.getElementById("eventi-filter-date-to"),
+    filterReparto: document.getElementById("eventi-filter-reparto"),
 
     // Action buttons
     addEventBtn: document.getElementById("eventi-add-btn"),
@@ -714,6 +715,199 @@ export function applyResponsiveDesign() {
     card.classList.toggle("mobile-card", isMobile);
     card.classList.toggle("tablet-card", isTablet);
   });
+}
+
+/**
+ * Popola il filtro reparti con le opzioni disponibili
+ */
+export async function populateDepartmentFilter(reparti) {
+  if (!domElements.filterReparto) return;
+
+  // Clear existing options except the first one
+  const firstOption = domElements.filterReparto.querySelector('option[value=""]');
+  domElements.filterReparto.innerHTML = '';
+  if (firstOption) {
+    domElements.filterReparto.appendChild(firstOption);
+  }
+
+  // Add department options
+  reparti.forEach(reparto => {
+    const option = document.createElement('option');
+    option.value = reparto;
+    option.textContent = reparto;
+    domElements.filterReparto.appendChild(option);
+  });
+
+  logger.log('✅ Filtro reparti popolato con', reparti.length, 'opzioni');
+}
+
+/**
+ * Applica filtri attivi all'interfaccia
+ */
+export function applyFiltersToUI(filters) {
+  if (!filters) return;
+
+  // Patient search
+  if (domElements.searchPatientInput && filters.paziente_search) {
+    domElements.searchPatientInput.value = filters.paziente_search;
+  }
+
+  // Event type filter
+  if (domElements.filterType && filters.tipo_evento) {
+    domElements.filterType.value = filters.tipo_evento;
+  }
+
+  // Date filters
+  if (domElements.filterDateFrom && filters.data_da) {
+    domElements.filterDateFrom.value = filters.data_da;
+  }
+
+  if (domElements.filterDateTo && filters.data_a) {
+    domElements.filterDateTo.value = filters.data_a;
+  }
+
+  // Department filter
+  if (domElements.filterReparto && filters.reparto) {
+    domElements.filterReparto.value = filters.reparto;
+  }
+
+  logger.log('✅ Filtri applicati all\'interfaccia:', filters);
+}
+
+/**
+ * Resetta tutti i filtri nell'interfaccia
+ */
+export function resetFiltersUI() {
+  if (domElements.searchPatientInput) {
+    domElements.searchPatientInput.value = '';
+    domElements.searchPatientInput.removeAttribute('data-patient-id');
+  }
+
+  if (domElements.filterType) {
+    domElements.filterType.value = '';
+  }
+
+  if (domElements.filterDateFrom) {
+    domElements.filterDateFrom.value = '';
+  }
+
+  if (domElements.filterDateTo) {
+    domElements.filterDateTo.value = '';
+  }
+
+  if (domElements.filterReparto) {
+    domElements.filterReparto.value = '';
+  }
+
+  // Hide patient search results
+  if (domElements.patientSearchResults) {
+    domElements.patientSearchResults.style.display = 'none';
+  }
+
+  logger.log('✅ Filtri UI resettati');
+}
+
+/**
+ * Mostra indicatori di filtri attivi
+ */
+export function showActiveFiltersIndicator(filters) {
+  const activeFiltersCount = Object.values(filters).filter(value => 
+    value && value.toString().trim() !== ''
+  ).length;
+
+  // Find or create filter indicator
+  let indicator = document.getElementById('active-filters-indicator');
+  
+  if (activeFiltersCount > 0) {
+    if (!indicator) {
+      indicator = document.createElement('span');
+      indicator.id = 'active-filters-indicator';
+      indicator.className = 'badge bg-primary ms-2';
+      
+      const resetBtn = domElements.resetFiltersBtn;
+      if (resetBtn) {
+        resetBtn.appendChild(indicator);
+      }
+    }
+    
+    indicator.textContent = `${activeFiltersCount} filtro${activeFiltersCount > 1 ? 'i' : ''} attivo${activeFiltersCount > 1 ? 'i' : ''}`;
+    indicator.style.display = 'inline';
+  } else if (indicator) {
+    indicator.style.display = 'none';
+  }
+}
+
+/**
+ * Mostra stato di ricerca in corso
+ */
+export function showSearchingState() {
+  if (!domElements.timelineContainer) return;
+
+  const searchingHTML = `
+    <div class="searching-state text-center py-4">
+      <div class="spinner-border spinner-border-sm text-primary me-2" role="status">
+        <span class="visually-hidden">Ricerca in corso...</span>
+      </div>
+      <span class="text-muted">Ricerca in corso...</span>
+    </div>
+  `;
+
+  // Add searching indicator to existing content
+  const existingContent = domElements.timelineContainer.innerHTML;
+  domElements.timelineContainer.innerHTML = searchingHTML + existingContent;
+}
+
+/**
+ * Rimuove stato di ricerca in corso
+ */
+export function hideSearchingState() {
+  const searchingState = document.querySelector('.searching-state');
+  if (searchingState) {
+    searchingState.remove();
+  }
+}
+
+/**
+ * Evidenzia termini di ricerca nei risultati
+ */
+export function highlightSearchTerms(content, searchTerm) {
+  if (!searchTerm || searchTerm.length < 2) return content;
+
+  const regex = new RegExp(`(${searchTerm})`, 'gi');
+  return content.replace(regex, '<mark>$1</mark>');
+}
+
+/**
+ * Aggiorna contatore risultati ricerca
+ */
+export function updateSearchResultsCount(count, totalCount, filters) {
+  let resultsInfo = document.getElementById('search-results-info');
+  
+  if (!resultsInfo) {
+    resultsInfo = document.createElement('div');
+    resultsInfo.id = 'search-results-info';
+    resultsInfo.className = 'search-results-info text-muted mb-3';
+    
+    const timelineContainer = domElements.timelineContainer;
+    if (timelineContainer && timelineContainer.parentNode) {
+      timelineContainer.parentNode.insertBefore(resultsInfo, timelineContainer);
+    }
+  }
+
+  const hasActiveFilters = Object.values(filters || {}).some(value => 
+    value && value.toString().trim() !== ''
+  );
+
+  if (hasActiveFilters) {
+    resultsInfo.innerHTML = `
+      <i class="fas fa-filter me-1"></i>
+      Trovati <strong>${count}</strong> eventi su ${totalCount} totali
+      ${filters.paziente_search ? `per "${filters.paziente_search}"` : ''}
+    `;
+    resultsInfo.style.display = 'block';
+  } else {
+    resultsInfo.style.display = 'none';
+  }
 }
 
 /**

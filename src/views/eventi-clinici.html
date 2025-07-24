@@ -40,24 +40,33 @@
                         <span class="material-icons input-icon">calendar_today</span>
                     </div>
                 </div>
-                <div class="col-md-2 d-flex align-items-end">
+                <div class="col-md-2">
+                    <label for="eventi-filter-reparto" class="form-label">Reparto</label>
+                    <select id="eventi-filter-reparto" class="form-select" data-custom="true">
+                        <option value="">Tutti i reparti</option>
+                        <!-- Department options will be populated dynamically -->
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Second row for action buttons -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-12 d-flex justify-content-between align-items-center">
+                    <div class="d-flex" style="gap: 1rem;">
+                        <button id="eventi-reset-filters-btn" class="btn btn-outline-secondary">
+                            <span class="material-icons me-1" style="vertical-align: text-bottom;">refresh</span>Resetta Filtri
+                        </button>
+                        <button id="eventi-export-btn" class="btn btn-outline-secondary">
+                            <span class="material-icons me-1" style="vertical-align: text-bottom;">download</span>Esporta
+                        </button>
+                    </div>
                     <button id="eventi-add-btn" class="btn btn-primary">
                         <span class="material-icons me-1" style="vertical-align: text-bottom;">add</span>Nuovo Evento
                     </button>
                 </div>
             </div>
 
-            <!-- Action Buttons -->
-            <div class="d-flex justify-content-center mb-3">
-                <div class="d-flex" style="gap: 1rem;">
-                    <button id="eventi-reset-filters-btn" class="btn btn-outline-secondary">
-                        <span class="material-icons me-1" style="vertical-align: text-bottom;">refresh</span>Resetta Filtri
-                    </button>
-                    <button id="eventi-export-btn" class="btn btn-outline-secondary">
-                        <span class="material-icons me-1" style="vertical-align: text-bottom;">download</span>Esporta
-                    </button>
-                </div>
-            </div>
+
 
             <!-- Events Timeline Container -->
             <div id="eventi-timeline-container">

@@ -8,7 +8,16 @@ import {
   deleteEventoClinico,
   searchPazientiForEvents,
   getGiorniPostOperatori,
-  clearSearchCache
+  clearSearchCache,
+  searchEventiWithDebounce,
+  applyEventTypeFilter,
+  applyDateRangeFilter,
+  applyDepartmentFilter,
+  searchPatientsRealTime,
+  applyPatientSearch,
+  getCurrentFilters,
+  resetAllFilters,
+  getDepartmentsList
 } from './eventi-clinici-api.js';
 
 import {
@@ -25,7 +34,14 @@ import {
   updateModalTitle,
   renderEventDetails,
   applyResponsiveDesign,
-  getDOMElements
+  getDOMElements,
+  populateDepartmentFilter,
+  applyFiltersToUI,
+  resetFiltersUI,
+  showActiveFiltersIndicator,
+  showSearchingState,
+  hideSearchingState,
+  updateSearchResultsCount
 } from './eventi-clinici-ui.js';
 
 import { logger } from '../../../core/services/loggerService.js';
@@ -83,6 +99,9 @@ export async function initEventiCliniciView(urlParams) {
 
     // Apply responsive design
     applyResponsiveDesign();
+
+    // Load departments for filter
+    await loadDepartments();
 
     // Load initial data
     await loadEventsData();
@@ -204,24 +223,61 @@ function setupMainActionListeners() {
  * Configura i listener per i filtri
  */
 function setupFilterListeners() {
-  // Event type filter
+  // Event type filter with immediate UI update
   if (domElements.filterType) {
-    const handler = () => handleFilterChange();
+    const handler = async () => {
+      showSearchingState();
+      try {
+        const result = await applyEventTypeFilter(domElements.filterType.value);
+        renderEventsTimeline(result);
+        setupEventCardListeners();
+        updateSearchResultsCount(result.eventi.length, result.totalCount, getCurrentFilters());
+        showActiveFiltersIndicator(getCurrentFilters());
+      } catch (error) {
+        logger.error('❌ Errore applicazione filtro tipo evento:', error);
+      } finally {
+        hideSearchingState();
+      }
+    };
     domElements.filterType.addEventListener('change', handler);
     cleanupFunctions.push(() => domElements.filterType.removeEventListener('change', handler));
   }
 
-  // Date filters
+  // Date filters with debouncing
   if (domElements.filterDateFrom) {
-    const handler = () => handleFilterChange();
+    const handler = debounce(async () => {
+      await handleDateRangeFilter();
+    }, 500);
     domElements.filterDateFrom.addEventListener('change', handler);
     cleanupFunctions.push(() => domElements.filterDateFrom.removeEventListener('change', handler));
   }
 
   if (domElements.filterDateTo) {
-    const handler = () => handleFilterChange();
+    const handler = debounce(async () => {
+      await handleDateRangeFilter();
+    }, 500);
     domElements.filterDateTo.addEventListener('change', handler);
     cleanupFunctions.push(() => domElements.filterDateTo.removeEventListener('change', handler));
+  }
+
+  // Department filter
+  if (domElements.filterReparto) {
+    const handler = async () => {
+      showSearchingState();
+      try {
+        const result = await applyDepartmentFilter(domElements.filterReparto.value);
+        renderEventsTimeline(result);
+        setupEventCardListeners();
+        updateSearchResultsCount(result.eventi.length, result.totalCount, getCurrentFilters());
+        showActiveFiltersIndicator(getCurrentFilters());
+      } catch (error) {
+        logger.error('❌ Errore applicazione filtro reparto:', error);
+      } finally {
+        hideSearchingState();
+      }
+    };
+    domElements.filterReparto.addEventListener('change', handler);
+    cleanupFunctions.push(() => domElements.filterReparto.removeEventListener('change', handler));
   }
 }
 
@@ -278,11 +334,29 @@ function setupModalFormListeners() {
  * Configura i listener per la ricerca
  */
 function setupSearchListeners() {
-  // Main patient search
+  // Main patient search with real-time filtering
   if (domElements.searchPatientInput) {
-    const handler = debounce((e) => handlePatientSearch(e.target.value), 300);
-    domElements.searchPatientInput.addEventListener('input', handler);
-    cleanupFunctions.push(() => domElements.searchPatientInput.removeEventListener('input', handler));
+    const searchHandler = debounce(async (e) => {
+      const searchTerm = e.target.value;
+      
+      // Show patient search results
+      if (searchTerm && searchTerm.length >= 2) {
+        try {
+          const patients = await searchPatientsRealTime(searchTerm);
+          renderPatientSearchResults(patients, 'patient-search-results');
+        } catch (error) {
+          logger.error('❌ Errore ricerca pazienti:', error);
+        }
+      } else {
+        hideSearchResults('patient-search-results');
+      }
+      
+      // Apply patient filter to events
+      await handlePatientSearchFilter(searchTerm);
+    }, 300);
+    
+    domElements.searchPatientInput.addEventListener('input', searchHandler);
+    cleanupFunctions.push(() => domElements.searchPatientInput.removeEventListener('input', searchHandler));
   }
 
   // Modal patient search
@@ -303,6 +377,19 @@ function setupSearchListeners() {
 }
 
 /**
+ * Carica la lista dei reparti per il filtro
+ */
+async function loadDepartments() {
+  try {
+    const reparti = await getDepartmentsList();
+    await populateDepartmentFilter(reparti);
+    logger.log('✅ Reparti caricati per filtro:', reparti.length);
+  } catch (error) {
+    logger.error('❌ Errore caricamento reparti:', error);
+  }
+}
+
+/**
  * Carica i dati degli eventi
  */
 async function loadEventsData() {
@@ -318,6 +405,10 @@ async function loadEventsData() {
 
     renderEventsTimeline(result);
     setupEventCardListeners();
+    
+    // Update UI indicators
+    updateSearchResultsCount(result.eventi.length, result.totalCount, getCurrentFilters());
+    showActiveFiltersIndicator(getCurrentFilters());
 
     logger.log('✅ Eventi caricati:', result.eventi.length);
 
@@ -365,29 +456,52 @@ function setupEventCardListeners() {
 }
 
 /**
- * Gestisce la ricerca pazienti nel filtro principale
+ * Gestisce il filtro di ricerca pazienti con debouncing
  */
-async function handlePatientSearch(searchTerm) {
+async function handlePatientSearchFilter(searchTerm) {
   try {
-    if (!searchTerm || searchTerm.length < 2) {
-      hideSearchResults('patient-search-results');
-      currentState.filters.paziente_search = '';
-      await loadEventsData();
-      return;
-    }
-
-    const patients = await searchPazientiForEvents(searchTerm);
-    renderPatientSearchResults(patients, 'patient-search-results');
-
-    // Update filter and reload if a specific patient is selected
-    if (domElements.searchPatientInput.dataset.patientId) {
-      currentState.selectedPatientId = domElements.searchPatientInput.dataset.patientId;
-      currentState.filters.paziente_search = searchTerm;
-      await loadEventsData();
-    }
-
+    showSearchingState();
+    
+    const result = await applyPatientSearch(searchTerm);
+    renderEventsTimeline(result);
+    setupEventCardListeners();
+    
+    // Update UI indicators
+    updateSearchResultsCount(result.eventi.length, result.totalCount, getCurrentFilters());
+    showActiveFiltersIndicator(getCurrentFilters());
+    
   } catch (error) {
-    logger.error('❌ Errore ricerca pazienti:', error);
+    logger.error('❌ Errore filtro ricerca pazienti:', error);
+  } finally {
+    hideSearchingState();
+  }
+}
+
+/**
+ * Gestisce il filtro per range di date
+ */
+async function handleDateRangeFilter() {
+  try {
+    showSearchingState();
+    
+    const dataDa = domElements.filterDateFrom?.value || '';
+    const dataA = domElements.filterDateTo?.value || '';
+    
+    const result = await applyDateRangeFilter(dataDa, dataA);
+    renderEventsTimeline(result);
+    setupEventCardListeners();
+    
+    // Update UI indicators
+    updateSearchResultsCount(result.eventi.length, result.totalCount, getCurrentFilters());
+    showActiveFiltersIndicator(getCurrentFilters());
+    
+  } catch (error) {
+    logger.error('❌ Errore filtro range date:', error);
+    if (error.message.includes('data di inizio')) {
+      notificationService.error(error.message);
+    }
+  } finally {
+    hideSearchingState();
   }
 }
 

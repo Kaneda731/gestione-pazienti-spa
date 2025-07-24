@@ -1,0 +1,203 @@
+// src/features/eventi-clinici/css/eventi-clinici.scss
+
+.timeline {
+    position: relative;
+    padding: 0;
+    margin: 0;
+    
+    &::before {
+        content: '';
+        position: absolute;
+        left: 30px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #dee2e6;
+        z-index: 1;
+    }
+}
+
+.event-card {
+    position: relative;
+    margin-bottom: 1.5rem;
+    padding-left: 70px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .event-icon {
+        position: absolute;
+        left: 15px;
+        top: 10px;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2;
+        
+        .material-icons {
+            font-size: 18px;
+            color: white;
+        }
+    }
+    
+    .event-content {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 1rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        
+        .event-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            
+            .event-title {
+                margin: 0;
+                font-weight: 600;
+                color: #495057;
+            }
+            
+            .event-date {
+                color: #6c757d;
+                font-weight: 500;
+            }
+        }
+        
+        .event-patient {
+            margin-bottom: 0.5rem;
+            
+            strong {
+                color: #212529;
+            }
+            
+            small {
+                color: #6c757d;
+                margin-left: 0.5rem;
+            }
+        }
+        
+        .event-description {
+            margin-bottom: 0.5rem;
+            color: #495057;
+            font-size: 0.9rem;
+        }
+    }
+    
+    // Stili specifici per tipo di evento
+    &.intervention {
+        .event-icon {
+            background: #28a745;
+        }
+        
+        .event-content {
+            border-left: 4px solid #28a745;
+        }
+    }
+    
+    &.infection {
+        .event-icon {
+            background: #dc3545;
+        }
+        
+        .event-content {
+            border-left: 4px solid #dc3545;
+        }
+    }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+    .timeline {
+        &::before {
+            left: 20px;
+        }
+    }
+    
+    .event-card {
+        padding-left: 50px;
+        
+        .event-icon {
+            left: 5px;
+            width: 25px;
+            height: 25px;
+            
+            .material-icons {
+                font-size: 16px;
+            }
+        }
+        
+        .event-content {
+            padding: 0.75rem;
+            
+            .event-header {
+                flex-direction: column;
+                align-items: flex-start;
+                
+                .event-date {
+                    margin-top: 0.25rem;
+                }
+            }
+        }
+    }
+}
+
+// Patient search dropdown styles
+.dropdown-menu {
+    &.show {
+        display: block !important;
+    }
+    
+    .dropdown-item {
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        
+        &:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .patient-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            
+            .patient-name {
+                font-weight: 500;
+            }
+            
+            .patient-rad {
+                font-size: 0.8rem;
+                color: #6c757d;
+            }
+        }
+    }
+}
+
+// Modal specific styles
+#evento-form-modal {
+    .modal-body {
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+}
+
+// Loading and empty states
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #6c757d;
+    
+    .material-icons {
+        font-size: 48px;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+}

@@ -67,3 +67,7 @@ class CustomDatepicker {
 }
 
 export default CustomDatepicker;
+
+export function initCustomDatepickers(selector, options) {
+    return new CustomDatepicker(selector, options);
+}

@@ -26,12 +26,33 @@ export async function searchActivePatients(searchTerm) {
  * @param {string} patientId - L'ID del paziente da dimettere.
  * @param {string} dischargeDate - La data di dimissione.
  * @returns {Promise<Object>} I dati del paziente aggiornato.
+ * @deprecated Use dischargePatientWithTransfer instead
  */
 export async function dischargePatient(patientId, dischargeDate) {
+    return dischargePatientWithTransfer(patientId, { 
+        data_dimissione: dischargeDate,
+        tipo_dimissione: 'dimissione',
+        codice_dimissione: '3'
+    });
+}
+
+/**
+ * Aggiorna un paziente con i dati di dimissione/trasferimento completi.
+ * @param {string} patientId - L'ID del paziente da dimettere.
+ * @param {Object} dischargeData - I dati di dimissione/trasferimento.
+ * @returns {Promise<Object>} I dati del paziente aggiornato.
+ */
+export async function dischargePatientWithTransfer(patientId, dischargeData) {
+    // Valida i dati di dimissione
+    const validationResult = validateDischargeData(dischargeData);
+    if (!validationResult.isValid) {
+        throw new Error(`Dati di dimissione non validi: ${validationResult.errors.join(', ')}`);
+    }
+
     // Prima verifichiamo se il paziente esiste e non è già dimesso
     const { data: existingPatient, error: checkError } = await supabase
         .from('pazienti')
-        .select('id, data_dimissione')
+        .select('id, data_dimissione, data_ricovero')
         .eq('id', patientId)
         .is('data_dimissione', null)
         .single();
@@ -48,17 +69,13 @@ export async function dischargePatient(patientId, dischargeDate) {
         throw new Error('Paziente non trovato o già dimesso.');
     }
 
-    // Normalizza la data come nell'inserimento paziente
-    let normalizedDate = dischargeDate;
-    if (typeof normalizedDate === 'string' && normalizedDate.includes('/')) {
-        const [day, month, year] = normalizedDate.split('/');
-        normalizedDate = `${year}-${month}-${day}`;
-    }
+    // Prepara i dati per l'aggiornamento
+    const updateData = prepareDischargeUpdateData(dischargeData, existingPatient);
 
     // Procediamo con l'aggiornamento
     const { data, error } = await supabase
         .from('pazienti')
-        .update({ data_dimissione: normalizedDate })
+        .update(updateData)
         .eq('id', patientId)
         .select()
         .single();
@@ -72,4 +89,123 @@ export async function dischargePatient(patientId, dischargeDate) {
     }
     
     return data;
+}
+
+/**
+ * Valida i dati di dimissione/trasferimento.
+ * @param {Object} dischargeData - I dati da validare.
+ * @returns {Object} Risultato della validazione con isValid e errors.
+ */
+export function validateDischargeData(dischargeData) {
+    const errors = [];
+    
+    // Validazione campi obbligatori
+    if (!dischargeData.data_dimissione) {
+        errors.push('La data di dimissione è obbligatoria');
+    }
+    
+    if (!dischargeData.tipo_dimissione) {
+        errors.push('Il tipo di dimissione è obbligatorio');
+    }
+    
+    if (!dischargeData.codice_dimissione) {
+        errors.push('Il codice dimissione è obbligatorio');
+    }
+    
+    // Validazione valori consentiti
+    const tipiDimissioneValidi = ['dimissione', 'trasferimento_interno', 'trasferimento_esterno'];
+    if (dischargeData.tipo_dimissione && !tipiDimissioneValidi.includes(dischargeData.tipo_dimissione)) {
+        errors.push('Tipo di dimissione non valido');
+    }
+    
+    const codiciDimissioneValidi = ['3', '6'];
+    if (dischargeData.codice_dimissione && !codiciDimissioneValidi.includes(dischargeData.codice_dimissione)) {
+        errors.push('Codice dimissione non valido');
+    }
+    
+    // Validazioni specifiche per tipo di dimissione
+    if (dischargeData.tipo_dimissione === 'trasferimento_interno') {
+        if (!dischargeData.reparto_destinazione || dischargeData.reparto_destinazione.trim() === '') {
+            errors.push('Il reparto di destinazione è obbligatorio per i trasferimenti interni');
+        }
+    }
+    
+    if (dischargeData.tipo_dimissione === 'trasferimento_esterno') {
+        if (!dischargeData.clinica_destinazione || dischargeData.clinica_destinazione.trim() === '') {
+            errors.push('La clinica di destinazione è obbligatoria per i trasferimenti esterni');
+        }
+        
+        if (!dischargeData.codice_clinica) {
+            errors.push('Il codice clinica è obbligatorio per i trasferimenti esterni');
+        }
+        
+        const codiciClinicaValidi = ['56', '60'];
+        if (dischargeData.codice_clinica && !codiciClinicaValidi.includes(dischargeData.codice_clinica)) {
+            errors.push('Codice clinica non valido');
+        }
+    }
+    
+    // Validazione formato data
+    if (dischargeData.data_dimissione) {
+        const dateRegex = /^\d{2}\/\d{2}\/\d{4}$/;
+        if (!dateRegex.test(dischargeData.data_dimissione)) {
+            errors.push('Formato data dimissione non valido (utilizzare gg/mm/aaaa)');
+        }
+    }
+    
+    return {
+        isValid: errors.length === 0,
+        errors
+    };
+}
+
+/**
+ * Prepara i dati per l'aggiornamento del database.
+ * @param {Object} dischargeData - I dati di dimissione.
+ * @param {Object} existingPatient - I dati del paziente esistente.
+ * @returns {Object} I dati preparati per l'aggiornamento.
+ */
+function prepareDischargeUpdateData(dischargeData, existingPatient) {
+    // Normalizza la data come nell'inserimento paziente
+    let normalizedDate = dischargeData.data_dimissione;
+    if (typeof normalizedDate === 'string' && normalizedDate.includes('/')) {
+        const [day, month, year] = normalizedDate.split('/');
+        normalizedDate = `${year}-${month}-${day}`;
+    }
+    
+    // Validazione data dimissione non precedente al ricovero
+    if (existingPatient.data_ricovero) {
+        const ricoveroDate = new Date(existingPatient.data_ricovero);
+        const dimissioneDate = new Date(normalizedDate);
+        
+        if (dimissioneDate < ricoveroDate) {
+            throw new Error('La data di dimissione non può essere precedente alla data di ricovero');
+        }
+    }
+    
+    const updateData = {
+        data_dimissione: normalizedDate,
+        tipo_dimissione: dischargeData.tipo_dimissione,
+        codice_dimissione: dischargeData.codice_dimissione
+    };
+    
+    // Aggiungi campi specifici in base al tipo di dimissione
+    if (dischargeData.tipo_dimissione === 'trasferimento_interno') {
+        updateData.reparto_destinazione = dischargeData.reparto_destinazione;
+        // Pulisci i campi di trasferimento esterno
+        updateData.clinica_destinazione = null;
+        updateData.codice_clinica = null;
+    } else if (dischargeData.tipo_dimissione === 'trasferimento_esterno') {
+        updateData.clinica_destinazione = dischargeData.clinica_destinazione;
+        updateData.codice_clinica = dischargeData.codice_clinica;
+        // Pulisci i campi di trasferimento interno
+        updateData.reparto_destinazione = null;
+    } else {
+        // Per dimissione normale, pulisci tutti i campi di trasferimento
+        updateData.reparto_destinazione = null;
+        updateData.clinica_destinazione = null;
+        updateData.codice_clinica = null;
+    }
+    
+    return updateData;
 }

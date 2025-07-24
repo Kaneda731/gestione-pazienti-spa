@@ -44,6 +44,48 @@
                                 <span class="material-icons input-icon">calendar_today</span>
                             </div>
                         </div>
+
+                        <div class="mb-3">
+                            <label for="tipo_dimissione" class="form-label">Tipo di Dimissione</label>
+                            <select id="tipo_dimissione" name="tipo_dimissione" class="form-select" required>
+                                <option value="dimissione">Dimissione</option>
+                                <option value="trasferimento_interno">Trasferimento Interno</option>
+                                <option value="trasferimento_esterno">Trasferimento Esterno</option>
+                            </select>
+                        </div>
+
+                        <!-- Campi per Trasferimento Interno -->
+                        <div id="internal-transfer-fields" class="d-none">
+                            <div class="mb-3">
+                                <label for="reparto_destinazione" class="form-label">Reparto di Destinazione</label>
+                                <input type="text" id="reparto_destinazione" name="reparto_destinazione" class="form-control" placeholder="Inserisci il reparto di destinazione">
+                            </div>
+                        </div>
+
+                        <!-- Campi per Trasferimento Esterno -->
+                        <div id="external-transfer-fields" class="d-none">
+                            <div class="mb-3">
+                                <label for="clinica_destinazione" class="form-label">Clinica di Destinazione</label>
+                                <input type="text" id="clinica_destinazione" name="clinica_destinazione" class="form-control" placeholder="Inserisci la clinica di destinazione">
+                            </div>
+                            <div class="mb-3">
+                                <label for="codice_clinica" class="form-label">Codice Clinica</label>
+                                <select id="codice_clinica" name="codice_clinica" class="form-select">
+                                    <option value="">Seleziona codice clinica</option>
+                                    <option value="56">56 - Riabilitazione</option>
+                                    <option value="60">60 - Riabilitazione Specialistica</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="codice_dimissione" class="form-label">Codice Dimissione</label>
+                            <select id="codice_dimissione" name="codice_dimissione" class="form-select" required>
+                                <option value="">Seleziona codice dimissione</option>
+                                <option value="3">3 - Dimissione Ordinaria</option>
+                                <option value="6">6 - Trasferimento</option>
+                            </select>
+                        </div>
                         
                         <button type="submit" class="btn btn-primary">
                             <span class="material-icons me-1" style="vertical-align: middle;">check_circle</span>

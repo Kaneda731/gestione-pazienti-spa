@@ -17,7 +17,15 @@ export const dom = {
     get selectedPatientRicovero() { return document.getElementById('selected-paziente-ricovero'); },
     get dataDimissioneInput() { return document.getElementById('data_dimissione'); },
     get backButton() { return document.querySelector('.view[data-view-name="dimissione"] .btn-back-menu'); },
-    get messageContainer() { return document.getElementById('messaggio-container-dimissione'); }
+    get messageContainer() { return document.getElementById('messaggio-container-dimissione'); },
+    // Enhanced discharge form elements
+    get tipoDimissioneSelect() { return document.getElementById('tipo_dimissione'); },
+    get repartoDestinazioneInput() { return document.getElementById('reparto_destinazione'); },
+    get clinicaDestinazioneInput() { return document.getElementById('clinica_destinazione'); },
+    get codiceClinicaSelect() { return document.getElementById('codice_clinica'); },
+    get codiceDimissioneSelect() { return document.getElementById('codice_dimissione'); },
+    get internalTransferFields() { return document.getElementById('internal-transfer-fields'); },
+    get externalTransferFields() { return document.getElementById('external-transfer-fields'); }
 };
 
 function clearSearchResults() {
@@ -47,6 +55,9 @@ export function initializeUI(searchCallback) {
             }
         });
     }
+    
+    // Inizializza i listener per i campi di trasferimento
+    initializeTransferFieldListeners();
     
     resetView();
 }
@@ -132,6 +143,26 @@ export function resetView() {
     if (dom.dataDimissioneInput) {
         dom.dataDimissioneInput.value = '';
     }
+    
+    // Reset transfer fields
+    if (dom.tipoDimissioneSelect) {
+        dom.tipoDimissioneSelect.value = 'dimissione';
+    }
+    if (dom.repartoDestinazioneInput) {
+        dom.repartoDestinazioneInput.value = '';
+    }
+    if (dom.clinicaDestinazioneInput) {
+        dom.clinicaDestinazioneInput.value = '';
+    }
+    if (dom.codiceClinicaSelect) {
+        dom.codiceClinicaSelect.value = '';
+    }
+    if (dom.codiceDimissioneSelect) {
+        dom.codiceDimissioneSelect.value = '';
+    }
+    
+    // Reset transfer field visibility
+    handleDischargeTypeChange('dimissione');
 }
 
 /**
@@ -141,4 +172,158 @@ export function resetView() {
  */
 export function showFeedback(message, type) {
     mostraMessaggio(message, type, 'messaggio-container-dimissione');
+}
+
+/**
+ * Gestisce la visualizzazione dinamica dei campi di trasferimento
+ * @param {string} dischargeType - Il tipo di dimissione selezionato
+ */
+export function handleDischargeTypeChange(dischargeType) {
+    const internalFields = dom.internalTransferFields;
+    const externalFields = dom.externalTransferFields;
+    
+    if (!internalFields || !externalFields) {
+        console.warn('Transfer fields containers not found');
+        return;
+    }
+    
+    // Nascondi tutti i campi di trasferimento inizialmente
+    internalFields.classList.add('d-none');
+    externalFields.classList.add('d-none');
+    
+    // Rimuovi i requisiti required da tutti i campi di trasferimento
+    clearTransferFieldRequirements();
+    
+    // Mostra i campi appropriati in base al tipo di dimissione
+    switch (dischargeType) {
+        case 'trasferimento_interno':
+            internalFields.classList.remove('d-none');
+            if (dom.repartoDestinazioneInput) {
+                dom.repartoDestinazioneInput.required = true;
+            }
+            break;
+        case 'trasferimento_esterno':
+            externalFields.classList.remove('d-none');
+            if (dom.clinicaDestinazioneInput) {
+                dom.clinicaDestinazioneInput.required = true;
+            }
+            if (dom.codiceClinicaSelect) {
+                dom.codiceClinicaSelect.required = true;
+            }
+            break;
+        case 'dimissione':
+        default:
+            // Nessun campo aggiuntivo richiesto per dimissione normale
+            break;
+    }
+    
+    // Il codice dimissione è sempre richiesto
+    if (dom.codiceDimissioneSelect) {
+        dom.codiceDimissioneSelect.required = true;
+    }
+}
+
+/**
+ * Rimuove i requisiti required dai campi di trasferimento
+ */
+function clearTransferFieldRequirements() {
+    const transferFields = [
+        dom.repartoDestinazioneInput,
+        dom.clinicaDestinazioneInput,
+        dom.codiceClinicaSelect
+    ];
+    
+    transferFields.forEach(field => {
+        if (field) {
+            field.required = false;
+            field.value = '';
+        }
+    });
+}
+
+/**
+ * Inizializza i listener per i campi di trasferimento
+ */
+export function initializeTransferFieldListeners() {
+    if (dom.tipoDimissioneSelect) {
+        dom.tipoDimissioneSelect.addEventListener('change', (e) => {
+            handleDischargeTypeChange(e.target.value);
+        });
+        
+        // Inizializza con il valore corrente
+        handleDischargeTypeChange(dom.tipoDimissioneSelect.value);
+    }
+}
+
+/**
+ * Valida i dati del form di dimissione/trasferimento
+ * @returns {Object} Oggetto con isValid e errors
+ */
+export function validateDischargeForm() {
+    const errors = [];
+    const dischargeDate = dom.dataDimissioneInput?.value;
+    const dischargeType = dom.tipoDimissioneSelect?.value;
+    const dischargeCode = dom.codiceDimissioneSelect?.value;
+    
+    // Validazione data dimissione
+    if (!dischargeDate) {
+        errors.push('La data di dimissione è obbligatoria');
+    }
+    
+    // Validazione tipo dimissione
+    if (!dischargeType) {
+        errors.push('Il tipo di dimissione è obbligatorio');
+    }
+    
+    // Validazione codice dimissione
+    if (!dischargeCode) {
+        errors.push('Il codice dimissione è obbligatorio');
+    }
+    
+    // Validazioni specifiche per tipo di dimissione
+    if (dischargeType === 'trasferimento_interno') {
+        const reparto = dom.repartoDestinazioneInput?.value;
+        if (!reparto || reparto.trim() === '') {
+            errors.push('Il reparto di destinazione è obbligatorio per i trasferimenti interni');
+        }
+    } else if (dischargeType === 'trasferimento_esterno') {
+        const clinica = dom.clinicaDestinazioneInput?.value;
+        const codiceClinica = dom.codiceClinicaSelect?.value;
+        
+        if (!clinica || clinica.trim() === '') {
+            errors.push('La clinica di destinazione è obbligatoria per i trasferimenti esterni');
+        }
+        if (!codiceClinica) {
+            errors.push('Il codice clinica è obbligatorio per i trasferimenti esterni');
+        }
+    }
+    
+    return {
+        isValid: errors.length === 0,
+        errors
+    };
+}
+
+/**
+ * Raccoglie tutti i dati del form di dimissione/trasferimento
+ * @returns {Object} Oggetto con tutti i dati del form
+ */
+export function getDischargeFormData() {
+    const formData = {
+        data_dimissione: dom.dataDimissioneInput?.value,
+        tipo_dimissione: dom.tipoDimissioneSelect?.value,
+        codice_dimissione: dom.codiceDimissioneSelect?.value
+    };
+    
+    // Aggiungi campi specifici in base al tipo di dimissione
+    const dischargeType = formData.tipo_dimissione;
+    
+    if (dischargeType === 'trasferimento_interno') {
+        formData.reparto_destinazione = dom.repartoDestinazioneInput?.value;
+    } else if (dischargeType === 'trasferimento_esterno') {
+        formData.clinica_destinazione = dom.clinicaDestinazioneInput?.value;
+        formData.codice_clinica = dom.codiceClinicaSelect?.value;
+    }
+    
+    return formData;
 }

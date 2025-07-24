@@ -1,6 +1,6 @@
 // src/features/patients/views/dimissione.js
 import { navigateTo } from '../../../app/router.js';
-import { searchActivePatients, dischargePatient } from './dimissione-api.js';
+import { searchActivePatients, dischargePatientWithTransfer } from './dimissione-api.js';
 import { 
     dom,
     initializeUI, 
@@ -9,7 +9,9 @@ import {
     displayDischargeForm,
     setLoading,
     resetView,
-    showFeedback
+    showFeedback,
+    validateDischargeForm,
+    getDischargeFormData
 } from './dimissione-ui.js';
 
 let selectedPatient = null;
@@ -41,21 +43,33 @@ async function handleSearch(query) {
 async function handleDischargeSubmit(event) {
     event.preventDefault();
     
-    if (!dom.dataDimissioneInput) {
-        console.error('Elemento dataDimissioneInput non trovato');
+    if (!selectedPatient) {
+        showFeedback('Seleziona un paziente prima di procedere.', 'warning');
         return;
     }
-    
-    const dischargeDate = dom.dataDimissioneInput.value;
 
-    if (!selectedPatient || !dischargeDate) {
-        showFeedback('Seleziona un paziente e una data di dimissione.', 'warning');
+    // Valida i dati del form
+    const validation = validateDischargeForm();
+    if (!validation.isValid) {
+        showFeedback(`Errori di validazione: ${validation.errors.join(', ')}`, 'error');
         return;
     }
+
+    // Raccoglie i dati del form
+    const dischargeData = getDischargeFormData();
 
     try {
-        await dischargePatient(selectedPatient.id, dischargeDate);
-        showFeedback('Paziente dimesso con successo!', 'success');
+        await dischargePatientWithTransfer(selectedPatient.id, dischargeData);
+        
+        // Messaggio di successo personalizzato in base al tipo di dimissione
+        let successMessage = 'Paziente dimesso con successo!';
+        if (dischargeData.tipo_dimissione === 'trasferimento_interno') {
+            successMessage = `Paziente trasferito con successo al reparto ${dischargeData.reparto_destinazione}!`;
+        } else if (dischargeData.tipo_dimissione === 'trasferimento_esterno') {
+            successMessage = `Paziente trasferito con successo alla clinica ${dischargeData.clinica_destinazione}!`;
+        }
+        
+        showFeedback(successMessage, 'success');
         selectedPatient = null;
         resetView();
         setTimeout(() => navigateTo('home'), 1500);

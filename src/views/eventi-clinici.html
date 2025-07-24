@@ -1,0 +1,198 @@
+<div class="view" id="eventi-clinici-view">
+    <div class="card card-full-width">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h3><span class="material-icons me-2">timeline</span>Eventi Clinici</h3>
+            <button class="btn btn-sm btn-back-menu" data-view="home">
+                <span class="material-icons me-1" style="vertical-align: text-bottom;">arrow_back</span>Torna al Menu
+            </button>
+        </div>
+        <div class="card-body">
+            <!-- Search and Filter Section -->
+            <div class="filters-container row g-3 mb-4">
+                <div class="col-md-4">
+                    <label for="eventi-search-patient" class="form-label">Cerca Paziente</label>
+                    <div class="position-relative">
+                        <input type="text" id="eventi-search-patient" class="form-control" placeholder="Nome, cognome o codice RAD...">
+                        <div id="patient-search-results" class="dropdown-menu position-absolute w-100" style="display: none; max-height: 200px; overflow-y: auto;">
+                            <!-- Patient search results will be populated here -->
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <label for="eventi-filter-type" class="form-label">Tipo Evento</label>
+                    <select id="eventi-filter-type" class="form-select" data-custom="true">
+                        <option value="">Tutti</option>
+                        <option value="intervento">Interventi</option>
+                        <option value="infezione">Infezioni</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="eventi-filter-date-from" class="form-label">Data Da</label>
+                    <div class="input-group-icon">
+                        <input type="text" id="eventi-filter-date-from" class="form-control" data-datepicker placeholder="gg/mm/aaaa">
+                        <span class="material-icons input-icon">calendar_today</span>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <label for="eventi-filter-date-to" class="form-label">Data A</label>
+                    <div class="input-group-icon">
+                        <input type="text" id="eventi-filter-date-to" class="form-control" data-datepicker placeholder="gg/mm/aaaa">
+                        <span class="material-icons input-icon">calendar_today</span>
+                    </div>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button id="eventi-add-btn" class="btn btn-primary">
+                        <span class="material-icons me-1" style="vertical-align: text-bottom;">add</span>Nuovo Evento
+                    </button>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex justify-content-center mb-3">
+                <div class="d-flex" style="gap: 1rem;">
+                    <button id="eventi-reset-filters-btn" class="btn btn-outline-secondary">
+                        <span class="material-icons me-1" style="vertical-align: text-bottom;">refresh</span>Resetta Filtri
+                    </button>
+                    <button id="eventi-export-btn" class="btn btn-outline-secondary">
+                        <span class="material-icons me-1" style="vertical-align: text-bottom;">download</span>Esporta
+                    </button>
+                </div>
+            </div>
+
+            <!-- Events Timeline Container -->
+            <div id="eventi-timeline-container">
+                <!-- Timeline events will be populated here -->
+            </div>
+
+            <!-- Pagination Controls -->
+            <div id="eventi-pagination-controls" class="d-flex justify-content-between align-items-center mt-3">
+                <button id="eventi-prev-page-btn" class="btn btn-outline-secondary">&laquo; Precedente</button>
+                <span id="eventi-page-info"></span>
+                <button id="eventi-next-page-btn" class="btn btn-outline-secondary">Successivo &raquo;</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Event Form Modal -->
+<div class="modal fade" id="evento-form-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title d-flex align-items-center">
+                    <span class="material-icons me-2" id="evento-modal-icon">add</span>
+                    <span id="evento-modal-title">Nuovo Evento Clinico</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="evento-form">
+                    <input type="hidden" id="evento-id" name="id">
+                    <div id="evento-messaggio-container" class="mb-3"></div>
+                    
+                    <div class="row g-3">
+                        <!-- Patient Selection -->
+                        <div class="col-md-6">
+                            <label for="evento-paziente" class="form-label">Paziente *</label>
+                            <div class="position-relative">
+                                <input type="text" id="evento-paziente" class="form-control" placeholder="Cerca paziente..." required>
+                                <input type="hidden" id="evento-paziente-id" name="paziente_id">
+                                <div id="evento-patient-search-results" class="dropdown-menu position-absolute w-100" style="display: none; max-height: 200px; overflow-y: auto;">
+                                    <!-- Patient search results will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Event Type -->
+                        <div class="col-md-6">
+                            <label for="evento-tipo" class="form-label">Tipo Evento *</label>
+                            <select id="evento-tipo" class="form-select" name="tipo_evento" required data-custom="true">
+                                <option value="">Seleziona tipo...</option>
+                                <option value="intervento">Intervento Chirurgico</option>
+                                <option value="infezione">Infezione</option>
+                            </select>
+                        </div>
+
+                        <!-- Event Date -->
+                        <div class="col-md-6">
+                            <label for="evento-data" class="form-label">Data Evento *</label>
+                            <div class="input-group-icon">
+                                <input type="text" id="evento-data" class="form-control" name="data_evento" data-datepicker placeholder="gg/mm/aaaa" required>
+                                <span class="material-icons input-icon">calendar_today</span>
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="col-md-6">
+                            <label for="evento-descrizione" class="form-label">Descrizione</label>
+                            <textarea id="evento-descrizione" class="form-control" name="descrizione" rows="2" placeholder="Descrizione dell'evento..."></textarea>
+                        </div>
+
+                        <!-- Intervention-specific fields -->
+                        <div id="intervento-fields" class="col-12" style="display: none;">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="evento-tipo-intervento" class="form-label">Tipo Intervento</label>
+                                    <select id="evento-tipo-intervento" class="form-select" name="tipo_intervento" data-custom="true">
+                                        <option value="">Seleziona tipo intervento...</option>
+                                        <option value="Chirurgia Ortopedica">Chirurgia Ortopedica</option>
+                                        <option value="Chirurgia Plastica">Chirurgia Plastica</option>
+                                        <option value="Chirurgia Vascolare">Chirurgia Vascolare</option>
+                                        <option value="Chirurgia Generale">Chirurgia Generale</option>
+                                        <option value="Altro">Altro</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Infection-specific fields -->
+                        <div id="infezione-fields" class="col-12" style="display: none;">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="evento-agente-patogeno" class="form-label">Agente Patogeno</label>
+                                    <input type="text" id="evento-agente-patogeno" class="form-control" name="agente_patogeno" placeholder="Es. Staphylococcus aureus">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+                <button type="button" id="evento-save-btn" class="btn btn-primary">
+                    <span class="material-icons me-1" style="vertical-align: middle;">save</span>
+                    Salva Evento
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Event Detail Modal -->
+<div class="modal fade" id="evento-detail-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title d-flex align-items-center">
+                    <span class="material-icons me-2" id="evento-detail-icon">info</span>
+                    <span id="evento-detail-title">Dettagli Evento</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="evento-detail-content">
+                <!-- Event details will be populated here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+                <button type="button" id="evento-edit-btn" class="btn btn-primary">
+                    <span class="material-icons me-1" style="vertical-align: middle;">edit</span>
+                    Modifica
+                </button>
+                <button type="button" id="evento-delete-btn" class="btn btn-danger">
+                    <span class="material-icons me-1" style="vertical-align: middle;">delete</span>
+                    Elimina
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

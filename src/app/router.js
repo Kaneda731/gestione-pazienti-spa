@@ -38,6 +38,7 @@ const viewModules = {
     'grafico': () => import('../features/charts/views/grafico.js'),
     'list': () => import('../features/patients/views/list.js'),
     'diagnosi': () => import('../features/diagnoses/views/diagnosi.js'),
+    'eventi-clinici': () => import('../features/eventi-clinici/views/eventi-clinici.js'),
 };
 
 const viewCache = new Map();
@@ -52,7 +53,8 @@ function updateUIVisibility() {
         'list': ['admin', 'editor', 'viewer'],
         'grafico': ['admin', 'editor', 'viewer'],
         'diagnosi': ['admin'],
-        'dimissione': ['admin', 'editor']
+        'dimissione': ['admin', 'editor'],
+        'eventi-clinici': ['admin', 'editor']
     };
 
     document.querySelectorAll('.menu-card').forEach(card => {
@@ -175,7 +177,8 @@ export async function renderView() {
             'list': ['admin', 'editor', 'viewer'],
             'grafico': ['admin', 'editor', 'viewer'],
             'diagnosi': ['admin'],
-            'dimissione': ['admin', 'editor']
+            'dimissione': ['admin', 'editor'],
+            'eventi-clinici': ['admin', 'editor']
         };
         
         let viewToRender = requestedViewName;
@@ -225,6 +228,9 @@ export async function renderView() {
                 } else if (viewToRender === 'dimissione') {
                     // Accesso diretto all'inizializzatore per la vista dimissione
                     currentViewCleanup = await module.initDimissioneView(urlParams);
+                } else if (viewToRender === 'eventi-clinici') {
+                    // Accesso diretto all'inizializzatore per la vista eventi clinici
+                    currentViewCleanup = await module.initEventiCliniciView(urlParams);
                 } else {
                     const initializer = Object.values(module).find(fn => typeof fn === 'function' && fn.name.startsWith('init'));
                     if (initializer) {

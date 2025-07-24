@@ -239,6 +239,140 @@ class PatientService {
   }
 
   /**
+   * Dimette un paziente con informazioni di trasferimento
+   */
+  async dischargePatientWithTransfer(id, dischargeData) {
+    try {
+      stateService.setLoading(true, "Dimissione paziente...");
+
+      // Validazione dati dimissione/trasferimento
+      this.validateDischargeData(dischargeData);
+
+      const { data, error } = await supabase
+        .from("pazienti")
+        .update(dischargeData)
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Invalida cache per questo paziente
+      this.cache.delete(`patient_${id}`);
+
+      const tipoMessage = dischargeData.tipo_dimissione === 'dimissione' 
+        ? 'dimesso' 
+        : 'trasferito';
+      
+      notificationService.success(`Paziente ${tipoMessage} con successo!`);
+      return data;
+    } catch (error) {
+      console.error("Errore nella dimissione/trasferimento:", error);
+      notificationService.error(`Errore nella dimissione: ${error.message}`);
+      throw error;
+    } finally {
+      stateService.setLoading(false);
+    }
+  }
+
+  /**
+   * Ottiene la cronologia dei trasferimenti per un paziente
+   */
+  async getTransferHistory(pazienteId) {
+    try {
+      // Per ora restituiamo le informazioni di dimissione/trasferimento del paziente
+      // In futuro potrebbe essere esteso per includere una tabella separata per la cronologia
+      const patient = await this.getPatientById(pazienteId);
+      
+      if (!patient) {
+        throw new Error("Paziente non trovato");
+      }
+
+      const transferHistory = [];
+      
+      // Se il paziente è stato dimesso/trasferito, aggiungi alla cronologia
+      if (patient.data_dimissione && patient.tipo_dimissione) {
+        transferHistory.push({
+          data: patient.data_dimissione,
+          tipo: patient.tipo_dimissione,
+          reparto_destinazione: patient.reparto_destinazione,
+          clinica_destinazione: patient.clinica_destinazione,
+          codice_clinica: patient.codice_clinica,
+          codice_dimissione: patient.codice_dimissione
+        });
+      }
+
+      return transferHistory;
+    } catch (error) {
+      console.error("Errore nel caricamento cronologia trasferimenti:", error);
+      notificationService.error(`Errore nel caricamento cronologia: ${error.message}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Valida i dati di dimissione/trasferimento
+   */
+  validateDischargeData(dischargeData) {
+    // Campi obbligatori base
+    const required = ["data_dimissione", "tipo_dimissione"];
+
+    for (const field of required) {
+      if (!dischargeData[field] || dischargeData[field].toString().trim() === "") {
+        throw new Error(`Il campo ${field} è obbligatorio`);
+      }
+    }
+
+    // Validazione tipo dimissione
+    const tipiValidi = ["dimissione", "trasferimento_interno", "trasferimento_esterno"];
+    if (!tipiValidi.includes(dischargeData.tipo_dimissione)) {
+      throw new Error(`Tipo dimissione non valido. Valori ammessi: ${tipiValidi.join(", ")}`);
+    }
+
+    // Validazione data dimissione
+    if (dischargeData.data_dimissione) {
+      const dimissioneDate = new Date(dischargeData.data_dimissione);
+      const oggi = new Date();
+      if (dimissioneDate > oggi) {
+        throw new Error("La data di dimissione non può essere nel futuro");
+      }
+    }
+
+    // Validazioni specifiche per tipo dimissione
+    if (dischargeData.tipo_dimissione === "trasferimento_interno") {
+      if (!dischargeData.reparto_destinazione || dischargeData.reparto_destinazione.trim() === "") {
+        throw new Error("Il reparto di destinazione è obbligatorio per i trasferimenti interni");
+      }
+    }
+
+    if (dischargeData.tipo_dimissione === "trasferimento_esterno") {
+      if (!dischargeData.clinica_destinazione || dischargeData.clinica_destinazione.trim() === "") {
+        throw new Error("La clinica di destinazione è obbligatoria per i trasferimenti esterni");
+      }
+      
+      if (!dischargeData.codice_clinica) {
+        throw new Error("Il codice clinica è obbligatorio per i trasferimenti esterni");
+      }
+
+      // Validazione codici clinica
+      const codiciValidi = ["56", "60"];
+      if (!codiciValidi.includes(dischargeData.codice_clinica)) {
+        throw new Error(`Codice clinica non valido. Valori ammessi: ${codiciValidi.join(", ")}`);
+      }
+    }
+
+    // Validazione codice dimissione (sempre obbligatorio)
+    if (!dischargeData.codice_dimissione) {
+      throw new Error("Il codice dimissione è obbligatorio");
+    }
+
+    const codiciDimissioneValidi = ["3", "6"];
+    if (!codiciDimissioneValidi.includes(dischargeData.codice_dimissione)) {
+      throw new Error(`Codice dimissione non valido. Valori ammessi: ${codiciDimissioneValidi.join(", ")}`);
+    }
+  }
+
+  /**
    * Riattiva un paziente dimesso
    */
   async reactivatePatient(id) {

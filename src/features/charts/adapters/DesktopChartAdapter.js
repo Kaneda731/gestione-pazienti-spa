@@ -22,24 +22,27 @@ class DesktopChartAdapter {
   adaptOptions(options) {
     // Clona in modo sicuro le opzioni
     const adaptedOptions = ChartUtils.safeClone(options);
-    
+
     // Inizializza plugins se non esistono
     adaptedOptions.plugins = adaptedOptions.plugins || {};
     adaptedOptions.interaction = adaptedOptions.interaction || {};
-    
+
+    // Ricava il tipo di grafico dalle opzioni (Chart.js usa 'type' a questo livello)
+    const chartType = options.type || (options.plugins && options.plugins.type) || null;
+
     // Configurazioni specifiche per desktop
-    adaptedOptions.plugins.legend = this._getLegendOptions();
+    adaptedOptions.plugins.legend = this._getLegendOptions(chartType);
     adaptedOptions.plugins.title = this._getTitleOptions(adaptedOptions.plugins?.title);
     adaptedOptions.plugins.tooltip = this._getTooltipOptions(adaptedOptions.plugins?.tooltip);
     adaptedOptions.interaction = this._getInteractionOptions();
-    
+
     // Supporto per zoom
     adaptedOptions.plugins.zoom = this._getZoomOptions();
-    
+
     // Configurazioni generali
     adaptedOptions.maintainAspectRatio = false;
     adaptedOptions.responsive = true;
-    
+
     // Animazioni fluide per desktop
     adaptedOptions.animation = {
       duration: 1000,
@@ -49,11 +52,11 @@ class DesktopChartAdapter {
         return context.dataIndex * 50;
       }
     };
-    
+
     // Eventi specifici
     adaptedOptions.onHover = this._getHoverHandler();
     adaptedOptions.onClick = this._getClickHandler();
-    
+
     return adaptedOptions;
   }
 
@@ -79,7 +82,52 @@ class DesktopChartAdapter {
    * @returns {Object} - Le opzioni della legenda
    * @private
    */
-  _getLegendOptions() {
+  _getLegendOptions(chartType) {
+    // Legenda ottimizzata per i grafici a barre e linee: sempre visibile, in alto, senza scroll
+    if (chartType === 'bar' || chartType === 'line') {
+      return {
+        display: true,
+        position: 'top',
+        align: 'center',
+        labels: {
+          boxWidth: 14,
+          font: { size: 12 },
+          padding: 8,
+          usePointStyle: true,
+          maxWidth: undefined,
+          maxHeight: undefined,
+          generateLabels: function(chart) {
+            const data = chart.data;
+            if (data.labels.length && data.datasets.length) {
+              return data.labels.map((label, i) => {
+                const dataset = data.datasets[0];
+                const backgroundColor = ChartUtils.getDatasetColor(dataset, i);
+                const meta = chart.getDatasetMeta(0);
+                const hidden = meta.data[i] ? meta.data[i].hidden : false;
+                return {
+                  text: label,
+                  fillStyle: backgroundColor,
+                  strokeStyle: backgroundColor,
+                  lineWidth: 0,
+                  pointStyle: 'circle',
+                  hidden: hidden,
+                  index: i
+                };
+              });
+            }
+            return [];
+          }
+        },
+        onClick: (e, legendItem, legend) => {
+          const index = legendItem.index;
+          const chart = legend.chart;
+          const meta = chart.getDatasetMeta(0);
+          meta.data[index].hidden = !meta.data[index].hidden;
+          chart.update();
+        }
+      };
+    }
+    // Default: legenda a destra per altri tipi
     return {
       position: 'right',
       align: 'start',
@@ -88,19 +136,14 @@ class DesktopChartAdapter {
         font: { size: 14 },
         padding: 20,
         usePointStyle: true,
-        // Funzione personalizzata per generare le etichette della legenda
         generateLabels: function(chart) {
           const data = chart.data;
           if (data.labels.length && data.datasets.length) {
             return data.labels.map((label, i) => {
               const dataset = data.datasets[0];
-              // Gestisci diversi formati di backgroundColor
               const backgroundColor = ChartUtils.getDatasetColor(dataset, i);
-              
-              // Verifica se l'elemento è nascosto
               const meta = chart.getDatasetMeta(0);
               const hidden = meta.data[i] ? meta.data[i].hidden : false;
-              
               return {
                 text: label,
                 fillStyle: backgroundColor,
@@ -115,19 +158,12 @@ class DesktopChartAdapter {
           return [];
         }
       },
-      // Gestione del click sulla legenda per filtrare i dati
       onClick: (e, legendItem, legend) => {
         const index = legendItem.index;
         const chart = legend.chart;
         const meta = chart.getDatasetMeta(0);
-        
-        // Toggle della visibilità dell'elemento
         meta.data[index].hidden = !meta.data[index].hidden;
-        
-        // Aggiorna il grafico
         chart.update();
-        
-        // Feedback visivo
         const container = chart.canvas.parentNode;
         if (container) {
           const item = container.querySelector(`.chart-legend-item-${index}`);

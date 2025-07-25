@@ -64,6 +64,12 @@ temp/
 # Test coverage reports
 coverage/
 
+# Playwright
+test-results/
+playwright-report/
+playwright/.cache/
+__tests__/e2e/
+
 # Performance and bundle analysis files
 .bundle-*.json
 .performance-*.json

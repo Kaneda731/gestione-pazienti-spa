@@ -710,13 +710,13 @@ function validateFilterCombination(filters) {
 
   // Validate future dates
   const today = new Date();
-  today.setHours(23, 59, 59, 999);
+  const todayString = today.toISOString().split('T')[0];
   
-  if (filters.data_da && new Date(filters.data_da) > today) {
+  if (filters.data_da && filters.data_da > todayString) {
     errors.push('La data di inizio non può essere nel futuro');
   }
   
-  if (filters.data_a && new Date(filters.data_a) > today) {
+  if (filters.data_a && filters.data_a > todayString) {
     errors.push('La data di fine non può essere nel futuro');
   }
 

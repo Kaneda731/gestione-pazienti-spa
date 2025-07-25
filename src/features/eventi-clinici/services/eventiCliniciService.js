@@ -64,8 +64,9 @@ class EventiCliniciService {
 
       // Ricerca paziente per nome/cognome
       if (paziente_search) {
+        const searchPattern = `%${paziente_search}%`;
         query = query.or(
-          `pazienti.nome.ilike.%${paziente_search}%,pazienti.cognome.ilike.%${paziente_search}%`
+          `pazienti.nome.ilike."${searchPattern}",pazienti.cognome.ilike."${searchPattern}"`
         );
       }
 

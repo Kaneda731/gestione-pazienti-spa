@@ -17,7 +17,15 @@ import {
   applyPatientSearch,
   getCurrentFilters,
   resetAllFilters,
-  getDepartmentsList
+  getDepartmentsList,
+  applyCombinedFilters,
+  getSuggestedFilters,
+  applySorting,
+  exportFilteredEvents,
+  saveFiltersToState,
+  loadFiltersFromState,
+  resetFiltersAndState,
+  getFilterStats
 } from './eventi-clinici-api.js';
 
 import {
@@ -36,12 +44,17 @@ import {
   applyResponsiveDesign,
   getDOMElements,
   populateDepartmentFilter,
+  populateAdvancedFilters,
   applyFiltersToUI,
   resetFiltersUI,
   showActiveFiltersIndicator,
+  showFilterStats,
   showSearchingState,
   hideSearchingState,
-  updateSearchResultsCount
+  updateSearchResultsCount,
+  showExportProgress,
+  showExportSuccess,
+  getFiltersFromUI
 } from './eventi-clinici-ui.js';
 
 import { logger } from '../../../core/services/loggerService.js';
@@ -62,11 +75,16 @@ let currentState = {
     tipo_evento: '',
     data_da: '',
     data_a: '',
-    reparto: ''
+    reparto: '',
+    agente_patogeno: '',
+    tipo_intervento: '',
+    sortColumn: 'data_evento',
+    sortDirection: 'desc'
   },
   selectedPatientId: null,
   editingEventId: null,
-  isLoading: false
+  isLoading: false,
+  filterStats: null
 };
 
 // DOM elements and modals
@@ -100,8 +118,11 @@ export async function initEventiCliniciView(urlParams) {
     // Apply responsive design
     applyResponsiveDesign();
 
-    // Load departments for filter
-    await loadDepartments();
+    // Load filter suggestions and departments
+    await loadFilterSuggestions();
+
+    // Load saved filters from state
+    await loadSavedFilters();
 
     // Load initial data
     await loadEventsData();
@@ -211,11 +232,36 @@ function setupMainActionListeners() {
     cleanupFunctions.push(() => domElements.resetFiltersBtn.removeEventListener('click', handler));
   }
 
-  // Export button
+  // Export buttons
   if (domElements.exportBtn) {
-    const handler = () => exportEvents();
+    const handler = () => exportEvents('csv');
     domElements.exportBtn.addEventListener('click', handler);
     cleanupFunctions.push(() => domElements.exportBtn.removeEventListener('click', handler));
+  }
+
+  if (domElements.exportCsvBtn) {
+    const handler = () => exportEvents('csv');
+    domElements.exportCsvBtn.addEventListener('click', handler);
+    cleanupFunctions.push(() => domElements.exportCsvBtn.removeEventListener('click', handler));
+  }
+
+  if (domElements.exportJsonBtn) {
+    const handler = () => exportEvents('json');
+    domElements.exportJsonBtn.addEventListener('click', handler);
+    cleanupFunctions.push(() => domElements.exportJsonBtn.removeEventListener('click', handler));
+  }
+
+  // Filter management buttons
+  if (domElements.saveFiltersBtn) {
+    const handler = () => saveCurrentFilters();
+    domElements.saveFiltersBtn.addEventListener('click', handler);
+    cleanupFunctions.push(() => domElements.saveFiltersBtn.removeEventListener('click', handler));
+  }
+
+  if (domElements.loadFiltersBtn) {
+    const handler = () => loadSavedFilters();
+    domElements.loadFiltersBtn.addEventListener('click', handler);
+    cleanupFunctions.push(() => domElements.loadFiltersBtn.removeEventListener('click', handler));
   }
 }
 
@@ -263,21 +309,44 @@ function setupFilterListeners() {
   // Department filter
   if (domElements.filterReparto) {
     const handler = async () => {
-      showSearchingState();
-      try {
-        const result = await applyDepartmentFilter(domElements.filterReparto.value);
-        renderEventsTimeline(result);
-        setupEventCardListeners();
-        updateSearchResultsCount(result.eventi.length, result.totalCount, getCurrentFilters());
-        showActiveFiltersIndicator(getCurrentFilters());
-      } catch (error) {
-        logger.error('❌ Errore applicazione filtro reparto:', error);
-      } finally {
-        hideSearchingState();
-      }
+      await handleCombinedFiltersChange();
     };
     domElements.filterReparto.addEventListener('change', handler);
     cleanupFunctions.push(() => domElements.filterReparto.removeEventListener('change', handler));
+  }
+
+  // Advanced filters
+  if (domElements.filterAgentePatogeno) {
+    const handler = debounce(async () => {
+      await handleCombinedFiltersChange();
+    }, 500);
+    domElements.filterAgentePatogeno.addEventListener('input', handler);
+    cleanupFunctions.push(() => domElements.filterAgentePatogeno.removeEventListener('input', handler));
+  }
+
+  if (domElements.filterTipoIntervento) {
+    const handler = debounce(async () => {
+      await handleCombinedFiltersChange();
+    }, 500);
+    domElements.filterTipoIntervento.addEventListener('input', handler);
+    cleanupFunctions.push(() => domElements.filterTipoIntervento.removeEventListener('input', handler));
+  }
+
+  // Sorting filters
+  if (domElements.filterSortColumn) {
+    const handler = async () => {
+      await handleSortingChange();
+    };
+    domElements.filterSortColumn.addEventListener('change', handler);
+    cleanupFunctions.push(() => domElements.filterSortColumn.removeEventListener('change', handler));
+  }
+
+  if (domElements.filterSortDirection) {
+    const handler = async () => {
+      await handleSortingChange();
+    };
+    domElements.filterSortDirection.addEventListener('change', handler);
+    cleanupFunctions.push(() => domElements.filterSortDirection.removeEventListener('change', handler));
   }
 }
 
@@ -377,15 +446,21 @@ function setupSearchListeners() {
 }
 
 /**
- * Carica la lista dei reparti per il filtro
+ * Carica i suggerimenti per i filtri
  */
-async function loadDepartments() {
+async function loadFilterSuggestions() {
   try {
-    const reparti = await getDepartmentsList();
+    const [suggestions, reparti] = await Promise.all([
+      getSuggestedFilters(),
+      getDepartmentsList()
+    ]);
+
     await populateDepartmentFilter(reparti);
-    logger.log('✅ Reparti caricati per filtro:', reparti.length);
+    await populateAdvancedFilters(suggestions);
+
+    logger.log('✅ Suggerimenti filtri caricati:', { suggestions, reparti: reparti.length });
   } catch (error) {
-    logger.error('❌ Errore caricamento reparti:', error);
+    logger.error('❌ Errore caricamento suggerimenti filtri:', error);
   }
 }
 
@@ -409,6 +484,9 @@ async function loadEventsData() {
     // Update UI indicators
     updateSearchResultsCount(result.eventi.length, result.totalCount, getCurrentFilters());
     showActiveFiltersIndicator(getCurrentFilters());
+
+    // Update filter stats
+    await updateFilterStats();
 
     logger.log('✅ Eventi caricati:', result.eventi.length);
 
@@ -549,36 +627,50 @@ async function handleFilterChange() {
  * Resetta tutti i filtri
  */
 async function resetFilters() {
-  // Clear form fields
-  if (domElements.searchPatientInput) {
-    domElements.searchPatientInput.value = '';
-    delete domElements.searchPatientInput.dataset.patientId;
+  try {
+    showSearchingState();
+
+    // Reset using API function that also clears persistent state
+    const result = await resetFiltersAndState();
+
+    // Reset UI
+    resetFiltersUI();
+
+    // Reset local state
+    currentState.filters = {
+      paziente_search: '',
+      tipo_evento: '',
+      data_da: '',
+      data_a: '',
+      reparto: '',
+      agente_patogeno: '',
+      tipo_intervento: '',
+      sortColumn: 'data_evento',
+      sortDirection: 'desc'
+    };
+    currentState.currentPage = 0;
+    currentState.selectedPatientId = null;
+
+    // Hide search results
+    hideAllSearchResults();
+
+    // Render results
+    renderEventsTimeline(result);
+    setupEventCardListeners();
+
+    // Update UI indicators
+    updateSearchResultsCount(result.eventi.length, result.totalCount, getCurrentFilters());
+    showActiveFiltersIndicator(getCurrentFilters());
+    await updateFilterStats();
+
+    notificationService.success('Filtri resettati');
+
+  } catch (error) {
+    logger.error('❌ Errore reset filtri:', error);
+    notificationService.error('Errore nel reset dei filtri');
+  } finally {
+    hideSearchingState();
   }
-  if (domElements.filterType) domElements.filterType.value = '';
-  if (domElements.filterDateFrom) domElements.filterDateFrom.value = '';
-  if (domElements.filterDateTo) domElements.filterDateTo.value = '';
-
-  // Reset state
-  currentState.filters = {
-    paziente_search: '',
-    tipo_evento: '',
-    data_da: '',
-    data_a: '',
-    reparto: ''
-  };
-  currentState.currentPage = 0;
-  currentState.selectedPatientId = null;
-
-  // Hide search results
-  hideAllSearchResults();
-
-  // Clear search cache
-  clearSearchCache();
-
-  // Reload data
-  await loadEventsData();
-
-  notificationService.success('Filtri resettati');
 }
 
 /**
@@ -783,13 +875,20 @@ async function deleteEvent(eventId) {
 /**
  * Esporta gli eventi
  */
-async function exportEvents() {
+async function exportEvents(format = 'csv') {
   try {
-    notificationService.info('Funzionalità di export in sviluppo');
-    // TODO: Implement export functionality
+    showExportProgress(true);
+
+    const result = await exportFilteredEvents(format);
+    showExportSuccess(result);
+
+    notificationService.success(`Eventi esportati con successo in formato ${format.toUpperCase()}`);
+
   } catch (error) {
     logger.error('❌ Errore export eventi:', error);
-    notificationService.error('Errore nell\'esportazione');
+    notificationService.error(error.message || 'Errore nell\'esportazione');
+  } finally {
+    showExportProgress(false);
   }
 }
 
@@ -892,6 +991,125 @@ function debounce(func, wait) {
 }
 
 /**
+ * Gestisce i cambiamenti nei filtri combinati
+ */
+async function handleCombinedFiltersChange() {
+  try {
+    showSearchingState();
+
+    // Get current filters from UI
+    const uiFilters = getFiltersFromUI();
+    
+    // Apply combined filters
+    const result = await applyCombinedFilters(uiFilters);
+    
+    // Update local state
+    currentState.filters = { ...currentState.filters, ...uiFilters };
+    currentState.currentPage = 0;
+
+    // Render results
+    renderEventsTimeline(result);
+    setupEventCardListeners();
+
+    // Update UI indicators
+    updateSearchResultsCount(result.eventi.length, result.totalCount, getCurrentFilters());
+    showActiveFiltersIndicator(getCurrentFilters());
+    await updateFilterStats();
+
+    // Auto-save filters
+    saveFiltersToState();
+
+  } catch (error) {
+    logger.error('❌ Errore applicazione filtri combinati:', error);
+    notificationService.error(error.message || 'Errore nell\'applicazione dei filtri');
+  } finally {
+    hideSearchingState();
+  }
+}
+
+/**
+ * Gestisce i cambiamenti nell'ordinamento
+ */
+async function handleSortingChange() {
+  try {
+    showSearchingState();
+
+    const sortColumn = domElements.filterSortColumn?.value || 'data_evento';
+    const sortDirection = domElements.filterSortDirection?.value || 'desc';
+
+    const result = await applySorting(sortColumn, sortDirection);
+
+    // Update local state
+    currentState.filters.sortColumn = sortColumn;
+    currentState.filters.sortDirection = sortDirection;
+
+    // Render results
+    renderEventsTimeline(result);
+    setupEventCardListeners();
+
+    // Update UI indicators
+    updateSearchResultsCount(result.eventi.length, result.totalCount, getCurrentFilters());
+    await updateFilterStats();
+
+    // Auto-save filters
+    saveFiltersToState();
+
+  } catch (error) {
+    logger.error('❌ Errore applicazione ordinamento:', error);
+    notificationService.error(error.message || 'Errore nell\'ordinamento');
+  } finally {
+    hideSearchingState();
+  }
+}
+
+/**
+ * Salva i filtri correnti nello stato persistente
+ */
+async function saveCurrentFilters() {
+  try {
+    saveFiltersToState();
+    notificationService.success('Filtri salvati');
+  } catch (error) {
+    logger.error('❌ Errore salvataggio filtri:', error);
+    notificationService.error('Errore nel salvataggio dei filtri');
+  }
+}
+
+/**
+ * Carica i filtri salvati dallo stato persistente
+ */
+async function loadSavedFilters() {
+  try {
+    const savedFilters = await loadFiltersFromState();
+    
+    if (savedFilters) {
+      // Update local state
+      currentState.filters = { ...currentState.filters, ...savedFilters };
+      
+      // Apply to UI
+      applyFiltersToUI(savedFilters);
+      
+      logger.log('✅ Filtri caricati dallo stato:', savedFilters);
+    }
+  } catch (error) {
+    logger.error('❌ Errore caricamento filtri salvati:', error);
+  }
+}
+
+/**
+ * Aggiorna le statistiche dei filtri
+ */
+async function updateFilterStats() {
+  try {
+    const stats = await getFilterStats();
+    currentState.filterStats = stats;
+    showFilterStats(stats);
+  } catch (error) {
+    logger.error('❌ Errore aggiornamento statistiche filtri:', error);
+  }
+}
+
+/**
  * Funzione di cleanup
  */
 function cleanup() {
@@ -926,11 +1144,16 @@ function cleanup() {
       tipo_evento: '',
       data_da: '',
       data_a: '',
-      reparto: ''
+      reparto: '',
+      agente_patogeno: '',
+      tipo_intervento: '',
+      sortColumn: 'data_evento',
+      sortDirection: 'desc'
     },
     selectedPatientId: null,
     editingEventId: null,
-    isLoading: false
+    isLoading: false,
+    filterStats: null
   };
 
   // Clear search cache

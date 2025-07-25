@@ -24,7 +24,11 @@ let currentFilters = {
   tipo_evento: '',
   data_da: '',
   data_a: '',
-  reparto: ''
+  reparto: '',
+  agente_patogeno: '',
+  tipo_intervento: '',
+  sortColumn: 'data_evento',
+  sortDirection: 'desc'
 };
 
 // Debounced search functions
@@ -647,6 +651,414 @@ export async function getDepartmentsList() {
 export function clearSearchCache() {
   searchCache.clear();
   logger.log('🧹 Cache ricerca pulita');
+}
+
+/**
+ * Applica filtri combinati per query complesse
+ */
+export async function applyCombinedFilters(filters) {
+  try {
+    logger.log('🔍 Applicazione filtri combinati:', filters);
+
+    // Validate filter combinations
+    validateFilterCombination(filters);
+
+    // Merge with current filters
+    const combinedFilters = { ...currentFilters, ...filters };
+    
+    // Apply filters
+    const result = await fetchEventiClinici(combinedFilters, 0);
+    
+    // Update current filters
+    currentFilters = combinedFilters;
+
+    logger.log('✅ Filtri combinati applicati:', {
+      filtri: combinedFilters,
+      risultati: result.eventi.length
+    });
+
+    return result;
+  } catch (error) {
+    logger.error('❌ Errore applicazione filtri combinati:', error);
+    handleApiError(error, 'Errore nell\'applicazione dei filtri');
+    throw error;
+  }
+}
+
+/**
+ * Valida la combinazione di filtri
+ */
+function validateFilterCombination(filters) {
+  const errors = [];
+
+  // Validate date range
+  if (filters.data_da && filters.data_a) {
+    const startDate = new Date(filters.data_da);
+    const endDate = new Date(filters.data_a);
+    
+    if (startDate > endDate) {
+      errors.push('La data di inizio non può essere successiva alla data di fine');
+    }
+    
+    // Check if date range is too wide (more than 2 years)
+    const diffTime = Math.abs(endDate - startDate);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    if (diffDays > 730) {
+      errors.push('Il range di date non può superare i 2 anni');
+    }
+  }
+
+  // Validate future dates
+  const today = new Date();
+  today.setHours(23, 59, 59, 999);
+  
+  if (filters.data_da && new Date(filters.data_da) > today) {
+    errors.push('La data di inizio non può essere nel futuro');
+  }
+  
+  if (filters.data_a && new Date(filters.data_a) > today) {
+    errors.push('La data di fine non può essere nel futuro');
+  }
+
+  // Validate type-specific filters
+  if (filters.tipo_intervento && filters.tipo_evento !== 'intervento') {
+    errors.push('Il filtro tipo intervento può essere usato solo con eventi di tipo intervento');
+  }
+  
+  if (filters.agente_patogeno && filters.tipo_evento !== 'infezione') {
+    errors.push('Il filtro agente patogeno può essere usato solo con eventi di tipo infezione');
+  }
+
+  if (errors.length > 0) {
+    throw new Error(errors.join(', '));
+  }
+}
+
+/**
+ * Ottiene filtri suggeriti basati sui dati esistenti
+ */
+export async function getSuggestedFilters() {
+  try {
+    logger.log('💡 Caricamento filtri suggeriti');
+
+    // Import supabase directly since we need it here
+    const { supabase } = await import('../../../core/services/supabaseClient.js');
+    
+    // Get unique values for filter suggestions
+    const [tipiIntervento, agentiPatogeni, reparti] = await Promise.all([
+      // Unique intervention types
+      supabase
+        .from('eventi_clinici')
+        .select('tipo_intervento')
+        .eq('tipo_evento', 'intervento')
+        .not('tipo_intervento', 'is', null)
+        .order('tipo_intervento'),
+      
+      // Unique pathogen agents
+      supabase
+        .from('eventi_clinici')
+        .select('agente_patogeno')
+        .eq('tipo_evento', 'infezione')
+        .not('agente_patogeno', 'is', null)
+        .order('agente_patogeno'),
+      
+      // Unique departments from patients
+      supabase
+        .from('pazienti')
+        .select('reparto_appartenenza')
+        .not('reparto_appartenenza', 'is', null)
+        .order('reparto_appartenenza')
+    ]);
+
+    const suggestions = {
+      tipiIntervento: [...new Set(tipiIntervento.data?.map(t => t.tipo_intervento) || [])],
+      agentiPatogeni: [...new Set(agentiPatogeni.data?.map(a => a.agente_patogeno) || [])],
+      reparti: [...new Set(reparti.data?.map(r => r.reparto_appartenenza) || [])]
+    };
+
+    logger.log('✅ Filtri suggeriti caricati:', suggestions);
+    return suggestions;
+  } catch (error) {
+    logger.error('❌ Errore caricamento filtri suggeriti:', error);
+    return {
+      tipiIntervento: [],
+      agentiPatogeni: [],
+      reparti: []
+    };
+  }
+}
+
+/**
+ * Applica ordinamento ai risultati
+ */
+export async function applySorting(sortColumn, sortDirection) {
+  try {
+    logger.log('📊 Applicazione ordinamento:', { sortColumn, sortDirection });
+
+    // Validate sort parameters
+    const validColumns = ['data_evento', 'tipo_evento', 'created_at', 'paziente_nome'];
+    const validDirections = ['asc', 'desc'];
+
+    if (!validColumns.includes(sortColumn)) {
+      throw new Error(`Colonna di ordinamento non valida: ${sortColumn}`);
+    }
+
+    if (!validDirections.includes(sortDirection)) {
+      throw new Error(`Direzione di ordinamento non valida: ${sortDirection}`);
+    }
+
+    const filters = { 
+      ...currentFilters, 
+      sortColumn, 
+      sortDirection 
+    };
+    
+    const result = await fetchEventiClinici(filters, 0);
+
+    // Update current filters
+    currentFilters.sortColumn = sortColumn;
+    currentFilters.sortDirection = sortDirection;
+
+    logger.log('✅ Ordinamento applicato:', {
+      colonna: sortColumn,
+      direzione: sortDirection,
+      risultati: result.eventi.length
+    });
+
+    return result;
+  } catch (error) {
+    logger.error('❌ Errore applicazione ordinamento:', error);
+    handleApiError(error, 'Errore nell\'applicazione dell\'ordinamento');
+    throw error;
+  }
+}
+
+/**
+ * Esporta eventi filtrati in formato CSV
+ */
+export async function exportFilteredEvents(format = 'csv') {
+  try {
+    logger.log('📤 Esportazione eventi filtrati:', { format, filters: currentFilters });
+
+    // Fetch all events with current filters (no pagination)
+    const allEventsResult = await eventiCliniciService.getAllEventi(currentFilters, { 
+      page: 0, 
+      limit: 10000 // Large limit to get all results
+    });
+
+    if (!allEventsResult.eventi || allEventsResult.eventi.length === 0) {
+      throw new Error('Nessun evento da esportare con i filtri correnti');
+    }
+
+    let exportData;
+    let filename;
+    let mimeType;
+
+    switch (format) {
+      case 'csv':
+        exportData = generateCSV(allEventsResult.eventi);
+        filename = `eventi_clinici_${new Date().toISOString().split('T')[0]}.csv`;
+        mimeType = 'text/csv;charset=utf-8;';
+        break;
+      
+      case 'json':
+        exportData = JSON.stringify(allEventsResult.eventi, null, 2);
+        filename = `eventi_clinici_${new Date().toISOString().split('T')[0]}.json`;
+        mimeType = 'application/json;charset=utf-8;';
+        break;
+      
+      default:
+        throw new Error(`Formato di esportazione non supportato: ${format}`);
+    }
+
+    // Create and trigger download
+    const blob = new Blob([exportData], { type: mimeType });
+    const link = document.createElement('a');
+    
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', filename);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+
+    logger.log('✅ Esportazione completata:', {
+      formato: format,
+      eventi: allEventsResult.eventi.length,
+      filename
+    });
+
+    return {
+      success: true,
+      count: allEventsResult.eventi.length,
+      filename
+    };
+
+  } catch (error) {
+    logger.error('❌ Errore esportazione eventi:', error);
+    handleApiError(error, 'Errore nell\'esportazione degli eventi');
+    throw error;
+  }
+}
+
+/**
+ * Genera CSV dai dati degli eventi
+ */
+function generateCSV(eventi) {
+  const headers = [
+    'ID',
+    'Tipo Evento',
+    'Data Evento',
+    'Paziente',
+    'Reparto',
+    'Descrizione',
+    'Tipo Intervento',
+    'Agente Patogeno',
+    'Data Creazione'
+  ];
+
+  const csvRows = [headers.join(',')];
+
+  eventi.forEach(evento => {
+    const row = [
+      evento.id || '',
+      evento.tipo_evento || '',
+      evento.data_evento || '',
+      evento.pazienti ? `"${evento.pazienti.nome} ${evento.pazienti.cognome}"` : '',
+      evento.pazienti?.reparto_appartenenza || '',
+      evento.descrizione ? `"${evento.descrizione.replace(/"/g, '""')}"` : '',
+      evento.tipo_intervento || '',
+      evento.agente_patogeno || '',
+      evento.created_at || ''
+    ];
+    csvRows.push(row.join(','));
+  });
+
+  return csvRows.join('\n');
+}
+
+/**
+ * Salva filtri correnti nello stato persistente
+ */
+export function saveFiltersToState() {
+  try {
+    // Import stateService dynamically to avoid circular dependencies
+    import('../../../core/services/stateService.js').then(({ stateService }) => {
+      stateService.setState('eventiCliniciFilters', currentFilters);
+      logger.log('💾 Filtri salvati nello stato:', currentFilters);
+    });
+  } catch (error) {
+    logger.error('❌ Errore salvataggio filtri:', error);
+  }
+}
+
+/**
+ * Carica filtri dallo stato persistente
+ */
+export async function loadFiltersFromState() {
+  try {
+    const { stateService } = await import('../../../core/services/stateService.js');
+    const savedFilters = stateService.getState('eventiCliniciFilters');
+    
+    if (savedFilters) {
+      currentFilters = { ...currentFilters, ...savedFilters };
+      logger.log('📂 Filtri caricati dallo stato:', currentFilters);
+    }
+    
+    return currentFilters;
+  } catch (error) {
+    logger.error('❌ Errore caricamento filtri:', error);
+    return currentFilters;
+  }
+}
+
+/**
+ * Resetta filtri e rimuove dallo stato persistente
+ */
+export async function resetFiltersAndState() {
+  try {
+    logger.log('🔄 Reset completo filtri e stato');
+
+    // Reset current filters
+    currentFilters = {
+      paziente_search: '',
+      tipo_evento: '',
+      data_da: '',
+      data_a: '',
+      reparto: '',
+      agente_patogeno: '',
+      tipo_intervento: '',
+      sortColumn: 'data_evento',
+      sortDirection: 'desc'
+    };
+
+    // Clear from persistent state
+    const { stateService } = await import('../../../core/services/stateService.js');
+    stateService.setState('eventiCliniciFilters', null);
+
+    // Clear search cache
+    clearSearchCache();
+
+    // Fetch fresh data
+    const result = await fetchEventiClinici(currentFilters, 0);
+
+    logger.log('✅ Reset completo completato:', {
+      risultati: result.eventi.length
+    });
+
+    return result;
+  } catch (error) {
+    logger.error('❌ Errore reset completo filtri:', error);
+    handleApiError(error, 'Errore nel reset dei filtri');
+    throw error;
+  }
+}
+
+/**
+ * Ottiene statistiche sui filtri applicati
+ */
+export async function getFilterStats() {
+  try {
+    logger.log('📊 Calcolo statistiche filtri');
+
+    // Get total count without filters
+    const totalResult = await fetchEventiClinici({}, 0);
+    const totalCount = totalResult.totalCount;
+
+    // Get filtered count
+    const filteredResult = await fetchEventiClinici(currentFilters, 0);
+    const filteredCount = filteredResult.totalCount;
+
+    // Calculate active filters
+    const activeFilters = Object.entries(currentFilters)
+      .filter(([key, value]) => value && value.toString().trim() !== '' && 
+               !['sortColumn', 'sortDirection'].includes(key))
+      .map(([key, value]) => ({ key, value }));
+
+    const stats = {
+      totalEvents: totalCount,
+      filteredEvents: filteredCount,
+      activeFiltersCount: activeFilters.length,
+      activeFilters,
+      filterEfficiency: totalCount > 0 ? ((totalCount - filteredCount) / totalCount * 100).toFixed(1) : 0
+    };
+
+    logger.log('✅ Statistiche filtri calcolate:', stats);
+    return stats;
+  } catch (error) {
+    logger.error('❌ Errore calcolo statistiche filtri:', error);
+    return {
+      totalEvents: 0,
+      filteredEvents: 0,
+      activeFiltersCount: 0,
+      activeFilters: [],
+      filterEfficiency: 0
+    };
+  }
 }
 
 /**

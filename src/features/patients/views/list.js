@@ -173,9 +173,10 @@ export async function initListView(listData) {
         if (domElements.diagnosiFilter) domElements.diagnosiFilter.value = persistedFilters.diagnosi || '';
         if (domElements.statoFilter) domElements.statoFilter.value = persistedFilters.stato || '';
         if (domElements.infettoFilter) domElements.infettoFilter.value = persistedFilters.infetto || '';
+        if (domElements.trasferimentoFilter) domElements.trasferimentoFilter.value = persistedFilters.trasferimento || '';
         if (domElements.searchInput) domElements.searchInput.value = persistedFilters.search || '';
 
-        initCustomSelects('#list-filter-reparto, #list-filter-diagnosi, #list-filter-stato, #list-filter-infetto');
+        initCustomSelects('#list-filter-reparto, #list-filter-diagnosi, #list-filter-stato, #list-filter-infetto, #list-filter-trasferimento');
 
         setupEventListeners();
         

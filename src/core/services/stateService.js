@@ -37,6 +37,19 @@ class StateService {
                 sortDirection: 'desc'
             },
             
+            // Filtri eventi clinici
+            eventiCliniciFilters: {
+                paziente_search: '',
+                tipo_evento: '',
+                data_da: '',
+                data_a: '',
+                reparto: '',
+                agente_patogeno: '',
+                tipo_intervento: '',
+                sortColumn: 'data_evento',
+                sortDirection: 'desc'
+            },
+            
             // Formulari
             formData: {},
             
@@ -55,7 +68,7 @@ class StateService {
         this.subscribers = new Map();
         
         // Chiavi che devono essere persistite su localStorage
-        this.persistentKeys = ['listFilters', 'editPazienteId', 'formData'];
+        this.persistentKeys = ['listFilters', 'editPazienteId', 'formData', 'eventiCliniciFilters'];
         
         // Inizializza lo stato da localStorage se disponibile
         this.loadPersistedState();
@@ -318,6 +331,34 @@ class StateService {
 
     isAuthenticated() {
         return this.getState('isAuthenticated');
+    }
+
+    /**
+     * Gestione filtri eventi clinici
+     */
+    updateEventiCliniciFilters(newFilters) {
+        this.setState('eventiCliniciFilters', {
+            ...this.getState('eventiCliniciFilters'),
+            ...newFilters
+        });
+    }
+
+    getEventiCliniciFilters() {
+        return this.getState('eventiCliniciFilters');
+    }
+
+    resetEventiCliniciFilters() {
+        this.setState('eventiCliniciFilters', {
+            paziente_search: '',
+            tipo_evento: '',
+            data_da: '',
+            data_a: '',
+            reparto: '',
+            agente_patogeno: '',
+            tipo_intervento: '',
+            sortColumn: 'data_evento',
+            sortDirection: 'desc'
+        });
     }
 }
 

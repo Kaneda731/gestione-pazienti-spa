@@ -8,58 +8,129 @@
         </div>
         <div class="card-body">
             <!-- Search and Filter Section -->
-            <div class="filters-container row g-3 mb-4">
-                <div class="col-md-4">
-                    <label for="eventi-search-patient" class="form-label">Cerca Paziente</label>
-                    <div class="position-relative">
-                        <input type="text" id="eventi-search-patient" class="form-control" placeholder="Nome, cognome o codice RAD...">
-                        <div id="patient-search-results" class="dropdown-menu position-absolute w-100" style="display: none; max-height: 200px; overflow-y: auto;">
-                            <!-- Patient search results will be populated here -->
+            <div class="eventi-filters-section">
+                <!-- Basic Filters Row -->
+                <div class="filters-container row g-3 mb-3">
+                    <div class="col-md-3">
+                        <label for="eventi-search-patient" class="form-label">Cerca Paziente</label>
+                        <div class="position-relative">
+                            <input type="text" id="eventi-search-patient" class="form-control" placeholder="Nome, cognome o codice RAD...">
+                            <div id="patient-search-results" class="dropdown-menu position-absolute w-100" style="display: none; max-height: 200px; overflow-y: auto;">
+                                <!-- Patient search results will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="eventi-filter-type" class="form-label">Tipo Evento</label>
+                        <select id="eventi-filter-type" class="form-select" data-custom="true">
+                            <option value="">Tutti</option>
+                            <option value="intervento">Interventi</option>
+                            <option value="infezione">Infezioni</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="eventi-filter-date-from" class="form-label">Data Da</label>
+                        <div class="input-group-icon">
+                            <input type="text" id="eventi-filter-date-from" class="form-control" data-datepicker placeholder="gg/mm/aaaa">
+                            <span class="material-icons input-icon">calendar_today</span>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="eventi-filter-date-to" class="form-label">Data A</label>
+                        <div class="input-group-icon">
+                            <input type="text" id="eventi-filter-date-to" class="form-control" data-datepicker placeholder="gg/mm/aaaa">
+                            <span class="material-icons input-icon">calendar_today</span>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="eventi-filter-reparto" class="form-label">Reparto</label>
+                        <select id="eventi-filter-reparto" class="form-select" data-custom="true">
+                            <option value="">Tutti i reparti</option>
+                            <!-- Department options will be populated dynamically -->
+                        </select>
+                    </div>
+                    <div class="col-md-1 d-flex align-items-end">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#advanced-filters" aria-expanded="false" title="Filtri avanzati">
+                            <span class="material-icons">tune</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Advanced Filters (Collapsible) -->
+                <div class="collapse" id="advanced-filters">
+                    <div class="card card-body mb-3">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label for="eventi-filter-tipo-intervento" class="form-label">Tipo Intervento</label>
+                                <select id="eventi-filter-tipo-intervento" class="form-select" data-custom="true">
+                                    <option value="">Tutti gli interventi</option>
+                                    <!-- Options will be populated dynamically -->
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="eventi-filter-agente-patogeno" class="form-label">Agente Patogeno</label>
+                                <input type="text" id="eventi-filter-agente-patogeno" class="form-control" placeholder="Cerca agente patogeno...">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="eventi-sort-column" class="form-label">Ordina per</label>
+                                <select id="eventi-sort-column" class="form-select" data-custom="true">
+                                    <option value="data_evento">Data Evento</option>
+                                    <option value="tipo_evento">Tipo Evento</option>
+                                    <option value="created_at">Data Creazione</option>
+                                    <option value="paziente_nome">Nome Paziente</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="eventi-sort-direction" class="form-label">Direzione</label>
+                                <select id="eventi-sort-direction" class="form-select" data-custom="true">
+                                    <option value="desc">Decrescente</option>
+                                    <option value="asc">Crescente</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-2">
-                    <label for="eventi-filter-type" class="form-label">Tipo Evento</label>
-                    <select id="eventi-filter-type" class="form-select" data-custom="true">
-                        <option value="">Tutti</option>
-                        <option value="intervento">Interventi</option>
-                        <option value="infezione">Infezioni</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <label for="eventi-filter-date-from" class="form-label">Data Da</label>
-                    <div class="input-group-icon">
-                        <input type="text" id="eventi-filter-date-from" class="form-control" data-datepicker placeholder="gg/mm/aaaa">
-                        <span class="material-icons input-icon">calendar_today</span>
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <label for="eventi-filter-date-to" class="form-label">Data A</label>
-                    <div class="input-group-icon">
-                        <input type="text" id="eventi-filter-date-to" class="form-control" data-datepicker placeholder="gg/mm/aaaa">
-                        <span class="material-icons input-icon">calendar_today</span>
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <label for="eventi-filter-reparto" class="form-label">Reparto</label>
-                    <select id="eventi-filter-reparto" class="form-select" data-custom="true">
-                        <option value="">Tutti i reparti</option>
-                        <!-- Department options will be populated dynamically -->
-                    </select>
-                </div>
             </div>
             
-            <!-- Second row for action buttons -->
+            <!-- Action buttons and filter management -->
             <div class="row g-3 mb-4">
                 <div class="col-md-12 d-flex justify-content-between align-items-center">
-                    <div class="d-flex" style="gap: 1rem;">
+                    <div class="d-flex flex-wrap" style="gap: 0.5rem;">
                         <button id="eventi-reset-filters-btn" class="btn btn-outline-secondary">
                             <span class="material-icons me-1" style="vertical-align: text-bottom;">refresh</span>Resetta Filtri
                         </button>
-                        <button id="eventi-export-btn" class="btn btn-outline-secondary">
-                            <span class="material-icons me-1" style="vertical-align: text-bottom;">download</span>Esporta
-                        </button>
+                        
+                        <!-- Export dropdown -->
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span class="material-icons me-1" style="vertical-align: text-bottom;">download</span>Esporta
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><button id="eventi-export-csv-btn" class="dropdown-item" type="button">
+                                    <span class="material-icons me-2" style="vertical-align: text-bottom;">table_chart</span>CSV
+                                </button></li>
+                                <li><button id="eventi-export-json-btn" class="dropdown-item" type="button">
+                                    <span class="material-icons me-2" style="vertical-align: text-bottom;">code</span>JSON
+                                </button></li>
+                            </ul>
+                        </div>
+
+                        <!-- Filter management -->
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-outline-info dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span class="material-icons me-1" style="vertical-align: text-bottom;">filter_list</span>Filtri
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><button id="eventi-save-filters-btn" class="dropdown-item" type="button">
+                                    <span class="material-icons me-2" style="vertical-align: text-bottom;">save</span>Salva Filtri
+                                </button></li>
+                                <li><button id="eventi-load-filters-btn" class="dropdown-item" type="button">
+                                    <span class="material-icons me-2" style="vertical-align: text-bottom;">folder_open</span>Carica Filtri
+                                </button></li>
+                            </ul>
+                        </div>
                     </div>
+                    
                     <button id="eventi-add-btn" class="btn btn-primary">
                         <span class="material-icons me-1" style="vertical-align: text-bottom;">add</span>Nuovo Evento
                     </button>

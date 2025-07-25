@@ -36,9 +36,18 @@
                                 <option value="false">Non Infetto</option>
                             </select>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-2">
+                            <label for="list-filter-trasferimento" class="form-label">Trasferimento</label>
+                            <select id="list-filter-trasferimento" class="form-select form-select-sm" data-custom="true">
+                                <option value="">Tutti</option>
+                                <option value="dimissione">Dimissione</option>
+                                <option value="trasferimento_interno">Trasf. Interno</option>
+                                <option value="trasferimento_esterno">Trasf. Esterno</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
                             <label for="list-search" class="form-label">Cerca</label>
-                            <input type="text" id="list-search" class="form-control form-control-sm" placeholder="Per nome, cognome o RAD...">
+                            <input type="text" id="list-search" class="form-control form-control-sm" placeholder="Nome, cognome, RAD, destinazione...">
                         </div>
                     </div>
                     
@@ -54,6 +63,7 @@
                                     <th>Diagnosi</th>
                                     <th>Reparto</th>
                                     <th>Stato</th>
+                                    <th>Trasferimento</th>
                                     <th>Azioni</th>
                                 </tr>
                             </thead>

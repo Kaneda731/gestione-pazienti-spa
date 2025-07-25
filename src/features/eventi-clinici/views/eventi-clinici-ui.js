@@ -26,11 +26,19 @@ export function initializeDOMElements() {
     filterDateFrom: document.getElementById("eventi-filter-date-from"),
     filterDateTo: document.getElementById("eventi-filter-date-to"),
     filterReparto: document.getElementById("eventi-filter-reparto"),
+    filterAgentePatogeno: document.getElementById("eventi-filter-agente-patogeno"),
+    filterTipoIntervento: document.getElementById("eventi-filter-tipo-intervento"),
+    filterSortColumn: document.getElementById("eventi-sort-column"),
+    filterSortDirection: document.getElementById("eventi-sort-direction"),
 
     // Action buttons
     addEventBtn: document.getElementById("eventi-add-btn"),
     resetFiltersBtn: document.getElementById("eventi-reset-filters-btn"),
     exportBtn: document.getElementById("eventi-export-btn"),
+    exportCsvBtn: document.getElementById("eventi-export-csv-btn"),
+    exportJsonBtn: document.getElementById("eventi-export-json-btn"),
+    saveFiltersBtn: document.getElementById("eventi-save-filters-btn"),
+    loadFiltersBtn: document.getElementById("eventi-load-filters-btn"),
 
     // Pagination
     paginationControls: document.getElementById("eventi-pagination-controls"),
@@ -742,6 +750,47 @@ export async function populateDepartmentFilter(reparti) {
 }
 
 /**
+ * Popola i filtri avanzati con i valori suggeriti
+ */
+export async function populateAdvancedFilters(suggestions) {
+  try {
+    // Populate intervention types filter
+    if (domElements.filterTipoIntervento && suggestions.tipiIntervento) {
+      populateSelectOptions(domElements.filterTipoIntervento, suggestions.tipiIntervento);
+    }
+
+    // Populate pathogen agents filter
+    if (domElements.filterAgentePatogeno && suggestions.agentiPatogeni) {
+      populateSelectOptions(domElements.filterAgentePatogeno, suggestions.agentiPatogeni);
+    }
+
+    logger.log('✅ Filtri avanzati popolati:', suggestions);
+  } catch (error) {
+    logger.error('❌ Errore popolamento filtri avanzati:', error);
+  }
+}
+
+/**
+ * Utility per popolare opzioni di select
+ */
+function populateSelectOptions(selectElement, options) {
+  // Clear existing options except the first one
+  const firstOption = selectElement.querySelector('option[value=""]');
+  selectElement.innerHTML = '';
+  if (firstOption) {
+    selectElement.appendChild(firstOption);
+  }
+
+  // Add new options
+  options.forEach(option => {
+    const optionElement = document.createElement('option');
+    optionElement.value = option;
+    optionElement.textContent = option;
+    selectElement.appendChild(optionElement);
+  });
+}
+
+/**
  * Applica filtri attivi all'interfaccia
  */
 export function applyFiltersToUI(filters) {
@@ -769,6 +818,24 @@ export function applyFiltersToUI(filters) {
   // Department filter
   if (domElements.filterReparto && filters.reparto) {
     domElements.filterReparto.value = filters.reparto;
+  }
+
+  // Advanced filters
+  if (domElements.filterAgentePatogeno && filters.agente_patogeno) {
+    domElements.filterAgentePatogeno.value = filters.agente_patogeno;
+  }
+
+  if (domElements.filterTipoIntervento && filters.tipo_intervento) {
+    domElements.filterTipoIntervento.value = filters.tipo_intervento;
+  }
+
+  // Sorting
+  if (domElements.filterSortColumn && filters.sortColumn) {
+    domElements.filterSortColumn.value = filters.sortColumn;
+  }
+
+  if (domElements.filterSortDirection && filters.sortDirection) {
+    domElements.filterSortDirection.value = filters.sortDirection;
   }
 
   logger.log('✅ Filtri applicati all\'interfaccia:', filters);
@@ -799,6 +866,24 @@ export function resetFiltersUI() {
     domElements.filterReparto.value = '';
   }
 
+  // Advanced filters
+  if (domElements.filterAgentePatogeno) {
+    domElements.filterAgentePatogeno.value = '';
+  }
+
+  if (domElements.filterTipoIntervento) {
+    domElements.filterTipoIntervento.value = '';
+  }
+
+  // Sorting
+  if (domElements.filterSortColumn) {
+    domElements.filterSortColumn.value = 'data_evento';
+  }
+
+  if (domElements.filterSortDirection) {
+    domElements.filterSortDirection.value = 'desc';
+  }
+
   // Hide patient search results
   if (domElements.patientSearchResults) {
     domElements.patientSearchResults.style.display = 'none';
@@ -811,9 +896,15 @@ export function resetFiltersUI() {
  * Mostra indicatori di filtri attivi
  */
 export function showActiveFiltersIndicator(filters) {
-  const activeFiltersCount = Object.values(filters).filter(value => 
-    value && value.toString().trim() !== ''
-  ).length;
+  // Exclude sorting from active filters count
+  const filterableKeys = Object.keys(filters).filter(key => 
+    !['sortColumn', 'sortDirection'].includes(key)
+  );
+  
+  const activeFiltersCount = filterableKeys.filter(key => {
+    const value = filters[key];
+    return value && value.toString().trim() !== '';
+  }).length;
 
   // Find or create filter indicator
   let indicator = document.getElementById('active-filters-indicator');
@@ -835,6 +926,128 @@ export function showActiveFiltersIndicator(filters) {
   } else if (indicator) {
     indicator.style.display = 'none';
   }
+}
+
+/**
+ * Mostra statistiche sui filtri
+ */
+export function showFilterStats(stats) {
+  let statsContainer = document.getElementById('filter-stats-container');
+  
+  if (!statsContainer) {
+    statsContainer = document.createElement('div');
+    statsContainer.id = 'filter-stats-container';
+    statsContainer.className = 'filter-stats alert alert-info mt-2';
+    
+    // Insert after filters section
+    const filtersSection = document.querySelector('.eventi-filters-section');
+    if (filtersSection) {
+      filtersSection.appendChild(statsContainer);
+    }
+  }
+
+  if (stats.activeFiltersCount > 0) {
+    statsContainer.innerHTML = `
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <i class="fas fa-chart-bar me-2"></i>
+          <strong>${stats.filteredEvents}</strong> di <strong>${stats.totalEvents}</strong> eventi
+          ${stats.filterEfficiency > 0 ? `(${stats.filterEfficiency}% filtrati)` : ''}
+        </div>
+        <div class="text-muted small">
+          ${stats.activeFiltersCount} filtro${stats.activeFiltersCount > 1 ? 'i' : ''} attivo${stats.activeFiltersCount > 1 ? 'i' : ''}
+        </div>
+      </div>
+    `;
+    statsContainer.style.display = 'block';
+  } else {
+    statsContainer.style.display = 'none';
+  }
+}
+
+/**
+ * Mostra stato di esportazione
+ */
+export function showExportProgress(isExporting = false) {
+  const exportButtons = [
+    domElements.exportBtn,
+    domElements.exportCsvBtn,
+    domElements.exportJsonBtn
+  ].filter(btn => btn);
+
+  exportButtons.forEach(btn => {
+    if (isExporting) {
+      btn.disabled = true;
+      const originalText = btn.textContent;
+      btn.dataset.originalText = originalText;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Esportando...';
+    } else {
+      btn.disabled = false;
+      const originalText = btn.dataset.originalText;
+      if (originalText) {
+        btn.textContent = originalText;
+        delete btn.dataset.originalText;
+      }
+    }
+  });
+}
+
+/**
+ * Mostra toast di successo per esportazione
+ */
+export function showExportSuccess(result) {
+  // Create toast element
+  const toast = document.createElement('div');
+  toast.className = 'toast align-items-center text-white bg-success border-0';
+  toast.setAttribute('role', 'alert');
+  toast.innerHTML = `
+    <div class="d-flex">
+      <div class="toast-body">
+        <i class="fas fa-download me-2"></i>
+        Esportati ${result.count} eventi in ${result.filename}
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+    </div>
+  `;
+
+  // Add to toast container or create one
+  let toastContainer = document.getElementById('toast-container');
+  if (!toastContainer) {
+    toastContainer = document.createElement('div');
+    toastContainer.id = 'toast-container';
+    toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+    document.body.appendChild(toastContainer);
+  }
+
+  toastContainer.appendChild(toast);
+
+  // Show toast using Bootstrap
+  import('bootstrap').then(({ Toast }) => {
+    const bsToast = new Toast(toast);
+    bsToast.show();
+    
+    // Remove after hiding
+    toast.addEventListener('hidden.bs.toast', () => {
+      toast.remove();
+    });
+  });
+}
+
+/**
+ * Ottiene i filtri correnti dall'interfaccia
+ */
+export function getFiltersFromUI() {
+  return {
+    paziente_search: domElements.searchPatientInput?.value || '',
+    tipo_evento: domElements.filterType?.value || '',
+    data_da: domElements.filterDateFrom?.value || '',
+    data_a: domElements.filterDateTo?.value || '',
+    reparto: domElements.filterReparto?.value || '',
+    agente_patogeno: domElements.filterAgentePatogeno?.value || '',
+    tipo_intervento: domElements.filterTipoIntervento?.value || '',
+    sortColumn: domElements.filterSortColumn?.value || 'data_evento',
+    sortDirection: domElements.filterSortDirection?.value || 'desc'
+  };
 }
 
 /**

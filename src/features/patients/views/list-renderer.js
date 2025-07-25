@@ -4,6 +4,83 @@ import { currentUser } from '../../../core/auth/authService.js';
 
 const ITEMS_PER_PAGE = 10;
 
+/**
+ * Genera un badge di stato migliorato che include informazioni di trasferimento
+ */
+function getEnhancedStatusBadge(patient) {
+    if (!patient.data_dimissione) {
+        return `<span class="badge bg-success">Attivo</span>`;
+    }
+
+    // Paziente dimesso/trasferito
+    let badgeClass = 'bg-secondary';
+    let badgeText = 'Dimesso';
+    let badgeIcon = '';
+
+    if (patient.tipo_dimissione) {
+        switch (patient.tipo_dimissione) {
+            case 'trasferimento_interno':
+                badgeClass = 'bg-info';
+                badgeText = 'Trasf. Interno';
+                badgeIcon = '<span class="material-icons" style="font-size: 0.8em; margin-right: 2px;">swap_horiz</span>';
+                break;
+            case 'trasferimento_esterno':
+                badgeClass = 'bg-warning text-dark';
+                badgeText = 'Trasf. Esterno';
+                badgeIcon = '<span class="material-icons" style="font-size: 0.8em; margin-right: 2px;">exit_to_app</span>';
+                break;
+            case 'dimissione':
+                badgeClass = 'bg-secondary';
+                badgeText = 'Dimesso';
+                badgeIcon = '<span class="material-icons" style="font-size: 0.8em; margin-right: 2px;">home</span>';
+                break;
+        }
+    }
+
+    // Aggiungi codice dimissione se presente
+    let dischargeCode = '';
+    if (patient.codice_dimissione) {
+        const codeText = patient.codice_dimissione === '3' ? 'Ord.' : patient.codice_dimissione === '6' ? 'Vol.' : patient.codice_dimissione;
+        dischargeCode = ` <small>(${codeText})</small>`;
+    }
+
+    return `<span class="badge ${badgeClass}">${badgeIcon}${badgeText}${dischargeCode}</span>`;
+}
+
+/**
+ * Genera informazioni di trasferimento per la colonna dedicata
+ */
+function getTransferInfo(patient) {
+    if (!patient.data_dimissione || !patient.tipo_dimissione) {
+        return '-';
+    }
+
+    switch (patient.tipo_dimissione) {
+        case 'trasferimento_interno':
+            return patient.reparto_destinazione ? 
+                `<small class="text-info"><strong>→ ${patient.reparto_destinazione}</strong></small>` : 
+                '<small class="text-muted">Interno</small>';
+        
+        case 'trasferimento_esterno':
+            let externalInfo = '<small class="text-warning"><strong>Esterno</strong>';
+            if (patient.clinica_destinazione) {
+                externalInfo += `<br>→ ${patient.clinica_destinazione}`;
+            }
+            if (patient.codice_clinica) {
+                const clinicName = patient.codice_clinica === '56' ? 'Riab. Cardiologica' : 
+                                 patient.codice_clinica === '60' ? 'Riab. Generale' : 
+                                 `Cod. ${patient.codice_clinica}`;
+                externalInfo += `<br>(${clinicName})`;
+            }
+            externalInfo += '</small>';
+            return externalInfo;
+        
+        case 'dimissione':
+        default:
+            return '<small class="text-muted">-</small>';
+    }
+}
+
 export function updateSortIndicators() {
     if (!domElements.tableHeaders || domElements.tableHeaders.length === 0) return;
     
@@ -71,13 +148,14 @@ function renderTable(pazientiToRender) {
 
     tableBody.innerHTML = '';
     if (pazientiToRender.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">Nessun paziente trovato.</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="9" class="text-center text-muted">Nessun paziente trovato.</td></tr>';
         return;
     }
     
     const rowsHtml = pazientiToRender.map(p => {
         const isDimesso = p.data_dimissione;
-        const statusBadge = isDimesso ? `<span class="badge bg-secondary">Dimesso</span>` : `<span class="badge bg-success">Attivo</span>`;
+        const statusBadge = getEnhancedStatusBadge(p);
+        const transferInfo = getTransferInfo(p);
         const userRole = currentUser.profile?.role;
         const canEdit = userRole === 'admin' || userRole === 'editor';
         let actionButtons = '';
@@ -103,6 +181,7 @@ function renderTable(pazientiToRender) {
                 <td data-label="Diagnosi">${p.diagnosi}</td>
                 <td data-label="Reparto">${p.reparto_appartenenza}</td>
                 <td data-label="Stato">${statusBadge}</td>
+                <td data-label="Trasferimento">${transferInfo}</td>
                 <td class="text-nowrap">${actionButtons}</td>
             </tr>
         `;
@@ -121,7 +200,8 @@ function renderCards(pazientiToRender) {
     if (window.matchMedia("(max-width: 767px)").matches) {
         const cardsHtml = pazientiToRender.map(p => {
             const isDimesso = p.data_dimissione;
-            const statusBadge = isDimesso ? `<span class="badge bg-warning text-dark">Dimesso</span>` : `<span class="badge bg-success">Attivo</span>`;
+            const statusBadge = getEnhancedStatusBadge(p);
+            const transferInfo = getTransferInfo(p);
             let mobileActionButtons = '';
             if (canEdit) {
                 const dimissioneButton = isDimesso
@@ -135,6 +215,13 @@ function renderCards(pazientiToRender) {
                     </div>
                 `;
             }
+
+            // Aggiungi informazioni di trasferimento se presenti
+            let transferInfoHtml = '';
+            if (transferInfo !== '-') {
+                transferInfoHtml = `<p class="card-text mb-1" style="font-size: 1.15rem;"><strong>Trasferimento:</strong> ${transferInfo}</p>`;
+            }
+
             return `
                 <div class="card mb-3 patient-card-mobile card-border-dark">
                     <div class="card-body">
@@ -142,7 +229,8 @@ function renderCards(pazientiToRender) {
                         <p class="card-text mb-1 field-border-dark" style="font-size: 1.15rem;"><strong>Data di Nascita:</strong> ${p.data_nascita ? new Date(p.data_nascita).toLocaleDateString() : '-'}</p>
                         <p class="card-text mb-1 field-border-dark" style="font-size: 1.15rem;"><strong>Data Ricovero:</strong> ${new Date(p.data_ricovero).toLocaleDateString()}</p>
                         <p class="card-text mb-1 field-border-dark" style="font-size: 1.15rem;"><strong>Diagnosi:</strong> ${p.diagnosi}</p>
-                        <p class="card-text mb-1" style="font-size: 1.15rem;">${statusBadge}</p>
+                        <p class="card-text mb-1" style="font-size: 1.15rem;"><strong>Stato:</strong> ${statusBadge}</p>
+                        ${transferInfoHtml}
                         ${mobileActionButtons}
                     </div>
                 </div>
@@ -152,7 +240,8 @@ function renderCards(pazientiToRender) {
     } else {
         const cardsHtml = pazientiToRender.map(p => {
             const isDimesso = p.data_dimissione;
-            const statusBadge = isDimesso ? `<span class="badge bg-warning text-dark">Dimesso</span>` : `<span class="badge bg-success">Attivo</span>`;
+            const statusBadge = getEnhancedStatusBadge(p);
+            const transferInfo = getTransferInfo(p);
             let desktopActionButtons = '';
             if (canEdit) {
                 const dimissioneButton = isDimesso
@@ -164,6 +253,13 @@ function renderCards(pazientiToRender) {
                     <button class="btn btn-sm btn-outline-danger ms-1" data-action="delete" data-id="${p.id}" title="Elimina"><span class="material-icons me-1" style="font-size: 1em;">delete</span></button>
                 `;
             }
+
+            // Aggiungi informazioni di trasferimento se presenti
+            let transferInfoHtml = '';
+            if (transferInfo !== '-') {
+                transferInfoHtml = `<p class="card-text mb-1"><strong>Trasferimento:</strong> ${transferInfo}</p>`;
+            }
+
             return `
                 <div class="card mb-3 patient-card-desktop card-border-dark">
                     <div class="card-body">
@@ -180,7 +276,8 @@ function renderCards(pazientiToRender) {
                                     <div class="col-sm-6">
                                         <p class="card-text mb-1 field-border-dark"><strong>Diagnosi:</strong> ${p.diagnosi}</p>
                                         <p class="card-text mb-1"><strong>Reparto:</strong> ${p.reparto_appartenenza}</p>
-                        <p class="card-text mb-1">${statusBadge}</p>
+                                        <p class="card-text mb-1"><strong>Stato:</strong> ${statusBadge}</p>
+                                        ${transferInfoHtml}
                                     </div>
                                 </div>
                             </div>

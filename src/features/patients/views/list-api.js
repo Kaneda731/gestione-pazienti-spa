@@ -17,7 +17,7 @@ function buildBaseQuery() {
         const searchTerm = domElements.searchInput.value.trim();
         if (searchTerm) {
             logger.log('🔍 Applicando filtro ricerca:', searchTerm);
-            query = query.or(`nome.ilike.%${searchTerm}%,cognome.ilike.%${searchTerm}%,diagnosi.ilike.%${searchTerm}%,codice_rad.ilike.%${searchTerm}%`);
+            query = query.or(`nome.ilike.%${searchTerm}%,cognome.ilike.%${searchTerm}%,diagnosi.ilike.%${searchTerm}%,codice_rad.ilike.%${searchTerm}%,reparto_destinazione.ilike.%${searchTerm}%,clinica_destinazione.ilike.%${searchTerm}%`);
         }
     }
     
@@ -45,6 +45,11 @@ function buildBaseQuery() {
         const isInfetto = domElements.infettoFilter.value === 'true';
         logger.log('🔍 Applicando filtro infetto:', isInfetto);
         query = query.eq('infetto', isInfetto);
+    }
+    
+    if (domElements.trasferimentoFilter && domElements.trasferimentoFilter.value) {
+        logger.log('🔍 Applicando filtro trasferimento:', domElements.trasferimentoFilter.value);
+        query = query.eq('tipo_dimissione', domElements.trasferimentoFilter.value);
     }
     
     logger.log('✅ Query base costruita con successo');

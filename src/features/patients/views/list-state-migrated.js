@@ -32,6 +32,7 @@ export function cacheDOMElements(viewContainer) {
     domElements.diagnosiFilter = document.getElementById('list-filter-diagnosi');
     domElements.statoFilter = document.getElementById('list-filter-stato');
     domElements.infettoFilter = document.getElementById('list-filter-infetto');
+    domElements.trasferimentoFilter = document.getElementById('list-filter-trasferimento');
     domElements.searchInput = document.getElementById('list-search');
     domElements.resetButton = document.getElementById('reset-filters-btn');
     domElements.filterContainer = viewContainer.querySelector('.filters-container');
@@ -51,6 +52,8 @@ export function cacheDOMElements(viewContainer) {
         repartoFilter: !!domElements.repartoFilter,
         diagnosiFilter: !!domElements.diagnosiFilter,
         statoFilter: !!domElements.statoFilter,
+        infettoFilter: !!domElements.infettoFilter,
+        trasferimentoFilter: !!domElements.trasferimentoFilter,
         searchInput: !!domElements.searchInput,
         resetButton: !!domElements.resetButton,
         filterContainer: !!domElements.filterContainer,
@@ -72,7 +75,7 @@ export function cacheDOMElements(viewContainer) {
     }
     
     // Validazione elementi critici
-    const criticalElements = ['tableBody', 'cardsContainer', 'repartoFilter', 'diagnosiFilter', 'statoFilter', 'infettoFilter'];
+    const criticalElements = ['tableBody', 'cardsContainer', 'repartoFilter', 'diagnosiFilter', 'statoFilter', 'infettoFilter', 'trasferimentoFilter'];
     criticalElements.forEach(key => {
         if (!domElements[key]) {
             console.error(`Elemento DOM critico non trovato: ${key}`);
@@ -100,6 +103,9 @@ export function loadPersistedFilters() {
     if (domElements.infettoFilter && filters.infetto) {
         domElements.infettoFilter.value = filters.infetto;
     }
+    if (domElements.trasferimentoFilter && filters.trasferimento) {
+        domElements.trasferimentoFilter.value = filters.trasferimento;
+    }
     if (domElements.searchInput && filters.search) {
         domElements.searchInput.value = filters.search;
     }
@@ -114,6 +120,7 @@ export function persistFilters() {
         diagnosi: domElements.diagnosiFilter?.value || '',
         stato: domElements.statoFilter?.value || '',
         infetto: domElements.infettoFilter?.value || '',
+        trasferimento: domElements.trasferimentoFilter?.value || '',
         search: domElements.searchInput?.value || '',
         page: stateService.getFilters().page || 0,
         sortColumn: stateService.getFilters().sortColumn || 'data_ricovero',
@@ -135,10 +142,11 @@ export function resetFilters() {
     if (domElements.diagnosiFilter) domElements.diagnosiFilter.value = '';
     if (domElements.statoFilter) domElements.statoFilter.value = '';
     if (domElements.infettoFilter) domElements.infettoFilter.value = '';
+    if (domElements.trasferimentoFilter) domElements.trasferimentoFilter.value = '';
     if (domElements.searchInput) domElements.searchInput.value = '';
     
     // Resetta custom select se presenti
-    [domElements.repartoFilter, domElements.diagnosiFilter, domElements.statoFilter, domElements.infettoFilter].forEach(element => {
+    [domElements.repartoFilter, domElements.diagnosiFilter, domElements.statoFilter, domElements.infettoFilter, domElements.trasferimentoFilter].forEach(element => {
         if (element?.customSelectInstance) {
             element.customSelectInstance.setValue('');
         }

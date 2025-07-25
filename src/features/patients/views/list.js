@@ -76,9 +76,24 @@ function setupEventListeners() {
 
     const handleAction = (e) => {
         const button = e.target.closest('button[data-action]');
-        if (!button) return;
-        const { action, id } = button.dataset;
-        handlePatientAction(action, id);
+        if (button) {
+            const { action, id } = button.dataset;
+            handlePatientAction(action, id);
+            return;
+        }
+
+        // Handle clinical events quick actions
+        const clinicalButton = e.target.closest('button[class*="btn-add-"], button[class*="btn-view-"]');
+        if (clinicalButton) {
+            const patientId = clinicalButton.dataset.patientId;
+            if (clinicalButton.classList.contains('btn-add-intervention')) {
+                handleClinicalEventAction('add-intervention', patientId);
+            } else if (clinicalButton.classList.contains('btn-add-infection')) {
+                handleClinicalEventAction('add-infection', patientId);
+            } else if (clinicalButton.classList.contains('btn-view-events')) {
+                handleClinicalEventAction('view-events', patientId);
+            }
+        }
     };
 
     document.getElementById('pazienti-table-body').addEventListener('click', handleAction);
@@ -112,6 +127,23 @@ async function handlePatientAction(action, id) {
         case 'riattiva':
             await updatePazienteStatus(id, false);
             fetchAndRender();
+            break;
+    }
+}
+
+async function handleClinicalEventAction(action, patientId) {
+    switch (action) {
+        case 'add-intervention':
+            // Navigate to clinical events view with pre-filled intervention form
+            navigateTo(`eventi-clinici?action=add&type=intervento&paziente=${patientId}`);
+            break;
+        case 'add-infection':
+            // Navigate to clinical events view with pre-filled infection form
+            navigateTo(`eventi-clinici?action=add&type=infezione&paziente=${patientId}`);
+            break;
+        case 'view-events':
+            // Navigate to clinical events view filtered by patient
+            navigateTo(`eventi-clinici?paziente=${patientId}`);
             break;
     }
 }

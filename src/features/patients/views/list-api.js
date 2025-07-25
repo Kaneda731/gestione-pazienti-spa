@@ -87,11 +87,56 @@ export async function fetchPazienti() {
         throw error;
     }
     
+    // Fetch clinical events for each patient
+    if (data && data.length > 0) {
+        logger.log('📊 Caricamento eventi clinici per i pazienti...');
+        
+        try {
+            const patientIds = data.map(p => p.id);
+            const { data: eventiData, error: eventiError } = await supabase
+                .from('eventi_clinici')
+                .select('*')
+                .in('paziente_id', patientIds)
+                .order('data_evento', { ascending: false });
+            
+            if (eventiError) {
+                logger.warn('⚠️ Errore nel caricamento eventi clinici:', eventiError);
+                // Continue without clinical events data
+            } else {
+                // Group events by patient ID
+                const eventiByPatient = {};
+                if (eventiData) {
+                    eventiData.forEach(evento => {
+                        if (!eventiByPatient[evento.paziente_id]) {
+                            eventiByPatient[evento.paziente_id] = [];
+                        }
+                        eventiByPatient[evento.paziente_id].push(evento);
+                    });
+                }
+                
+                // Add clinical events to each patient
+                data.forEach(patient => {
+                    patient.eventi_clinici = eventiByPatient[patient.id] || [];
+                });
+                
+                logger.log('✅ Eventi clinici caricati per', Object.keys(eventiByPatient).length, 'pazienti');
+            }
+        } catch (eventiError) {
+            logger.warn('⚠️ Errore nel caricamento eventi clinici:', eventiError);
+            // Continue without clinical events data
+            data.forEach(patient => {
+                patient.eventi_clinici = [];
+            });
+        }
+    }
+    
     // Debug: verifica se i dati hanno user_id (indicatore che sono reali)
     if (data && data.length > 0) {
         logger.log('🔍 Debug dati - Primo record:', {
             hasUserId: !!data[0].user_id,
             hasCreatedAt: !!data[0].created_at,
+            hasEventiClinici: !!data[0].eventi_clinici,
+            eventiCount: data[0].eventi_clinici?.length || 0,
             tableName: 'pazienti',
             sample: data[0]
         });

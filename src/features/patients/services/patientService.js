@@ -521,10 +521,78 @@ class PatientService {
       }
     }
 
+    // Validazione data infezione
+    if (data.data_infezione) {
+      const infezioneDate = new Date(data.data_infezione);
+      const ricoveroDate = new Date(data.data_ricovero);
+      const oggi = new Date();
+      
+      if (infezioneDate < ricoveroDate) {
+        throw new Error(
+          "La data di infezione non può essere precedente alla data di ricovero"
+        );
+      }
+      
+      if (infezioneDate > oggi) {
+        throw new Error("La data di infezione non può essere nel futuro");
+      }
+
+      // Se c'è una data dimissione, l'infezione deve essere precedente
+      if (data.data_dimissione) {
+        const dimissioneDate = new Date(data.data_dimissione);
+        if (infezioneDate > dimissioneDate) {
+          throw new Error(
+            "La data di infezione non può essere successiva alla data di dimissione"
+          );
+        }
+      }
+    }
+
     // Validazione codice RAD (opzionale ma con formato specifico)
     if (data.codice_rad && data.codice_rad.trim() !== "") {
       if (data.codice_rad.length > 11) {
         throw new Error("Il codice RAD non può superare i 11 caratteri");
+      }
+    }
+
+    // Validazione campi dimissione/trasferimento
+    if (data.tipo_dimissione) {
+      const tipiValidi = ["dimissione", "trasferimento_interno", "trasferimento_esterno"];
+      if (!tipiValidi.includes(data.tipo_dimissione)) {
+        throw new Error(`Tipo dimissione non valido. Valori ammessi: ${tipiValidi.join(", ")}`);
+      }
+
+      // Validazioni specifiche per tipo dimissione
+      if (data.tipo_dimissione === "trasferimento_interno") {
+        if (!data.reparto_destinazione || data.reparto_destinazione.trim() === "") {
+          throw new Error("Il reparto di destinazione è obbligatorio per i trasferimenti interni");
+        }
+      }
+
+      if (data.tipo_dimissione === "trasferimento_esterno") {
+        if (!data.clinica_destinazione || data.clinica_destinazione.trim() === "") {
+          throw new Error("La clinica di destinazione è obbligatoria per i trasferimenti esterni");
+        }
+        
+        if (!data.codice_clinica) {
+          throw new Error("Il codice clinica è obbligatorio per i trasferimenti esterni");
+        }
+
+        // Validazione codici clinica
+        const codiciValidi = ["56", "60"];
+        if (!codiciValidi.includes(data.codice_clinica)) {
+          throw new Error(`Codice clinica non valido. Valori ammessi: ${codiciValidi.join(", ")}`);
+        }
+      }
+
+      // Validazione codice dimissione (obbligatorio se c'è tipo dimissione)
+      if (!data.codice_dimissione) {
+        throw new Error("Il codice dimissione è obbligatorio quando si specifica il tipo dimissione");
+      }
+
+      const codiciDimissioneValidi = ["3", "6"];
+      if (!codiciDimissioneValidi.includes(data.codice_dimissione)) {
+        throw new Error(`Codice dimissione non valido. Valori ammessi: ${codiciDimissioneValidi.join(", ")}`);
       }
     }
   }

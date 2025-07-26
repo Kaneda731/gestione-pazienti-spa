@@ -178,8 +178,8 @@ function initializeFormComponents() {
     // Initialize custom selects
     initCustomSelects();
 
-    // Initialize date pickers
-    initCustomDatepickers();
+    // Initialize date pickers with correct selector
+    initCustomDatepickers('[data-datepicker]');
 
     logger.log('✅ Componenti form inizializzati');
   } catch (error) {
@@ -688,6 +688,7 @@ async function changePage(newPage) {
  */
 function openEventModal(eventData = null) {
   try {
+
     // Reset form
     resetEventForm();
     clearFormMessages();
@@ -702,6 +703,24 @@ function openEventModal(eventData = null) {
       currentState.editingEventId = null;
       updateModalTitle('Nuovo Evento Clinico', 'add');
     }
+
+    // Forza la reinizializzazione del datepicker per il modal
+    setTimeout(() => {
+      const eventDateInput = document.getElementById('evento-data');
+      if (eventDateInput && eventDateInput._flatpickrInstance) {
+        // L'istanza esiste già, assicuriamoci che sia funzionante
+        eventDateInput._flatpickrInstance.redraw();
+      } else {
+        // Inizializza ex-novo se non esiste
+        import('../../../shared/components/forms/CustomDatepicker.js').then(({ initCustomDatepickers }) => {
+          initCustomDatepickers('[data-datepicker]', {
+            maxDate: 'today',
+            allowInput: true,
+            locale: { firstDayOfWeek: 1 }
+          });
+        });
+      }
+    }, 100);
 
     if (eventFormModal) {
       eventFormModal.show();

@@ -1,5 +1,6 @@
 // src/features/patients/views/dimissione-ui.js
 import CustomDatepicker from '../../../shared/components/forms/CustomDatepicker.js';
+import { initCustomSelects } from '../../../shared/components/forms/CustomSelect.js';
 import { mostraMessaggio } from '../../../shared/utils/helpers.js';
 import { debounce } from '../../../shared/utils/dom.js';
 
@@ -42,6 +43,9 @@ export function initializeUI(searchCallback) {
         dateFormat: "d/m/Y",
     });
 
+    // Inizializza i custom select per tutte le select con data-custom="true"
+    initCustomSelects('.form-select[data-custom="true"]');
+
     debouncedSearch = debounce(searchCallback, 300);
 
     if (dom.searchInput) {
@@ -70,6 +74,14 @@ export function cleanupUI() {
         datepickerInstance.destroy();
         datepickerInstance = null;
     }
+    
+    // Distrugge tutti i custom select
+    const customSelects = document.querySelectorAll('.form-select[data-custom="true"]');
+    customSelects.forEach(select => {
+        if (select.customSelectInstance) {
+            select.customSelectInstance.destroy();
+        }
+    });
 }
 
 /**
@@ -147,6 +159,9 @@ export function resetView() {
     // Reset transfer fields
     if (dom.tipoDimissioneSelect) {
         dom.tipoDimissioneSelect.value = 'dimissione';
+        if (dom.tipoDimissioneSelect.customSelectInstance) {
+            dom.tipoDimissioneSelect.customSelectInstance.setValue('dimissione');
+        }
     }
     if (dom.repartoDestinazioneInput) {
         dom.repartoDestinazioneInput.value = '';
@@ -156,9 +171,15 @@ export function resetView() {
     }
     if (dom.codiceClinicaSelect) {
         dom.codiceClinicaSelect.value = '';
+        if (dom.codiceClinicaSelect.customSelectInstance) {
+            dom.codiceClinicaSelect.customSelectInstance.setValue('');
+        }
     }
     if (dom.codiceDimissioneSelect) {
         dom.codiceDimissioneSelect.value = '';
+        if (dom.codiceDimissioneSelect.customSelectInstance) {
+            dom.codiceDimissioneSelect.customSelectInstance.setValue('');
+        }
     }
     
     // Reset transfer field visibility

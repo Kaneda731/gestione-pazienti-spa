@@ -108,7 +108,7 @@ export function renderPazienti(data, count) {
 
 export function showLoading() {
     if (domElements.tableBody) {
-        domElements.tableBody.innerHTML = '<tr><td colspan="8" class="text-center"><div class="spinner-border"></div></td></tr>';
+        domElements.tableBody.innerHTML = '<tr><td colspan="10" class="text-center"><div class="spinner-border"></div></td></tr>';
     }
     const cardsContainer = document.getElementById('pazienti-cards-container');
     if (cardsContainer) {
@@ -119,7 +119,7 @@ export function showLoading() {
 export function showError(error) {
     console.error('Errore dettagliato durante il fetch dei pazienti:', error);
     if (domElements.tableBody) {
-        domElements.tableBody.innerHTML = `<tr><td colspan="8" class="text-center text-danger"><strong>Errore nel caricamento dei dati.</strong><br>Controlla la console per i dettagli.</td></tr>`;
+        domElements.tableBody.innerHTML = `<tr><td colspan="10" class="text-center text-danger"><strong>Errore nel caricamento dei dati.</strong><br>Controlla la console per i dettagli.</td></tr>`;
     }
     const cardsContainer = document.getElementById('pazienti-cards-container');
     if (cardsContainer) {

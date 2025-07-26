@@ -177,11 +177,45 @@ export class PatientCard {
     }
 
     /**
+     * Genera informazioni di trasferimento per la colonna dedicata
+     * @returns {string} HTML delle informazioni di trasferimento
+     */
+    getTransferInfo() {
+        if (!this.patient.data_dimissione || !this.patient.tipo_dimissione) {
+            return '-';
+        }
+
+        switch (this.patient.tipo_dimissione) {
+            case 'trasferimento_interno':
+                return this.patient.reparto_destinazione ? 
+                    `<small class="text-info"><strong>→ ${this.patient.reparto_destinazione}</strong></small>` : 
+                    '<small class="text-muted">Interno</small>';
+            
+            case 'trasferimento_esterno':
+                let externalInfo = '<small class="text-warning"><strong>Esterno</strong>';
+                if (this.patient.clinica_destinazione) {
+                    externalInfo += `<br>→ ${this.patient.clinica_destinazione}`;
+                }
+                if (this.patient.codice_clinica) {
+                    const clinicName = this.patient.codice_clinica === '56' ? 'Riab. Cardiologica' : 
+                                     this.patient.codice_clinica === '60' ? 'Riab. Generale' : 
+                                     `Cod. ${this.patient.codice_clinica}`;
+                    externalInfo += `<br>(${clinicName})`;
+                }
+                externalInfo += '</small>';
+                return externalInfo;
+            
+            case 'dimissione':
+            default:
+                return '<small class="text-muted">-</small>';
+        }
+    }
+
+    /**
      * Renderizza la riga della tabella per desktop
      * @returns {string} HTML della riga della tabella
      */
     renderTableRow() {
-        const isDimesso = this.patient.data_dimissione;
         const statusBadge = new StatusBadge(this.patient).render();
         
         // Verifica permessi utente
@@ -201,15 +235,20 @@ export class PatientCard {
             ? `<span class="badge bg-${postOpInfo.statusClass}" title="${postOpInfo.statusText}">${postOpInfo.badgeText}</span>`
             : '-';
 
+        // Get transfer info for transfer column
+        const transferInfo = this.getTransferInfo();
+
         return `
             <tr>
                 <td data-label="Cognome">${this.patient.cognome}</td>
                 <td data-label="Nome">${this.patient.nome}</td>
+                <td data-label="Data Nascita">${this.patient.data_nascita ? new Date(this.patient.data_nascita).toLocaleDateString() : '-'}</td>
                 <td data-label="Data Ricovero">${new Date(this.patient.data_ricovero).toLocaleDateString()}</td>
                 <td data-label="Diagnosi">${this.patient.diagnosi}</td>
                 <td data-label="Reparto">${this.patient.reparto_appartenenza}</td>
                 <td data-label="Post-Op">${postOpCell}</td>
                 <td data-label="Stato">${statusBadge}</td>
+                <td data-label="Trasferimento">${transferInfo}</td>
                 <td class="text-nowrap">
                     ${actionButtons}
                 </td>

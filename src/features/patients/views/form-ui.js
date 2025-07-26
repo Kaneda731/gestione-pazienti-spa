@@ -2,6 +2,7 @@
 import { initCustomSelects, updateCustomSelect } from '../../../shared/components/forms/CustomSelect.js';
 import CustomDatepicker from '../../../shared/components/forms/CustomDatepicker.js';
 import { mostraMessaggio } from '../../../shared/utils/helpers.js';
+import { initEventiCliniciTab, setCurrentPatient, cleanupEventiCliniciTab } from './eventi-clinici-tab.js';
 
 let datepickerInstance = null;
 
@@ -15,6 +16,129 @@ export function initializeFormComponents() {
         dateFormat: "d/m/Y",
         allowInput: true,
     });
+
+    // Aggiungi event listener per la gestione condizionale dei campi
+    setupConditionalFieldsLogic();
+    
+    // Inizializza il tab degli eventi clinici
+    initEventiCliniciTab();
+}
+
+/**
+ * Configura la logica per mostrare/nascondere campi condizionalmente.
+ */
+function setupConditionalFieldsLogic() {
+    const tipoDimissioneSelect = document.getElementById('tipo_dimissione');
+    if (tipoDimissioneSelect) {
+        tipoDimissioneSelect.addEventListener('change', (e) => {
+            handleTipoDimissioneChange(e.target.value);
+        });
+    }
+
+    const infettoCheckbox = document.getElementById('infetto');
+    if (infettoCheckbox) {
+        infettoCheckbox.addEventListener('change', (e) => {
+            handleInfettoChange(e.target.checked);
+        });
+    }
+
+    // Listener per aggiornare il titolo quando nome/cognome cambiano
+    const nomeInput = document.getElementById('nome');
+    const cognomeInput = document.getElementById('cognome');
+    
+    if (nomeInput && cognomeInput) {
+        [nomeInput, cognomeInput].forEach(input => {
+            input.addEventListener('input', updatePatientTitle);
+        });
+    }
+}
+
+/**
+ * Gestisce la visualizzazione condizionale dei campi basata sul tipo dimissione.
+ * @param {string} tipoDimissione - Il tipo di dimissione selezionato.
+ */
+export function handleTipoDimissioneChange(tipoDimissione) {
+    const repartoContainer = document.getElementById('reparto-destinazione-container');
+    const clinicaContainer = document.getElementById('clinica-destinazione-container');
+    const codiceClinicaContainer = document.getElementById('codice-clinica-container');
+
+    // Nascondi tutti i campi condizionali
+    repartoContainer.style.display = 'none';
+    clinicaContainer.style.display = 'none';
+    codiceClinicaContainer.style.display = 'none';
+
+    // Pulisci i valori dei campi nascosti
+    document.getElementById('reparto_destinazione').value = '';
+    document.getElementById('clinica_destinazione').value = '';
+    document.getElementById('codice_clinica').value = '';
+
+    // Mostra i campi appropriati basati sulla selezione
+    switch (tipoDimissione) {
+        case 'trasferimento_interno':
+            repartoContainer.style.display = 'block';
+            break;
+        case 'trasferimento_esterno':
+            clinicaContainer.style.display = 'block';
+            codiceClinicaContainer.style.display = 'block';
+            break;
+        case 'dimissione':
+            // Nessun campo aggiuntivo necessario per dimissione semplice
+            break;
+    }
+
+    // Aggiorna i custom select per i campi mostrati
+    updateCustomSelect('#form-inserimento [data-custom="true"]');
+}
+
+/**
+ * Gestisce la visualizzazione condizionale del campo data infezione.
+ * @param {boolean} isInfetto - Se il paziente è infetto.
+ */
+export function handleInfettoChange(isInfetto) {
+    const dataInfezioneContainer = document.getElementById('data-infezione-container');
+    const dataInfezioneInput = document.getElementById('data_infezione');
+
+    if (isInfetto) {
+        dataInfezioneContainer.style.display = 'block';
+        // Se non c'è già una data, suggerisci la data odierna
+        if (!dataInfezioneInput.value) {
+            const today = new Date();
+            const formattedDate = `${today.getDate().toString().padStart(2, '0')}/${(today.getMonth() + 1).toString().padStart(2, '0')}/${today.getFullYear()}`;
+            dataInfezioneInput.value = formattedDate;
+        }
+    } else {
+        dataInfezioneContainer.style.display = 'none';
+        dataInfezioneInput.value = '';
+    }
+}
+
+/**
+ * Aggiorna il titolo della pagina con il nome del paziente corrente.
+ */
+function updatePatientTitle() {
+    const titleElement = document.getElementById('inserimento-title');
+    if (!titleElement) return;
+
+    const nomeInput = document.getElementById('nome');
+    const cognomeInput = document.getElementById('cognome');
+    const pazienteIdInput = document.getElementById('paziente-id');
+    
+    // Verifica se siamo in modalità modifica (c'è un ID paziente)
+    const isEditMode = pazienteIdInput && pazienteIdInput.value;
+    
+    if (isEditMode) {
+        const nome = nomeInput ? nomeInput.value.trim() : '';
+        const cognome = cognomeInput ? cognomeInput.value.trim() : '';
+        const patientName = `${nome} ${cognome}`.trim();
+        
+        const titleHTML = patientName 
+            ? `<span class="material-icons me-2">edit</span><span class="patient-name">${patientName}</span>`
+            : '<span class="material-icons me-2">edit</span>Modifica Paziente';
+        titleElement.innerHTML = titleHTML;
+    } else {
+        // Modalità inserimento - titolo standard
+        titleElement.innerHTML = '<span class="material-icons me-2">person_add</span>Inserimento Nuovo Paziente';
+    }
 }
 
 /**
@@ -25,6 +149,9 @@ export function cleanupFormComponents() {
         datepickerInstance.destroy();
         datepickerInstance = null;
     }
+    
+    // Cleanup del tab eventi clinici
+    cleanupEventiCliniciTab();
 }
 
 /**
@@ -57,9 +184,28 @@ export function populateForm(patient) {
     document.getElementById('livello_assistenza').value = patient.livello_assistenza || '';
     document.getElementById('codice_rad').value = patient.codice_rad || '';
     document.getElementById('infetto').checked = patient.infetto || false;
+    document.getElementById('data_infezione').value = formatDateForDisplay(patient.data_infezione || '');
+
+    // Popola i nuovi campi per dimissione/trasferimento
+    document.getElementById('tipo_dimissione').value = patient.tipo_dimissione || '';
+    document.getElementById('reparto_destinazione').value = patient.reparto_destinazione || '';
+    document.getElementById('clinica_destinazione').value = patient.clinica_destinazione || '';
+    document.getElementById('codice_clinica').value = patient.codice_clinica || '';
+    document.getElementById('codice_dimissione').value = patient.codice_dimissione || '';
+
+    // Mostra/nascondi campi condizionali basati sul tipo dimissione e stato infetto
+    handleTipoDimissioneChange(patient.tipo_dimissione || '');
+    handleInfettoChange(patient.infetto || false);
+
+    // Imposta il paziente corrente per il tab eventi clinici
+    setCurrentPatient(patient.id);
 
     // Aggiorna il titolo e il pulsante per la modalità modifica
-    document.getElementById('inserimento-title').innerHTML = '<span class="material-icons me-2">edit</span>Modifica Paziente';
+    const patientName = `${patient.nome || ''} ${patient.cognome || ''}`.trim();
+    const titleHTML = patientName 
+        ? `<span class="material-icons me-2">edit</span><span class="patient-name">${patientName}</span>`
+        : '<span class="material-icons me-2">edit</span>Modifica Paziente';
+    document.getElementById('inserimento-title').innerHTML = titleHTML;
     document.getElementById('save-patient-btn').innerHTML = '<span class="material-icons me-1" style="vertical-align: middle;">save</span>Aggiorna Paziente';
     
     // Forza l'aggiornamento di tutti i custom select per mostrare i valori corretti
@@ -99,13 +245,35 @@ export function getFormData() {
     data.infetto = form.querySelector('#infetto').checked;
     
     // Converti le date dal formato dd/mm/yyyy a yyyy-mm-dd per Supabase
-    const dateFields = ['data_nascita', 'data_ricovero', 'data_dimissione'];
+    const dateFields = ['data_nascita', 'data_ricovero', 'data_dimissione', 'data_infezione'];
     dateFields.forEach(field => {
         if (data[field] && data[field].includes('/')) {
             const [day, month, year] = data[field].split('/');
             data[field] = `${year}-${month}-${day}`;
         }
     });
+
+    // Pulisci i campi vuoti per evitare di inviare stringhe vuote
+    Object.keys(data).forEach(key => {
+        if (data[key] === '' || data[key] === null || data[key] === undefined) {
+            data[key] = null;
+        }
+    });
+
+    // Gestisci i campi condizionali - se il tipo dimissione non li richiede, impostali a null
+    const tipoDimissione = data.tipo_dimissione;
+    if (tipoDimissione !== 'trasferimento_interno') {
+        data.reparto_destinazione = null;
+    }
+    if (tipoDimissione !== 'trasferimento_esterno') {
+        data.clinica_destinazione = null;
+        data.codice_clinica = null;
+    }
+
+    // Se il paziente non è infetto, rimuovi la data infezione
+    if (!data.infetto) {
+        data.data_infezione = null;
+    }
 
     return data;
 }

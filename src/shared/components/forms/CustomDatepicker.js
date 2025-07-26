@@ -44,7 +44,7 @@ class CustomDatepicker {
         const wrapper = icon.closest('.input-group-icon');
         if (!wrapper) return;
 
-        const input = wrapper.querySelector(this.selector);
+        const input = wrapper.querySelector('[data-datepicker]') || wrapper.querySelector('input[type="text"]');
         if (input && input._flatpickrInstance) {
             // Usa l'istanza salvata per aprire il calendario
             input._flatpickrInstance.toggle();

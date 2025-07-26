@@ -77,18 +77,18 @@ export async function dischargePatientWithTransfer(patientId, dischargeData) {
         .from('pazienti')
         .update(updateData)
         .eq('id', patientId)
-        .select()
-        .single();
+        .select();
 
     if (error) {
         console.error('Errore durante la dimissione:', error);
-        if (error.code === 'PGRST116') {
-            throw new Error('Paziente non trovato durante l\'aggiornamento.');
-        }
         throw new Error('Errore durante l\'aggiornamento del paziente.');
     }
     
-    return data;
+    if (!data || data.length === 0) {
+        throw new Error('Paziente non trovato durante l\'aggiornamento.');
+    }
+    
+    return data[0];
 }
 
 /**

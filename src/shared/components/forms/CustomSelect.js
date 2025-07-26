@@ -48,9 +48,9 @@ export class CustomSelect {
     updateOptions() {
         window.appLogger?.debug('Updating options for', { selectId: this.selectElement.id });
         this.populateOptions();
-        // Se c'era un valore selezionato, prova a riapplicarlo
+        // Se c'era un valore selezionato, prova a riapplicarlo SENZA scatenare eventi
         if (this.selectElement.value) {
-            this.setValue(this.selectElement.value);
+            this.setValue(this.selectElement.value, true); // silent = true
         } else {
             // Altrimenti, resetta al placeholder
             const label = this.wrapper.querySelector('.custom-select-label');
@@ -236,9 +236,24 @@ export class CustomSelect {
         if (!this.mobileModal) this.close();
     }
     
-    setValue(value) {
+    setValue(value, silent = false) {
         const option = this.selectElement.querySelector(`option[value="${value}"]`);
-        if (option) this.selectOption(value, option.textContent);
+        if (option) {
+            if (silent) {
+                // Aggiorna solo il valore senza scatenare eventi
+                const label = this.wrapper.querySelector('.custom-select-label');
+                if (label) {
+                    if (option.hasAttribute('data-icon')) {
+                        label.innerHTML = `${option.getAttribute('data-icon')} ${option.textContent}`;
+                    } else {
+                        label.textContent = option.textContent;
+                    }
+                }
+                this.selectElement.value = value;
+            } else {
+                this.selectOption(value, option.textContent);
+            }
+        }
     }
     
     open() {

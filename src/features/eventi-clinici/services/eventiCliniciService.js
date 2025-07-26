@@ -41,7 +41,8 @@ class EventiCliniciService {
             id,
             nome,
             cognome,
-            reparto_appartenenza
+            reparto_appartenenza,
+            codice_rad
           )
         `, { count: "exact" });
 
@@ -62,12 +63,28 @@ class EventiCliniciService {
         query = query.eq("pazienti.reparto_appartenenza", reparto);
       }
 
-      // Ricerca paziente per nome/cognome
-      if (paziente_search) {
-        const searchPattern = `%${paziente_search}%`;
-        query = query.or(
-          `pazienti.nome.ilike."${searchPattern}",pazienti.cognome.ilike."${searchPattern}"`
-        );
+      // Ricerca paziente per nome/cognome/codice_rad (join: serve query separata)
+      if (paziente_search && paziente_search.trim() !== "") {
+        const searchPattern = `%${paziente_search.trim()}%`;
+        // Use the same search logic as dimissione-api.js for consistency
+        const pazientiRes = await supabase
+          .from("pazienti")
+          .select("id")
+          .or(`nome.ilike.${searchPattern},cognome.ilike.${searchPattern},codice_rad.ilike.${searchPattern}`);
+        const pazientiIds = pazientiRes.data?.map(p => p.id) || [];
+        if (pazientiIds.length > 0) {
+          query = query.in("paziente_id", pazientiIds);
+        } else {
+          // Nessun paziente trovato: restituisci subito risultato vuoto
+          return {
+            eventi: [],
+            totalCount: 0,
+            currentPage: page,
+            totalPages: 0,
+            hasNextPage: false,
+            hasPrevPage: false,
+          };
+        }
       }
 
       // Paginazione e ordinamento
@@ -313,10 +330,13 @@ class EventiCliniciService {
     try {
       let query = supabase
         .from("pazienti")
-        .select("id, nome, cognome, data_ricovero, diagnosi, reparto_appartenenza")
-        .not("user_id", "is", null)
-        .or(`nome.ilike.%${searchTerm}%,cognome.ilike.%${searchTerm}%`)
-        .order("cognome");
+        .select("id, nome, cognome, data_ricovero, diagnosi, reparto_appartenenza, codice_rad")
+        .not("user_id", "is", null);
+
+      // Use the same search logic as dimissione-api.js
+      const searchPattern = `%${searchTerm.trim()}%`;
+      query = query.or(`cognome.ilike.${searchPattern},nome.ilike.${searchPattern},codice_rad.ilike.${searchPattern}`);
+      query = query.order("cognome");
 
       if (activeOnly) {
         query = query.is("data_dimissione", null);

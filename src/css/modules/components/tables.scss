@@ -25,6 +25,16 @@
     vertical-align: middle;
     font-size: 1rem;
     color: var(--text-primary);
+    white-space: nowrap; /* Previeni il wrapping del testo */
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Permetti il wrapping solo per le colonne che potrebbero avere testo lungo */
+.table tbody td:nth-child(5), /* Diagnosi */
+.table tbody td:nth-child(9), /* Trasferimento */
+.table tbody td:nth-child(10) /* Azioni */ {
+    white-space: normal;
 }
 
 .table-hover tbody tr:hover {
@@ -60,6 +70,33 @@
 .table-responsive {
     max-width: 100% !important;
     overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling su iOS */
+}
+
+/* Migliora la visualizzazione della tabella su schermi grandi */
+@media (min-width: 1200px) {
+    .table-responsive {
+        overflow-x: visible; /* Rimuovi scroll orizzontale su schermi grandi */
+    }
+    
+    .table {
+        width: 100%;
+        min-width: auto;
+    }
+}
+
+/* Ottimizzazione larghezza colonne per evitare scroll */
+@media (min-width: 1200px) {
+    .table th:nth-child(1), .table td:nth-child(1) { width: 12%; } /* Cognome */
+    .table th:nth-child(2), .table td:nth-child(2) { width: 12%; } /* Nome */
+    .table th:nth-child(3), .table td:nth-child(3) { width: 10%; } /* Data Nascita */
+    .table th:nth-child(4), .table td:nth-child(4) { width: 10%; } /* Data Ricovero */
+    .table th:nth-child(5), .table td:nth-child(5) { width: 15%; } /* Diagnosi */
+    .table th:nth-child(6), .table td:nth-child(6) { width: 12%; } /* Reparto */
+    .table th:nth-child(7), .table td:nth-child(7) { width: 8%; }  /* Post-Op */
+    .table th:nth-child(8), .table td:nth-child(8) { width: 8%; }  /* Stato */
+    .table th:nth-child(9), .table td:nth-child(9) { width: 10%; } /* Trasferimento */
+    .table th:nth-child(10), .table td:nth-child(10) { width: 13%; } /* Azioni */
 }
 
 @media (max-width: 991.98px) {

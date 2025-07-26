@@ -179,9 +179,18 @@ export async function exportPazientiToCSV() {
 }
 
 export async function updatePazienteStatus(pazienteId, isDimissione) {
-    const updateData = {
-        data_dimissione: isDimissione ? new Date().toISOString().split('T')[0] : null
-    };
+    const updateData = isDimissione 
+        ? { data_dimissione: new Date().toISOString().split('T')[0] }
+        : {
+            // Quando si riattiva un paziente, cancella tutti i dati di dimissione
+            data_dimissione: null,
+            tipo_dimissione: null,
+            reparto_destinazione: null,
+            clinica_destinazione: null,
+            codice_clinica: null,
+            codice_dimissione: null
+        };
+    
     try {
         const { data, error } = await supabase
             .from('pazienti')
@@ -196,6 +205,9 @@ export async function updatePazienteStatus(pazienteId, isDimissione) {
             logger.warn('Nessuna riga modificata per l-ID:', pazienteId);
             return;
         }
+        
+
+        
     } catch (error) {
         console.error('Errore durante l\'aggiornamento dello stato del paziente:', error);
         alert(`Errore: ${error.message}`);

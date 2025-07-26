@@ -378,7 +378,13 @@ class PatientService {
   async reactivatePatient(id) {
     try {
       await this.updatePatient(id, {
+        // Cancella tutti i dati di dimissione quando si riattiva un paziente
         data_dimissione: null,
+        tipo_dimissione: null,
+        reparto_destinazione: null,
+        clinica_destinazione: null,
+        codice_clinica: null,
+        codice_dimissione: null
       });
 
       notificationService.success("Paziente riattivato con successo!");

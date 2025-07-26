@@ -581,10 +581,47 @@ select.custom-select-original {
 
 .custom-select-dropdown {
   display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid var(--input-border);
+  border-top: none;
+  border-radius: 0 0 var(--border-radius-sm) var(--border-radius-sm);
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1050; /* Alto z-index per essere sopra altri elementi */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .custom-select-wrapper.open .custom-select-dropdown {
   display: block;
+}
+
+/* Assicura che i container dei campi condizionali non nascondano i dropdown */
+#reparto-destinazione-container .custom-select-wrapper.open,
+#clinica-destinazione-container .custom-select-wrapper.open,
+#codice-clinica-container .custom-select-wrapper.open {
+  z-index: 1051; /* Ancora più alto per i campi condizionali */
+}
+
+/* Stile per le opzioni del dropdown */
+.custom-select-option {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  
+  &:last-child {
+    border-bottom: none;
+  }
+  
+  &:hover,
+  &.focused {
+    background-color: rgba(37, 99, 235, 0.1);
+    color: var(--primary-color);
+  }
 }
 
 /* Stili per il datepicker (Tema Chiaro) */
@@ -692,18 +729,19 @@ select.custom-select-original {
 #clinica-destinazione-container,
 #codice-clinica-container {
     transition: all 0.3s ease-in-out;
-    overflow: hidden;
     
     &[style*="display: none"] {
         opacity: 0;
         max-height: 0;
         margin: 0;
         padding: 0;
+        overflow: hidden;
     }
     
     &[style*="display: block"] {
         opacity: 1;
-        max-height: 200px;
+        max-height: none; /* Rimuove la limitazione di altezza */
+        overflow: visible; /* Permette al dropdown di essere visibile */
     }
 }
 

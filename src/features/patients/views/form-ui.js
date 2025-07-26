@@ -86,8 +86,21 @@ export function handleTipoDimissioneChange(tipoDimissione) {
             break;
     }
 
-    // Aggiorna i custom select per i campi mostrati
-    updateCustomSelect('#form-inserimento [data-custom="true"]');
+    // Inizializza i custom select per i campi appena mostrati
+    // Usa setTimeout per assicurarsi che il DOM sia aggiornato dopo il cambio di display
+    setTimeout(() => {
+        if (tipoDimissione === 'trasferimento_interno') {
+            const repartoSelect = document.getElementById('reparto_destinazione');
+            if (repartoSelect && !repartoSelect.customSelectInstance) {
+                initCustomSelects('#reparto_destinazione');
+            }
+        } else if (tipoDimissione === 'trasferimento_esterno') {
+            const codiceClinicaSelect = document.getElementById('codice_clinica');
+            if (codiceClinicaSelect && !codiceClinicaSelect.customSelectInstance) {
+                initCustomSelects('#codice_clinica');
+            }
+        }
+    }, 50); // Piccolo delay per permettere al CSS di applicare le transizioni
 }
 
 /**

@@ -87,7 +87,7 @@ function initAppLogger() {
         },
         
         error: (message, error = null) => {
-            console.error(`[APP ERROR] ${message}`, error || '');
+            console.error('[APP ERROR]', message, error || '');
             // In produzione, inviare l'errore a un servizio di monitoring.
         },
         

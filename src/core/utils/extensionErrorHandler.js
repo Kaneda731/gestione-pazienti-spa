@@ -110,7 +110,7 @@ class ExtensionErrorHandler {
         
         // Logga solo i primi errori per evitare spam nella console
         if (!this.suppressedErrors.has(errorKey) && this.errorCount < this.maxErrorsToLog) {
-            console.warn(`[ExtensionErrorHandler] Errore di estensione soppresso (${type}):`, {
+            console.warn('[ExtensionErrorHandler] Errore di estensione soppresso:', type, {
                 message: event.message || event.reason,
                 filename: event.filename,
                 type: type

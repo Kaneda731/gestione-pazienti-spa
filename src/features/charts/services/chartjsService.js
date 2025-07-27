@@ -16,15 +16,31 @@ import { sanitizeHtml } from '../../../shared/utils/sanitizeHtml.js';
 
 // Define utility functions locally instead of importing from chartService.js
 function showLoadingInContainer(container) {
-  container.innerHTML = sanitizeHtml('<div class="d-flex justify-content-center align-items-center h-100"><div class="spinner-border text-primary"></div></div>');
+  let html = '<div class="d-flex justify-content-center align-items-center h-100"><div class="spinner-border text-primary"></div></div>';
+  container.innerHTML = sanitizeHtml(html);
 }
 
 function showErrorInContainer(container, message) {
-  container.innerHTML = sanitizeHtml(`<div class="alert alert-danger"><strong>Errore:</strong> ${message}</div>`);
+  const div = document.createElement('div');
+  div.className = 'alert alert-danger';
+  
+  const strong = document.createElement('strong');
+  strong.textContent = 'Errore:';
+  
+  div.appendChild(strong);
+  div.appendChild(document.createTextNode(' ' + message));
+  
+  container.innerHTML = '';
+  container.appendChild(div);
 }
 
 function showMessageInContainer(container, message, className = "text-muted") {
-  container.innerHTML = sanitizeHtml(`<p class="${className} text-center mt-5">${message}</p>`);
+  const p = document.createElement('p');
+  p.className = `${className} text-center mt-5`;
+  p.textContent = message;
+  
+  container.innerHTML = '';
+  container.appendChild(p);
 }
 
 import ChartTypeManager from "../components/ChartTypeManager.js";

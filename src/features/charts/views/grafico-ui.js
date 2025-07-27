@@ -1,4 +1,5 @@
 // src/features/charts/views/grafico-ui.js
+import { sanitizeHtml } from '../../../shared/utils/sanitizeHtml.js';
 import { populateSelectWithOptions } from '../../../shared/utils/index.js';
 import { initCustomSelects, updateCustomSelect } from '../../../shared/components/forms/CustomSelect.js';
 import CustomDatepicker from '../../../shared/components/forms/CustomDatepicker.js';
@@ -352,11 +353,11 @@ export function populateFilters(options) {
 
     // Popola il filtro Infetto (Sì/No/Tutti)
     if (dom.infettoFilter) {
-        dom.infettoFilter.innerHTML = `
+        dom.infettoFilter.innerHTML = sanitizeHtml(`
             <option value="">Tutti</option>
             <option value="true">Sì</option>
             <option value="false">No</option>
-        `;
+        `);
         updateCustomSelect('#filter-infetto');
     }
 }
@@ -598,17 +599,17 @@ export async function drawChartWithCurrentData(filters) {
 
 // Funzioni per mostrare stati nella UI
 export function showLoading() {
-    dom.chartContainer.innerHTML = '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>';
+    dom.chartContainer.innerHTML = sanitizeHtml('<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>');
 }
 
 export function showInitialMessage() {
-    dom.chartContainer.innerHTML = '<p class="text-muted">Seleziona i filtri e clicca "Applica" per visualizzare il grafico.</p>';
+    dom.chartContainer.innerHTML = sanitizeHtml('<p class="text-muted">Seleziona i filtri e clicca "Applica" per visualizzare il grafico.</p>');
 }
 
 export function showMessage(message) {
-    dom.chartContainer.innerHTML = `<p class="text-muted">${message}</p>`;
+    dom.chartContainer.innerHTML = sanitizeHtml(`<p class="text-muted">${message}</p>`);
 }
 
 export function showError(errorMessage) {
-    dom.chartContainer.innerHTML = `<div class="alert alert-danger">${errorMessage}</div>`;
+    dom.chartContainer.innerHTML = sanitizeHtml(`<div class="alert alert-danger">${errorMessage}</div>`);
 }

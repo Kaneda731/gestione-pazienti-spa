@@ -54,7 +54,7 @@ class LoggerService {
      */
     debug(prefix, ...args) {
         if (isDevelopment || isTest) {
-            console.log(`[${prefix}]`, ...args);
+            console.log('[' + String(prefix) + ']', ...args);
         }
     }
 

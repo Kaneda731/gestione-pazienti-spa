@@ -6,6 +6,7 @@
 
 import { CustomSelect, initCustomSelects } from '../../../shared/components/forms/CustomSelect.js';
 import { initCustomDatepickers } from '../../../shared/components/forms/CustomDatepicker.js';
+import { sanitizeHtml } from '../../../shared/utils/sanitizeHtml.js';
 
 export class EventiFormManager {
     constructor(formSelector, options = {}) {
@@ -285,7 +286,7 @@ export class EventiFormManager {
             </div>
         `).join('');
 
-        this.elements.patientSearchResults.innerHTML = resultsHTML;
+        this.elements.patientSearchResults.innerHTML = sanitizeHtml(resultsHTML);
         this.elements.patientSearchResults.style.display = 'block';
 
         // Bind click events to results
@@ -461,17 +462,17 @@ export class EventiFormManager {
     showMessage(message, type = 'info') {
         if (!this.elements.messaggioContainer) return;
 
-        this.elements.messaggioContainer.innerHTML = `
+        this.elements.messaggioContainer.innerHTML = sanitizeHtml(`
             <div class="alert alert-${type} alert-dismissible fade show" role="alert">
-                ${message}
+                ${sanitizeHtml(message)}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-        `;
+        `);
     }
 
     clearMessage() {
         if (this.elements.messaggioContainer) {
-            this.elements.messaggioContainer.innerHTML = '';
+            this.elements.messaggioContainer.innerHTML = sanitizeHtml('');
         }
     }
 

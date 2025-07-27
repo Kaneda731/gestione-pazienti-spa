@@ -107,7 +107,15 @@ export function isChartsReady() {
  * @param {HTMLElement} container - Elemento DOM dove mostrare il loading
  */
 export function showLoadingInContainer(container) {
-    container.innerHTML = sanitizeHtml('<div class="d-flex justify-content-center align-items-center h-100"><div class="spinner-border text-primary"></div></div>');
+    const loadingDiv = document.createElement('div');
+    loadingDiv.className = 'd-flex justify-content-center align-items-center h-100';
+    
+    const spinner = document.createElement('div');
+    spinner.className = 'spinner-border text-primary';
+    
+    loadingDiv.appendChild(spinner);
+    container.innerHTML = '';
+    container.appendChild(loadingDiv);
 }
 
 /**
@@ -116,7 +124,17 @@ export function showLoadingInContainer(container) {
  * @param {string} message - Messaggio di errore
  */
 export function showErrorInContainer(container, message) {
-    container.innerHTML = sanitizeHtml(`<div class="alert alert-danger"><strong>Errore:</strong> ${message}</div>`);
+    const div = document.createElement('div');
+    div.className = 'alert alert-danger';
+    
+    const strong = document.createElement('strong');
+    strong.textContent = 'Errore:';
+    
+    div.appendChild(strong);
+    div.appendChild(document.createTextNode(' ' + message));
+    
+    container.innerHTML = '';
+    container.appendChild(div);
 }
 
 /**
@@ -126,5 +144,10 @@ export function showErrorInContainer(container, message) {
  * @param {string} className - Classe CSS per il messaggio (default: text-muted)
  */
 export function showMessageInContainer(container, message, className = 'text-muted') {
-    container.innerHTML = sanitizeHtml(`<p class="${className} text-center mt-5">${message}</p>`);
+    const p = document.createElement('p');
+    p.className = `${className} text-center mt-5`;
+    p.textContent = message;
+    
+    container.innerHTML = '';
+    container.appendChild(p);
 }

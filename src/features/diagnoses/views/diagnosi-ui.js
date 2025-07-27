@@ -15,25 +15,48 @@ export const dom = {
  * @param {object} eventHandlers - Oggetto con le funzioni per gestire i click.
  */
 export function renderTable(diagnosi, eventHandlers) {
+
     dom.tableBody.innerHTML = '';
     if (diagnosi.length === 0) {
-        dom.tableBody.innerHTML = '<tr><td colspan="2" class="text-center">Nessuna diagnosi trovata.</td></tr>';
+        const row = dom.tableBody.insertRow();
+        const td = document.createElement('td');
+        td.colSpan = 2;
+        td.className = 'text-center';
+        td.textContent = 'Nessuna diagnosi trovata.';
+        row.appendChild(td);
         return;
     }
 
     diagnosi.forEach(d => {
         const row = dom.tableBody.insertRow();
-        row.innerHTML = `
-            <td data-label="Nome Diagnosi">${d.nome}</td>
-            <td data-label="Azioni" class="text-end">
-                <button class="btn btn-sm btn-warning edit-btn" data-id="${d.id}" data-name="${d.nome}" title="Modifica diagnosi">
-                    <span class="material-icons">edit</span>
-                </button>
-                <button class="btn btn-sm btn-danger delete-btn" data-id="${d.id}" title="Elimina diagnosi">
-                    <span class="material-icons">delete</span>
-                </button>
-            </td>
-        `;
+        // Crea le celle in modo sicuro
+        const tdNome = document.createElement('td');
+        tdNome.setAttribute('data-label', 'Nome Diagnosi');
+        tdNome.textContent = d.nome;
+        row.appendChild(tdNome);
+
+        const tdAzioni = document.createElement('td');
+        tdAzioni.setAttribute('data-label', 'Azioni');
+        tdAzioni.className = 'text-end';
+
+        // Bottone modifica
+        const btnEdit = document.createElement('button');
+        btnEdit.className = 'btn btn-sm btn-warning edit-btn';
+        btnEdit.setAttribute('data-id', d.id);
+        btnEdit.setAttribute('data-name', d.nome);
+        btnEdit.title = 'Modifica diagnosi';
+        btnEdit.innerHTML = '<span class="material-icons">edit</span>';
+        tdAzioni.appendChild(btnEdit);
+
+        // Bottone elimina
+        const btnDelete = document.createElement('button');
+        btnDelete.className = 'btn btn-sm btn-danger delete-btn';
+        btnDelete.setAttribute('data-id', d.id);
+        btnDelete.title = 'Elimina diagnosi';
+        btnDelete.innerHTML = '<span class="material-icons">delete</span>';
+        tdAzioni.appendChild(btnDelete);
+
+        row.appendChild(tdAzioni);
         // Usa event delegation nel controllore invece di aggiungere listener qui
     });
 }

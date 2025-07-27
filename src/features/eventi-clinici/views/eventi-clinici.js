@@ -61,6 +61,7 @@ import { logger } from '../../../core/services/loggerService.js';
 import { notificationService } from '../../../core/services/notificationService.js';
 import { initCustomSelects } from '../../../shared/components/forms/CustomSelect.js';
 import { initCustomDatepickers } from '../../../shared/components/forms/CustomDatepicker.js';
+import { sanitizeHtml } from '../../../shared/utils/sanitizeHtml.js';
 
 /**
  * Controller principale per la gestione degli eventi clinici
@@ -748,7 +749,7 @@ async function handleSaveEvent() {
     // Show loading state
     if (domElements.saveBtn) {
       domElements.saveBtn.disabled = true;
-      domElements.saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Salvando...';
+      domElements.saveBtn.innerHTML = sanitizeHtml('<span class="spinner-border spinner-border-sm me-1"></span>Salvando...');
     }
 
     let result;
@@ -777,7 +778,7 @@ async function handleSaveEvent() {
     // Reset button state
     if (domElements.saveBtn) {
       domElements.saveBtn.disabled = false;
-      domElements.saveBtn.innerHTML = '<span class="material-icons me-1" style="vertical-align: middle;">save</span>Salva Evento';
+      domElements.saveBtn.innerHTML = sanitizeHtml('<span class="material-icons me-1" style="vertical-align: middle;">save</span>Salva Evento');
     }
   }
 }

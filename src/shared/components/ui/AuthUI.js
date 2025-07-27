@@ -1,4 +1,5 @@
 // src/shared/components/ui/AuthUI.js
+import { sanitizeHtml } from '../../utils/sanitizeHtml.js';
 import { Modal } from '../../../core/services/bootstrapService.js';
 import { signInWithGoogle, signOut, currentUser } from '../../../core/auth/authService.js';
 import { syncMobileAuth } from '../../../app/mobile/mobile-navigation.js';
@@ -14,7 +15,7 @@ export function updateAuthUI(session) {
         const userRole = currentUser.profile?.role || 'caricamento...';
         const userEmail = session.user.email;
 
-        authContainer.innerHTML = `
+        authContainer.innerHTML = sanitizeHtml(`
             <div class="d-flex align-items-center text-light">
                 <span class="navbar-text me-3" title="${userEmail}">
                     <i class="material-icons me-1" style="font-size: 1.1em; vertical-align: text-bottom;">account_circle</i>
@@ -27,14 +28,14 @@ export function updateAuthUI(session) {
                     <i class="material-icons" style="font-size: 1em; vertical-align: middle;">logout</i>
                 </button>
             </div>
-        `;
+        `);
     } else {
-        authContainer.innerHTML = `
+        authContainer.innerHTML = sanitizeHtml(`
             <button id="login-modal-trigger" class="btn btn-outline-light">
                 <i class="material-icons me-1" style="font-size: 1em;">login</i>
                 Accedi
             </button>
-        `;
+        `);
     }
 
     // Forza la sincronizzazione della UI mobile ogni volta che quella desktop cambia
@@ -94,7 +95,7 @@ async function showLoginModal() {
         
         // Crea il modal
         const modalContainer = document.createElement('div');
-        modalContainer.innerHTML = authModalHtml;
+        modalContainer.innerHTML = sanitizeHtml(authModalHtml);
         document.body.appendChild(modalContainer.firstElementChild);
         modalElement = document.getElementById('auth-modal');
     }

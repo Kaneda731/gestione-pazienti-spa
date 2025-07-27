@@ -1,5 +1,7 @@
 // src/features/charts/components/ChartTypeManager.js
 
+import { sanitizeHtml } from '../../../shared/utils/sanitizeHtml.js';
+
 /**
  * Gestisce i diversi tipi di grafici disponibili
  */
@@ -259,11 +261,10 @@ class ChartTypeManager {
               word-wrap: break-word;
             `;
             
-            tooltip.innerHTML = `
-              <div style="font-weight: bold; margin-bottom: 4px;">${label}</div>
-              <div>${value} pazienti</div>
-              <div style="font-size: 12px; opacity: 0.9;">${percentage}% del totale</div>
-            `;
+            let html = '<div style="font-weight: bold; margin-bottom: 4px;">' + label + '</div>' +
+              '<div>' + value + ' pazienti</div>' +
+              '<div style="font-size: 12px; opacity: 0.9;">' + percentage + '% del totale</div>';
+            tooltip.innerHTML = sanitizeHtml(html);
             
             // Posiziona il tooltip vicino al mouse
             const rect = canvas.getBoundingClientRect();
@@ -306,25 +307,23 @@ class ChartTypeManager {
             if (!document.querySelector('.custom-pie-tooltip')) {
               const tooltip = document.createElement('div');
               tooltip.className = 'custom-pie-tooltip';
-              tooltip.style.cssText = `
-                position: fixed;
-                background: rgba(0, 0, 0, 0.9);
-                color: white;
-                padding: 12px 16px;
-                border-radius: 8px;
-                font-size: 14px;
-                pointer-events: none;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-                z-index: 9999;
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                line-height: 1.4;
-              `;
-              
-              tooltip.innerHTML = `
-                <div style="font-weight: bold; margin-bottom: 4px;">${label}</div>
-                <div>${value} pazienti</div>
-                <div style="font-size: 12px; opacity: 0.9;">${percentage}% del totale</div>
-              `;
+              tooltip.style.cssText =
+                'position: fixed;' +
+                'background: rgba(0, 0, 0, 0.9);' +
+                'color: white;' +
+                'padding: 12px 16px;' +
+                'border-radius: 8px;' +
+                'font-size: 14px;' +
+                'pointer-events: none;' +
+                'box-shadow: 0 4px 12px rgba(0,0,0,0.5);' +
+                'z-index: 9999;' +
+                'font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, sans-serif;' +
+                'line-height: 1.4;';
+
+              let html = '<div style="font-weight: bold; margin-bottom: 4px;">' + label + '</div>' +
+                '<div>' + value + ' pazienti</div>' +
+                '<div style="font-size: 12px; opacity: 0.9;">' + percentage + '% del totale</div>';
+                tooltip.innerHTML = sanitizeHtml(html);
               
               const x = event.native.clientX + 10;
               const y = event.native.clientY - 10;
@@ -464,13 +463,13 @@ class ChartTypeManager {
                 const value = context.parsed.y || context.parsed.x || 0;
                 const total = context.dataset.data.reduce((a, b) => a + b, 0);
                 const percentage = ((value / total) * 100).toFixed(1);
-                return `${label}: ${value} (${percentage}%)`;
+                return label + ': ' + value + ' (' + percentage + '%)';
               },
               afterLabel: (context) => {
                 // Aggiungi informazioni aggiuntive nel tooltip
                 const dataset = context.dataset;
                 const total = dataset.data.reduce((a, b) => a + b, 0);
-                return `Percentuale sul totale: ${((context.parsed.y / total) * 100).toFixed(1)}%`;
+                return 'Percentuale sul totale: ' + ((context.parsed.y / total) * 100).toFixed(1) + '%';
               }
             }
           },
@@ -747,8 +746,7 @@ class ChartTypeManager {
     r = Math.round((r + m) * 255).toString(16).padStart(2, '0');
     g = Math.round((g + m) * 255).toString(16).padStart(2, '0');
     b = Math.round((b + m) * 255).toString(16).padStart(2, '0');
-    
-    return `#${r}${g}${b}`;
+    return '#' + r + g + b;
   }
   
   /**

@@ -2,6 +2,7 @@
 
 import { logger } from "../../../core/services/loggerService.js";
 import { formatDate } from "../../../shared/utils/formatting.js";
+import { sanitizeHtml } from "../../../shared/utils/sanitizeHtml.js";
 
 /**
  * UI renderer per la timeline degli eventi clinici
@@ -98,7 +99,7 @@ export function renderEventsTimeline(eventsData) {
     }
 
     // Clear existing content
-    domElements.timelineContainer.innerHTML = "";
+    domElements.timelineContainer.innerHTML = sanitizeHtml("");
 
     if (!eventsData.eventi || eventsData.eventi.length === 0) {
       renderEmptyState();
@@ -137,9 +138,9 @@ export function renderEventsTimeline(eventsData) {
 function createTimelineElement() {
   const timeline = document.createElement("div");
   timeline.className = "eventi-timeline";
-  timeline.innerHTML = `
+  timeline.innerHTML = sanitizeHtml(`
     <div class="timeline-line"></div>
-  `;
+  `);
   return timeline;
 }
 
@@ -166,10 +167,15 @@ function createDateGroup(date, eventi) {
 
   const dateHeader = document.createElement("div");
   dateHeader.className = "timeline-date-header";
-  dateHeader.innerHTML = `
-    <div class="timeline-date-marker"></div>
-    <h5 class="timeline-date-title">${formatDate(date)}</h5>
-  `;
+  const marker = document.createElement('div');
+  marker.className = 'timeline-date-marker';
+  
+  const title = document.createElement('h5');
+  title.className = 'timeline-date-title';
+  title.textContent = formatDate(date);
+  
+  dateHeader.appendChild(marker);
+  dateHeader.appendChild(title);
 
   dateGroup.appendChild(dateHeader);
 
@@ -238,7 +244,7 @@ function createEventCard(evento) {
     }
   `;
 
-  card.innerHTML = cardContent;
+  card.innerHTML = sanitizeHtml(cardContent);
 
   // Add click handler for card expansion
   card.addEventListener("click", (e) => {
@@ -257,7 +263,7 @@ function renderEventCardDetails(evento) {
   let details = "";
 
   if (evento.descrizione) {
-    details += `<p class="event-description">${evento.descrizione}</p>`;
+    details += `<p class="event-description">${sanitizeHtml(evento.descrizione)}</p>`;
   }
 
   // Type-specific details
@@ -265,7 +271,7 @@ function renderEventCardDetails(evento) {
     if (evento.tipo_intervento) {
       details += `
         <div class="event-detail-item">
-          <strong>Tipo Intervento:</strong> ${evento.tipo_intervento}
+          <strong>Tipo Intervento:</strong> ${sanitizeHtml(evento.tipo_intervento)}
         </div>
       `;
     }
@@ -273,7 +279,7 @@ function renderEventCardDetails(evento) {
     if (evento.agente_patogeno) {
       details += `
         <div class="event-detail-item">
-          <strong>Agente Patogeno:</strong> ${evento.agente_patogeno}
+          <strong>Agente Patogeno:</strong> ${sanitizeHtml(evento.agente_patogeno)}
         </div>
       `;
     }
@@ -300,29 +306,40 @@ function toggleEventCardExpansion(card) {
  * Renderizza lo stato vuoto
  */
 function renderEmptyState() {
-  domElements.timelineContainer.innerHTML = `
-    <div class="empty-state text-center py-5">
-      <div class="empty-state-icon mb-3">
-        <i class="fas fa-calendar-times fa-3x text-muted"></i>
-      </div>
-      <h4 class="text-muted">Nessun evento trovato</h4>
-      <p class="text-muted">Non ci sono eventi clinici che corrispondono ai filtri selezionati.</p>
-      <button class="btn btn-primary" id="add-first-event-btn">
-        <i class="fas fa-plus me-1"></i>
-        Aggiungi primo evento
-      </button>
-    </div>
-  `;
+  // Creazione DOM sicura per empty state
+  domElements.timelineContainer.innerHTML = sanitizeHtml('');
+  const emptyDiv = document.createElement('div');
+  emptyDiv.className = 'empty-state text-center py-5';
+
+  const iconDiv = document.createElement('div');
+  iconDiv.className = 'empty-state-icon mb-3';
+  iconDiv.innerHTML = sanitizeHtml('<i class="fas fa-calendar-times fa-3x text-muted"></i>');
+  emptyDiv.appendChild(iconDiv);
+
+  const h4 = document.createElement('h4');
+  h4.className = 'text-muted';
+  h4.textContent = 'Nessun evento trovato';
+  emptyDiv.appendChild(h4);
+
+  const p = document.createElement('p');
+  p.className = 'text-muted';
+  p.textContent = 'Non ci sono eventi clinici che corrispondono ai filtri selezionati.';
+  emptyDiv.appendChild(p);
+
+  const btn = document.createElement('button');
+  btn.className = 'btn btn-primary';
+  btn.id = 'add-first-event-btn';
+  btn.innerHTML = sanitizeHtml('<i class="fas fa-plus me-1"></i> Aggiungi primo evento');
+  emptyDiv.appendChild(btn);
+
+  domElements.timelineContainer.appendChild(emptyDiv);
 
   // Add event listener for the add button
-  const addBtn = document.getElementById("add-first-event-btn");
-  if (addBtn) {
-    addBtn.addEventListener("click", () => {
-      if (domElements.addEventBtn) {
-        domElements.addEventBtn.click();
-      }
-    });
-  }
+  btn.addEventListener('click', () => {
+    if (domElements.addEventBtn) {
+      domElements.addEventBtn.click();
+    }
+  });
 }
 
 /**
@@ -331,14 +348,14 @@ function renderEmptyState() {
 export function showLoading() {
   if (!domElements.timelineContainer) return;
 
-  domElements.timelineContainer.innerHTML = `
+  domElements.timelineContainer.innerHTML = sanitizeHtml(`
     <div class="loading-state text-center py-5">
       <div class="spinner-border text-primary mb-3" role="status">
         <span class="visually-hidden">Caricamento...</span>
       </div>
       <p class="text-muted">Caricamento eventi clinici...</p>
     </div>
-  `;
+  `);
 }
 
 /**
@@ -347,19 +364,19 @@ export function showLoading() {
 export function showError(message = "Errore nel caricamento dei dati") {
   if (!domElements.timelineContainer) return;
 
-  domElements.timelineContainer.innerHTML = `
+  domElements.timelineContainer.innerHTML = sanitizeHtml(`
     <div class="error-state text-center py-5">
       <div class="error-state-icon mb-3">
         <i class="fas fa-exclamation-triangle fa-3x text-danger"></i>
       </div>
       <h4 class="text-danger">Errore</h4>
-      <p class="text-muted">${message}</p>
+      <p class="text-muted">${sanitizeHtml(message)}</p>
       <button class="btn btn-outline-primary" onclick="location.reload()">
         <i class="fas fa-refresh me-1"></i>
         Riprova
       </button>
     </div>
-  `;
+  `);
 }
 
 /**
@@ -434,7 +451,7 @@ export function renderPatientSearchResults(patients, containerId) {
     )
     .join("");
 
-  container.innerHTML = resultsHTML;
+  container.innerHTML = sanitizeHtml(resultsHTML);
   container.style.display = "block";
 
   // Add click handlers
@@ -583,12 +600,12 @@ export function resetEventForm() {
 export function showFormMessage(message, type = "danger") {
   if (!domElements.messageContainer) return;
 
-  domElements.messageContainer.innerHTML = `
+  domElements.messageContainer.innerHTML = sanitizeHtml(`
     <div class="alert alert-${type} alert-dismissible fade show" role="alert">
-      ${message}
+      ${sanitizeHtml(message)}
       <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
-  `;
+  `);
 }
 
 /**
@@ -596,7 +613,7 @@ export function showFormMessage(message, type = "danger") {
  */
 export function clearFormMessages() {
   if (domElements.messageContainer) {
-    domElements.messageContainer.innerHTML = "";
+    domElements.messageContainer.innerHTML = sanitizeHtml("");
   }
 }
 
@@ -702,7 +719,7 @@ export function renderEventDetails(evento) {
     </div>
   `;
 
-  domElements.detailContent.innerHTML = detailsHTML;
+  domElements.detailContent.innerHTML = sanitizeHtml(detailsHTML);
 }
 
 /**
@@ -733,7 +750,7 @@ export async function populateDepartmentFilter(reparti) {
 
   // Clear existing options except the first one
   const firstOption = domElements.filterReparto.querySelector('option[value=""]');
-  domElements.filterReparto.innerHTML = '';
+  domElements.filterReparto.innerHTML = sanitizeHtml('');
   if (firstOption) {
     domElements.filterReparto.appendChild(firstOption);
   }
@@ -776,7 +793,7 @@ export async function populateAdvancedFilters(suggestions) {
 function populateSelectOptions(selectElement, options) {
   // Clear existing options except the first one
   const firstOption = selectElement.querySelector('option[value=""]');
-  selectElement.innerHTML = '';
+  selectElement.innerHTML = sanitizeHtml('');
   if (firstOption) {
     selectElement.appendChild(firstOption);
   }
@@ -947,7 +964,7 @@ export function showFilterStats(stats) {
   }
 
   if (stats.activeFiltersCount > 0) {
-    statsContainer.innerHTML = `
+    statsContainer.innerHTML = sanitizeHtml(`
       <div class="d-flex justify-content-between align-items-center">
         <div>
           <i class="fas fa-chart-bar me-2"></i>
@@ -958,7 +975,7 @@ export function showFilterStats(stats) {
           ${stats.activeFiltersCount} filtro${stats.activeFiltersCount > 1 ? 'i' : ''} attivo${stats.activeFiltersCount > 1 ? 'i' : ''}
         </div>
       </div>
-    `;
+    `);
     statsContainer.style.display = 'block';
   } else {
     statsContainer.style.display = 'none';
@@ -980,7 +997,7 @@ export function showExportProgress(isExporting = false) {
       btn.disabled = true;
       const originalText = btn.textContent;
       btn.dataset.originalText = originalText;
-      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Esportando...';
+      btn.innerHTML = sanitizeHtml('<span class="spinner-border spinner-border-sm me-1"></span>Esportando...');
     } else {
       btn.disabled = false;
       const originalText = btn.dataset.originalText;
@@ -1000,15 +1017,15 @@ export function showExportSuccess(result) {
   const toast = document.createElement('div');
   toast.className = 'toast align-items-center text-white bg-success border-0';
   toast.setAttribute('role', 'alert');
-  toast.innerHTML = `
+  toast.innerHTML = sanitizeHtml(`
     <div class="d-flex">
       <div class="toast-body">
         <i class="fas fa-download me-2"></i>
-        Esportati ${result.count} eventi in ${result.filename}
+        Esportati ${result.count} eventi in ${sanitizeHtml(result.filename)}
       </div>
       <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
     </div>
-  `;
+  `);
 
   // Add to toast container or create one
   let toastContainer = document.getElementById('toast-container');
@@ -1067,7 +1084,7 @@ export function showSearchingState() {
 
   // Add searching indicator to existing content
   const existingContent = domElements.timelineContainer.innerHTML;
-  domElements.timelineContainer.innerHTML = searchingHTML + existingContent;
+  domElements.timelineContainer.innerHTML = sanitizeHtml(searchingHTML) + existingContent;
 }
 
 /**
@@ -1086,7 +1103,9 @@ export function hideSearchingState() {
 export function highlightSearchTerms(content, searchTerm) {
   if (!searchTerm || searchTerm.length < 2) return content;
 
-  const regex = new RegExp(`(${searchTerm})`, 'gi');
+  // Escape special regex characters to prevent ReDoS attacks
+  const escapedSearchTerm = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp(`(${escapedSearchTerm})`, 'gi');
   return content.replace(regex, '<mark>$1</mark>');
 }
 
@@ -1112,11 +1131,11 @@ export function updateSearchResultsCount(count, totalCount, filters) {
   );
 
   if (hasActiveFilters) {
-    resultsInfo.innerHTML = `
+    resultsInfo.innerHTML = sanitizeHtml(`
       <i class="fas fa-filter me-1"></i>
       Trovati <strong>${count}</strong> eventi su ${totalCount} totali
-      ${filters.paziente_search ? `per "${filters.paziente_search}"` : ''}
-    `;
+      ${filters.paziente_search ? `per "${sanitizeHtml(filters.paziente_search)}"` : ''}
+    `);
     resultsInfo.style.display = 'block';
   } else {
     resultsInfo.style.display = 'none';

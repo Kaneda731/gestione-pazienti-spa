@@ -84,7 +84,7 @@ class UIStateService {
     createLoadingElement(message) {
         const div = document.createElement('div');
         div.className = 'ui-state loading-state';
-        div.innerHTML = `
+        div.innerHTML = sanitizeHtml(`
             <div class="loading-content">
                 <div class="spinner">
                     <div class="spinner-border text-primary" role="status">
@@ -156,7 +156,7 @@ class UIStateService {
                     margin-top: 0.5rem;
                 }
             </style>
-        `;
+        `);
         return div;
     }
 
@@ -166,12 +166,12 @@ class UIStateService {
     createEmptyElement(message, icon) {
         const div = document.createElement('div');
         div.className = 'ui-state empty-state';
-        div.innerHTML = `
+        div.innerHTML = sanitizeHtml(`
             <div class="empty-content">
                 <span class="material-icons empty-icon">${icon}</span>
                 <div class="empty-message">${message}</div>
             </div>
-        `;
+        `);
         return div;
     }
 
@@ -189,13 +189,13 @@ class UIStateService {
             </button>
         ` : '';
 
-        div.innerHTML = `
+        div.innerHTML = sanitizeHtml(`
             <div class="error-content">
                 <span class="material-icons error-icon">error_outline</span>
                 <div class="error-message">${message}</div>
                 ${retryButton}
             </div>
-        `;
+        `);
 
         // Aggiungi event listener per retry se necessario
         if (canRetry && retryCallback) {

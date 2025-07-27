@@ -4,6 +4,7 @@ import { postOperativeCalculator } from '../../eventi-clinici/utils/post-operati
 import { initCustomSelects, updateCustomSelect } from '../../../shared/components/forms/CustomSelect.js';
 import CustomDatepicker from '../../../shared/components/forms/CustomDatepicker.js';
 import { mostraMessaggio } from '../../../shared/utils/helpers.js';
+import { sanitizeHtml } from '../../../shared/utils/domSecurity.js';
 
 let eventiDatepicker = null;
 let currentPatientId = null;
@@ -337,7 +338,7 @@ function renderEventiList(eventi) {
         `;
     }).join('');
 
-    eventiList.innerHTML = eventiHTML;
+    eventiList.innerHTML = sanitizeHtml(eventiHTML);
 
     // Aggiungi event listeners per modifica ed eliminazione
     eventiList.querySelectorAll('.edit-evento').forEach(btn => {

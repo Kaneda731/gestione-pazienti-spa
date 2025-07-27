@@ -165,13 +165,13 @@ class NotificationService {
             info: 'info'
         };
 
-        div.innerHTML = `
+        div.innerHTML = sanitizeHtml(`
             <div class="notification-content">
                 <span class="material-icons notification-icon">${iconMap[notification.type] || 'info'}</span>
-                <div class="notification-message">${sanitizeHtml(notification.message)}</div>
+                <div class="notification-message">${notification.message}</div>
             </div>
             <button class="notification-close">&times;</button>
-        `;
+        `);
 
         // Event listeners
         div.addEventListener('click', () => {

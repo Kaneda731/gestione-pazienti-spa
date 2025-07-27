@@ -3,6 +3,8 @@
  * v2.2.0 - Aggiunto metodo updateOptions
  */
 
+import { sanitizeHtml } from '../../utils/sanitizeHtml.js';
+
 export class CustomSelect {
     constructor(selectElement, options = {}) {
         // ... (costruttore invariato)
@@ -72,7 +74,7 @@ export class CustomSelect {
         if (originalName) {
             wrapper.setAttribute('data-name', originalName);
         }
-        wrapper.innerHTML = `
+        wrapper.innerHTML = sanitizeHtml(`
             <div class="custom-select-trigger">
                 <span class="custom-select-label">${this.options.placeholder}</span>
                 <span class="custom-select-arrow">
@@ -84,7 +86,7 @@ export class CustomSelect {
             <div class="custom-select-dropdown">
                 <div class="custom-select-options"></div>
             </div>
-        `;
+        `);
         return wrapper;
     }
     
@@ -103,7 +105,20 @@ export class CustomSelect {
             optionElement.dataset.value = option.value;
             // Supporta icone tramite data-icon attribute
             if (option.hasAttribute('data-icon')) {
-                optionElement.innerHTML = `${option.getAttribute('data-icon')} ${option.textContent}`;
+                // Crea elementi DOM sicuri invece di usare innerHTML
+                let iconHtml = option.getAttribute('data-icon');
+                
+                // Crea un container temporaneo per parsare l'HTML sanitizzato
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = sanitizeHtml(iconHtml);
+                
+                // Aggiungi tutti i nodi icona
+                while (tempDiv.firstChild) {
+                    optionElement.appendChild(tempDiv.firstChild);
+                }
+                
+                // Aggiungi il testo in modo sicuro
+                optionElement.appendChild(document.createTextNode(' ' + option.textContent));
             } else {
                 optionElement.textContent = option.textContent;
             }
@@ -222,7 +237,22 @@ export class CustomSelect {
             // Supporta icone tramite data-icon attribute
             const option = this.selectElement.querySelector(`option[value="${value}"]`);
             if (option && option.hasAttribute('data-icon')) {
-                label.innerHTML = `${option.getAttribute('data-icon')} ${text}`;
+                // Crea elementi DOM sicuri invece di usare innerHTML
+                let iconHtml = option.getAttribute('data-icon');
+                
+                label.innerHTML = '';
+                
+                // Crea un container temporaneo per parsare l'HTML sanitizzato
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = sanitizeHtml(iconHtml);
+                
+                // Aggiungi tutti i nodi icona
+                while (tempDiv.firstChild) {
+                    label.appendChild(tempDiv.firstChild);
+                }
+                
+                // Aggiungi il testo in modo sicuro
+                label.appendChild(document.createTextNode(' ' + text));
             } else {
                 label.textContent = text;
             }
@@ -244,7 +274,7 @@ export class CustomSelect {
                 const label = this.wrapper.querySelector('.custom-select-label');
                 if (label) {
                     if (option.hasAttribute('data-icon')) {
-                        label.innerHTML = `${option.getAttribute('data-icon')} ${option.textContent}`;
+                        label.innerHTML = sanitizeHtml(`${option.getAttribute('data-icon')} ${option.textContent}`);
                     } else {
                         label.textContent = option.textContent;
                     }

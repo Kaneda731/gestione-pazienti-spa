@@ -1,5 +1,6 @@
 // src/shared/utils/helpers.js
 import { supabase } from '../../core/services/supabaseClient.js';
+import { sanitizeHtml } from './sanitizeHtml.js';
 
 /**
  * Converte un array di oggetti in una stringa CSV.
@@ -50,7 +51,7 @@ export async function getFilterOptions(filterName) {
         .order(filterName, { ascending: true });
 
     if (error) {
-        console.error(`Errore nel recupero delle opzioni per ${filterName}:`, error);
+        console.error('Errore nel recupero delle opzioni per:', filterName, error);
         return [];
     }
     // Filtra i duplicati usando Set
@@ -68,7 +69,7 @@ export function populateSelectWithOptions(selectElement, options, defaultOptionT
     if (!selectElement) return;
 
     const currentValue = selectElement.value;
-    selectElement.innerHTML = `<option value="">${defaultOptionText}</option>`;
+    selectElement.innerHTML = sanitizeHtml(`<option value="">${defaultOptionText}</option>`);
     
     options.forEach(value => {
         const option = document.createElement('option');
@@ -99,10 +100,10 @@ export function mostraMessaggio(message, type = 'info', containerId = 'messaggio
         info: 'info'
     }[type];
 
-    container.innerHTML = `
+    container.innerHTML = sanitizeHtml(`
         <div class="alert alert-${alertType} d-flex align-items-center" role="alert">
             <span class="material-icons me-2">${icon}</span>
             <div>${message}</div>
         </div>
-    `;
+    `);
 }

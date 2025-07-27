@@ -4,6 +4,7 @@ import { state, domElements } from './list-state-migrated.js';
 import { convertToCSV } from '../../../shared/utils/index.js';
 import { patientService } from '../services/patientService.js';
 import { logger } from '../../../core/services/loggerService.js';
+import { sanitizeHtml } from '../../../shared/utils/domSecurity.js';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -149,7 +150,7 @@ export async function fetchPazienti() {
 export async function exportPazientiToCSV() {
     const originalBtnContent = domElements.exportButton.innerHTML;
     domElements.exportButton.disabled = true;
-    domElements.exportButton.innerHTML = `<span class="spinner-border spinner-border-sm"></span> Esportazione...`;
+    domElements.exportButton.innerHTML = sanitizeHtml(`<span class="spinner-border spinner-border-sm"></span> Esportazione...`);
 
     try {
         let query = buildBaseQuery().order(state.sortColumn, { ascending: state.sortDirection === 'asc' });
@@ -174,7 +175,7 @@ export async function exportPazientiToCSV() {
         alert(`Errore durante l\'esportazione: ${error.message}`);
     } finally {
         domElements.exportButton.disabled = false;
-        domElements.exportButton.innerHTML = originalBtnContent;
+        domElements.exportButton.innerHTML = sanitizeHtml(originalBtnContent);
     }
 }
 

@@ -1,5 +1,7 @@
 // src/shared/utils/dom.js
 
+import { sanitizeHtml } from './sanitizeHtml.js';
+
 /**
  * Utilities per manipolazione DOM
  */
@@ -40,14 +42,14 @@ export function createElement(tag, attributes = {}, content = '') {
         } else if (key === 'textContent') {
             element.textContent = value;
         } else if (key === 'innerHTML') {
-            element.innerHTML = value;
+            element.innerHTML = sanitizeHtml(value);
         } else {
             element.setAttribute(key, value);
         }
     });
     
     if (content) {
-        element.innerHTML = content;
+        element.innerHTML = sanitizeHtml(content);
     }
     
     return element;

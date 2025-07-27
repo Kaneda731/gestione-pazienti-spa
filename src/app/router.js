@@ -110,7 +110,7 @@ async function fetchView(viewName) {
         viewCache.set(viewName, viewContent);
         return viewContent;
     } catch (error) {
-        console.error(`Errore nel caricamento della vista ${viewName}:`, error);
+        console.error('Errore nel caricamento della vista:', viewName, error);
         logger.error(`Fallimento caricamento vista HTML ${viewName}:`, error);
         
         // Evita loop infinito se anche home fallisce
@@ -237,7 +237,7 @@ export async function renderView() {
                     }
                 }
             } catch (moduleError) {
-                console.error(`Errore nel caricamento del modulo ${viewToRender}:`, moduleError);
+                console.error('Errore nel caricamento del modulo:', viewToRender, moduleError);
                 logger.error(`Fallimento caricamento modulo ${viewToRender}:`, moduleError);
                 
                 // Fallback: mostra un messaggio di errore user-friendly

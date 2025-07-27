@@ -1,3 +1,5 @@
+import { sanitizeHtml } from '../../../shared/utils/sanitizeHtml.js';
+
 /**
  * Gestione dei modal per i grafici
  */
@@ -43,7 +45,7 @@ class ChartModals {
     const modal = document.createElement('div');
     modal.id = 'mobile-chart-detail-modal';
     modal.className = 'chart-modal';
-    modal.innerHTML = this._getMobileModalTemplate(data, percentage);
+    modal.innerHTML = sanitizeHtml(this._getMobileModalTemplate(data, percentage));
     
     // Aggiungi il modal al DOM
     document.body.appendChild(modal);
@@ -99,7 +101,7 @@ class ChartModals {
     const panel = document.createElement('div');
     panel.id = 'desktop-chart-detail-panel';
     panel.className = 'desktop-chart-panel';
-    panel.innerHTML = this._getDesktopPanelTemplate(data);
+    panel.innerHTML = sanitizeHtml(this._getDesktopPanelTemplate(data));
     
     // Aggiungi il pannello al container del grafico
     if (data.chart && data.chart.canvas && data.chart.canvas.parentNode) {

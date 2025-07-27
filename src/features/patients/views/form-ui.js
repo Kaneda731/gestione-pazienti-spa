@@ -3,6 +3,7 @@ import { initCustomSelects, updateCustomSelect } from '../../../shared/component
 import CustomDatepicker from '../../../shared/components/forms/CustomDatepicker.js';
 import { mostraMessaggio } from '../../../shared/utils/helpers.js';
 import { initEventiCliniciTab, setCurrentPatient, cleanupEventiCliniciTab } from './eventi-clinici-tab.js';
+import { sanitizeHtml } from '../../../shared/utils/domSecurity.js';
 
 let datepickerInstance = null;
 
@@ -147,10 +148,10 @@ function updatePatientTitle() {
         const titleHTML = patientName 
             ? `<span class="material-icons me-2">edit</span><span class="patient-name">${patientName}</span>`
             : '<span class="material-icons me-2">edit</span>Modifica Paziente';
-        titleElement.innerHTML = titleHTML;
+        titleElement.innerHTML = sanitizeHtml(titleHTML);
     } else {
         // Modalità inserimento - titolo standard
-        titleElement.innerHTML = '<span class="material-icons me-2">person_add</span>Inserimento Nuovo Paziente';
+        titleElement.innerHTML = sanitizeHtml('<span class="material-icons me-2">person_add</span>Inserimento Nuovo Paziente');
     }
 }
 
@@ -218,8 +219,8 @@ export function populateForm(patient) {
     const titleHTML = patientName 
         ? `<span class="material-icons me-2">edit</span><span class="patient-name">${patientName}</span>`
         : '<span class="material-icons me-2">edit</span>Modifica Paziente';
-    document.getElementById('inserimento-title').innerHTML = titleHTML;
-    document.getElementById('save-patient-btn').innerHTML = '<span class="material-icons me-1" style="vertical-align: middle;">save</span>Aggiorna Paziente';
+    document.getElementById('inserimento-title').innerHTML = sanitizeHtml(titleHTML);
+    document.getElementById('save-patient-btn').innerHTML = sanitizeHtml('<span class="material-icons me-1" style="vertical-align: middle;">save</span>Aggiorna Paziente');
     
     // Forza l'aggiornamento di tutti i custom select per mostrare i valori corretti
     updateCustomSelect('#form-inserimento [data-custom="true"]');
@@ -233,7 +234,7 @@ export function renderDiagnosiOptions(options) {
     const diagnosiSelect = document.getElementById('diagnosi');
     if (!diagnosiSelect) return;
 
-    diagnosiSelect.innerHTML = '<option value="">Seleziona diagnosi...</option>';
+    diagnosiSelect.innerHTML = sanitizeHtml('<option value="">Seleziona diagnosi...</option>');
     options.forEach(diagnosi => {
         const option = document.createElement('option');
         option.value = diagnosi.nome;

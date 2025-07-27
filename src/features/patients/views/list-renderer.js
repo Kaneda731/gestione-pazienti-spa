@@ -2,6 +2,7 @@
 import { domElements, state } from './list-state-migrated.js';
 import { currentUser } from '../../../core/auth/authService.js';
 import { PatientCard } from '../../../shared/components/ui/PatientCard.js';
+import { sanitizeHtml } from '../../../shared/utils/domSecurity.js';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -108,22 +109,22 @@ export function renderPazienti(data, count) {
 
 export function showLoading() {
     if (domElements.tableBody) {
-        domElements.tableBody.innerHTML = '<tr><td colspan="10" class="text-center"><div class="spinner-border"></div></td></tr>';
+        domElements.tableBody.innerHTML = sanitizeHtml('<tr><td colspan="10" class="text-center"><div class="spinner-border"></div></td></tr>');
     }
     const cardsContainer = document.getElementById('pazienti-cards-container');
     if (cardsContainer) {
-        cardsContainer.innerHTML = '<div class="text-center p-4"><div class="spinner-border"></div></div>';
+        cardsContainer.innerHTML = sanitizeHtml('<div class="text-center p-4"><div class="spinner-border"></div></div>');
     }
 }
 
 export function showError(error) {
     console.error('Errore dettagliato durante il fetch dei pazienti:', error);
     if (domElements.tableBody) {
-        domElements.tableBody.innerHTML = `<tr><td colspan="10" class="text-center text-danger"><strong>Errore nel caricamento dei dati.</strong><br>Controlla la console per i dettagli.</td></tr>`;
+        domElements.tableBody.innerHTML = sanitizeHtml(`<tr><td colspan="10" class="text-center text-danger"><strong>Errore nel caricamento dei dati.</strong><br>Controlla la console per i dettagli.</td></tr>`);
     }
     const cardsContainer = document.getElementById('pazienti-cards-container');
     if (cardsContainer) {
-        cardsContainer.innerHTML = '<div class="text-center text-danger p-4"><strong>Errore nel caricamento dei dati.</strong></div>';
+        cardsContainer.innerHTML = sanitizeHtml('<div class="text-center text-danger p-4"><strong>Errore nel caricamento dei dati.</strong></div>');
     }
 }
 
@@ -149,7 +150,13 @@ function renderTable(pazientiToRender) {
 
     tableBody.innerHTML = '';
     if (pazientiToRender.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="10" class="text-center text-muted">Nessun paziente trovato.</td></tr>';
+        tableBody.innerHTML = '';
+        const row = tableBody.insertRow();
+        const td = document.createElement('td');
+        td.colSpan = 10;
+        td.className = 'text-center text-muted';
+        td.textContent = 'Nessun paziente trovato.';
+        row.appendChild(td);
         return;
     }
     
@@ -161,7 +168,7 @@ function renderTable(pazientiToRender) {
         return patientCard.renderTableRow();
     }).join('');
     
-    tableBody.innerHTML = rowsHtml;
+    tableBody.innerHTML = sanitizeHtml(rowsHtml);
 }
 
 function renderCards(pazientiToRender) {
@@ -169,7 +176,11 @@ function renderCards(pazientiToRender) {
     if (!cardsContainer) return;
 
     if (pazientiToRender.length === 0) {
-        cardsContainer.innerHTML = '<div class="text-center text-muted p-4">Nessun paziente trovato.</div>';
+        cardsContainer.innerHTML = '';
+        const div = document.createElement('div');
+        div.className = 'text-center text-muted p-4';
+        div.textContent = 'Nessun paziente trovato.';
+        cardsContainer.appendChild(div);
         return;
     }
 
@@ -183,7 +194,7 @@ function renderCards(pazientiToRender) {
         return patientCard.render();
     }).join('');
     
-    cardsContainer.innerHTML = cardsHtml;
+    cardsContainer.innerHTML = sanitizeHtml(cardsHtml);
 }
 
 function updatePaginationControls(totalItems) {

@@ -259,11 +259,11 @@ export function getFormData() {
     data.infetto = form.querySelector('#infetto').checked;
     
     // Converti le date dal formato dd/mm/yyyy a yyyy-mm-dd per Supabase
-    const dateFields = ['data_nascita', 'data_ricovero', 'data_dimissione', 'data_infezione'];
+    const dateFields = ['data_nascita', 'data_ricovero', 'data_dimissione', 'data_infezione', 'data_evento'];
     dateFields.forEach(field => {
         if (data[field] && data[field].includes('/')) {
             const [day, month, year] = data[field].split('/');
-            data[field] = `${year}-${month}-${day}`;
+            data[field] = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
         }
     });
 

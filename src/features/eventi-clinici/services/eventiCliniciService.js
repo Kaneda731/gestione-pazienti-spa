@@ -373,9 +373,24 @@ class EventiCliniciService {
 
     // Validazione data evento
     if (data.data_evento) {
-      const dataEvento = new Date(data.data_evento);
+      // Verifica che la data sia nel formato corretto (YYYY-MM-DD)
+      const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+      if (!dateRegex.test(data.data_evento)) {
+        throw new Error("Formato data non valido. La data deve essere nel formato YYYY-MM-DD, ricevuto: " + data.data_evento);
+      }
+      
+      const dataEvento = new Date(data.data_evento + 'T00:00:00');
       const oggi = new Date();
-      if (dataEvento > oggi) {
+      
+      if (isNaN(dataEvento.getTime())) {
+        throw new Error("Data non valida: " + data.data_evento);
+      }
+      
+      // Confronta solo le date, ignorando l'orario
+      const oggiDate = new Date(oggi.getFullYear(), oggi.getMonth(), oggi.getDate());
+      const eventoDate = new Date(dataEvento.getFullYear(), dataEvento.getMonth(), dataEvento.getDate());
+      
+      if (eventoDate > oggiDate) {
         throw new Error("La data dell'evento non può essere nel futuro");
       }
     }

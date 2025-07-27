@@ -1,7 +1,13 @@
 // src/shared/services/modalService.js
 
 /**
+ * @deprecated Questo servizio è deprecato. Usa invece ConfirmModal da src/shared/components/ui/ConfirmModal.js
+ * 
  * Servizio per gestire i modali Bootstrap in modo sicuro
+ * 
+ * MIGRAZIONE:
+ * - showDeleteConfirmModal() -> ConfirmModal.forDeletion()
+ * - showConfirmModal() -> new ConfirmModal() o metodi statici specifici
  */
 
 // Importa Bootstrap Modal dal servizio centralizzato

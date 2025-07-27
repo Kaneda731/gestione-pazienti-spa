@@ -202,37 +202,29 @@
                             </div>
                         </div>
 
-                        <!-- Description -->
-                        <div class="col-md-6">
-                            <label for="evento-descrizione" class="form-label">Descrizione</label>
-                            <textarea id="evento-descrizione" class="form-control" name="descrizione" rows="2" placeholder="Descrizione dell'evento..."></textarea>
-                        </div>
-
                         <!-- Intervention-specific fields -->
-                        <div id="intervento-fields" class="col-12" style="display: none;">
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label for="evento-tipo-intervento" class="form-label">Tipo Intervento</label>
-                                    <select id="evento-tipo-intervento" class="form-select" name="tipo_intervento" data-custom="true">
-                                        <option value="">Seleziona tipo intervento...</option>
-                                        <option value="Chirurgia Ortopedica">Chirurgia Ortopedica</option>
-                                        <option value="Chirurgia Plastica">Chirurgia Plastica</option>
-                                        <option value="Chirurgia Vascolare">Chirurgia Vascolare</option>
-                                        <option value="Chirurgia Generale">Chirurgia Generale</option>
-                                        <option value="Altro">Altro</option>
-                                    </select>
-                                </div>
-                            </div>
+                        <div id="intervento-fields" class="col-md-6" style="display: none;">
+                            <label for="evento-tipo-intervento" class="form-label">Tipo Intervento</label>
+                            <select id="evento-tipo-intervento" class="form-select" name="tipo_intervento" data-custom="true">
+                                <option value="">Seleziona tipo intervento...</option>
+                                <option value="Chirurgia Ortopedica">Chirurgia Ortopedica</option>
+                                <option value="Chirurgia Plastica">Chirurgia Plastica</option>
+                                <option value="Chirurgia Vascolare">Chirurgia Vascolare</option>
+                                <option value="Chirurgia Generale">Chirurgia Generale</option>
+                                <option value="Altro">Altro</option>
+                            </select>
                         </div>
 
                         <!-- Infection-specific fields -->
-                        <div id="infezione-fields" class="col-12" style="display: none;">
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label for="evento-agente-patogeno" class="form-label">Agente Patogeno</label>
-                                    <input type="text" id="evento-agente-patogeno" class="form-control" name="agente_patogeno" placeholder="Es. Staphylococcus aureus">
-                                </div>
-                            </div>
+                        <div id="infezione-fields" class="col-md-6" style="display: none;">
+                            <label for="evento-agente-patogeno" class="form-label">Agente Patogeno</label>
+                            <input type="text" id="evento-agente-patogeno" class="form-control" name="agente_patogeno" placeholder="Es. Staphylococcus aureus">
+                        </div>
+
+                        <!-- Description - moved to bottom -->
+                        <div class="col-12">
+                            <label for="evento-descrizione" class="form-label">Descrizione</label>
+                            <textarea id="evento-descrizione" class="form-control" name="descrizione" rows="2" placeholder="Descrizione dell'evento..."></textarea>
                         </div>
                     </div>
                 </form>

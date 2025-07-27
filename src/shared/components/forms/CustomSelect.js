@@ -186,6 +186,23 @@ export class CustomSelect {
                 window.appLogger?.error('Errore nel keyboard handler:', error);
             }
         });
+        
+        // Listener per il resize della finestra per ricalcolare la posizione del dropdown
+        this.resizeHandler = () => {
+            if (this.isOpen) {
+                this.adjustDropdownPosition();
+            }
+        };
+        window.addEventListener('resize', this.resizeHandler);
+        
+        // Listener per lo scroll per ricalcolare la posizione del dropdown
+        this.scrollHandler = () => {
+            if (this.isOpen) {
+                this.adjustDropdownPosition();
+            }
+        };
+        window.addEventListener('scroll', this.scrollHandler, { passive: true });
+        
         this.wrapper.setAttribute('tabindex', '0');
     }
     
@@ -296,12 +313,70 @@ export class CustomSelect {
             parentCard.classList.add('overflow-visible');
         }
         
+        // Controlla se c'è abbastanza spazio sotto per il dropdown
+        this.adjustDropdownPosition();
+        
         // Non usare più il modal mobile, apri sempre il dropdown
         if (this.selectedValue === '') {
             const firstOption = this.wrapper.querySelector('.custom-select-option');
             if (firstOption) {
                 firstOption.classList.add('focused');
             }
+        }
+    }
+    
+    adjustDropdownPosition() {
+        const dropdown = this.wrapper.querySelector('.custom-select-dropdown');
+        const trigger = this.wrapper.querySelector('.custom-select-trigger');
+        
+        if (!dropdown || !trigger) return;
+        
+        // Reset delle classi di posizionamento
+        this.wrapper.classList.remove('dropdown-up', 'dropdown-down');
+        
+        // Controlla se siamo dentro una modal
+        const modal = this.wrapper.closest('.modal');
+        const isInModal = !!modal;
+        
+        // Calcola le posizioni
+        const triggerRect = trigger.getBoundingClientRect();
+        let containerHeight, containerBottom;
+        
+        if (isInModal) {
+            // Se siamo in una modal, usa i confini della modal
+            const modalBody = modal.querySelector('.modal-body');
+            const modalRect = modalBody ? modalBody.getBoundingClientRect() : modal.getBoundingClientRect();
+            containerHeight = modalRect.height;
+            containerBottom = modalRect.bottom;
+        } else {
+            // Altrimenti usa il viewport
+            containerHeight = window.innerHeight;
+            containerBottom = window.innerHeight;
+        }
+        
+        const dropdownHeight = Math.min(isInModal ? 150 : 200, dropdown.scrollHeight || 200);
+        const spaceBelow = containerBottom - triggerRect.bottom - 20;
+        const spaceAbove = triggerRect.top - (isInModal ? modal.getBoundingClientRect().top : 0) - 20;
+        
+        // Preferisci aprire verso il basso, ma se non c'è spazio e c'è spazio sopra, apri verso l'alto
+        if (spaceBelow < dropdownHeight && spaceAbove >= dropdownHeight) {
+            this.wrapper.classList.add('dropdown-up');
+            window.appLogger?.debug('Dropdown aperto verso l\'alto', { 
+                spaceBelow, 
+                spaceAbove, 
+                dropdownHeight,
+                isInModal,
+                elementId: this.selectElement.id 
+            });
+        } else {
+            this.wrapper.classList.add('dropdown-down');
+            window.appLogger?.debug('Dropdown aperto verso il basso', { 
+                spaceBelow, 
+                spaceAbove, 
+                dropdownHeight,
+                isInModal,
+                elementId: this.selectElement.id 
+            });
         }
     }
     
@@ -331,6 +406,8 @@ export class CustomSelect {
     destroy() {
         if (this.outsideClickHandler) document.removeEventListener('click', this.outsideClickHandler);
         if (this.outsideTouchHandler) document.removeEventListener('touchstart', this.outsideTouchHandler);
+        if (this.resizeHandler) window.removeEventListener('resize', this.resizeHandler);
+        if (this.scrollHandler) window.removeEventListener('scroll', this.scrollHandler);
         this.removeMobileModal();
         this.wrapper.remove();
         this.selectElement.style.display = '';

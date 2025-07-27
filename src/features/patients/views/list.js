@@ -5,7 +5,7 @@ import { state, domElements, cacheDOMElements, loadPersistedFilters, persistFilt
 import { fetchPazienti, exportPazientiToCSV, updatePazienteStatus, deletePaziente } from './list-api.js';
 import { renderPazienti, showLoading, showError, updateSortIndicators, ensureCorrectView } from './list-renderer.js';
 import { initCustomSelects } from '../../../shared/components/forms/CustomSelect.js';
-import { showDeleteConfirmModal } from '../../../shared/services/modalService.js';
+// Rimosso import del vecchio modalService
 import { supabase } from '../../../core/services/supabaseClient.js';
 import { currentUser } from '../../../core/auth/authService.js';
 import { getCurrentFilters } from './list-state-migrated.js';
@@ -115,18 +115,37 @@ async function handlePatientAction(action, id) {
             navigateTo('inserimento');
             break;
         case 'delete':
-            await showDeleteConfirmModal(async () => {
+            const { ConfirmModal } = await import('../../../shared/components/ui/ConfirmModal.js');
+            const modal = ConfirmModal.forDeletion('questo paziente');
+            const confirmed = await modal.show();
+            if (confirmed) {
                 await deletePaziente(id);
                 fetchAndRender();
-            });
+            }
             break;
         case 'dimetti':
-            await updatePazienteStatus(id, true);
-            fetchAndRender();
+            const { ConfirmModal: ConfirmModalDimetti } = await import('../../../shared/components/ui/ConfirmModal.js');
+            // Trova il paziente per ottenere il nome
+            const pazienteDimetti = state.pazienti.find(p => p.id === id);
+            const nomeCompletoDimetti = pazienteDimetti ? `${pazienteDimetti.nome} ${pazienteDimetti.cognome}` : 'il paziente';
+            const modalDimetti = ConfirmModalDimetti.forDismissal(nomeCompletoDimetti);
+            const confirmedDimetti = await modalDimetti.show();
+            if (confirmedDimetti) {
+                await updatePazienteStatus(id, true);
+                fetchAndRender();
+            }
             break;
         case 'riattiva':
-            await updatePazienteStatus(id, false);
-            fetchAndRender();
+            const { ConfirmModal: ConfirmModalRiattiva } = await import('../../../shared/components/ui/ConfirmModal.js');
+            // Trova il paziente per ottenere il nome
+            const pazienteRiattiva = state.pazienti.find(p => p.id === id);
+            const nomeCompletoRiattiva = pazienteRiattiva ? `${pazienteRiattiva.nome} ${pazienteRiattiva.cognome}` : 'il paziente';
+            const modalRiattiva = ConfirmModalRiattiva.forReactivation(nomeCompletoRiattiva);
+            const confirmedRiattiva = await modalRiattiva.show();
+            if (confirmedRiattiva) {
+                await updatePazienteStatus(id, false);
+                fetchAndRender();
+            }
             break;
     }
 }

@@ -181,7 +181,14 @@ label[for="data_infezione"] {
     &[style*="display: block"] {
         opacity: 1;
         max-height: 200px;
+        overflow: visible; /* Permette al dropdown di essere visibile */
     }
+}
+
+/* Assicura che il container del tipo intervento abbia posizione relativa quando visibile */
+#tipo-intervento-container[style*="display: block"] {
+    position: relative;
+    z-index: 1;
 }
 
 /* Stili per l'info post-operatoria */
@@ -595,6 +602,137 @@ select.custom-select-original {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
+/* Dropdown che si apre verso l'alto */
+.custom-select-wrapper.dropdown-up .custom-select-dropdown {
+  top: auto;
+  bottom: 100%;
+  border-top: 1px solid var(--input-border);
+  border-bottom: none;
+  border-radius: var(--border-radius-sm) var(--border-radius-sm) 0 0;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Z-index specifico per il dropdown del tipo intervento negli eventi clinici */
+#tipo-intervento-container .custom-select-dropdown {
+  z-index: 1052; /* Z-index ancora più alto per il tipo intervento */
+}
+
+/* Regole specifiche per dropdown nelle modal */
+.modal-body {
+  /* Permetti ai dropdown di uscire dai confini del modal-body */
+  overflow: visible !important;
+}
+
+.modal-content {
+  /* Assicurati che il modal-content non tagli i dropdown */
+  overflow: visible;
+}
+
+/* Z-index per dropdown nelle modal - deve essere superiore al z-index della modal (1055) */
+.modal .custom-select-dropdown {
+  z-index: 1060;
+}
+
+/* Regole specifiche per la modal degli eventi clinici */
+#evento-form-modal .modal-body {
+  overflow: visible !important;
+  /* Aggiungi padding extra in basso per fare spazio ai dropdown */
+  padding-bottom: 2rem;
+}
+
+#evento-form-modal .custom-select-wrapper.open {
+  z-index: 1061;
+}
+
+#evento-form-modal .custom-select-dropdown {
+  z-index: 1062;
+}
+
+/* Aumenta l'altezza minima della modal quando i campi condizionali sono visibili */
+#evento-form-modal #intervento-fields[style*="display: block"],
+#evento-form-modal #infezione-fields[style*="display: block"] {
+  margin-bottom: 1rem;
+}
+
+/* Assicura che la modal abbia abbastanza spazio per i dropdown */
+#evento-form-modal .modal-dialog {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+/* Regola specifica per il dropdown del tipo intervento nella modal */
+#evento-form-modal #evento-tipo-intervento-custom-select .custom-select-dropdown {
+  z-index: 1063;
+  /* Se non c'è spazio sotto, forza l'apertura verso l'alto */
+  max-height: 150px;
+}
+
+/* Forza l'overflow visibile per i campi condizionali nella modal */
+#evento-form-modal #intervento-fields,
+#evento-form-modal #infezione-fields {
+  overflow: visible !important;
+  position: relative;
+  z-index: 1060;
+}
+
+/* Assicura che il wrapper del custom select abbia z-index alto */
+#evento-form-modal #intervento-fields .custom-select-wrapper,
+#evento-form-modal #infezione-fields .custom-select-wrapper {
+  position: relative;
+  z-index: 1061;
+}
+
+/* Forza il dropdown a essere sempre visibile */
+#evento-form-modal .custom-select-wrapper.open .custom-select-dropdown {
+  position: absolute !important;
+  z-index: 1065 !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25) !important;
+}
+
+/* Fix per dropdown Bootstrap nelle card degli eventi */
+.evento-card {
+  position: relative;
+  
+  .dropdown {
+    position: relative;
+    z-index: 1000;
+  }
+  
+  .dropdown-menu {
+    z-index: 1001 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  }
+  
+  /* Quando il dropdown è aperto, aumenta lo z-index della card */
+  &:has(.dropdown-menu.show) {
+    z-index: 999;
+  }
+}
+
+/* Assicura che la lista eventi abbia overflow visibile */
+.eventi-list {
+  overflow: visible !important;
+  
+  .evento-card {
+    overflow: visible;
+  }
+}
+
+/* Regole specifiche per i dropdown nelle tab degli eventi clinici */
+#eventi-clinici .evento-card .dropdown-menu {
+  z-index: 1050 !important;
+  position: absolute !important;
+}
+
+/* Forza l'overflow visibile per il tab degli eventi clinici */
+#eventi-clinici {
+  overflow: visible !important;
+  
+  .tab-pane {
+    overflow: visible !important;
+  }
+}
+
 .custom-select-wrapper.open .custom-select-dropdown {
   display: block;
 }
@@ -602,7 +740,8 @@ select.custom-select-original {
 /* Assicura che i container dei campi condizionali non nascondano i dropdown */
 #reparto-destinazione-container .custom-select-wrapper.open,
 #clinica-destinazione-container .custom-select-wrapper.open,
-#codice-clinica-container .custom-select-wrapper.open {
+#codice-clinica-container .custom-select-wrapper.open,
+#tipo-intervento-container .custom-select-wrapper.open {
   z-index: 1051; /* Ancora più alto per i campi condizionali */
 }
 

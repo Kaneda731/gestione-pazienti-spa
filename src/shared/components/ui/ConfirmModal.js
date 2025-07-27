@@ -87,21 +87,25 @@ export class ConfirmModal {
      * @returns {string} HTML del modal
      */
     render() {
+        const headerClass = this.options.confirmClass === 'btn-danger' ? '' : 
+                           this.options.confirmClass === 'btn-warning' ? 'warning' : 
+                           this.options.confirmClass === 'btn-success' ? 'success' : '';
+        
         return `
-            <div class="modal fade" id="${this.modalId}" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog">
+            <div class="modal fade confirm-modal" id="${this.modalId}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title d-flex align-items-center">
-                                <span class="material-icons me-2">${this.options.icon}</span>
+                        <div class="modal-header ${headerClass}">
+                            <h5 class="modal-title">
+                                <span class="material-icons">${this.options.icon}</span>
                                 ${this.options.title}
                             </h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            ${this.options.message}
+                            <p>${this.options.message}</p>
                         </div>
-                        <div class="modal-footer">
+                        <div class="modal-footer d-flex justify-content-center">
                             <button type="button" class="btn btn-secondary btn-cancel" data-bs-dismiss="modal">
                                 ${this.options.cancelText}
                             </button>
@@ -190,6 +194,36 @@ export class ConfirmModal {
             cancelText: 'Continua modifica',
             confirmClass: 'btn-warning',
             icon: 'warning'
+        });
+    }
+
+    /**
+     * Crea un modal per conferma eliminazione evento clinico
+     * @returns {ConfirmModal} Istanza del componente
+     */
+    static forClinicalEventDeletion() {
+        return new ConfirmModal({
+            title: 'Elimina evento clinico',
+            message: 'Sei sicuro di voler eliminare questo evento clinico? L\'operazione non può essere annullata.',
+            confirmText: 'Elimina',
+            cancelText: 'Annulla',
+            confirmClass: 'btn-danger',
+            icon: 'delete_forever'
+        });
+    }
+
+    /**
+     * Crea un modal per conferma eliminazione diagnosi
+     * @returns {ConfirmModal} Istanza del componente
+     */
+    static forDiagnosisDeletion() {
+        return new ConfirmModal({
+            title: 'Elimina diagnosi',
+            message: 'Sei sicuro di voler eliminare questa diagnosi? L\'operazione non può essere annullata.',
+            confirmText: 'Elimina',
+            cancelText: 'Annulla',
+            confirmClass: 'btn-danger',
+            icon: 'delete_forever'
         });
     }
 }

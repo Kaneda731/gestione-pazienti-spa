@@ -1,7 +1,7 @@
 // src/features/patients/views/eventi-clinici-tab.js
 import { eventiCliniciService } from '../../eventi-clinici/services/eventiCliniciService.js';
 import { postOperativeCalculator } from '../../eventi-clinici/utils/post-operative-calculator.js';
-import { initCustomSelects, updateCustomSelect } from '../../../shared/components/forms/CustomSelect.js';
+import { initCustomSelects, updateCustomSelect, CustomSelect } from '../../../shared/components/forms/CustomSelect.js';
 import CustomDatepicker from '../../../shared/components/forms/CustomDatepicker.js';
 import { mostraMessaggio } from '../../../shared/utils/helpers.js';
 import { sanitizeHtml } from '../../../shared/utils/domSecurity.js';
@@ -66,14 +66,33 @@ function setupEventListeners() {
  * Inizializza i componenti del form eventi
  */
 function initializeComponents() {
-    // Inizializza custom selects
-    initCustomSelects('#nuovo-evento-form [data-custom="true"]');
+    // Inizializza custom selects - inizializza solo quelli visibili inizialmente
+    initCustomSelects('#evento-tipo');
+    
+    // Inizializza il select del tipo intervento anche se nascosto
+    const tipoInterventoSelect = document.getElementById('evento-tipo-intervento');
+    if (tipoInterventoSelect && !tipoInterventoSelect.customSelectInstance) {
+        new CustomSelect(tipoInterventoSelect);
+    }
     
     // Inizializza datepicker per eventi
     eventiDatepicker = new CustomDatepicker('#evento-data', {
         dateFormat: "d/m/Y",
         allowInput: true,
-        maxDate: "today" // Non permettere date future
+        maxDate: "today", // Non permettere date future
+        onChange: function(selectedDates, dateStr, instance) {
+            // Validazione aggiuntiva quando la data cambia
+            if (selectedDates.length > 0) {
+                const selectedDate = selectedDates[0];
+                const today = new Date();
+                today.setHours(23, 59, 59, 999);
+                
+                if (selectedDate > today) {
+                    instance.clear();
+                    mostraMessaggio('La data dell\'evento non può essere nel futuro', 'warning');
+                }
+            }
+        }
     });
 }
 
@@ -120,8 +139,16 @@ function resetEventoForm() {
     // Nascondi campi condizionali
     handleEventoTypeChange('');
 
-    // Reset custom selects
-    updateCustomSelect('#nuovo-evento-form [data-custom="true"]');
+    // Reset custom selects se esistenti
+    const tipoEventoSelect = document.getElementById('evento-tipo');
+    if (tipoEventoSelect?.customSelectInstance) {
+        tipoEventoSelect.customSelectInstance.setValue('');
+    }
+    
+    const tipoInterventoSelect = document.getElementById('evento-tipo-intervento');
+    if (tipoInterventoSelect?.customSelectInstance) {
+        tipoInterventoSelect.customSelectInstance.setValue('');
+    }
 }
 
 /**
@@ -132,25 +159,39 @@ function handleEventoTypeChange(tipoEvento) {
     const agentePatogenoContainer = document.getElementById('agente-patogeno-container');
 
     // Nascondi tutti i campi condizionali
-    tipoInterventoContainer.style.display = 'none';
-    agentePatogenoContainer.style.display = 'none';
+    if (tipoInterventoContainer) tipoInterventoContainer.style.display = 'none';
+    if (agentePatogenoContainer) agentePatogenoContainer.style.display = 'none';
 
     // Pulisci i valori dei campi nascosti
-    document.getElementById('evento-tipo-intervento').value = '';
-    document.getElementById('evento-agente-patogeno').value = '';
+    const tipoInterventoSelect = document.getElementById('evento-tipo-intervento');
+    const agentePatogenoInput = document.getElementById('evento-agente-patogeno');
+    
+    if (tipoInterventoSelect) {
+        tipoInterventoSelect.value = '';
+        if (tipoInterventoSelect.customSelectInstance) {
+            tipoInterventoSelect.customSelectInstance.setValue('');
+        }
+    }
+    if (agentePatogenoInput) agentePatogenoInput.value = '';
 
     // Mostra i campi appropriati
     switch (tipoEvento) {
         case 'intervento':
-            tipoInterventoContainer.style.display = 'block';
+            if (tipoInterventoContainer) {
+                tipoInterventoContainer.style.display = 'block';
+                console.log('Mostrando container tipo intervento');
+                
+                // Assicurati che il CustomSelect sia inizializzato
+                if (tipoInterventoSelect && !tipoInterventoSelect.customSelectInstance) {
+                    console.log('Inizializzando CustomSelect per tipo intervento');
+                    new CustomSelect(tipoInterventoSelect);
+                }
+            }
             break;
         case 'infezione':
-            agentePatogenoContainer.style.display = 'block';
+            if (agentePatogenoContainer) agentePatogenoContainer.style.display = 'block';
             break;
     }
-
-    // Aggiorna custom selects
-    updateCustomSelect('#nuovo-evento-form [data-custom="true"]');
 }
 
 /**
@@ -188,7 +229,20 @@ async function handleSaveEvento() {
         mostraMessaggio('Evento clinico salvato con successo!', 'success');
     } catch (error) {
         console.error('Errore nel salvataggio evento:', error);
-        mostraMessaggio(error.message || 'Errore nel salvataggio evento', 'danger');
+        
+        // Gestisci errori specifici del database
+        let errorMessage = 'Errore nel salvataggio evento';
+        if (error.message) {
+            if (error.message.includes('date/time field value out of range')) {
+                errorMessage = 'Formato data non valido. Utilizzare il formato gg/mm/aaaa';
+            } else if (error.message.includes('future')) {
+                errorMessage = 'La data dell\'evento non può essere nel futuro';
+            } else {
+                errorMessage = error.message;
+            }
+        }
+        
+        mostraMessaggio(errorMessage, 'danger');
     }
 }
 
@@ -196,10 +250,22 @@ async function handleSaveEvento() {
  * Ottiene i dati dal form evento
  */
 function getEventoFormData() {
+    const rawDate = document.getElementById('evento-data').value;
+    let convertedDate = null;
+    
+    // Converti la data solo se presente
+    if (rawDate && rawDate.trim() !== '') {
+        try {
+            convertedDate = convertDateToISO(rawDate.trim());
+        } catch (error) {
+            throw new Error(error.message || 'Formato data non valido. Utilizzare il formato gg/mm/aaaa');
+        }
+    }
+    
     const data = {
         id: document.getElementById('evento-id').value || null,
         tipo_evento: document.getElementById('evento-tipo').value,
-        data_evento: convertDateToISO(document.getElementById('evento-data').value),
+        data_evento: convertedDate,
         descrizione: document.getElementById('evento-descrizione').value,
         tipo_intervento: document.getElementById('evento-tipo-intervento').value || null,
         agente_patogeno: document.getElementById('evento-agente-patogeno').value || null
@@ -228,12 +294,23 @@ function validateEventoData(data) {
     }
 
     // Verifica che la data non sia futura
-    const eventDate = new Date(data.data_evento);
-    const today = new Date();
-    today.setHours(23, 59, 59, 999);
-    
-    if (eventDate > today) {
-        return { isValid: false, message: 'La data dell\'evento non può essere nel futuro' };
+    try {
+        const eventDate = new Date(data.data_evento + 'T00:00:00');
+        
+        // Verifica che la data sia valida
+        if (isNaN(eventDate.getTime())) {
+            return { isValid: false, message: 'Formato data non valido' };
+        }
+        
+        const today = new Date();
+        const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        const eventDateOnly = new Date(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate());
+        
+        if (eventDateOnly > todayDate) {
+            return { isValid: false, message: 'La data dell\'evento non può essere nel futuro' };
+        }
+    } catch (error) {
+        return { isValid: false, message: 'Errore nella validazione della data: ' + error.message };
     }
 
     if (data.tipo_evento === 'intervento' && !data.tipo_intervento) {
@@ -247,10 +324,58 @@ function validateEventoData(data) {
  * Converte data da dd/mm/yyyy a yyyy-mm-dd
  */
 function convertDateToISO(dateString) {
-    if (!dateString || !dateString.includes('/')) return dateString;
+    if (!dateString) {
+        return null;
+    }
     
-    const [day, month, year] = dateString.split('/');
-    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+    // Se è già in formato ISO, restituiscilo così com'è
+    if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        return dateString;
+    }
+    
+    if (!dateString.includes('/')) {
+        throw new Error('Formato data non valido. Utilizzare il formato gg/mm/aaaa');
+    }
+    
+    const parts = dateString.split('/');
+    if (parts.length !== 3) {
+        throw new Error('Formato data non valido. Utilizzare il formato gg/mm/aaaa');
+    }
+    
+    const [day, month, year] = parts;
+    
+    // Validazione dei componenti della data
+    const dayNum = parseInt(day, 10);
+    const monthNum = parseInt(month, 10);
+    const yearNum = parseInt(year, 10);
+    
+    if (isNaN(dayNum) || isNaN(monthNum) || isNaN(yearNum)) {
+        throw new Error('Formato data non valido. Utilizzare numeri validi');
+    }
+    
+    if (dayNum < 1 || dayNum > 31) {
+        throw new Error('Giorno non valido (1-31)');
+    }
+    
+    if (monthNum < 1 || monthNum > 12) {
+        throw new Error('Mese non valido (1-12)');
+    }
+    
+    if (yearNum < 1900 || yearNum > 2100) {
+        throw new Error('Anno non valido');
+    }
+    
+    // Crea un oggetto Date per validare ulteriormente la data
+    const dateObj = new Date(yearNum, monthNum - 1, dayNum);
+    if (dateObj.getDate() !== dayNum || dateObj.getMonth() !== monthNum - 1 || dateObj.getFullYear() !== yearNum) {
+        throw new Error('Data non valida (es. 31/02/2025)');
+    }
+    
+    // Formatta sempre con zero padding
+    const paddedMonth = month.padStart(2, '0');
+    const paddedDay = day.padStart(2, '0');
+    
+    return `${year}-${paddedMonth}-${paddedDay}`;
 }
 
 /**
@@ -397,29 +522,49 @@ function editEvento(eventoId) {
     const evento = currentEventi.find(e => e.id === eventoId);
     if (!evento) return;
 
-    // Popola il form con i dati dell'evento
-    document.getElementById('evento-id').value = evento.id;
-    document.getElementById('evento-tipo').value = evento.tipo_evento;
-    document.getElementById('evento-data').value = convertDateFromISO(evento.data_evento);
-    document.getElementById('evento-descrizione').value = evento.descrizione || '';
-    document.getElementById('evento-tipo-intervento').value = evento.tipo_intervento || '';
-    document.getElementById('evento-agente-patogeno').value = evento.agente_patogeno || '';
-
-    // Gestisci campi condizionali
-    handleEventoTypeChange(evento.tipo_evento);
-
-    // Aggiorna custom selects
-    updateCustomSelect('#nuovo-evento-form [data-custom="true"]');
-
-    // Mostra il form
+    // Mostra il form prima di popolarlo
     showEventoForm();
+
+    // Aspetta un momento per assicurarsi che il form sia visibile
+    setTimeout(() => {
+        // Popola il form con i dati dell'evento
+        document.getElementById('evento-id').value = evento.id;
+        document.getElementById('evento-data').value = convertDateFromISO(evento.data_evento);
+        document.getElementById('evento-descrizione').value = evento.descrizione || '';
+        document.getElementById('evento-tipo-intervento').value = evento.tipo_intervento || '';
+        document.getElementById('evento-agente-patogeno').value = evento.agente_patogeno || '';
+
+        // Aggiorna il custom select del tipo evento PRIMA di gestire i campi condizionali
+        const tipoEventoSelect = document.getElementById('evento-tipo');
+        if (tipoEventoSelect?.customSelectInstance && evento.tipo_evento) {
+            tipoEventoSelect.customSelectInstance.setValue(evento.tipo_evento);
+        } else {
+            document.getElementById('evento-tipo').value = evento.tipo_evento;
+        }
+
+        // Gestisci campi condizionali DOPO aver impostato il tipo evento
+        handleEventoTypeChange(evento.tipo_evento);
+
+        // Aspetta un altro momento per i campi condizionali
+        setTimeout(() => {
+            const tipoInterventoSelect = document.getElementById('evento-tipo-intervento');
+            if (tipoInterventoSelect?.customSelectInstance && evento.tipo_intervento) {
+                tipoInterventoSelect.customSelectInstance.setValue(evento.tipo_intervento);
+            }
+        }, 100);
+    }, 50);
 }
 
 /**
  * Elimina un evento
  */
 async function deleteEvento(eventoId) {
-    if (!confirm('Sei sicuro di voler eliminare questo evento clinico?')) {
+    const { ConfirmModal } = await import('../../../shared/components/ui/ConfirmModal.js');
+    
+    const modal = ConfirmModal.forClinicalEventDeletion();
+    const confirmed = await modal.show();
+    
+    if (!confirmed) {
         return;
     }
 

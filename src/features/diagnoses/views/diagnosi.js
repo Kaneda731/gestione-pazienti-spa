@@ -41,7 +41,12 @@ async function handleSave(event) {
 }
 
 async function handleDelete(id) {
-    if (confirm('Sei sicuro di voler eliminare questa diagnosi?')) {
+    const { ConfirmModal } = await import('../../../shared/components/ui/ConfirmModal.js');
+    
+    const modal = ConfirmModal.forDiagnosisDeletion();
+    const confirmed = await modal.show();
+    
+    if (confirmed) {
         try {
             await deleteDiagnosi(id);
             showFeedback('Diagnosi eliminata con successo!', 'success');

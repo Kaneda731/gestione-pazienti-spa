@@ -43,16 +43,45 @@
         border-radius: var(--border-radius) !important;
     }
 
-    /* Stili specifici per la lista pazienti mobile (se necessario) */
+    /* Stili specifici per la lista pazienti mobile */
     .card.card-list-compact {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        padding: 0.75rem;
         border-left: 4px solid var(--primary-color);
+        margin-bottom: 0.75rem;
+        transition: all 0.2s ease;
+    }
+
+    .card.card-list-compact:hover {
+        box-shadow: var(--shadow-lg) !important;
+        transform: translateY(-1px);
     }
 
     .card.card-list-compact .card-body {
-        padding: 0 0 0 0.75rem;
+        padding: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+
+    .card.card-list-compact .card-title {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+        color: var(--text-primary);
+    }
+
+    .card.card-list-compact .card-meta {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        line-height: 1.3;
+    }
+
+    /* Stili per le card con stato di errore (pazienti dimessi) */
+    .card.status-error {
+        border-left-color: var(--bs-secondary);
+        opacity: 0.85;
+    }
+
+    .card.status-success {
+        border-left-color: var(--bs-success);
     }
 }

@@ -1,0 +1,301 @@
+/* ===================================
+   DISCHARGE/TRANSFER SECTION - Mobile Optimized
+   =================================== */
+
+@media (max-width: 767px) {
+  /* Titolo abbreviato per schermi molto piccoli */
+  .discharge-transfer-section h5 {
+    position: relative !important;
+  }
+
+  .discharge-transfer-section h5::after {
+    content: attr(data-short-title) !important;
+    display: none !important;
+  }
+
+  @media (max-width: 360px) {
+    .discharge-transfer-section h5 span:not(.material-icons) {
+      display: none !important;
+    }
+
+    .discharge-transfer-section h5::after {
+      display: inline !important;
+      content: "Dimissione/Trasferimento" !important;
+    }
+  }
+  /* Sezione principale dimissione/trasferimento */
+  .discharge-transfer-section {
+    margin-top: 2rem !important;
+    padding: 1.5rem !important;
+    background: linear-gradient(
+      135deg,
+      rgba(var(--primary-rgb), 0.05),
+      rgba(var(--primary-rgb), 0.02)
+    ) !important;
+    border: 2px solid rgba(var(--primary-rgb), 0.1) !important;
+    border-radius: 16px !important;
+    box-shadow: var(--shadow-sm) !important;
+    position: relative !important;
+    overflow: hidden !important;
+  }
+
+  /* Decorazione visiva */
+  .discharge-transfer-section::before {
+    content: "" !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 4px !important;
+    background: linear-gradient(
+      90deg,
+      var(--primary-color),
+      rgba(var(--primary-rgb), 0.6)
+    ) !important;
+    border-radius: 16px 16px 0 0 !important;
+  }
+
+  /* Titolo della sezione */
+  .discharge-transfer-section h5 {
+    display: flex !important;
+    align-items: flex-start !important;
+    margin-bottom: 1.5rem !important;
+    padding-bottom: 1rem !important;
+    border-bottom: 2px solid rgba(var(--primary-rgb), 0.15) !important;
+    color: var(--primary-color) !important;
+    font-weight: 700 !important;
+    font-size: 0.9rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.3px !important;
+    line-height: 1.3 !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    hyphens: auto !important;
+    flex-wrap: wrap !important;
+    white-space: normal !important;
+  }
+
+  .discharge-transfer-section h5 .material-icons {
+    font-size: 1.3rem !important;
+    margin-right: 0.75rem !important;
+    margin-top: 0.1rem !important;
+    padding: 0.4rem !important;
+    background: rgba(var(--primary-rgb), 0.1) !important;
+    border-radius: 50% !important;
+    color: var(--primary-color) !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Testo del titolo che può andare a capo */
+  .discharge-transfer-section h5 span:not(.material-icons) {
+    flex: 1 !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+    hyphens: auto !important;
+  }
+
+  /* Layout dei campi */
+  .discharge-transfer-section .row {
+    gap: 1rem !important;
+  }
+
+  .discharge-transfer-section .col-md-4 {
+    margin-bottom: 1.5rem !important;
+  }
+
+  /* Stili specifici per i campi della sezione */
+  .discharge-transfer-section .form-label {
+    font-weight: 600 !important;
+    color: var(--text-primary) !important;
+    margin-bottom: 0.75rem !important;
+    font-size: 0.95rem !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  /* Icone nei label */
+  .discharge-transfer-section .form-label::before {
+    content: "•" !important;
+    color: var(--primary-color) !important;
+    font-weight: bold !important;
+    margin-right: 0.5rem !important;
+    font-size: 1.2rem !important;
+  }
+
+  /* Campi input e select della sezione */
+  .discharge-transfer-section .form-control,
+  .discharge-transfer-section .form-select {
+    min-height: 56px !important;
+    font-size: 16px !important;
+    padding: 1rem 1.25rem !important;
+    border: 2px solid rgba(var(--border-color-rgb), 0.3) !important;
+    border-radius: 12px !important;
+    background: var(--input-bg) !important;
+    transition: all 0.3s ease !important;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+  }
+
+  .discharge-transfer-section .form-control:focus,
+  .discharge-transfer-section .form-select:focus {
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 4px rgba(var(--primary-rgb), 0.15),
+      inset 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+    transform: translateY(-1px) !important;
+  }
+
+  /* Input group con icone */
+  .discharge-transfer-section .input-group-icon {
+    position: relative !important;
+  }
+
+  .discharge-transfer-section .input-group-icon .input-icon {
+    position: absolute !important;
+    right: 1rem !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    color: var(--text-secondary) !important;
+    font-size: 1.25rem !important;
+    pointer-events: none !important;
+    z-index: 3 !important;
+  }
+
+  .discharge-transfer-section .input-group-icon .form-control {
+    padding-right: 3rem !important;
+  }
+
+  /* Campi condizionali nascosti */
+  .discharge-transfer-section [id$="-container"] {
+    transition: all 0.3s ease !important;
+  }
+
+  .discharge-transfer-section [id$="-container"]:not([style*="display: none"]) {
+    animation: slideInDown 0.3s ease-out !important;
+  }
+
+  @keyframes slideInDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Stili per campi specifici */
+  #data_dimissione {
+    background-image: linear-gradient(
+      45deg,
+      transparent 40%,
+      rgba(var(--primary-rgb), 0.05) 50%,
+      transparent 60%
+    ) !important;
+  }
+
+  /* Placeholder styling */
+  .discharge-transfer-section .form-control::placeholder,
+  .discharge-transfer-section .form-select option[value=""] {
+    color: var(--text-muted) !important;
+    font-style: italic !important;
+  }
+
+  /* Separatore visivo tra i gruppi di campi */
+  .discharge-transfer-section .col-md-4:nth-child(3n)::after {
+    content: "" !important;
+    display: block !important;
+    width: 100% !important;
+    height: 1px !important;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(var(--border-color-rgb), 0.3),
+      transparent
+    ) !important;
+    margin: 1rem 0 !important;
+  }
+
+  /* Responsive adjustments */
+  .discharge-transfer-section .col-md-4 {
+    width: 100% !important;
+    flex: 0 0 100% !important;
+  }
+
+  /* Gestione testo lungo su schermi molto piccoli */
+  @media (max-width: 320px) {
+    .discharge-transfer-section h5 {
+      font-size: 0.8rem !important;
+      letter-spacing: 0.1px !important;
+    }
+
+    .discharge-transfer-section h5 .material-icons {
+      font-size: 1.1rem !important;
+      padding: 0.3rem !important;
+      margin-right: 0.5rem !important;
+    }
+  }
+}
+
+/* Tablet - Layout intermedio */
+@media (min-width: 768px) and (max-width: 991px) {
+  .discharge-transfer-section {
+    padding: 1.25rem !important;
+  }
+
+  .discharge-transfer-section .col-md-4 {
+    flex: 0 0 48% !important;
+    width: 48% !important;
+  }
+
+  .discharge-transfer-section .form-control,
+  .discharge-transfer-section .form-select {
+    min-height: 52px !important;
+    font-size: 15px !important;
+  }
+}
+
+/* Desktop - Mantieni layout originale ma con miglioramenti */
+@media (min-width: 992px) {
+  .discharge-transfer-section {
+    margin-top: 1.5rem !important;
+    padding: 1.25rem !important;
+    border-radius: 12px !important;
+  }
+
+  .discharge-transfer-section h5 {
+    font-size: 1.2rem !important;
+  }
+}
+
+/* Tema scuro */
+[data-bs-theme="dark"] {
+  .discharge-transfer-section {
+    background: linear-gradient(
+      135deg,
+      rgba(var(--primary-rgb), 0.08),
+      rgba(var(--primary-rgb), 0.03)
+    ) !important;
+    border-color: rgba(var(--primary-rgb), 0.2) !important;
+  }
+
+  .discharge-transfer-section h5 {
+    color: var(--primary-color) !important;
+  }
+
+  .discharge-transfer-section h5 .material-icons {
+    background: rgba(var(--primary-rgb), 0.15) !important;
+  }
+
+  .discharge-transfer-section .form-control,
+  .discharge-transfer-section .form-select {
+    background: var(--input-bg) !important;
+    border-color: rgba(var(--border-color-rgb), 0.4) !important;
+    color: var(--text-primary) !important;
+  }
+
+  .discharge-transfer-section .form-control:focus,
+  .discharge-transfer-section .form-select:focus {
+    box-shadow: 0 0 0 4px rgba(var(--primary-rgb), 0.2),
+      inset 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+  }
+}

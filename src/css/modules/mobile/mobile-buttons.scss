@@ -1,0 +1,374 @@
+/* ===================================
+   MOBILE BUTTONS - IMPROVED UX/UI
+   =================================== */
+
+@media (max-width: 767px) {
+    /* Container per le azioni mobili */
+    .mobile-actions-container {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-top: 0.75rem;
+    }
+
+    /* Pulsanti principali (Modifica, Dimetti, Elimina) */
+    .mobile-primary-actions {
+        display: flex;
+        gap: 0.4rem;
+        justify-content: space-between;
+    }
+
+    .mobile-action-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-width: 55px;
+        max-width: 70px;
+        min-height: 55px;
+        padding: 0.4rem;
+        border-radius: 8px;
+        border-width: 1.5px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        flex: 1;
+    }
+
+    .mobile-action-btn .material-icons {
+        font-size: 18px;
+        margin-bottom: 2px;
+    }
+
+    .mobile-btn-text {
+        font-size: 0.65rem;
+        line-height: 1;
+        font-weight: 600;
+        text-align: center;
+    }
+
+    /* Hover e active effects per i pulsanti principali */
+    .mobile-action-btn:hover,
+    .mobile-action-btn:focus {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .mobile-action-btn:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Feedback tattile per touch devices */
+    @media (hover: none) and (pointer: coarse) {
+        .mobile-action-btn:active {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+    }
+
+    /* Colori specifici per i pulsanti principali */
+    .mobile-action-btn.btn-outline-primary:hover {
+        background-color: var(--bs-primary);
+        border-color: var(--bs-primary);
+        color: white;
+    }
+
+    .mobile-action-btn.btn-outline-warning:hover {
+        background-color: var(--bs-warning);
+        border-color: var(--bs-warning);
+        color: var(--bs-dark);
+    }
+
+    .mobile-action-btn.btn-outline-success:hover {
+        background-color: var(--bs-success);
+        border-color: var(--bs-success);
+        color: white;
+    }
+
+    .mobile-action-btn.btn-outline-danger:hover {
+        background-color: var(--bs-danger);
+        border-color: var(--bs-danger);
+        color: white;
+    }
+
+    /* Pulsanti eventi clinici */
+    .mobile-clinical-actions {
+        display: flex;
+        gap: 0.3rem;
+        justify-content: space-between;
+        padding: 0.4rem;
+        background: rgba(var(--bs-light-rgb), 0.3);
+        border-radius: 8px;
+        border: 1px solid rgba(var(--bs-secondary-rgb), 0.2);
+    }
+
+    .mobile-clinical-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        flex: 1;
+        min-height: 45px;
+        padding: 0.3rem;
+        border-radius: 6px;
+        border-width: 1px;
+        font-size: 0.7rem;
+        transition: all 0.2s ease;
+        background: white;
+    }
+
+    .mobile-clinical-btn .material-icons {
+        font-size: 14px;
+        margin-bottom: 2px;
+    }
+
+    .mobile-clinical-text {
+        font-size: 0.6rem;
+        line-height: 1;
+        font-weight: 600;
+        text-align: center;
+    }
+
+    /* Hover e active effects per i pulsanti clinici */
+    .mobile-clinical-btn:hover,
+    .mobile-clinical-btn:focus {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .mobile-clinical-btn:active {
+        transform: translateY(0);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Feedback tattile per touch devices */
+    @media (hover: none) and (pointer: coarse) {
+        .mobile-clinical-btn:active {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+    }
+
+    /* Colori specifici per i pulsanti clinici */
+    .mobile-clinical-btn.btn-outline-primary:hover {
+        background-color: var(--bs-primary);
+        border-color: var(--bs-primary);
+        color: white;
+    }
+
+    .mobile-clinical-btn.btn-outline-warning:hover {
+        background-color: var(--bs-warning);
+        border-color: var(--bs-warning);
+        color: var(--bs-dark);
+    }
+
+    .mobile-clinical-btn.btn-outline-info:hover {
+        background-color: var(--bs-info);
+        border-color: var(--bs-info);
+        color: white;
+    }
+
+    /* Miglioramenti per le card compatte */
+    .card-list-compact {
+        margin-bottom: 0.75rem;
+    }
+
+    .card-list-compact .card-body {
+        display: flex;
+        flex-direction: column;
+        padding: 1rem;
+        gap: 0.75rem;
+    }
+
+    .card-list-compact .card-info {
+        flex: 1;
+    }
+
+    .card-list-compact .card-title {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+        color: var(--bs-dark);
+    }
+
+    .card-list-compact .card-meta {
+        font-size: 0.8rem;
+        color: var(--bs-secondary);
+        line-height: 1.3;
+    }
+
+    /* Responsive adjustments per schermi molto piccoli */
+    @media (max-width: 375px) {
+        .mobile-action-btn {
+            min-width: 50px;
+            max-width: 65px;
+            min-height: 50px;
+            padding: 0.3rem;
+        }
+
+        .mobile-action-btn .material-icons {
+            font-size: 16px;
+        }
+
+        .mobile-btn-text {
+            font-size: 0.6rem;
+        }
+
+        .mobile-clinical-btn {
+            min-height: 40px;
+            padding: 0.25rem;
+        }
+
+        .mobile-clinical-btn .material-icons {
+            font-size: 12px;
+        }
+
+        .mobile-clinical-text {
+            font-size: 0.55rem;
+        }
+
+        .mobile-primary-actions {
+            gap: 0.3rem;
+        }
+
+        .mobile-clinical-actions {
+            gap: 0.25rem;
+            padding: 0.3rem;
+        }
+    }
+}
+
+/* Miglioramenti per tablet in modalità portrait */
+@media (min-width: 768px) and (max-width: 991px) {
+    .mobile-actions-container {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .mobile-primary-actions {
+        gap: 0.75rem;
+    }
+
+    .mobile-clinical-actions {
+        gap: 0.5rem;
+        padding: 0.75rem;
+    }
+}
+/* ==
+=================================
+   ACCESSIBILITY IMPROVEMENTS
+   =================================== */
+
+@media (max-width: 767px) {
+    /* Miglioramenti per l'accessibilità */
+    .mobile-action-btn:focus-visible,
+    .mobile-clinical-btn:focus-visible {
+        outline: 2px solid var(--bs-primary);
+        outline-offset: 2px;
+    }
+
+    /* Miglioramenti per utenti con preferenze di movimento ridotto */
+    @media (prefers-reduced-motion: reduce) {
+        .mobile-action-btn,
+        .mobile-clinical-btn {
+            transition: none;
+        }
+
+        .mobile-action-btn:hover,
+        .mobile-action-btn:focus,
+        .mobile-clinical-btn:hover,
+        .mobile-clinical-btn:focus {
+            transform: none;
+        }
+    }
+
+    /* Miglioramenti per il contrasto in modalità high contrast */
+    @media (prefers-contrast: high) {
+        .mobile-action-btn,
+        .mobile-clinical-btn {
+            border-width: 2px;
+        }
+
+        .mobile-clinical-actions {
+            border-width: 2px;
+        }
+    }
+
+    /* Separatore visivo tra le sezioni di pulsanti */
+    .mobile-quick-actions::before {
+        content: '';
+        display: block;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(var(--bs-secondary-rgb), 0.3), transparent);
+        margin-bottom: 0.5rem;
+    }
+}
+
+/* ===================================
+   FILTER ACTION BUTTONS MOBILE
+   =================================== */
+
+@media (max-width: 767px) {
+    /* Container per i pulsanti filtro */
+    #filter-actions-container {
+        flex-direction: row !important;
+        gap: 0.5rem !important;
+        width: 100%;
+        max-width: 320px;
+        margin: 0 auto;
+        justify-content: center;
+    }
+
+    /* Pulsanti filtro più compatti */
+    #reset-filters-btn,
+    #export-csv-btn {
+        flex: 1;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        min-width: 0; /* Permette al flex di ridurre la larghezza se necessario */
+    }
+
+    #reset-filters-btn .material-icons,
+    #export-csv-btn .material-icons {
+        font-size: 18px;
+    }
+
+    /* Responsive per schermi molto piccoli */
+    @media (max-width: 375px) {
+        #filter-actions-container {
+            max-width: 300px;
+            gap: 0.4rem !important;
+        }
+
+        #reset-filters-btn,
+        #export-csv-btn {
+            padding: 0.4rem 0.6rem;
+            font-size: 0.8rem;
+            gap: 0.3rem;
+        }
+
+        #reset-filters-btn .material-icons,
+        #export-csv-btn .material-icons {
+            font-size: 16px;
+        }
+    }
+}
+
+/* Per tablet, mantieni layout orizzontale ma più compatto */
+@media (min-width: 768px) and (max-width: 991px) {
+    #filter-actions-container {
+        gap: 0.75rem !important;
+    }
+
+    #reset-filters-btn,
+    #export-csv-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+    }
+}

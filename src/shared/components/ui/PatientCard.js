@@ -40,6 +40,32 @@ export class PatientCard {
     }
 
     /**
+     * Ottiene la data dell'ultimo intervento se esiste
+     * @returns {string|null} Data formattata dell'ultimo intervento
+     */
+    getLastInterventionDate() {
+        if (!this.patient.eventi_clinici || this.patient.eventi_clinici.length === 0) {
+            return null;
+        }
+
+        const interventions = this.patient.eventi_clinici
+            .filter(evento => evento.tipo_evento === 'intervento')
+            .sort((a, b) => new Date(b.data_evento) - new Date(a.data_evento));
+
+        return interventions.length > 0 
+            ? new Date(interventions[0].data_evento).toLocaleDateString()
+            : null;
+    }
+
+    /**
+     * Verifica se il paziente è infetto
+     * @returns {boolean} True se il paziente è infetto
+     */
+    isPatientInfected() {
+        return this.patient.flag_infetto === true || this.patient.flag_infetto === 'true';
+    }
+
+    /**
      * Renderizza la card per dispositivi mobili
      * @param {string} statusClass - Classe CSS per lo stato
      * @param {boolean} canEdit - Se l'utente può modificare
@@ -59,6 +85,24 @@ export class PatientCard {
             ? `<span class="badge bg-${postOpInfo.statusClass} ms-1" style="font-size: 0.7em;">${postOpInfo.badgeText}</span>`
             : '';
 
+        // Get last intervention date
+        const lastInterventionDate = this.getLastInterventionDate();
+        
+        // Check if patient is infected
+        const isInfected = this.isPatientInfected();
+
+        // Build additional info array
+        const additionalInfo = [];
+        if (postOpInfo && postOpInfo.hasStatus) {
+            additionalInfo.push(postOpInfo.statusText);
+        }
+        if (lastInterventionDate) {
+            additionalInfo.push(`Intervento: ${lastInterventionDate}`);
+        }
+        if (isInfected) {
+            additionalInfo.push(`<span class="text-warning fw-bold">⚠️ Infetto</span>`);
+        }
+
         const quickActionsSection = this.options.showClinicalEvents && canEdit
             ? this.renderMobileQuickActions()
             : '';
@@ -66,15 +110,15 @@ export class PatientCard {
         return `
             <div class="card card-list-compact status-${statusClass}">
                 <div class="card-body">
-                    <div>
+                    <div class="card-info">
                         <div class="card-title">${this.patient.cognome} ${this.patient.nome}${postOpBadge}</div>
                         <div class="card-meta mobile-text-sm">
                             ${this.patient.diagnosi} • ${this.patient.reparto_appartenenza}
-                            ${postOpInfo && postOpInfo.hasStatus ? ` • ${postOpInfo.statusText}` : ''}
+                            ${additionalInfo.length > 0 ? ` • ${additionalInfo.join(' • ')}` : ''}
                         </div>
                     </div>
                     <div class="mobile-actions-container">
-                        ${actionButtons ? `<div class="mobile-horizontal" style="gap: 0.25rem;">${actionButtons}</div>` : ''}
+                        ${actionButtons ? `<div class="mobile-primary-actions">${actionButtons}</div>` : ''}
                         ${quickActionsSection}
                     </div>
                 </div>
@@ -89,21 +133,24 @@ export class PatientCard {
     renderMobileQuickActions() {
         return `
             <div class="mobile-quick-actions mt-2">
-                <div class="btn-group btn-group-sm" role="group">
-                    <button type="button" class="btn btn-outline-primary btn-add-intervention" 
+                <div class="mobile-clinical-actions">
+                    <button type="button" class="btn btn-outline-primary mobile-clinical-btn btn-add-intervention" 
                             data-patient-id="${this.patient.id}" 
                             title="Aggiungi Intervento">
-                        <span class="material-icons" style="font-size: 12px;">medical_services</span>
+                        <span class="material-icons">medical_services</span>
+                        <span class="mobile-clinical-text">Intervento</span>
                     </button>
-                    <button type="button" class="btn btn-outline-warning btn-add-infection" 
+                    <button type="button" class="btn btn-outline-warning mobile-clinical-btn btn-add-infection" 
                             data-patient-id="${this.patient.id}" 
                             title="Aggiungi Infezione">
-                        <span class="material-icons" style="font-size: 12px;">warning</span>
+                        <span class="material-icons">warning</span>
+                        <span class="mobile-clinical-text">Infezione</span>
                     </button>
-                    <button type="button" class="btn btn-outline-info btn-view-events" 
+                    <button type="button" class="btn btn-outline-info mobile-clinical-btn btn-view-events" 
                             data-patient-id="${this.patient.id}" 
                             title="Timeline Eventi">
-                        <span class="material-icons" style="font-size: 12px;">timeline</span>
+                        <span class="material-icons">timeline</span>
+                        <span class="mobile-clinical-text">Timeline</span>
                     </button>
                 </div>
             </div>

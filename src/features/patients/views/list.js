@@ -240,63 +240,6 @@ export async function initListView(listData) {
         showError(error);
     }
 
-    // Aggiungi pulsante debug se in ambiente di test
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        // Mostra il pulsante debug nell'interfaccia
-        const debugBtn = document.getElementById('debug-db-btn');
-        if (debugBtn) {
-            debugBtn.style.display = 'inline-block';
-            debugBtn.addEventListener('click', window.debugDatabaseConnection);
-        }
-        
-        // Aggiungi anche il pulsante fisso in alto a destra
-        const fixedDebugBtn = document.createElement('button');
-        fixedDebugBtn.textContent = '🔍 Debug DB';
-        fixedDebugBtn.onclick = window.debugDatabaseConnection;
-        fixedDebugBtn.style.cssText = 'position: fixed; top: 10px; right: 10px; z-index: 1000; padding: 10px; background: #ff9800; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.3);';
-        document.body.appendChild(fixedDebugBtn);
-        
-        logger.log('🟠 Pulsanti debug attivati per localhost');
-    }
+
 }
 
-// Debug function per verificare la connessione al database
-window.debugDatabaseConnection = async function() {
-    logger.log('🔍 DEBUG: Verifica connessione database...');
-    
-    try {
-        // Verifica connessione Supabase
-        const { data: { user }, error: authError } = await supabase.auth.getUser();
-        logger.log('👤 Utente autenticato:', user);
-        if (authError) console.error('❌ Errore auth:', authError);
-
-        // Verifica tabella pazienti
-        const { data: pazienti, error: dbError, count } = await supabase
-            .from('pazienti')
-            .select('*', { count: 'exact' });
-        
-        logger.log('📊 Pazienti trovati:', count);
-        logger.log('📋 Primi 5 pazienti:', pazienti?.slice(0, 5));
-        if (dbError) console.error('❌ Errore database:', dbError);
-
-        // Verifica struttura tabella
-        const { data: tableInfo, error: tableError } = await supabase
-            .from('pazienti')
-            .select('*')
-            .limit(1);
-        
-        if (tableInfo && tableInfo.length > 0) {
-            logger.log('🏗️ Struttura tabella - colonne:', Object.keys(tableInfo[0]));
-        }
-
-        alert(`Debug completato!
-- Utente: ${user ? user.email : 'Non autenticato'}
-- Pazienti nel DB: ${count || 0}
-- Errori: ${authError || dbError || tableError ? 'Si' : 'No'}
-Controlla la console per dettagli.`);
-        
-    } catch (error) {
-        console.error('❌ Errore durante debug:', error);
-        alert('Errore durante debug: ' + error.message);
-    }
-};

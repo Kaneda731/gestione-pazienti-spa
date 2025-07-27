@@ -1,0 +1,187 @@
+/* ===================================
+   PATIENT FORM TABS - Mobile Optimized
+   =================================== */
+
+@media (max-width: 767px) {
+  /* Contenitore delle tab del form paziente */
+  #patient-form-tabs {
+    display: flex !important;
+    justify-content: stretch !important;
+    align-items: stretch !important;
+    margin-bottom: 1.5rem !important;
+    border: none !important;
+    background: transparent !important;
+    gap: 0.5rem !important; /* Spazio tra le tab */
+    padding: 0 !important;
+  }
+
+  /* Ogni elemento tab occupa lo stesso spazio */
+  #patient-form-tabs .nav-item {
+    flex: 1 !important;
+    margin: 0 !important;
+  }
+
+  /* Stile dei pulsanti tab */
+  #patient-form-tabs .nav-link {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 1rem 0.75rem !important;
+    min-height: 80px !important;
+    border: 2px solid var(--border-color) !important;
+    border-radius: 12px !important;
+    background: var(--card-bg) !important;
+    color: var(--text-secondary) !important;
+    font-size: 0.85rem !important;
+    font-weight: 500 !important;
+    text-align: center !important;
+    transition: all 0.3s ease !important;
+    position: relative !important;
+    overflow: hidden !important;
+    text-decoration: none !important;
+    box-shadow: var(--shadow-sm) !important;
+  }
+
+  /* Icone nelle tab */
+  #patient-form-tabs .nav-link .material-icons {
+    font-size: 1.5rem !important;
+    margin-bottom: 0.25rem !important;
+    margin-right: 0 !important; /* Reset margin right */
+    transition: transform 0.2s ease !important;
+  }
+
+  /* Stato hover */
+  #patient-form-tabs .nav-link:hover {
+    border-color: var(--primary-color) !important;
+    background: rgba(var(--primary-rgb), 0.05) !important;
+    color: var(--primary-color) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: var(--shadow-md) !important;
+  }
+
+  #patient-form-tabs .nav-link:hover .material-icons {
+    transform: scale(1.1) !important;
+  }
+
+  /* Stato attivo */
+  #patient-form-tabs .nav-link.active {
+    border-color: var(--primary-color) !important;
+    background: linear-gradient(
+      135deg,
+      var(--primary-color),
+      rgba(var(--primary-rgb), 0.8)
+    ) !important;
+    color: white !important;
+    font-weight: 600 !important;
+    box-shadow: var(--shadow-lg) !important;
+    transform: translateY(-1px) !important;
+  }
+
+  #patient-form-tabs .nav-link.active .material-icons {
+    color: white !important;
+    transform: scale(1.05) !important;
+  }
+
+  /* Indicatore visivo per tab attiva */
+  #patient-form-tabs .nav-link.active::before {
+    content: "" !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 3px !important;
+    background: rgba(255, 255, 255, 0.3) !important;
+    border-radius: 12px 12px 0 0 !important;
+  }
+
+  /* Effetto ripple al tocco */
+  #patient-form-tabs .nav-link::after {
+    content: "" !important;
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    width: 0 !important;
+    height: 0 !important;
+    border-radius: 50% !important;
+    background: rgba(var(--primary-rgb), 0.2) !important;
+    transform: translate(-50%, -50%) !important;
+    transition: width 0.3s ease, height 0.3s ease !important;
+    pointer-events: none !important;
+  }
+
+  #patient-form-tabs .nav-link:active::after {
+    width: 100px !important;
+    height: 100px !important;
+  }
+
+  /* Testo delle tab responsive */
+  #patient-form-tabs .nav-link {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  /* Contenuto delle tab */
+  .tab-content {
+    margin-top: 1rem !important;
+  }
+
+  .tab-pane {
+    animation: fadeInUp 0.3s ease-in-out !important;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+/* Tablet - Layout intermedio */
+@media (min-width: 768px) and (max-width: 991px) {
+  #patient-form-tabs .nav-link {
+    min-height: 70px !important;
+    padding: 0.875rem 1rem !important;
+    font-size: 0.9rem !important;
+  }
+
+  #patient-form-tabs .nav-link .material-icons {
+    font-size: 1.4rem !important;
+  }
+}
+
+/* Desktop - Mantieni stile Bootstrap standard */
+@media (min-width: 992px) {
+  #patient-form-tabs {
+    /* Usa gli stili Bootstrap di default */
+  }
+}
+
+/* Tema scuro */
+[data-bs-theme="dark"] {
+  #patient-form-tabs .nav-link {
+    border-color: var(--border-color) !important;
+    background: var(--card-bg) !important;
+    color: var(--text-secondary) !important;
+  }
+
+  #patient-form-tabs .nav-link:hover {
+    background: rgba(var(--primary-rgb), 0.1) !important;
+    border-color: var(--primary-color) !important;
+  }
+
+  #patient-form-tabs .nav-link.active {
+    background: linear-gradient(
+      135deg,
+      var(--primary-color),
+      rgba(var(--primary-rgb), 0.9)
+    ) !important;
+    box-shadow: 0 4px 20px rgba(var(--primary-rgb), 0.3) !important;
+  }
+}

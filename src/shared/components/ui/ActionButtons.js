@@ -61,20 +61,24 @@ export class ActionButtons {
      */
     renderMobileButtons(isDimesso) {
         const dimissioneButton = isDimesso
-            ? `<button class="btn btn-sm btn-outline-success mobile-compact" data-action="riattiva" data-id="${this.patient.id}" title="Riattiva">
-                 <span class="material-icons mobile-text-xs">undo</span>
+            ? `<button class="btn btn-outline-success mobile-action-btn" data-action="riattiva" data-id="${this.patient.id}" title="Riattiva">
+                 <span class="material-icons">undo</span>
+                 <span class="mobile-btn-text">Riattiva</span>
                </button>`
-            : `<button class="btn btn-sm btn-outline-warning mobile-compact" data-action="dimetti" data-id="${this.patient.id}" title="Dimetti">
-                 <span class="material-icons mobile-text-xs">event_available</span>
+            : `<button class="btn btn-outline-warning mobile-action-btn" data-action="dimetti" data-id="${this.patient.id}" title="Dimetti">
+                 <span class="material-icons">event_available</span>
+                 <span class="mobile-btn-text">Dimetti</span>
                </button>`;
         
         return `
-            <button class="btn btn-sm btn-outline-primary mobile-compact" data-action="edit" data-id="${this.patient.id}" title="Modifica">
-                <span class="material-icons mobile-text-xs">edit</span>
+            <button class="btn btn-outline-primary mobile-action-btn" data-action="edit" data-id="${this.patient.id}" title="Modifica">
+                <span class="material-icons">edit</span>
+                <span class="mobile-btn-text">Modifica</span>
             </button>
             ${dimissioneButton}
-            <button class="btn btn-sm btn-outline-danger mobile-compact" data-action="delete" data-id="${this.patient.id}" title="Elimina">
-                <span class="material-icons mobile-text-xs">delete</span>
+            <button class="btn btn-outline-danger mobile-action-btn" data-action="delete" data-id="${this.patient.id}" title="Elimina">
+                <span class="material-icons">delete</span>
+                <span class="mobile-btn-text">Elimina</span>
             </button>
         `;
     }

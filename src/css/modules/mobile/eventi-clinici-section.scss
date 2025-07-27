@@ -1,0 +1,486 @@
+/* ===================================
+   EVENTI CLINICI SECTION - Mobile Optimized
+   =================================== */
+
+@media (max-width: 767px) {
+  /* Sezione principale eventi clinici */
+  .eventi-clinici-section,
+  #eventi-clinici .row {
+    margin-top: 1rem !important;
+  }
+
+  /* Header della sezione eventi - struttura reale dell'app */
+  #eventi-clinici .d-flex.justify-content-between.align-items-center {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 1rem !important;
+    margin-bottom: 1.5rem !important;
+    padding: 1rem !important;
+    background: linear-gradient(
+      135deg,
+      rgba(var(--success-rgb, 25, 135, 84), 0.05),
+      rgba(var(--success-rgb, 25, 135, 84), 0.02)
+    ) !important;
+    border: 2px solid rgba(var(--success-rgb, 25, 135, 84), 0.1) !important;
+    border-radius: 12px !important;
+    box-shadow: var(--shadow-sm) !important;
+  }
+
+  /* Mantieni anche la classe per i test */
+  .eventi-clinici-header {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 1rem !important;
+    margin-bottom: 1.5rem !important;
+    padding: 1rem !important;
+    background: linear-gradient(
+      135deg,
+      rgba(var(--success-rgb, 25, 135, 84), 0.05),
+      rgba(var(--success-rgb, 25, 135, 84), 0.02)
+    ) !important;
+    border: 2px solid rgba(var(--success-rgb, 25, 135, 84), 0.1) !important;
+    border-radius: 12px !important;
+    box-shadow: var(--shadow-sm) !important;
+  }
+
+  /* Titolo eventi clinici - struttura reale */
+  #eventi-clinici .d-flex.justify-content-between.align-items-center h5,
+  .eventi-clinici-header h5 {
+    display: flex !important;
+    align-items: center !important;
+    margin: 0 !important;
+    color: var(--success-color, #198754) !important;
+    font-weight: 700 !important;
+    font-size: 1rem !important;
+    width: 100% !important;
+  }
+
+  #eventi-clinici .d-flex.justify-content-between.align-items-center h5 .material-icons,
+  .eventi-clinici-header h5 .material-icons {
+    font-size: 1.4rem !important;
+    margin-right: 0.75rem !important;
+    padding: 0.4rem !important;
+    background: rgba(var(--success-rgb, 25, 135, 84), 0.1) !important;
+    border-radius: 50% !important;
+    color: var(--success-color, #198754) !important;
+  }
+
+  /* Pulsante aggiungi evento - struttura reale */
+  #eventi-clinici .d-flex.justify-content-between.align-items-center .btn,
+  .eventi-clinici-header .btn {
+    min-height: 48px !important;
+    padding: 0.875rem 1rem !important;
+    font-size: 0.9rem !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    white-space: nowrap !important;
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 !important;
+  }
+
+  #eventi-clinici .d-flex.justify-content-between.align-items-center .btn .material-icons,
+  .eventi-clinici-header .btn .material-icons {
+    font-size: 1.2rem !important;
+    margin-right: 0.75rem !important;
+    vertical-align: middle !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Testo del pulsante che può essere nascosto su schermi piccoli */
+  .eventi-clinici-header .btn span:not(.material-icons) {
+    flex-shrink: 1 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  /* Su schermi molto piccoli, mostra solo l'icona */
+  @media (max-width: 360px) {
+    .eventi-clinici-header .btn {
+      padding: 0.75rem 0.6rem !important;
+      margin-left: 0.5rem !important;
+    }
+
+    .eventi-clinici-header .btn .material-icons {
+      margin-right: 0 !important;
+    }
+
+    .eventi-clinici-header .btn span:not(.material-icons) {
+      display: none !important;
+    }
+  }
+
+  /* Su schermi medi, abbrevia il testo */
+  @media (max-width: 400px) and (min-width: 361px) {
+    .eventi-clinici-header .btn span:not(.material-icons) {
+      font-size: 0.75rem !important;
+    }
+
+    .eventi-clinici-header .btn span:not(.material-icons)::after {
+      content: "Aggiungi" !important;
+    }
+
+    .eventi-clinici-header .btn span:not(.material-icons) {
+      font-size: 0 !important;
+    }
+  }
+
+  /* Gestione responsive del layout header */
+  @media (max-width: 320px) {
+    .eventi-clinici-header {
+      flex-direction: column !important;
+      align-items: stretch !important;
+      gap: 1rem !important;
+    }
+
+    .eventi-clinici-header .btn {
+      margin-left: 0 !important;
+      width: 100% !important;
+      justify-content: center !important;
+    }
+
+    .eventi-clinici-header .btn span:not(.material-icons) {
+      display: inline !important;
+      font-size: 0.8rem !important;
+    }
+
+    .eventi-clinici-header .btn span:not(.material-icons)::after {
+      content: "Aggiungi Evento" !important;
+    }
+  }
+
+  /* Conteggio giorni post-operatori */
+  #post-op-info {
+    margin-bottom: 1.5rem !important;
+    padding: 1rem !important;
+    border-radius: 12px !important;
+    border: 2px solid rgba(var(--info-rgb, 13, 202, 240), 0.2) !important;
+    background: linear-gradient(
+      135deg,
+      rgba(var(--info-rgb, 13, 202, 240), 0.05),
+      rgba(var(--info-rgb, 13, 202, 240), 0.02)
+    ) !important;
+  }
+
+  #post-op-info .d-flex {
+    align-items: center !important;
+  }
+
+  #post-op-info .material-icons {
+    font-size: 1.5rem !important;
+    color: var(--info-color, #0dcaf0) !important;
+    margin-right: 0.75rem !important;
+    padding: 0.4rem !important;
+    background: rgba(var(--info-rgb, 13, 202, 240), 0.1) !important;
+    border-radius: 50% !important;
+  }
+
+  /* Lista eventi */
+  .eventi-list {
+    min-height: 200px !important;
+    padding: 1.5rem !important;
+    background: var(--card-bg) !important;
+    border: 2px solid var(--border-color) !important;
+    border-radius: 12px !important;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+  }
+
+  /* Messaggio nessun evento */
+  #no-eventi-message {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 2rem 1rem !important;
+    text-align: center !important;
+    color: var(--text-muted) !important;
+    min-height: 150px !important;
+  }
+
+  #no-eventi-message .material-icons {
+    font-size: 3.5rem !important;
+    opacity: 0.4 !important;
+    margin-bottom: 1rem !important;
+    color: var(--text-muted) !important;
+    padding: 1rem !important;
+    background: rgba(var(--text-muted-rgb, 108, 117, 125), 0.1) !important;
+    border-radius: 50% !important;
+  }
+
+  #no-eventi-message p {
+    margin: 0 !important;
+    font-size: 0.95rem !important;
+    font-weight: 500 !important;
+    line-height: 1.4 !important;
+  }
+
+  /* Form nuovo evento */
+  #nuovo-evento-form {
+    margin-top: 1.5rem !important;
+  }
+
+  #nuovo-evento-form .card {
+    border: 2px solid var(--primary-color) !important;
+    border-radius: 12px !important;
+    box-shadow: var(--shadow-md) !important;
+    overflow: hidden !important;
+  }
+
+  #nuovo-evento-form .card-header {
+    background: linear-gradient(
+      135deg,
+      var(--primary-color),
+      rgba(var(--primary-rgb), 0.9)
+    ) !important;
+    border-bottom: none !important;
+    padding: 1rem 1.25rem !important;
+  }
+
+  #nuovo-evento-form .card-header h6 {
+    margin: 0 !important;
+    font-weight: 700 !important;
+    font-size: 1rem !important;
+    color: white !important;
+  }
+
+  #nuovo-evento-form .card-header .material-icons {
+    font-size: 1.2rem !important;
+    margin-right: 0.5rem !important;
+    vertical-align: middle !important;
+  }
+
+  #nuovo-evento-form .card-header .btn {
+    padding: 0.25rem 0.5rem !important;
+    font-size: 0.8rem !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: white !important;
+    border-radius: 6px !important;
+  }
+
+  #nuovo-evento-form .card-header .btn:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+    border-color: rgba(255, 255, 255, 0.5) !important;
+  }
+
+  #nuovo-evento-form .card-body {
+    padding: 1.5rem !important;
+    background: var(--card-bg) !important;
+  }
+
+  /* Campi del form evento */
+  #nuovo-evento-form .form-label {
+    font-weight: 600 !important;
+    color: var(--text-primary) !important;
+    margin-bottom: 0.75rem !important;
+    font-size: 0.9rem !important;
+  }
+
+  #nuovo-evento-form .form-control,
+  #nuovo-evento-form .form-select,
+  #nuovo-evento-form textarea {
+    min-height: 52px !important;
+    font-size: 16px !important;
+    padding: 0.875rem 1rem !important;
+    border: 2px solid rgba(var(--border-color-rgb), 0.3) !important;
+    border-radius: 8px !important;
+    background: var(--input-bg) !important;
+    transition: all 0.3s ease !important;
+  }
+
+  #nuovo-evento-form .form-control:focus,
+  #nuovo-evento-form .form-select:focus,
+  #nuovo-evento-form textarea:focus {
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.15) !important;
+    transform: translateY(-1px) !important;
+  }
+
+  #nuovo-evento-form textarea {
+    min-height: 100px !important;
+    resize: vertical !important;
+  }
+
+  /* Pulsanti del form evento */
+  #nuovo-evento-form .text-end {
+    margin-top: 1.5rem !important;
+    padding-top: 1rem !important;
+    border-top: 1px solid var(--border-color) !important;
+  }
+
+  #nuovo-evento-form .btn {
+    min-height: 48px !important;
+    padding: 0.75rem 1.5rem !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    font-size: 0.9rem !important;
+  }
+
+  #nuovo-evento-form .btn .material-icons {
+    font-size: 1.1rem !important;
+    margin-right: 0.5rem !important;
+    vertical-align: middle !important;
+  }
+
+  /* Campi condizionali */
+  #tipo-intervento-container,
+  #agente-patogeno-container {
+    transition: all 0.3s ease !important;
+  }
+
+  #tipo-intervento-container:not([style*="display: none"]),
+  #agente-patogeno-container:not([style*="display: none"]) {
+    animation: slideInDown 0.3s ease-out !important;
+  }
+
+  @keyframes slideInDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Input con icone */
+  .input-group-icon {
+    position: relative !important;
+  }
+
+  .input-group-icon .input-icon {
+    position: absolute !important;
+    right: 1rem !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    color: var(--text-secondary) !important;
+    font-size: 1.2rem !important;
+    pointer-events: none !important;
+    z-index: 3 !important;
+  }
+
+  .input-group-icon .form-control {
+    padding-right: 3rem !important;
+  }
+}
+
+/* Tablet - Layout orizzontale */
+@media (min-width: 768px) and (max-width: 991px) {
+  #eventi-clinici .d-flex.justify-content-between.align-items-center,
+  .eventi-clinici-header {
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 1rem !important;
+    padding: 0.875rem !important;
+  }
+
+  #eventi-clinici .d-flex.justify-content-between.align-items-center h5,
+  .eventi-clinici-header h5 {
+    font-size: 1.1rem !important;
+    width: auto !important;
+    flex: 1 !important;
+  }
+
+  #eventi-clinici .d-flex.justify-content-between.align-items-center .btn,
+  .eventi-clinici-header .btn {
+    font-size: 0.9rem !important;
+    width: auto !important;
+    min-width: 140px !important;
+    flex-shrink: 0 !important;
+  }
+
+  #nuovo-evento-form .form-control,
+  #nuovo-evento-form .form-select {
+    min-height: 48px !important;
+    font-size: 15px !important;
+  }
+}
+
+/* Desktop - Layout orizzontale ottimizzato */
+@media (min-width: 992px) {
+  #eventi-clinici .d-flex.justify-content-between.align-items-center,
+  .eventi-clinici-header {
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 1.5rem !important;
+    border-radius: 8px !important;
+  }
+
+  #eventi-clinici .d-flex.justify-content-between.align-items-center h5,
+  .eventi-clinici-header h5 {
+    width: auto !important;
+    flex: 1 !important;
+    font-size: 1.2rem !important;
+  }
+
+  #eventi-clinici .d-flex.justify-content-between.align-items-center .btn,
+  .eventi-clinici-header .btn {
+    width: auto !important;
+    min-width: 160px !important;
+    flex-shrink: 0 !important;
+    font-size: 0.9rem !important;
+  }
+
+  #nuovo-evento-form .card {
+    border-radius: 8px !important;
+  }
+}
+
+/* Tema scuro */
+[data-bs-theme="dark"] {
+  .eventi-clinici-header {
+    background: linear-gradient(
+      135deg,
+      rgba(var(--success-rgb, 25, 135, 84), 0.08),
+      rgba(var(--success-rgb, 25, 135, 84), 0.03)
+    ) !important;
+    border-color: rgba(var(--success-rgb, 25, 135, 84), 0.2) !important;
+  }
+
+  .eventi-clinici-header h5 .material-icons {
+    background: rgba(var(--success-rgb, 25, 135, 84), 0.15) !important;
+  }
+
+  #post-op-info {
+    background: linear-gradient(
+      135deg,
+      rgba(var(--info-rgb, 13, 202, 240), 0.08),
+      rgba(var(--info-rgb, 13, 202, 240), 0.03)
+    ) !important;
+    border-color: rgba(var(--info-rgb, 13, 202, 240), 0.25) !important;
+  }
+
+  #post-op-info .material-icons {
+    background: rgba(var(--info-rgb, 13, 202, 240), 0.15) !important;
+  }
+
+  .eventi-list {
+    background: var(--card-bg) !important;
+    border-color: var(--border-color) !important;
+  }
+
+  #no-eventi-message .material-icons {
+    background: rgba(var(--text-muted-rgb, 108, 117, 125), 0.15) !important;
+  }
+
+  #nuovo-evento-form .form-control,
+  #nuovo-evento-form .form-select,
+  #nuovo-evento-form textarea {
+    background: var(--input-bg) !important;
+    border-color: rgba(var(--border-color-rgb), 0.4) !important;
+    color: var(--text-primary) !important;
+  }
+
+  #nuovo-evento-form .form-control:focus,
+  #nuovo-evento-form .form-select:focus,
+  #nuovo-evento-form textarea:focus {
+    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.2) !important;
+  }
+}

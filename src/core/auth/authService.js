@@ -1,4 +1,3 @@
-// src/core/auth/authService.js
 import { supabase } from '../services/supabaseClient.js';
 import { updateAuthUI } from '../../shared/components/ui/AuthUI.js';
 import { oauthManager } from './oauthService.js';

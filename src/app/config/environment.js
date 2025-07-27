@@ -1,5 +1,3 @@
-// src/app/config/environment.js
-
 /**
  * Configurazione dell'ambiente
  */

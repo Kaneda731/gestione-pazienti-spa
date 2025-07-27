@@ -1,3 +1,4 @@
+import { sanitizeHtml } from '../../../shared/utils/sanitizeHtml.js';
 // src/js/services/chartService.js
 
 /**
@@ -106,7 +107,7 @@ export function isChartsReady() {
  * @param {HTMLElement} container - Elemento DOM dove mostrare il loading
  */
 export function showLoadingInContainer(container) {
-    container.innerHTML = '<div class="d-flex justify-content-center align-items-center h-100"><div class="spinner-border text-primary"></div></div>';
+    container.innerHTML = sanitizeHtml('<div class="d-flex justify-content-center align-items-center h-100"><div class="spinner-border text-primary"></div></div>');
 }
 
 /**
@@ -115,7 +116,7 @@ export function showLoadingInContainer(container) {
  * @param {string} message - Messaggio di errore
  */
 export function showErrorInContainer(container, message) {
-    container.innerHTML = `<div class="alert alert-danger"><strong>Errore:</strong> ${message}</div>`;
+    container.innerHTML = sanitizeHtml(`<div class="alert alert-danger"><strong>Errore:</strong> ${message}</div>`);
 }
 
 /**
@@ -125,5 +126,5 @@ export function showErrorInContainer(container, message) {
  * @param {string} className - Classe CSS per il messaggio (default: text-muted)
  */
 export function showMessageInContainer(container, message, className = 'text-muted') {
-    container.innerHTML = `<p class="${className} text-center mt-5">${message}</p>`;
+    container.innerHTML = sanitizeHtml(`<p class="${className} text-center mt-5">${message}</p>`);
 }

@@ -5,6 +5,8 @@
  * Fornisce componenti riutilizzabili per loading, empty state, errori
  */
 
+import { sanitizeHtml } from '../../shared/utils/sanitizeHtml.js';
+
 class UIStateService {
     constructor() {
         this.loadingInstances = new Map();
@@ -29,7 +31,7 @@ class UIStateService {
             originalContent: container.innerHTML
         });
 
-        container.innerHTML = '';
+        container.innerHTML = sanitizeHtml('');
         container.appendChild(loadingElement);
         
         return loadingId;
@@ -41,7 +43,7 @@ class UIStateService {
     hideLoading(loadingId) {
         const instance = this.loadingInstances.get(loadingId);
         if (instance) {
-            instance.container.innerHTML = instance.originalContent;
+            instance.container.innerHTML = sanitizeHtml(instance.originalContent);
             this.loadingInstances.delete(loadingId);
         }
     }
@@ -57,7 +59,7 @@ class UIStateService {
         if (!container) return;
 
         const emptyElement = this.createEmptyElement(message, icon);
-        container.innerHTML = '';
+        container.innerHTML = sanitizeHtml('');
         container.appendChild(emptyElement);
     }
 
@@ -72,7 +74,7 @@ class UIStateService {
         if (!container) return;
 
         const errorElement = this.createErrorElement(message, canRetry, retryCallback);
-        container.innerHTML = '';
+        container.innerHTML = sanitizeHtml('');
         container.appendChild(errorElement);
     }
 
@@ -285,7 +287,7 @@ class UIStateService {
         }
 
         if (container) {
-            container.innerHTML = '';
+            container.innerHTML = sanitizeHtml('');
             renderFunction(container, data);
         }
     }

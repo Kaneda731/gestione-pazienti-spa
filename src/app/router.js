@@ -1,9 +1,8 @@
-// src/app/router.js
-
 import { supabase } from '../core/services/supabaseClient.js';
 import { currentUser } from '../core/auth/authService.js';
 import { logger } from '../core/services/loggerService.js';
 import { isDevelopment } from './config/environment.js';
+import { sanitizeHtml } from '../shared/utils/sanitizeHtml.js';
 
 let currentViewCleanup = null;
 let isNavigating = false;
@@ -166,7 +165,7 @@ export async function renderView() {
             return;
         }
 
-        viewContainer.innerHTML = '<div class="d-flex justify-content-center align-items-center" style="height: 80vh;"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+        viewContainer.innerHTML = sanitizeHtml('<div class="d-flex justify-content-center align-items-center" style="height: 80vh;"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>');
 
         const hash = window.location.hash.substring(1) || 'home';
         const [requestedViewName, queryString] = hash.split('?');
@@ -193,7 +192,7 @@ export async function renderView() {
         
         // Carica l'HTML per la vista richiesta
         const viewHtml = await fetchView(viewToRender);
-        viewContainer.innerHTML = viewHtml;
+        viewContainer.innerHTML = sanitizeHtml(viewHtml);
 
         // Attiva la vista per le animazioni CSS
         const newView = viewContainer.querySelector('.view');
@@ -242,7 +241,7 @@ export async function renderView() {
                 logger.error(`Fallimento caricamento modulo ${viewToRender}:`, moduleError);
                 
                 // Fallback: mostra un messaggio di errore user-friendly
-                viewContainer.innerHTML = `
+                viewContainer.innerHTML = sanitizeHtml(`
                     <div class="container mt-4">
                         <div class="alert alert-warning" role="alert">
                             <h4 class="alert-heading">
@@ -264,7 +263,7 @@ export async function renderView() {
                             ${isDevelopment ? `<details class="mt-3"><summary>Dettagli tecnici (solo sviluppo)</summary><pre class="small mt-2">${moduleError.stack || moduleError.message}</pre></details>` : ''}
                         </div>
                     </div>
-                `;
+                `);
                 
                 // Non bloccare l'esecuzione, l'utente può comunque navigare
                 return;
@@ -297,7 +296,7 @@ export async function renderView() {
     } catch (error) {
         console.error('Errore durante il rendering della vista:', error);
         if(viewContainer) {
-            viewContainer.innerHTML = '<div class="alert alert-danger m-3">Si è verificato un errore critico. Si prega di ricaricare la pagina.</div>';
+            viewContainer.innerHTML = sanitizeHtml('<div class="alert alert-danger m-3">Si è verificato un errore critico. Si prega di ricaricare la pagina.</div>');
         }
     } finally {
         isNavigating = false;

@@ -45,6 +45,7 @@
     "@popperjs/core": "^2.11.8",
     "@supabase/supabase-js": "^2.51.0",
     "bootstrap": "^5.3.7",
+    "dompurify": "^3.2.6",
     "dotenv": "^17.2.0",
     "flatpickr": "^4.6.13",
     "google-charts": "^2.0.0",

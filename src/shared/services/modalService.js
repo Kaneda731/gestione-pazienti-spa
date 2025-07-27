@@ -7,6 +7,8 @@
 // Importa Bootstrap Modal dal servizio centralizzato
 import { Modal } from '../../core/services/bootstrapService.js';
 
+import { sanitizeHtml } from '../utils/sanitizeHtml.js';
+
 /**
  * Mostra un modal di conferma eliminazione
  * @param {Function} onConfirm - Callback da eseguire quando l'utente conferma
@@ -88,15 +90,15 @@ export function showConfirmModal(title, message, confirmText = 'Conferma', cance
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title">${title}</h5>
+                            <h5 class="modal-title">${sanitizeHtml(title)}</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
                         <div class="modal-body">
-                            <p>${message}</p>
+                            <p>${sanitizeHtml(message)}</p>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">${cancelText}</button>
-                            <button type="button" class="btn btn-danger" id="temp-confirm-btn">${confirmText}</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">${sanitizeHtml(cancelText)}</button>
+                            <button type="button" class="btn btn-danger" id="temp-confirm-btn">${sanitizeHtml(confirmText)}</button>
                         </div>
                     </div>
                 </div>
@@ -105,7 +107,7 @@ export function showConfirmModal(title, message, confirmText = 'Conferma', cance
 
         // Inserisci nel DOM
         const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = modalHtml;
+        tempDiv.innerHTML = sanitizeHtml(modalHtml);
         document.body.appendChild(tempDiv);
 
         const modalElement = document.getElementById('temp-confirm-modal');

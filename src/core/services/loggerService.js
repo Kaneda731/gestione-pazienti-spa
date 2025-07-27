@@ -1,5 +1,3 @@
-// src/core/services/loggerService.js
-
 import { isDevelopment, isTest } from '../../app/config/environment.js';
 
 /**

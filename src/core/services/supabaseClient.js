@@ -1,4 +1,4 @@
-// src/js/services/supabaseClient.js
+
 import { createClient } from '@supabase/supabase-js';
 
 // Le variabili d'ambiente sono l'unica fonte di verità.

@@ -191,6 +191,7 @@ export function resetView() {
  * @param {string} message 
  * @param {'info'|'success'|'error'} type 
  */
+export function showFeedback(message, type) {
     switch(type) {
         case 'success':
             notificationService.success(message);

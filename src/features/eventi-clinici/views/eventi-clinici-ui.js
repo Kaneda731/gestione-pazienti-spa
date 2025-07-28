@@ -40,6 +40,10 @@ export function initializeDOMElements() {
     exportJsonBtn: document.getElementById("eventi-export-json-btn"),
     saveFiltersBtn: document.getElementById("eventi-save-filters-btn"),
     loadFiltersBtn: document.getElementById("eventi-load-filters-btn"),
+    
+    // Advanced filters
+    advancedFiltersToggle: document.querySelector('[data-bs-target="#advanced-filters"]'),
+    advancedFiltersContainer: document.getElementById("advanced-filters"),
 
     // Pagination
     paginationControls: document.getElementById("eventi-pagination-controls"),

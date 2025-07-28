@@ -116,6 +116,9 @@ export async function initEventiCliniciView(urlParams) {
     // Setup event listeners
     setupEventListeners();
 
+    // Initialize advanced filters state
+    initializeAdvancedFiltersState();
+
     // Apply responsive design
     applyResponsiveDesign();
 
@@ -348,6 +351,61 @@ function setupFilterListeners() {
     };
     domElements.filterSortDirection.addEventListener('change', handler);
     cleanupFunctions.push(() => domElements.filterSortDirection.removeEventListener('change', handler));
+  }
+
+  // Advanced filters toggle button
+  if (domElements.advancedFiltersToggle && domElements.advancedFiltersContainer) {
+    const handler = (event) => {
+      // Previeni il comportamento di default di Bootstrap
+      event.preventDefault();
+      event.stopPropagation();
+      
+      const isExpanded = domElements.advancedFiltersContainer.classList.contains('show');
+      
+      // Toggle manuale del collapse
+      if (isExpanded) {
+        domElements.advancedFiltersContainer.classList.remove('show');
+        domElements.advancedFiltersToggle.setAttribute('aria-expanded', 'false');
+      } else {
+        domElements.advancedFiltersContainer.classList.add('show');
+        domElements.advancedFiltersToggle.setAttribute('aria-expanded', 'true');
+      }
+      
+      // Aggiorna rotazione icona
+      const icon = domElements.advancedFiltersToggle.querySelector('.material-icons');
+      if (icon) {
+        icon.style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(180deg)';
+      }
+      
+      logger.log(`🔧 Filtri avanzati ${isExpanded ? 'chiusi' : 'aperti'}`);
+    };
+    
+    // Rimuovi gli attributi Bootstrap per evitare conflitti
+    domElements.advancedFiltersToggle.removeAttribute('data-bs-toggle');
+    domElements.advancedFiltersToggle.removeAttribute('data-bs-target');
+    
+    domElements.advancedFiltersToggle.addEventListener('click', handler);
+    cleanupFunctions.push(() => domElements.advancedFiltersToggle.removeEventListener('click', handler));
+  }
+}
+
+/**
+ * Inizializza lo stato dei filtri avanzati
+ */
+function initializeAdvancedFiltersState() {
+  if (domElements.advancedFiltersToggle && domElements.advancedFiltersContainer) {
+    // Assicurati che i filtri siano nascosti inizialmente
+    domElements.advancedFiltersContainer.classList.remove('show');
+    domElements.advancedFiltersToggle.setAttribute('aria-expanded', 'false');
+    
+    // Imposta l'icona nello stato iniziale
+    const icon = domElements.advancedFiltersToggle.querySelector('.material-icons');
+    if (icon) {
+      icon.style.transform = 'rotate(0deg)';
+      icon.style.transition = 'transform 0.3s ease';
+    }
+    
+    logger.log('✅ Stato iniziale filtri avanzati impostato (nascosti)');
   }
 }
 

@@ -56,7 +56,10 @@
     width: 100% !important;
   }
 
-  #eventi-clinici .d-flex.justify-content-between.align-items-center h5 .material-icons,
+  #eventi-clinici
+    .d-flex.justify-content-between.align-items-center
+    h5
+    .material-icons,
   .eventi-clinici-header h5 .material-icons {
     font-size: 1.4rem !important;
     margin-right: 0.75rem !important;
@@ -82,7 +85,10 @@
     margin: 0 !important;
   }
 
-  #eventi-clinici .d-flex.justify-content-between.align-items-center .btn .material-icons,
+  #eventi-clinici
+    .d-flex.justify-content-between.align-items-center
+    .btn
+    .material-icons,
   .eventi-clinici-header .btn .material-icons {
     font-size: 1.2rem !important;
     margin-right: 0.75rem !important;
@@ -305,6 +311,159 @@
     resize: vertical !important;
   }
 
+  /* Pulsanti del form evento - Best Practice UX */
+  #nuovo-evento-form .text-end {
+    margin-top: 1.5rem !important;
+    padding-top: 1rem !important;
+    border-top: 1px solid var(--border-color) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+  }
+
+  /* Stili base per tutti i pulsanti del form */
+  #nuovo-evento-form .btn {
+    min-height: 52px !important; /* Apple: minimo 44pt, usiamo 52px per touch ottimale */
+    padding: 1rem 1.5rem !important;
+    font-weight: 700 !important;
+    border-radius: 12px !important;
+    font-size: 0.95rem !important;
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.3s ease !important;
+    text-transform: none !important; /* Evita maiuscole per leggibilità */
+    letter-spacing: 0.3px !important;
+    box-shadow: var(--shadow-sm) !important;
+    position: relative !important;
+    overflow: hidden !important;
+  }
+
+  #nuovo-evento-form .btn .material-icons {
+    font-size: 1.3rem !important;
+    margin-right: 0.75rem !important;
+    vertical-align: middle !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Pulsante Salva Evento - Stile primario prominente */
+  #save-evento-btn {
+    background: linear-gradient(135deg, #198754, #157347) !important;
+    border: 2px solid #198754 !important;
+    color: white !important;
+    font-weight: 800 !important;
+    order: 2 !important; /* Appare per ultimo (più prominente) */
+  }
+
+  #save-evento-btn:hover {
+    background: linear-gradient(135deg, #157347, #146c43) !important;
+    border-color: #146c43 !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 25px rgba(25, 135, 84, 0.3) !important;
+  }
+
+  #save-evento-btn:active {
+    transform: translateY(0) !important;
+    box-shadow: 0 4px 15px rgba(25, 135, 84, 0.2) !important;
+  }
+
+  /* Effetto shimmer per feedback visivo */
+  #save-evento-btn::before {
+    content: "" !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: -100% !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.2),
+      transparent
+    ) !important;
+    transition: left 0.5s ease !important;
+  }
+
+  #save-evento-btn:hover::before {
+    left: 100% !important;
+  }
+
+  /* Pulsanti Annulla - Stile secondario */
+  #cancel-evento-btn,
+  #cancel-evento-btn-2 {
+    background: var(--card-bg) !important;
+    border: 2px solid var(--border-color) !important;
+    color: var(--text-secondary) !important;
+    order: 1 !important; /* Appare per primo (meno prominente) */
+  }
+
+  #cancel-evento-btn:hover,
+  #cancel-evento-btn-2:hover {
+    background: #6c757d !important;
+    border-color: #6c757d !important;
+    color: white !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 15px rgba(108, 117, 125, 0.2) !important;
+  }
+
+  /* Stato loading per il pulsante salva */
+  #save-evento-btn.loading {
+    pointer-events: none !important;
+    opacity: 0.8 !important;
+  }
+
+  #save-evento-btn.loading::after {
+    content: "" !important;
+    position: absolute !important;
+    width: 20px !important;
+    height: 20px !important;
+    border: 2px solid rgba(255, 255, 255, 0.3) !important;
+    border-top: 2px solid white !important;
+    border-radius: 50% !important;
+    animation: spin 1s linear infinite !important;
+  }
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Layout responsive dei pulsanti */
+  @media (max-width: 480px) {
+    #nuovo-evento-form .text-end {
+      flex-direction: column !important;
+    }
+
+    #nuovo-evento-form .btn {
+      width: 100% !important;
+      margin: 0 !important;
+    }
+  }
+
+  @media (min-width: 481px) {
+    #nuovo-evento-form .text-end {
+      flex-direction: row !important;
+      justify-content: flex-end !important;
+    }
+
+    #cancel-evento-btn,
+    #cancel-evento-btn-2 {
+      width: auto !important;
+      min-width: 140px !important;
+      margin-right: 0.75rem !important;
+    }
+
+    #save-evento-btn {
+      width: auto !important;
+      min-width: 180px !important;
+    }
+  }
+
   /* Pulsanti del form evento */
   #nuovo-evento-form .text-end {
     margin-top: 1.5rem !important;
@@ -482,5 +641,313 @@
   #nuovo-evento-form .form-select:focus,
   #nuovo-evento-form textarea:focus {
     box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.2) !important;
+  }
+
+  /* Pulsanti tema scuro */
+  #save-evento-btn {
+    background: linear-gradient(135deg, #198754, #157347) !important;
+    box-shadow: 0 4px 20px rgba(25, 135, 84, 0.3) !important;
+  }
+
+  #save-evento-btn:hover {
+    box-shadow: 0 8px 30px rgba(25, 135, 84, 0.4) !important;
+  }
+
+  #cancel-evento-btn,
+  #cancel-evento-btn-2 {
+    background: var(--card-bg) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-secondary) !important;
+  }
+
+  #cancel-evento-btn:hover,
+  #cancel-evento-btn-2:hover {
+    background: #495057 !important;
+    border-color: #495057 !important;
+    color: white !important;
+  }
+}
+/* ===================================
+   EVENTI CLINICI PAGE - Mobile Optimized
+   =================================== */
+
+/* Pulsante "Nuovo Evento" nella pagina eventi clinici */
+#eventi-add-btn {
+  min-height: 52px !important;
+  padding: 1rem 1.5rem !important;
+  font-weight: 700 !important;
+  border-radius: 12px !important;
+  font-size: 0.95rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.3s ease !important;
+  letter-spacing: 0.3px !important;
+  box-shadow: var(--shadow-sm) !important;
+  background: linear-gradient(
+    135deg,
+    var(--primary-color),
+    rgba(var(--primary-rgb), 0.8)
+  ) !important;
+  border: 2px solid var(--primary-color) !important;
+  color: white !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+#eventi-add-btn:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(var(--primary-rgb), 0.9),
+    rgba(var(--primary-rgb), 0.7)
+  ) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+
+#eventi-add-btn .material-icons {
+  font-size: 1.3rem !important;
+  margin-right: 0.75rem !important;
+  flex-shrink: 0 !important;
+}
+
+/* Pulsante "Salva Evento" nel modal della pagina eventi clinici */
+#evento-save-btn {
+  min-height: 52px !important;
+  padding: 1rem 1.5rem !important;
+  font-weight: 700 !important;
+  border-radius: 12px !important;
+  font-size: 0.95rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.3s ease !important;
+  letter-spacing: 0.3px !important;
+  box-shadow: var(--shadow-sm) !important;
+  background: linear-gradient(135deg, #198754, #157347) !important;
+  border: 2px solid #198754 !important;
+  color: white !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+#evento-save-btn:hover {
+  background: linear-gradient(135deg, #157347, #146c43) !important;
+  border-color: #146c43 !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 25px rgba(25, 135, 84, 0.3) !important;
+}
+
+#evento-save-btn .material-icons {
+  font-size: 1.3rem !important;
+  margin-right: 0.75rem !important;
+  flex-shrink: 0 !important;
+}
+
+/* Effetto shimmer per i pulsanti principali */
+#eventi-add-btn::before,
+#evento-save-btn::before {
+  content: "" !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: -100% !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  ) !important;
+  transition: left 0.5s ease !important;
+}
+
+#eventi-add-btn:hover::before,
+#evento-save-btn:hover::before {
+  left: 100% !important;
+}
+
+/* Pulsanti secondari nel modal */
+#evento-form-modal .btn-secondary {
+  min-height: 52px !important;
+  padding: 1rem 1.5rem !important;
+  font-weight: 600 !important;
+  border-radius: 12px !important;
+  font-size: 0.95rem !important;
+  background: var(--card-bg) !important;
+  border: 2px solid var(--border-color) !important;
+  color: var(--text-secondary) !important;
+  transition: all 0.3s ease !important;
+}
+
+#evento-form-modal .btn-secondary:hover {
+  background: #6c757d !important;
+  border-color: #6c757d !important;
+  color: white !important;
+  transform: translateY(-1px) !important;
+  box-shadow: var(--shadow-md) !important;
+}
+
+/* Pulsanti di azione nel detail modal */
+#evento-edit-btn {
+  min-height: 48px !important;
+  padding: 0.875rem 1.25rem !important;
+  font-weight: 600 !important;
+  border-radius: 10px !important;
+  background: linear-gradient(135deg, #0d6efd, #0b5ed7) !important;
+  border: 2px solid #0d6efd !important;
+  color: white !important;
+  transition: all 0.3s ease !important;
+}
+
+#evento-edit-btn:hover {
+  background: linear-gradient(135deg, #0b5ed7, #0a58ca) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 15px rgba(13, 110, 253, 0.3) !important;
+}
+
+#evento-delete-btn {
+  min-height: 48px !important;
+  padding: 0.875rem 1.25rem !important;
+  font-weight: 600 !important;
+  border-radius: 10px !important;
+  background: linear-gradient(135deg, #dc3545, #bb2d3b) !important;
+  border: 2px solid #dc3545 !important;
+  color: white !important;
+  transition: all 0.3s ease !important;
+}
+
+#evento-delete-btn:hover {
+  background: linear-gradient(135deg, #bb2d3b, #b02a37) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3) !important;
+}
+
+/* Layout responsive per i pulsanti del modal */
+@media (max-width: 576px) {
+  #evento-form-modal .modal-footer {
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+  }
+
+  #evento-form-modal .modal-footer .btn {
+    width: 100% !important;
+  }
+
+  #evento-detail-modal .modal-footer {
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+  }
+
+  #evento-detail-modal .modal-footer .btn {
+    width: 100% !important;
+  }
+}
+
+/* Pulsanti filtri e azioni nella pagina eventi */
+#eventi-reset-filters-btn,
+.btn-group .btn {
+  min-height: 44px !important;
+  padding: 0.75rem 1rem !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+  transition: all 0.3s ease !important;
+}
+
+#eventi-reset-filters-btn:hover,
+.btn-group .btn:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+/* Responsive per la barra azioni */
+@media (max-width: 768px) {
+  .d-flex.justify-content-between.align-items-center {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 1rem !important;
+  }
+
+  .d-flex.flex-wrap {
+    justify-content: center !important;
+  }
+
+  #eventi-add-btn {
+    width: 100% !important;
+    order: -1 !important; /* Mette il pulsante principale per primo */
+  }
+}
+
+/* Stato loading per i pulsanti */
+#evento-save-btn.loading,
+#eventi-add-btn.loading {
+  pointer-events: none !important;
+  opacity: 0.8 !important;
+}
+
+#evento-save-btn.loading::after,
+#eventi-add-btn.loading::after {
+  content: "" !important;
+  position: absolute !important;
+  width: 20px !important;
+  height: 20px !important;
+  border: 2px solid rgba(255, 255, 255, 0.3) !important;
+  border-top: 2px solid white !important;
+  border-radius: 50% !important;
+  animation: spin 1s linear infinite !important;
+}
+/* Pulsa
+nte filtri avanzati */
+[data-bs-target="#advanced-filters"] {
+  min-height: 44px !important;
+  padding: 0.75rem !important;
+  border-radius: 8px !important;
+  transition: all 0.3s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+[data-bs-target="#advanced-filters"]:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+[data-bs-target="#advanced-filters"] .material-icons {
+  font-size: 1.2rem !important;
+  transition: transform 0.3s ease !important;
+}
+
+[data-bs-target="#advanced-filters"][aria-expanded="true"] .material-icons {
+  transform: rotate(180deg) !important;
+}
+
+/* Container filtri avanzati */
+#advanced-filters {
+  transition: all 0.3s ease !important;
+  overflow: hidden !important;
+}
+
+/* Stato nascosto di default */
+#advanced-filters:not(.show) {
+  display: none !important;
+}
+
+/* Stato visibile */
+#advanced-filters.show {
+  display: block !important;
+  animation: slideDown 0.3s ease-out !important;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    max-height: 500px;
   }
 }

@@ -15,9 +15,6 @@ export function createNotificationElement({
     settings,
     timers,
     removeNotification,
-    startProgressBarAnimation,
-    pauseProgressBarAnimation,
-    resumeProgressBarAnimation,
     startAutoCloseTimer,
     pauseAutoCloseTimer,
     resumeAutoCloseTimer,
@@ -87,7 +84,7 @@ export function createNotificationElement({
     const notificationDuration = getDurationForType(notification.type, options.duration);
     if (notificationDuration > 0 && !options.persistent) {
         contentHtml += `
-            <div class="notification__progress" 
+            <div class="notification__progress notification__progress--active" 
                  aria-hidden="true" 
                  role="progressbar"
                  aria-label="Tempo rimanente prima della chiusura automatica"
@@ -103,9 +100,6 @@ export function createNotificationElement({
         removeNotification,
         pauseAutoCloseTimer,
         resumeAutoCloseTimer,
-        pauseProgressBarAnimation,
-        resumeProgressBarAnimation,
-        startProgressBarAnimation,
         notificationContainer
     });
 
@@ -124,8 +118,7 @@ export function createNotificationElement({
             timers,
             notification.id,
             notificationDuration,
-            () => removeNotification(notification.id),
-            (id, duration) => startProgressBarAnimation(id, duration)
+            () => removeNotification(notification.id)
         );
     }
 

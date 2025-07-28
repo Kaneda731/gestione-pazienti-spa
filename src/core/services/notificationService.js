@@ -154,9 +154,6 @@ class NotificationService {
             settings: this.settings,
             timers: this.timers,
             removeNotification: (id) => this.removeNotification(id),
-            startProgressBarAnimation: (id, duration) => this.startProgressBarAnimation(id, duration),
-            pauseProgressBarAnimation: (id) => this.pauseProgressBarAnimation(id),
-            resumeProgressBarAnimation: (id, remaining) => this.resumeProgressBarAnimation(id, remaining),
             startAutoCloseTimer: startAutoCloseTimer,
             pauseAutoCloseTimer: pauseAutoCloseTimer,
             resumeAutoCloseTimer: resumeAutoCloseTimer,
@@ -170,17 +167,6 @@ class NotificationService {
         this.notificationContainer.addNotification(element);
     }
 
-    startProgressBarAnimation(id, duration) {
-        if (!this.notificationContainer) return;
-        const element = this.notificationContainer.container?.querySelector(`[data-id="${id}"]`);
-        const progressBar = element?.querySelector('.notification__progress');
-        if (progressBar) {
-            progressBar.style.animation = 'none';
-            progressBar.offsetHeight; // Trigger reflow
-            progressBar.style.animation = `progress-bar-animation ${duration / 1000}s linear forwards`;
-        }
-    }
-
     /**
      * Rimuove una notifica con animazione e cleanup completo
      */
@@ -189,7 +175,7 @@ class NotificationService {
             console.log('🔧 removeNotification called for id:', id);
         }
         // Pulisci timer e progress bar
-        stopAutoCloseTimer(this.timers, id, (id) => this.stopProgressBarAnimation(id));
+        stopAutoCloseTimer(this.timers, id);
 
         if (this.notificationContainer) {
             const element = this.notificationContainer.container?.querySelector(`[data-id="${id}"]`);
@@ -245,28 +231,6 @@ class NotificationService {
                 console.error('[NotificationService] ERRORE: la notifica', id, 'è ancora nello stato dopo removeNotification!');
             }
         }
-    }
-
-    pauseProgressBarAnimation(id) {
-        if (!this.notificationContainer) return;
-        const element = this.notificationContainer.container?.querySelector(`[data-id="${id}"]`);
-        const progressBar = element?.querySelector('.notification__progress');
-        if (progressBar) {
-            progressBar.style.animationPlayState = 'paused';
-        }
-    }
-
-    resumeProgressBarAnimation(id, remainingTime) {
-        if (!this.notificationContainer) return;
-        const element = this.notificationContainer.container?.querySelector(`[data-id="${id}"]`);
-        const progressBar = element?.querySelector('.notification__progress');
-        if (progressBar) {
-            progressBar.style.animationPlayState = 'running';
-        }
-    }
-
-    stopProgressBarAnimation(id) {
-        // La logica di stop è già gestita in removeNotification
     }
 
     /**

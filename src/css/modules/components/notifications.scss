@@ -455,10 +455,6 @@
     transition: opacity 0.2s ease-in-out, height 0.2s ease-in-out;
     z-index: 1;
 
-    &--active {
-        opacity: 1;
-    }
-
     &::after {
         content: '';
         position: absolute;
@@ -474,8 +470,12 @@
         will-change: transform;
     }
 
-    &--active::after {
-        animation: progressCountdown var(--progress-duration, 4s) linear forwards;
+    &--active {
+        opacity: 1;
+
+        &::after {
+            animation: progressCountdown var(--progress-duration, 4s) linear forwards;
+        }
     }
 
     &--paused::after {

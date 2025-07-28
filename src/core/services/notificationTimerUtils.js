@@ -13,7 +13,7 @@ export function placeholderTimerUtils() {}
  * @param {Function} removeNotification
  * @param {Function} startProgressBarAnimation
  */
-export function startAutoCloseTimer(timers, notificationId, duration, removeNotification, startProgressBarAnimation) {
+export function startAutoCloseTimer(timers, notificationId, duration, removeNotification) {
     if (timers.has(notificationId)) {
         clearTimeout(timers.get(notificationId).timeoutId);
     }
@@ -32,37 +32,29 @@ export function startAutoCloseTimer(timers, notificationId, duration, removeNoti
         isPaused: false,
         pauseStartTime: null
     });
-    if (typeof startProgressBarAnimation === 'function') {
-        startProgressBarAnimation(notificationId, duration);
-    }
 }
 
 /**
  * Pausa il timer di auto-close
  * @param {Map} timers
  * @param {string} notificationId
- * @param {Function} pauseProgressBarAnimation
  */
-export function pauseAutoCloseTimer(timers, notificationId, pauseProgressBarAnimation) {
+export function pauseAutoCloseTimer(timers, notificationId) {
     const timer = timers.get(notificationId);
     if (!timer || timer.isPaused) return;
     clearTimeout(timer.timeoutId);
     timer.remainingTime = timer.originalDuration - (Date.now() - timer.startTime);
     timer.isPaused = true;
     timer.pauseStartTime = Date.now();
-    if (typeof pauseProgressBarAnimation === 'function') {
-        pauseProgressBarAnimation(notificationId);
-    }
 }
 
 /**
  * Riprende il timer di auto-close
  * @param {Map} timers
  * @param {string} notificationId
- * @param {Function} resumeProgressBarAnimation
  * @param {Function} removeNotification
  */
-export function resumeAutoCloseTimer(timers, notificationId, resumeProgressBarAnimation, removeNotification) {
+export function resumeAutoCloseTimer(timers, notificationId, removeNotification) {
     const timer = timers.get(notificationId);
     if (!timer || !timer.isPaused) return;
     timer.startTime = Date.now();
@@ -72,24 +64,17 @@ export function resumeAutoCloseTimer(timers, notificationId, resumeProgressBarAn
     }, timer.remainingTime);
     timer.isPaused = false;
     timer.pauseStartTime = null;
-    if (typeof resumeProgressBarAnimation === 'function') {
-        resumeProgressBarAnimation(notificationId, timer.remainingTime);
-    }
 }
 
 /**
  * Ferma completamente il timer di auto-close
  * @param {Map} timers
  * @param {string} notificationId
- * @param {Function} stopProgressBarAnimation
  */
-export function stopAutoCloseTimer(timers, notificationId, stopProgressBarAnimation) {
+export function stopAutoCloseTimer(timers, notificationId) {
     const timer = timers.get(notificationId);
     if (timer) {
         clearTimeout(timer.timeoutId);
         timers.delete(notificationId);
-    }
-    if (typeof stopProgressBarAnimation === 'function') {
-        stopProgressBarAnimation(notificationId);
     }
 }

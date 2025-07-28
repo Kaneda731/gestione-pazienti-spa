@@ -193,7 +193,7 @@ export class EventiCliniciModalManager {
 
     } catch (error) {
       logger.error('❌ Errore visualizzazione dettagli evento:', error);
-      notificationService.error('Errore nel caricamento dei dettagli');
+      // La notifica di errore è già gestita dal service/api layer.
     }
   }
 
@@ -221,7 +221,7 @@ export class EventiCliniciModalManager {
 
     } catch (error) {
       logger.error('❌ Errore modifica evento:', error);
-      notificationService.error('Errore nell\'apertura del form di modifica');
+      // La notifica di errore è già gestita dal service/api layer.
     }
   }
 

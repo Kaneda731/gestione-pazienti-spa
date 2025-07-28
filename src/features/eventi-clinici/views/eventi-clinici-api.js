@@ -847,7 +847,9 @@ export async function exportFilteredEvents(format = 'csv') {
     });
 
     if (!allEventsResult.eventi || allEventsResult.eventi.length === 0) {
-      throw new Error('Nessun evento da esportare con i filtri correnti');
+      // Usa una notifica di warning invece di lanciare un errore
+      notificationService.warning('Nessun evento da esportare con i filtri correnti');
+      return { success: false, count: 0 };
     }
 
     let exportData;
@@ -891,6 +893,9 @@ export async function exportFilteredEvents(format = 'csv') {
       eventi: allEventsResult.eventi.length,
       filename
     });
+
+    // Aggiungi notifica di successo qui per centralizzare la logica
+    notificationService.success(`Esportati ${allEventsResult.eventi.length} eventi con successo!`);
 
     return {
       success: true,
@@ -1011,6 +1016,8 @@ export async function resetFiltersAndState() {
     logger.log('✅ Reset completo completato:', {
       risultati: result.eventi.length
     });
+
+    notificationService.success('Filtri resettati con successo');
 
     return result;
   } catch (error) {

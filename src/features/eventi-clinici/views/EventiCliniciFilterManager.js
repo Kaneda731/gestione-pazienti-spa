@@ -242,13 +242,9 @@ export class EventiCliniciFilterManager {
       showActiveFiltersIndicator(getCurrentFilters());
       await this.updateFilterStatsCallback();
 
-      // Temporarily commented out to prevent notification flood
-      // notificationService.success('Filtri resettati');
-
     } catch (error) {
       logger.error('❌ Errore reset filtri:', error);
-      // Temporarily commented out to prevent notification flood
-      // notificationService.error('Errore nel reset dei filtri');
+      // La notifica di errore è già gestita dalla funzione resetFiltersAndState.
     } finally {
       hideSearchingState();
     }

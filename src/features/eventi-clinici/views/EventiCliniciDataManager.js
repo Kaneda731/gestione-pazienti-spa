@@ -95,13 +95,15 @@ export class EventiCliniciDataManager {
       showExportProgress(true);
 
       const result = await exportFilteredEvents(format);
-      showExportSuccess(result);
-
-      notificationService.success(`Eventi esportati con successo in formato ${format.toUpperCase()}`);
+      
+      // Mostra il feedback UI solo se l'esportazione ha avuto successo
+      if (result && result.success) {
+        showExportSuccess(result);
+      }
 
     } catch (error) {
-      logger.error('❌ Errore export eventi:', error);
-      notificationService.error(error.message || 'Errore nell\'esportazione');
+      // Le notifiche di errore e warning sono già gestite da exportFilteredEvents.
+      logger.error('❌ Errore export eventi catturato nel DataManager:', error);
     } finally {
       showExportProgress(false);
     }

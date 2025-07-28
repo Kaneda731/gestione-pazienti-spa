@@ -1,6 +1,6 @@
 // src/features/patients/views/list-api.js
 import { supabase } from '../../../core/services/supabaseClient.js';
-import { state, domElements } from './list-state-migrated.js';
+import { state, domElements, getCurrentFilters } from './list-state-migrated.js';
 import { convertToCSV } from '../../../shared/utils/index.js';
 import { patientService } from '../services/patientService.js';
 import { logger } from '../../../core/services/loggerService.js';
@@ -148,31 +148,19 @@ export async function fetchPazienti() {
 }
 
 export async function exportPazientiToCSV() {
+    if (!domElements.exportButton) return;
+
     const originalBtnContent = domElements.exportButton.innerHTML;
     domElements.exportButton.disabled = true;
     domElements.exportButton.innerHTML = sanitizeHtml(`<span class="spinner-border spinner-border-sm"></span> Esportazione...`);
 
     try {
-        let query = buildBaseQuery().order(state.sortColumn, { ascending: state.sortDirection === 'asc' });
-
-        const { data, error } = await query;
-        if (error) throw error;
-        if (data.length === 0) {
-            alert('Nessun dato da esportare per i filtri selezionati.');
-            return;
-        }
-
-        const csvContent = convertToCSV(data);
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = 'esportazione_pazienti.csv';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        // Usa il servizio centralizzato che gestisce anche le notifiche e lo stato di caricamento
+        const filters = getCurrentFilters();
+        await patientService.exportPatients(filters);
     } catch (error) {
-        console.error('Errore durante l\'esportazione CSV:', error);
-        alert(`Errore durante l\'esportazione: ${error.message}`);
+        // L'errore è già notificato dal service, lo logghiamo per debug
+        logger.error("Errore catturato in list-api durante l'esportazione CSV:", error);
     } finally {
         domElements.exportButton.disabled = false;
         domElements.exportButton.innerHTML = sanitizeHtml(originalBtnContent);
@@ -180,73 +168,28 @@ export async function exportPazientiToCSV() {
 }
 
 export async function updatePazienteStatus(pazienteId, isDimissione) {
-    const updateData = isDimissione 
-        ? { data_dimissione: new Date().toISOString().split('T')[0] }
-        : {
-            // Quando si riattiva un paziente, cancella tutti i dati di dimissione
-            data_dimissione: null,
-            tipo_dimissione: null,
-            reparto_destinazione: null,
-            clinica_destinazione: null,
-            codice_clinica: null,
-            codice_dimissione: null
-        };
-    
     try {
-        const { data, error } = await supabase
-            .from('pazienti')
-            .update(updateData)
-            .eq('id', pazienteId)
-            .select();
-
-        if (error) throw error;
-
-        if (!data || data.length === 0) {
-            alert('Operazione non riuscita. Il paziente non è stato trovato o non si hanno i permessi per modificarlo.');
-            logger.warn('Nessuna riga modificata per l-ID:', pazienteId);
-            return;
+        if (isDimissione) {
+            await patientService.dischargePatient(pazienteId);
+        } else {
+            await patientService.reactivatePatient(pazienteId);
         }
-        
-
-        
     } catch (error) {
-        console.error('Errore durante l\'aggiornamento dello stato del paziente:', error);
-        alert(`Errore: ${error.message}`);
+        // Le notifiche di errore sono già gestite dal service
+        logger.error(`❌ Errore durante l'aggiornamento dello stato del paziente ${pazienteId}:`, error);
+        throw error; // Rilancia l'errore per il chiamante se necessario
     }
 }
 
 export async function deletePaziente(pazienteId) {
     try {
-        logger.log('🗑️ Inizio eliminazione paziente ID:', pazienteId);
-        
-        // Verifica prima dell'eliminazione
-        const { count: beforeCount } = await supabase
-            .from('pazienti')
-            .select('*', { count: 'exact' });
-        logger.log('📊 Conteggio prima eliminazione:', beforeCount);
-        
-        // Esegui eliminazione
-        const { error } = await supabase
-            .from('pazienti')
-            .delete()
-            .eq('id', pazienteId);
-            
-        if (error) throw error;
-        
-        // Verifica dopo eliminazione
-        const { count: afterCount } = await supabase
-            .from('pazienti')
-            .select('*', { count: 'exact' });
-        logger.log('📊 Conteggio dopo eliminazione:', afterCount);
-        logger.log('✅ Paziente eliminato correttamente. Differenza:', beforeCount - afterCount);
-        
-        // Invalida cache per forzare refresh
-        patientService.invalidateCache();
-        logger.log('🔄 Cache invalidata');
-        
+        // Utilizza il servizio centralizzato che gestisce anche le notifiche
+        await patientService.deletePatient(pazienteId);
+        logger.log('✅ Chiamata a patientService.deletePatient completata per ID:', pazienteId);
     } catch (error) {
         console.error('❌ Errore eliminazione paziente:', error);
-        alert(`Errore: ${error.message}`);
+        // La notifica di errore è già gestita dal service, ma possiamo loggare qui
+        logger.error('Errore catturato in list-api durante la cancellazione del paziente:', error.message);
         throw error;
     }
 }

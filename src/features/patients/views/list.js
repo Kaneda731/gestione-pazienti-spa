@@ -12,11 +12,14 @@ import { getCurrentFilters } from './list-state-migrated.js';
 import { logger } from '../../../core/services/loggerService.js';
 import { stateService } from '../../../core/services/stateService.js';
 
+let currentPazienti = [];
+
 async function fetchAndRender() {
     showLoading();
     try {
         const { data, count } = await fetchPazienti();
-        renderPazienti(data, count);
+        currentPazienti = data || [];
+        renderPazienti(currentPazienti, count);
     } catch (error) {
         console.error('❌ Errore in fetchAndRender:', error);
         showError(error);
@@ -126,25 +129,25 @@ async function handlePatientAction(action, id) {
         case 'dimetti':
             const { ConfirmModal: ConfirmModalDimetti } = await import('../../../shared/components/ui/ConfirmModal.js');
             // Trova il paziente per ottenere il nome
-            const pazienteDimetti = state.pazienti.find(p => p.id === id);
+            const pazienteDimetti = currentPazienti.find(p => p.id === id);
             const nomeCompletoDimetti = pazienteDimetti ? `${pazienteDimetti.nome} ${pazienteDimetti.cognome}` : 'il paziente';
             const modalDimetti = ConfirmModalDimetti.forDismissal(nomeCompletoDimetti);
             const confirmedDimetti = await modalDimetti.show();
             if (confirmedDimetti) {
                 await updatePazienteStatus(id, true);
-                fetchAndRender();
+                await fetchAndRender();
             }
             break;
         case 'riattiva':
             const { ConfirmModal: ConfirmModalRiattiva } = await import('../../../shared/components/ui/ConfirmModal.js');
             // Trova il paziente per ottenere il nome
-            const pazienteRiattiva = state.pazienti.find(p => p.id === id);
+            const pazienteRiattiva = currentPazienti.find(p => p.id === id);
             const nomeCompletoRiattiva = pazienteRiattiva ? `${pazienteRiattiva.nome} ${pazienteRiattiva.cognome}` : 'il paziente';
             const modalRiattiva = ConfirmModalRiattiva.forReactivation(nomeCompletoRiattiva);
             const confirmedRiattiva = await modalRiattiva.show();
             if (confirmedRiattiva) {
                 await updatePazienteStatus(id, false);
-                fetchAndRender();
+                await fetchAndRender();
             }
             break;
     }
@@ -214,6 +217,7 @@ export async function initListView(listData) {
         cacheDOMElements(viewContainer);
 
         const { pazienti, count, repartoOptions, diagnosiOptions } = listData;
+        currentPazienti = pazienti || [];
 
         populateSelectWithOptions(domElements.repartoFilter, repartoOptions);
         populateSelectWithOptions(domElements.diagnosiFilter, diagnosiOptions);
@@ -231,7 +235,7 @@ export async function initListView(listData) {
 
         setupEventListeners();
         
-        renderPazienti(pazienti, count);
+        renderPazienti(currentPazienti, count);
         
         updateSortIndicators();
         
@@ -242,4 +246,3 @@ export async function initListView(listData) {
 
 
 }
-

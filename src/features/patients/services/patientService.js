@@ -164,12 +164,13 @@ class PatientService {
   /**
    * Aggiorna un paziente esistente
    */
-  async updatePatient(id, patientData) {
+  async updatePatient(id, patientData, options = { showNotification: true }) {
     try {
       stateService.setLoading(true, "Aggiornamento paziente...");
 
-      // Validazione dati
-      this.validatePatientData(patientData);
+      // Rimuoviamo la validazione da qui. È troppo restrittiva per aggiornamenti
+      // parziali come la riattivazione, dove vengono passati solo alcuni campi.
+      // La validazione completa viene già eseguita durante la creazione/modifica dal form.
 
       const { data, error } = await supabase
         .from("pazienti")
@@ -183,7 +184,9 @@ class PatientService {
       // Invalida cache per questo paziente
       this.cache.delete(`patient_${id}`);
 
-      notificationService.success("Paziente aggiornato con successo!");
+      if (options.showNotification) {
+        notificationService.success("Paziente aggiornato con successo!");
+      }
       return data;
     } catch (error) {
       console.error("Errore nell'aggiornamento paziente:", error);
@@ -228,7 +231,7 @@ class PatientService {
 
       await this.updatePatient(id, {
         data_dimissione: date,
-      });
+      }, { showNotification: false });
 
       notificationService.success("Paziente dimesso con successo!");
     } catch (error) {
@@ -385,7 +388,7 @@ class PatientService {
         clinica_destinazione: null,
         codice_clinica: null,
         codice_dimissione: null
-      });
+      }, { showNotification: false });
 
       notificationService.success("Paziente riattivato con successo!");
     } catch (error) {

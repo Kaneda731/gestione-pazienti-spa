@@ -17,7 +17,6 @@ import '/src/css/mobile.scss';
 import { initErrorHandling } from '../core/services/errorService.js';
 import { initAuth } from '../core/auth/authService.js';
 import { initTheme } from '../core/services/themeService.js';
-import { viteSupabaseMiddleware } from '../core/services/viteSupabaseMiddleware.js';
 import { logger } from '../core/services/loggerService.js';
 
 // Extension error handling
@@ -26,8 +25,8 @@ import '../core/utils/extensionErrorHandler.js';
 // Shared services
 import '../shared/components/ui/index.js';
 import '../core/services/bootstrapService.js';
-import '../core/services/stateService.js';
-import notificationService from '../core/services/notificationService.js';
+import { stateService } from '../core/services/stateService.js';
+import { notificationService } from '../core/services/notificationService.js';
 import '../core/services/uiStateService.js';
 
 // Debug: esponi il notificationService globalmente per testing
@@ -59,19 +58,15 @@ if (isDevelopment && environment.OAUTH_DEBUG) {
 async function initializeApp() {
     try {
         logger.log(`🚀 Inizializzazione ${environment.APP_NAME} v${environment.APP_VERSION}`);
-        
-        await viteSupabaseMiddleware.onReady();
-        
+
         initErrorHandling();
         initTheme();
         initBackToMenuButtons();
         initMobileUI();
         initializeAuthEventListeners();
-        
-        window.addEventListener('hashchange', () => {
-            if (window.location.hash.includes('access_token')) return;
-            renderView();
-        });
+        notificationService.init();
+
+        window.addEventListener('hashchange', renderView);
 
         // Gestisce l'autenticazione e il rendering iniziale.
         // Questa è l'unica fonte di verità per il primo rendering.
@@ -104,20 +99,3 @@ async function initializeApp() {
 }
 
 window.addEventListener('load', initializeApp);
-
-// Gestione degli errori globali (gli errori delle estensioni sono gestiti da ExtensionErrorHandler)
-window.addEventListener('error', (event) => {
-    // Solo logga errori che non sono delle estensioni
-    if (!event.message || !event.message.includes('extension')) {
-        console.error('Errore non catturato:', event.error);
-    }
-});
-
-window.addEventListener('unhandledrejection', (event) => {
-    // Solo logga promise rejection che non sono delle estensioni
-    const reason = event.reason;
-    const message = reason instanceof Error ? reason.message : String(reason);
-    if (!message.includes('extension') && !message.includes('message channel')) {
-        console.error('Promise rifiutata non gestita:', event.reason);
-    }
-});

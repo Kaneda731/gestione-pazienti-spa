@@ -1,5 +1,6 @@
 // src/core/services/notificationService.js
 
+import { stateService } from './stateService.js';
 /**
  * Servizio avanzato per la gestione delle notifiche UI
  * Supporta notifiche responsive, accessibili e personalizzabili
@@ -86,28 +87,97 @@ class NotificationService {
     _lastRenderedNotificationIds = [];
     // Abilita log dettagliati solo se necessario
     static DEBUG = false;
+
     constructor() {
         this.notificationContainer = null;
         this.timers = new Map(); // Gestione timer per auto-close
         this.touchStartX = null; // Per gesture swipe su mobile
         this.isRendering = false; // Protezione contro loop infiniti
-        try {
-            // Carica impostazioni da StateService
-            const stateSettings = stateService.getNotificationSettings();
-            this.settings = {
-                maxVisible: stateSettings.maxVisible,
-                defaultDuration: stateSettings.defaultDuration,
-                position: stateSettings.position,
-                enableSounds: stateSettings.enableSounds,
-                enableAnimations: stateSettings.enableAnimations,
-                autoCleanupInterval: stateSettings.autoCleanupInterval,
-                maxStoredNotifications: stateSettings.maxStoredNotifications,
-                customDurations: stateSettings.customDurations,
-                soundVolume: stateSettings.soundVolume
-            };
-            // this.init(); // Rimosso: il metodo non esiste
-        } catch (error) {
-            console.error('❌ [NotificationService] Errore durante inizializzazione:', error);
+        this.initialized = false;
+        this.settings = stateService.getNotificationSettings();
+    }
+
+    init() {
+        if (this.initialized || typeof window === 'undefined') return;
+
+        import('../../shared/components/notifications/NotificationContainer.js').then(({
+            NotificationContainer
+        }) => {
+            this.notificationContainer = new NotificationContainer({
+                position: this.settings.position,
+                maxVisible: this.settings.maxVisible,
+            });
+
+            createLiveRegion();
+
+            stateService.subscribe('notifications', (newState) => {
+                this.renderNotifications(newState.notifications);
+            });
+
+            this.initialized = true;
+            if (NotificationService.DEBUG) {
+                console.log('✅ NotificationService initialized');
+            }
+        }).catch(error => {
+            console.error('❌ Failed to initialize NotificationContainer:', error);
+        });
+    }
+
+    renderNotifications(notifications = []) {
+        if (!this.notificationContainer || this.isRendering) return;
+        this.isRendering = true;
+
+        const currentIds = new Set(notifications.map(n => n.id));
+        const renderedIds = new Set(this._lastRenderedNotificationIds);
+
+        renderedIds.forEach(id => {
+            if (!currentIds.has(id)) {
+                this.notificationContainer.removeNotification(id);
+            }
+        });
+
+        notifications.forEach(notification => {
+            if (!renderedIds.has(notification.id)) {
+                this.addNotificationToDOM(notification);
+            }
+        });
+
+        handleExcessNotifications(notifications.slice(this.settings.maxVisible), (id) => this.removeNotification(id));
+
+        this._lastRenderedNotificationIds = notifications.map(n => n.id);
+        this.isRendering = false;
+    }
+
+    addNotificationToDOM(notification) {
+        const rendererPayload = {
+            notification,
+            settings: this.settings,
+            timers: this.timers,
+            removeNotification: (id) => this.removeNotification(id),
+            startProgressBarAnimation: (id, duration) => this.startProgressBarAnimation(id, duration),
+            pauseProgressBarAnimation: (id) => this.pauseProgressBarAnimation(id),
+            resumeProgressBarAnimation: (id, remaining) => this.resumeProgressBarAnimation(id, remaining),
+            startAutoCloseTimer: startAutoCloseTimer,
+            pauseAutoCloseTimer: pauseAutoCloseTimer,
+            resumeAutoCloseTimer: resumeAutoCloseTimer,
+            announceNotification: announceNotification,
+            attachNotificationEvents: attachNotificationEvents,
+            attachTouchEvents: attachTouchEvents,
+            notificationContainer: this.notificationContainer
+        };
+        const element = createNotificationElement(rendererPayload);
+        if (!element) return;
+        this.notificationContainer.addNotification(element);
+    }
+
+    startProgressBarAnimation(id, duration) {
+        if (!this.notificationContainer) return;
+        const element = this.notificationContainer.container?.querySelector(`[data-id="${id}"]`);
+        const progressBar = element?.querySelector('.notification__progress');
+        if (progressBar) {
+            progressBar.style.animation = 'none';
+            progressBar.offsetHeight; // Trigger reflow
+            progressBar.style.animation = `progress-bar-animation ${duration / 1000}s linear forwards`;
         }
     }
 
@@ -175,6 +245,28 @@ class NotificationService {
                 console.error('[NotificationService] ERRORE: la notifica', id, 'è ancora nello stato dopo removeNotification!');
             }
         }
+    }
+
+    pauseProgressBarAnimation(id) {
+        if (!this.notificationContainer) return;
+        const element = this.notificationContainer.container?.querySelector(`[data-id="${id}"]`);
+        const progressBar = element?.querySelector('.notification__progress');
+        if (progressBar) {
+            progressBar.style.animationPlayState = 'paused';
+        }
+    }
+
+    resumeProgressBarAnimation(id, remainingTime) {
+        if (!this.notificationContainer) return;
+        const element = this.notificationContainer.container?.querySelector(`[data-id="${id}"]`);
+        const progressBar = element?.querySelector('.notification__progress');
+        if (progressBar) {
+            progressBar.style.animationPlayState = 'running';
+        }
+    }
+
+    stopProgressBarAnimation(id) {
+        // La logica di stop è già gestita in removeNotification
     }
 
     /**

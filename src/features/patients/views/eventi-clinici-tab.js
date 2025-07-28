@@ -226,23 +226,11 @@ async function handleSaveEvento() {
         // Nascondi form
         hideEventoForm();
         
-        notificationService.success('Evento clinico salvato con successo!');
+        // La notifica di successo è già gestita da eventiCliniciService
     } catch (error) {
-        console.error('Errore nel salvataggio evento:', error);
-        
-        // Gestisci errori specifici del database
-        let errorMessage = 'Errore nel salvataggio evento';
-        if (error.message) {
-            if (error.message.includes('date/time field value out of range')) {
-                errorMessage = 'Formato data non valido. Utilizzare il formato gg/mm/aaaa';
-            } else if (error.message.includes('future')) {
-                errorMessage = 'La data dell\'evento non può essere nel futuro';
-            } else {
-                errorMessage = error.message;
-            }
-        }
-        
-        notificationService.error(errorMessage);
+        // La notifica di errore è già gestita da eventiCliniciService.
+        // Logghiamo l'errore qui per debug, ma non mostriamo una seconda notifica.
+        logger.error('Errore catturato in handleSaveEvento:', error.message);
     }
 }
 
@@ -400,8 +388,9 @@ export async function loadEventiForCurrentPatient() {
         renderEventiList(eventi);
         updatePostOperativeInfo(eventi);
     } catch (error) {
-        console.error('Errore nel caricamento eventi:', error);
-        notificationService.error('Errore nel caricamento eventi clinici');
+        // La notifica di errore è già gestita da eventiCliniciService.
+        // Logghiamo l'errore per debug, ma non mostriamo una notifica duplicata.
+        logger.error('Errore nel caricamento eventi clinici per il paziente:', error);
     }
 }
 
@@ -571,10 +560,10 @@ async function deleteEvento(eventoId) {
     try {
         await eventiCliniciService.deleteEvento(eventoId);
         await loadEventiForCurrentPatient();
-        notificationService.success('Evento clinico eliminato con successo!');
+        // La notifica di successo è già gestita da eventiCliniciService
     } catch (error) {
-        console.error('Errore nell\'eliminazione evento:', error);
-        notificationService.error('Errore nell\'eliminazione evento');
+        // La notifica di errore è già gestita da eventiCliniciService.
+        logger.error('Errore catturato in deleteEvento:', error.message);
     }
 }
 

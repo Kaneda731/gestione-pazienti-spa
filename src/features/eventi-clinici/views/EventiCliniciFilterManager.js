@@ -141,7 +141,8 @@ export class EventiCliniciFilterManager {
 
     } catch (error) {
       logger.error('❌ Errore applicazione filtri combinati:', error);
-      notificationService.error(error.message || 'Errore nell\'applicazione dei filtri');
+      // La notifica di errore è già gestita a livello API/Service.
+      // Logghiamo qui per debug.
     } finally {
       hideSearchingState();
     }
@@ -176,7 +177,8 @@ export class EventiCliniciFilterManager {
 
     } catch (error) {
       logger.error('❌ Errore applicazione ordinamento:', error);
-      notificationService.error(error.message || 'Errore nell\'ordinamento');
+      // La notifica di errore è già gestita a livello API/Service.
+      // Logghiamo qui per debug.
     } finally {
       hideSearchingState();
     }
@@ -257,11 +259,10 @@ export class EventiCliniciFilterManager {
    */
   async saveCurrentFilters() {
     try {
-      saveFiltersToState();
-      notificationService.success('Filtri salvati');
+      await saveFiltersToState();
     } catch (error) {
       logger.error('❌ Errore salvataggio filtri:', error);
-      notificationService.error('Errore nel salvataggio dei filtri');
+      // La notifica di errore è già gestita dalla funzione saveFiltersToState.
     }
   }
 

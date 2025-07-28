@@ -274,11 +274,11 @@ export class EventiCliniciModalManager {
         await onReloadData();
       }
 
-      notificationService.success('Evento clinico eliminato con successo');
+      // La notifica di successo è già gestita da eventiCliniciService.
 
     } catch (error) {
       logger.error('❌ Errore eliminazione evento:', error);
-      notificationService.error('Errore nell\'eliminazione dell\'evento');
+      // La notifica di errore è già gestita a livello di service/api.
     }
   }
 

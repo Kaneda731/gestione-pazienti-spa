@@ -944,15 +944,17 @@ function generateCSV(eventi) {
 /**
  * Salva filtri correnti nello stato persistente
  */
-export function saveFiltersToState() {
+export async function saveFiltersToState() {
   try {
     // Import stateService dynamically to avoid circular dependencies
-    import('../../../core/services/stateService.js').then(({ stateService }) => {
-      stateService.setState('eventiCliniciFilters', currentFilters);
-      logger.log('💾 Filtri salvati nello stato:', currentFilters);
-    });
+    const { stateService } = await import('../../../core/services/stateService.js');
+    stateService.setState('eventiCliniciFilters', currentFilters);
+    logger.log('💾 Filtri salvati nello stato:', currentFilters);
+    notificationService.success('Filtri salvati con successo');
   } catch (error) {
     logger.error('❌ Errore salvataggio filtri:', error);
+    notificationService.error('Impossibile salvare i filtri');
+    throw error;
   }
 }
 

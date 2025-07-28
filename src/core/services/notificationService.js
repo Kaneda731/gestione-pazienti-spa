@@ -105,7 +105,7 @@ class NotificationService {
                 customDurations: stateSettings.customDurations,
                 soundVolume: stateSettings.soundVolume
             };
-            this.init();
+            // this.init(); // Rimosso: il metodo non esiste
         } catch (error) {
             console.error('❌ [NotificationService] Errore durante inizializzazione:', error);
         }

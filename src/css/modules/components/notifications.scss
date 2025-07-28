@@ -2,6 +2,9 @@
    SISTEMA DI NOTIFICHE UX
    =================================== */
 
+/* Import container styles */
+@import 'notification-container';
+
 /* Variabili specifiche per notifiche */
 :root {
     /* Colori notifiche - Basati su design system esistente */

@@ -1,0 +1,422 @@
+/* ===================================
+   NOTIFICATION CONTAINER COMPONENT
+   =================================== */
+
+/* Variabili specifiche per il container */
+:root {
+    --notification-container-z-index: 1050;
+    --notification-container-gap: 0.75rem;
+    --notification-container-padding: 1rem;
+    --notification-container-max-height: 100vh;
+    --notification-container-scroll-width: 6px;
+    
+    /* Stack effect variables */
+    --notification-stack-offset: 4px;
+    --notification-stack-scale: 0.02;
+    --notification-stack-opacity: 0.1;
+}
+
+/* Container principale con posizionamento responsive */
+.notification-container {
+    position: fixed;
+    z-index: var(--notification-container-z-index);
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--notification-container-gap);
+    max-height: var(--notification-container-max-height);
+    overflow: hidden;
+    transition: var(--transition);
+
+    /* Posizionamenti specifici */
+    &--top-right {
+        top: var(--notification-container-padding);
+        right: var(--notification-container-padding);
+        left: var(--notification-container-padding);
+
+        @media (min-width: 768px) {
+            top: 1.5rem;
+            right: 1.5rem;
+            left: auto;
+            width: 380px;
+        }
+
+        @media (min-width: 992px) {
+            top: 2rem;
+            right: 2rem;
+            width: 400px;
+        }
+    }
+
+    &--top-left {
+        top: var(--notification-container-padding);
+        left: var(--notification-container-padding);
+        right: var(--notification-container-padding);
+
+        @media (min-width: 768px) {
+            top: 1.5rem;
+            left: 1.5rem;
+            right: auto;
+            width: 380px;
+        }
+
+        @media (min-width: 992px) {
+            top: 2rem;
+            left: 2rem;
+            width: 400px;
+        }
+    }
+
+    &--top-center {
+        top: var(--notification-container-padding);
+        left: 50%;
+        transform: translateX(-50%);
+        width: calc(100vw - 2rem);
+
+        @media (min-width: 768px) {
+            top: 1.5rem;
+            width: 380px;
+        }
+
+        @media (min-width: 992px) {
+            top: 2rem;
+            width: 400px;
+        }
+    }
+
+    &--bottom-right {
+        bottom: var(--notification-container-padding);
+        right: var(--notification-container-padding);
+        left: var(--notification-container-padding);
+        flex-direction: column-reverse;
+
+        @media (min-width: 768px) {
+            bottom: 1.5rem;
+            right: 1.5rem;
+            left: auto;
+            width: 380px;
+        }
+
+        @media (min-width: 992px) {
+            bottom: 2rem;
+            right: 2rem;
+            width: 400px;
+        }
+    }
+
+    &--bottom-left {
+        bottom: var(--notification-container-padding);
+        left: var(--notification-container-padding);
+        right: var(--notification-container-padding);
+        flex-direction: column-reverse;
+
+        @media (min-width: 768px) {
+            bottom: 1.5rem;
+            left: 1.5rem;
+            right: auto;
+            width: 380px;
+        }
+
+        @media (min-width: 992px) {
+            bottom: 2rem;
+            left: 2rem;
+            width: 400px;
+        }
+    }
+
+    &--bottom-center {
+        bottom: var(--notification-container-padding);
+        left: 50%;
+        transform: translateX(-50%);
+        width: calc(100vw - 2rem);
+        flex-direction: column-reverse;
+
+        @media (min-width: 768px) {
+            bottom: 1.5rem;
+            width: 380px;
+        }
+
+        @media (min-width: 992px) {
+            bottom: 2rem;
+            width: 400px;
+        }
+    }
+
+    /* Container scrollabile quando troppo alto */
+    &--scrollable {
+        overflow-y: auto;
+        overflow-x: hidden;
+        max-height: 80vh;
+        
+        /* Custom scrollbar */
+        &::-webkit-scrollbar {
+            width: var(--notification-container-scroll-width);
+        }
+
+        &::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 3px;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 3px;
+            
+            &:hover {
+                background: rgba(0, 0, 0, 0.5);
+            }
+        }
+
+        /* Firefox scrollbar */
+        scrollbar-width: thin;
+        scrollbar-color: rgba(0, 0, 0, 0.3) rgba(0, 0, 0, 0.1);
+    }
+}
+
+/* Gestione stack notifiche multiple */
+.notification-container .notification {
+    pointer-events: auto;
+    transition: transform var(--transition), opacity var(--transition);
+    
+    /* Effetto stack per notifiche multiple */
+    &:not(:first-child) {
+        margin-top: calc(-1 * var(--notification-stack-offset));
+    }
+
+    /* Focus state per navigazione keyboard */
+    &--focused {
+        outline: var(--focus-outline);
+        outline-offset: var(--focus-outline-offset);
+        box-shadow: var(--focus-shadow), var(--notification-shadow);
+        z-index: calc(var(--notification-container-z-index) + 100);
+    }
+}
+
+/* Limite massimo notifiche visibili - responsive */
+.notification-container {
+    /* Mobile: max 3 notifiche */
+    @media (max-width: 767px) {
+        .notification:nth-child(n+4) {
+            display: none !important;
+            visibility: hidden;
+            opacity: 0;
+        }
+    }
+
+    /* Tablet: max 4 notifiche */
+    @media (min-width: 768px) and (max-width: 991px) {
+        .notification:nth-child(n+5) {
+            display: none !important;
+            visibility: hidden;
+            opacity: 0;
+        }
+    }
+
+    /* Desktop: max 5 notifiche (default) */
+    @media (min-width: 992px) {
+        .notification:nth-child(n+6) {
+            display: none !important;
+            visibility: hidden;
+            opacity: 0;
+        }
+    }
+}
+
+/* Override dinamico per maxVisible personalizzato */
+.notification-container[style*="--max-visible-notifications"] {
+    .notification {
+        &:nth-child(n+1) {
+            display: flex;
+            visibility: visible;
+            opacity: 1;
+        }
+    }
+}
+
+/* Animazioni specifiche per container */
+@keyframes containerFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes containerSlideIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Animazione container quando appare */
+.notification-container:not(:empty) {
+    animation: containerFadeIn 0.2s ease-out;
+}
+
+/* Responsive gap adjustment */
+@media (max-width: 767px) {
+    .notification-container {
+        --notification-container-gap: 0.5rem;
+        --notification-container-padding: 1rem;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+    .notification-container {
+        --notification-container-gap: 0.625rem;
+        --notification-container-padding: 1.5rem;
+    }
+}
+
+@media (min-width: 992px) {
+    .notification-container {
+        --notification-container-gap: 0.75rem;
+        --notification-container-padding: 2rem;
+    }
+}
+
+/* Tema scuro per container */
+[data-bs-theme="dark"] {
+    .notification-container {
+        &--scrollable {
+            &::-webkit-scrollbar-track {
+                background: rgba(255, 255, 255, 0.1);
+            }
+
+            &::-webkit-scrollbar-thumb {
+                background: rgba(255, 255, 255, 0.3);
+                
+                &:hover {
+                    background: rgba(255, 255, 255, 0.5);
+                }
+            }
+
+            scrollbar-color: rgba(255, 255, 255, 0.3) rgba(255, 255, 255, 0.1);
+        }
+    }
+}
+
+/* High contrast mode per container */
+@media (prefers-contrast: high) {
+    .notification-container {
+        &--scrollable {
+            &::-webkit-scrollbar-thumb {
+                background: currentColor;
+                border: 1px solid;
+            }
+        }
+    }
+}
+
+/* Reduced motion per container */
+@media (prefers-reduced-motion: reduce) {
+    .notification-container {
+        animation: none !important;
+        transition: none !important;
+        
+        .notification {
+            transition: none !important;
+            transform: none !important;
+        }
+    }
+}
+
+/* Utility classes per container */
+.notification-container {
+    /* Classe per debugging */
+    &--debug {
+        border: 2px dashed rgba(255, 0, 0, 0.5);
+        background: rgba(255, 0, 0, 0.1);
+        
+        .notification {
+            border: 1px dashed rgba(0, 255, 0, 0.5);
+        }
+    }
+
+    /* Classe per disabilitare animazioni */
+    &--no-animations {
+        .notification {
+            animation: none !important;
+            transition: none !important;
+        }
+    }
+
+    /* Classe per modalità compatta */
+    &--compact {
+        --notification-container-gap: 0.25rem;
+        
+        .notification {
+            padding: var(--spacing-sm);
+            min-height: 40px;
+        }
+    }
+
+    /* Classe per modalità espansa */
+    &--expanded {
+        --notification-container-gap: 1rem;
+        
+        .notification {
+            padding: var(--spacing-lg);
+            min-height: 60px;
+        }
+    }
+}
+
+/* Supporto per orientamento dispositivo */
+@media (orientation: landscape) and (max-height: 500px) {
+    .notification-container {
+        max-height: 60vh;
+        
+        &--scrollable {
+            max-height: 50vh;
+        }
+        
+        /* Riduci numero massimo su landscape mobile */
+        @media (max-width: 767px) {
+            .notification:nth-child(n+3) {
+                display: none !important;
+            }
+        }
+    }
+}
+
+/* Print styles - nascondi notifiche in stampa */
+@media print {
+    .notification-container {
+        display: none !important;
+    }
+}
+
+/* Accessibilità - focus trap per container */
+.notification-container:focus-within {
+    outline: none;
+}
+
+/* Gestione overflow per testi lunghi nel container */
+.notification-container .notification {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+}
+
+/* Supporto per container vuoto */
+.notification-container:empty {
+    display: none;
+}
+
+/* Transizioni smooth per cambi di posizione */
+.notification-container[data-position] {
+    transition: top var(--transition), 
+                bottom var(--transition), 
+                left var(--transition), 
+                right var(--transition),
+                transform var(--transition);
+}

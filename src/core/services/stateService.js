@@ -58,6 +58,12 @@ class StateService {
             loadingMessage: '',
             errors: [],
             notifications: [],
+            notificationSettings: {
+                maxVisible: 5,
+                defaultDuration: 5000,
+                position: 'top-right',
+                enableSounds: false
+            },
             
             // Autenticazione
             user: null,
@@ -68,7 +74,7 @@ class StateService {
         this.subscribers = new Map();
         
         // Chiavi che devono essere persistite su localStorage
-        this.persistentKeys = ['listFilters', 'editPazienteId', 'formData', 'eventiCliniciFilters'];
+        this.persistentKeys = ['listFilters', 'editPazienteId', 'formData', 'eventiCliniciFilters', 'notificationSettings'];
         
         // Inizializza lo stato da localStorage se disponibile
         this.loadPersistedState();
@@ -275,23 +281,29 @@ class StateService {
         });
     }
 
-    addNotification(type, message, duration = 5000) {
+    addNotification(type, message, options = {}) {
+        // Se options è un numero (backward compatibility), trattalo come duration
+        if (typeof options === 'number') {
+            options = { duration: options };
+        }
+
         const notification = {
-            id: Date.now(),
+            id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, // ID più unico per evitare collisioni
             type, // 'success', 'error', 'warning', 'info'
             message,
-            timestamp: new Date()
+            timestamp: new Date(),
+            options: {
+                duration: 5000,
+                persistent: false,
+                closable: true,
+                position: 'top-right',
+                priority: 0,
+                ...options
+            }
         };
 
         const notifications = [...this.getState('notifications'), notification];
         this.setState('notifications', notifications);
-
-        // Auto-remove dopo duration
-        if (duration > 0) {
-            setTimeout(() => {
-                this.removeNotification(notification.id);
-            }, duration);
-        }
 
         return notification.id;
     }

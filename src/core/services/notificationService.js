@@ -222,6 +222,27 @@ class NotificationService {
         }
         return this.show('success', message, options);
     }
+
+    info(message, options = {}) {
+        if (typeof options === 'number') {
+            options = { duration: options };
+        }
+        return this.show('info', message, options);
+    }
+
+    warning(message, options = {}) {
+        if (typeof options === 'number') {
+            options = { duration: options };
+        }
+        return this.show('warning', message, options);
+    }
+
+    error(message, options = {}) {
+        if (typeof options === 'number') {
+            options = { duration: options };
+        }
+        return this.show('error', message, options);
+    }
 }
 
 // Esporta istanza singleton

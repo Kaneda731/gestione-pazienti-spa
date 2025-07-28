@@ -6,5 +6,11 @@ import DOMPurify from 'dompurify';
  * @returns {string} - The sanitized HTML string.
  */
 export function sanitizeHtml(dirtyHtml) {
-  return DOMPurify.sanitize(dirtyHtml);
+  if (!dirtyHtml) return '';
+  try {
+    return DOMPurify.sanitize(dirtyHtml);
+  } catch (error) {
+    console.warn('Error sanitizing HTML:', error);
+    return String(dirtyHtml).replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
 }

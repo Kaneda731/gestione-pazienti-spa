@@ -1,0 +1,719 @@
+/* ===================================
+   SISTEMA DI NOTIFICHE UX - CSS COMPILATO PER TEST
+   =================================== */
+
+/* Variabili specifiche per notifiche */
+:root {
+    /* Colori notifiche - Basati su design system esistente */
+    --notification-success-bg: var(--success-color);
+    --notification-success-text: var(--success-dark);
+    --notification-success-border: var(--success-light);
+    --notification-error-bg: var(--danger-color);
+    --notification-error-text: var(--danger-dark);
+    --notification-error-border: var(--danger-light);
+    --notification-warning-bg: var(--warning-color);
+    --notification-warning-text: var(--warning-dark);
+    --notification-warning-border: var(--warning-light);
+    --notification-info-bg: var(--info-color);
+    --notification-info-text: var(--info-dark);
+    --notification-info-border: var(--info-light);
+
+    /* Layout e dimensioni */
+    --notification-border-radius: var(--border-radius);
+    --notification-shadow: var(--shadow-lg);
+    --notification-padding: var(--spacing-md);
+    --notification-gap: var(--spacing-sm);
+    --notification-z-index: 1050;
+
+    /* Touch targets (mobile-first) */
+    --notification-min-height: 52px;
+    --notification-close-size: 44px;
+    --notification-action-height: 44px;
+
+    /* Animazioni */
+    --notification-transition: var(--transition);
+    --notification-slide-distance: 100%;
+    --notification-fade-duration: 0.3s;
+    --notification-entrance-easing: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --notification-exit-easing: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --notification-scale-factor: 0.95;
+
+    /* Responsive breakpoints */
+    --notification-mobile-width: calc(100vw - 2rem);
+    --notification-tablet-width: 380px;
+    --notification-desktop-width: 400px;
+    --notification-container-padding-mobile: 1rem;
+    --notification-container-padding-tablet: 1.5rem;
+    --notification-container-padding-desktop: 2rem;
+}
+
+/* Container principale per notifiche */
+.notification-container {
+    position: fixed;
+    z-index: var(--notification-z-index);
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--notification-gap);
+    max-height: 100vh;
+    overflow: hidden;
+}
+
+/* Posizionamento responsive */
+.notification-container[data-position="top-right"] {
+    top: var(--notification-container-padding-mobile);
+    right: var(--notification-container-padding-mobile);
+    left: var(--notification-container-padding-mobile);
+}
+
+@media (min-width: 768px) {
+    .notification-container[data-position="top-right"] {
+        top: var(--notification-container-padding-tablet);
+        right: var(--notification-container-padding-tablet);
+        left: auto;
+        width: var(--notification-tablet-width);
+    }
+}
+
+@media (min-width: 992px) {
+    .notification-container[data-position="top-right"] {
+        top: var(--notification-container-padding-desktop);
+        right: var(--notification-container-padding-desktop);
+        width: var(--notification-desktop-width);
+    }
+}
+
+.notification-container[data-position="top-left"] {
+    top: var(--notification-container-padding-mobile);
+    left: var(--notification-container-padding-mobile);
+    right: var(--notification-container-padding-mobile);
+}
+
+@media (min-width: 768px) {
+    .notification-container[data-position="top-left"] {
+        top: var(--notification-container-padding-tablet);
+        left: var(--notification-container-padding-tablet);
+        right: auto;
+        width: var(--notification-tablet-width);
+    }
+}
+
+@media (min-width: 992px) {
+    .notification-container[data-position="top-left"] {
+        top: var(--notification-container-padding-desktop);
+        left: var(--notification-container-padding-desktop);
+        width: var(--notification-desktop-width);
+    }
+}
+
+.notification-container[data-position="top-center"] {
+    top: var(--notification-container-padding-mobile);
+    left: 50%;
+    transform: translateX(-50%);
+    width: var(--notification-mobile-width);
+}
+
+@media (min-width: 768px) {
+    .notification-container[data-position="top-center"] {
+        top: var(--notification-container-padding-tablet);
+        width: var(--notification-tablet-width);
+    }
+}
+
+@media (min-width: 992px) {
+    .notification-container[data-position="top-center"] {
+        top: var(--notification-container-padding-desktop);
+        width: var(--notification-desktop-width);
+    }
+}
+
+.notification-container[data-position="bottom-right"] {
+    bottom: var(--notification-container-padding-mobile);
+    right: var(--notification-container-padding-mobile);
+    left: var(--notification-container-padding-mobile);
+    flex-direction: column-reverse;
+}
+
+@media (min-width: 768px) {
+    .notification-container[data-position="bottom-right"] {
+        bottom: var(--notification-container-padding-tablet);
+        right: var(--notification-container-padding-tablet);
+        left: auto;
+        width: var(--notification-tablet-width);
+    }
+}
+
+@media (min-width: 992px) {
+    .notification-container[data-position="bottom-right"] {
+        bottom: var(--notification-container-padding-desktop);
+        right: var(--notification-container-padding-desktop);
+        width: var(--notification-desktop-width);
+    }
+}
+
+.notification-container[data-position="bottom-left"] {
+    bottom: var(--notification-container-padding-mobile);
+    left: var(--notification-container-padding-mobile);
+    right: var(--notification-container-padding-mobile);
+    flex-direction: column-reverse;
+}
+
+@media (min-width: 768px) {
+    .notification-container[data-position="bottom-left"] {
+        bottom: var(--notification-container-padding-tablet);
+        left: var(--notification-container-padding-tablet);
+        right: auto;
+        width: var(--notification-tablet-width);
+    }
+}
+
+@media (min-width: 992px) {
+    .notification-container[data-position="bottom-left"] {
+        bottom: var(--notification-container-padding-desktop);
+        left: var(--notification-container-padding-desktop);
+        width: var(--notification-desktop-width);
+    }
+}
+
+.notification-container[data-position="bottom-center"] {
+    bottom: var(--notification-container-padding-mobile);
+    left: 50%;
+    transform: translateX(-50%);
+    width: var(--notification-mobile-width);
+    flex-direction: column-reverse;
+}
+
+@media (min-width: 768px) {
+    .notification-container[data-position="bottom-center"] {
+        bottom: var(--notification-container-padding-tablet);
+        width: var(--notification-tablet-width);
+    }
+}
+
+@media (min-width: 992px) {
+    .notification-container[data-position="bottom-center"] {
+        bottom: var(--notification-container-padding-desktop);
+        width: var(--notification-desktop-width);
+    }
+}
+
+/* Componente singola notifica */
+.notification {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    min-height: var(--notification-min-height);
+    padding: var(--notification-padding);
+    border-radius: var(--notification-border-radius);
+    box-shadow: var(--notification-shadow);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    pointer-events: auto;
+    overflow: hidden;
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-base);
+    transition: var(--notification-transition);
+    transform: translateX(0);
+    opacity: 1;
+    background: var(--glass-bg-strong);
+}
+
+/* Hover effects per desktop */
+@media (min-width: 992px) {
+    .notification:hover {
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: var(--shadow-xl);
+    }
+}
+
+/* Focus per accessibilità */
+.notification:focus-within {
+    outline: var(--focus-outline);
+    outline-offset: var(--focus-outline-offset);
+    box-shadow: var(--focus-shadow), var(--notification-shadow);
+}
+
+/* Varianti per tipo */
+.notification--success {
+    background: linear-gradient(135deg, 
+        rgba(16, 185, 129, 0.1), 
+        rgba(52, 211, 153, 0.15)
+    );
+    border-left: 4px solid var(--notification-success-bg);
+    color: var(--notification-success-text);
+}
+
+.notification--success .notification__icon {
+    color: var(--notification-success-bg);
+}
+
+.notification--error {
+    background: linear-gradient(135deg, 
+        rgba(239, 68, 68, 0.1), 
+        rgba(248, 113, 113, 0.15)
+    );
+    border-left: 4px solid var(--notification-error-bg);
+    color: var(--notification-error-text);
+}
+
+.notification--error .notification__icon {
+    color: var(--notification-error-bg);
+}
+
+.notification--warning {
+    background: linear-gradient(135deg, 
+        rgba(245, 158, 11, 0.1), 
+        rgba(251, 191, 36, 0.15)
+    );
+    border-left: 4px solid var(--notification-warning-bg);
+    color: var(--notification-warning-text);
+}
+
+.notification--warning .notification__icon {
+    color: var(--notification-warning-bg);
+}
+
+.notification--info {
+    background: linear-gradient(135deg, 
+        rgba(6, 182, 212, 0.1), 
+        rgba(34, 211, 238, 0.15)
+    );
+    border-left: 4px solid var(--notification-info-bg);
+    color: var(--notification-info-text);
+}
+
+.notification--info .notification__icon {
+    color: var(--notification-info-bg);
+}
+
+/* Stati di animazione */
+.notification--entering {
+    animation: slideInRight var(--notification-fade-duration) var(--notification-entrance-easing);
+}
+
+.notification--exiting {
+    animation: slideOutRight var(--notification-fade-duration) var(--notification-exit-easing);
+}
+
+.notification--removing {
+    animation: fadeOut var(--notification-fade-duration) var(--notification-exit-easing);
+}
+
+.notification--sliding-up {
+    animation: slideUp var(--notification-fade-duration) var(--notification-exit-easing);
+}
+
+.notification--sliding-down {
+    animation: slideDown var(--notification-fade-duration) var(--notification-entrance-easing);
+}
+
+/* Mobile: animazione dall'alto */
+@media (max-width: 767px) {
+    .notification--entering {
+        animation: slideInDown var(--notification-fade-duration) var(--notification-entrance-easing);
+    }
+
+    .notification--exiting {
+        animation: slideOutUp var(--notification-fade-duration) var(--notification-exit-easing);
+    }
+}
+
+/* Contenuto della notifica */
+.notification__content {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+    flex: 1;
+    min-width: 0;
+}
+
+.notification__icon {
+    flex-shrink: 0;
+    font-family: 'Material Icons';
+    font-size: var(--icon-size-base);
+    line-height: 1;
+    margin-top: 2px;
+}
+
+@media (min-width: 768px) {
+    .notification__icon {
+        font-size: var(--icon-size-lg);
+    }
+}
+
+.notification__body {
+    flex: 1;
+    min-width: 0;
+}
+
+.notification__title {
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-base);
+    margin-bottom: var(--spacing-xs);
+    line-height: 1.4;
+}
+
+.notification__message {
+    font-weight: var(--font-weight-base);
+    color: var(--text-primary);
+    line-height: 1.5;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+/* Azioni della notifica */
+.notification__actions {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+    flex-shrink: 0;
+    margin-left: var(--spacing-sm);
+}
+
+.notification__close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--notification-close-size);
+    height: var(--notification-close-size);
+    min-width: var(--notification-close-size);
+    min-height: var(--notification-close-size);
+    border: none;
+    background: transparent;
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    transition: var(--notification-transition);
+    color: var(--text-muted);
+}
+
+.notification__close:hover {
+    background: rgba(0, 0, 0, 0.1);
+    color: var(--text-primary);
+    transform: scale(1.1);
+}
+
+.notification__close:focus {
+    outline: var(--focus-outline);
+    outline-offset: 2px;
+    background: var(--focus-bg);
+}
+
+.notification__close:active {
+    transform: scale(0.95);
+}
+
+.notification__close .material-icons {
+    font-size: 1.25rem;
+}
+
+.notification__action-btn {
+    min-height: var(--notification-action-height);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: var(--border-radius-sm);
+    background: rgba(255, 255, 255, 0.8);
+    color: var(--text-primary);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-bold);
+    cursor: pointer;
+    transition: var(--notification-transition);
+}
+
+.notification__action-btn:hover {
+    background: rgba(255, 255, 255, 1);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.notification__action-btn:focus {
+    outline: var(--focus-outline);
+    outline-offset: 2px;
+}
+
+.notification__action-btn:active {
+    transform: translateY(0);
+}
+
+.notification__action-btn--primary {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-dark);
+}
+
+.notification__action-btn--primary:hover {
+    background: var(--primary-dark);
+}
+
+.notification__action-btn--secondary {
+    background: var(--secondary-color);
+    color: white;
+    border-color: var(--secondary-dark);
+}
+
+.notification__action-btn--secondary:hover {
+    background: var(--secondary-dark);
+}
+
+/* Progress bar per auto-close */
+.notification__progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 0 0 var(--notification-border-radius) var(--notification-border-radius);
+    overflow: hidden;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+}
+
+.notification__progress--active {
+    opacity: 1;
+}
+
+.notification__progress::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background: currentColor;
+    opacity: 0.7;
+    transform-origin: left;
+    transform: scaleX(1);
+    transition: transform 0.1s ease-out;
+}
+
+.notification__progress--active::after {
+    animation: progressCountdown var(--progress-duration, 4s) linear;
+}
+
+.notification__progress--paused::after {
+    animation-play-state: paused;
+}
+
+.notification__progress--resumed::after {
+    animation-play-state: running;
+}
+
+/* Colori progress bar per tipo */
+.notification--success .notification__progress {
+    color: var(--notification-success-bg);
+}
+
+.notification--error .notification__progress {
+    color: var(--notification-error-bg);
+}
+
+.notification--warning .notification__progress {
+    color: var(--notification-warning-bg);
+}
+
+.notification--info .notification__progress {
+    color: var(--notification-info-bg);
+}
+
+/* Pausa animazione su hover/focus */
+.notification:hover .notification__progress::after,
+.notification:focus-within .notification__progress::after {
+    animation-play-state: paused;
+}
+
+/* Animazioni */
+@keyframes slideInRight {
+    from {
+        transform: translateX(var(--notification-slide-distance));
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(var(--notification-slide-distance));
+        opacity: 0;
+    }
+}
+
+@keyframes slideInDown {
+    from {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutUp {
+    from {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: scale(var(--notification-scale-factor));
+    }
+}
+
+@keyframes progressCountdown {
+    from {
+        transform: scaleX(1);
+    }
+    to {
+        transform: scaleX(0);
+    }
+}
+
+/* Animazione per notifiche che si spostano nello stack */
+@keyframes slideUp {
+    from {
+        transform: translateY(0);
+    }
+    to {
+        transform: translateY(calc(-100% - var(--notification-gap)));
+    }
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(calc(-100% - var(--notification-gap)));
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+/* Supporto per prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+    .notification {
+        animation: none !important;
+        transition: none !important;
+        transform: none !important;
+    }
+
+    .notification__progress::after {
+        animation: none !important;
+    }
+
+    .notification:hover {
+        transform: none !important;
+    }
+
+    .notification__close:hover {
+        transform: none !important;
+    }
+
+    .notification__action-btn:hover {
+        transform: none !important;
+    }
+}
+
+/* Accessibilità - Screen reader only */
+.notification__sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Live region per annunci screen reader */
+#notification-announcer {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Gestione stack notifiche multiple */
+.notification-container .notification:not(:last-child) {
+    margin-bottom: var(--spacing-sm);
+}
+
+/* Limite massimo notifiche visibili */
+.notification-container .notification:nth-child(n+6) {
+    display: none;
+}
+
+@media (max-width: 767px) {
+    .notification-container .notification:nth-child(n+4) {
+        display: none;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+    .notification-container .notification:nth-child(n+5) {
+        display: none;
+    }
+}
+
+/* Touch gestures per mobile */
+@media (max-width: 767px) {
+    .notification {
+        touch-action: pan-x;
+    }
+    
+    .notification.swipe-right {
+        transform: translateX(100%);
+        opacity: 0;
+        transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .notification {
+        border: 2px solid;
+    }
+    
+    .notification--success {
+        border-color: var(--notification-success-bg);
+    }
+    
+    .notification--error {
+        border-color: var(--notification-error-bg);
+    }
+    
+    .notification--warning {
+        border-color: var(--notification-warning-bg);
+    }
+    
+    .notification--info {
+        border-color: var(--notification-info-bg);
+    }
+    
+    .notification__close {
+        border: 1px solid currentColor;
+    }
+}

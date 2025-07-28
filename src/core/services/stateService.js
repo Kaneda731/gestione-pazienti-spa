@@ -14,6 +14,19 @@ import { logger } from './loggerService.js';
  */
 
 class StateService {
+    /**
+     * Ottiene l'impostazione di default per le animazioni
+     */
+    getDefaultAnimationSetting() {
+        try {
+            return typeof window !== 'undefined' && window.matchMedia 
+                ? !window.matchMedia('(prefers-reduced-motion: reduce)').matches 
+                : true;
+        } catch (error) {
+            return true; // Fallback sicuro
+        }
+    }
+
     constructor() {
         // Stato interno dell'applicazione
         this.state = {
@@ -62,7 +75,18 @@ class StateService {
                 maxVisible: 5,
                 defaultDuration: 5000,
                 position: 'top-right',
-                enableSounds: false
+                enableSounds: false,
+                enableAnimations: this.getDefaultAnimationSetting(),
+                autoCleanupInterval: 300000, // 5 minuti in ms
+                maxStoredNotifications: 50,
+                persistentTypes: ['error'], // Tipi che rimangono persistenti di default
+                soundVolume: 0.5,
+                customDurations: {
+                    success: 4000,
+                    info: 5000,
+                    warning: 6000,
+                    error: 0 // persistente
+                }
             },
             
             // Autenticazione
@@ -76,8 +100,14 @@ class StateService {
         // Chiavi che devono essere persistite su localStorage
         this.persistentKeys = ['listFilters', 'editPazienteId', 'formData', 'eventiCliniciFilters', 'notificationSettings'];
         
+        // Timer per cleanup automatico delle notifiche vecchie
+        this.cleanupTimer = null;
+        
         // Inizializza lo stato da localStorage se disponibile
         this.loadPersistedState();
+        
+        // Avvia sistema di cleanup automatico
+        this.startAutoCleanup();
     }
 
     /**
@@ -175,13 +205,37 @@ class StateService {
      * @param {object} oldState - Stato precedente
      */
     notifySubscribers(changedKeys, oldState) {
-        this.subscribers.forEach(({ keys, callback }) => {
+        this.subscribers.forEach(({ keys, callback }, subscriberId) => {
             const isInterested = keys.some(key => changedKeys.includes(key));
             if (isInterested) {
                 try {
-                    callback(this.state, oldState, changedKeys);
+                    const result = callback(this.state, oldState, changedKeys);
+                    if (result && typeof result.then === 'function') {
+                        // Se la callback restituisce una Promise, gestisci errori async
+                        result.catch(error => {
+                            const callbackName = callback.name || '(anonymous)';
+                            console.error(
+                                `Errore async in subscriber callback [${callbackName}] (subscriberId: ${String(subscriberId)}):`,
+                                error,
+                                '\nchangedKeys:', changedKeys,
+                                '\nsubscriber keys:', keys,
+                                '\ncurrent state:', this.state,
+                                '\nold state:', oldState,
+                                '\ncallback:', callback.toString()
+                            );
+                        });
+                    }
                 } catch (error) {
-                    console.error('Errore in subscriber callback:', error);
+                    const callbackName = callback.name || '(anonymous)';
+                    console.error(
+                        `Errore in subscriber callback [${callbackName}] (subscriberId: ${String(subscriberId)}):`,
+                        error,
+                        '\nchangedKeys:', changedKeys,
+                        '\nsubscriber keys:', keys,
+                        '\ncurrent state:', this.state,
+                        '\nold state:', oldState,
+                        '\ncallback:', callback.toString()
+                    );
                 }
             }
         });
@@ -192,6 +246,9 @@ class StateService {
      * @param {array} [keysToKeep] - Chiavi da mantenere durante la pulizia
      */
     clearState(keysToKeep = ['user', 'isAuthenticated']) {
+        // Ferma cleanup timer
+        this.stopAutoCleanup();
+
         const newState = {};
         keysToKeep.forEach(key => {
             if (this.state[key] !== undefined) {
@@ -199,8 +256,61 @@ class StateService {
             }
         });
 
+        // Crea stato di default
+        const defaultState = {
+            currentView: 'home',
+            previousView: null,
+            editPazienteId: null,
+            selectedPazienteId: null,
+            listFilters: {
+                reparto: '',
+                diagnosi: '',
+                stato: '',
+                infetto: '',
+                search: '',
+                page: 0,
+                sortColumn: 'data_ricovero',
+                sortDirection: 'desc'
+            },
+            eventiCliniciFilters: {
+                paziente_search: '',
+                tipo_evento: '',
+                data_da: '',
+                data_a: '',
+                reparto: '',
+                agente_patogeno: '',
+                tipo_intervento: '',
+                sortColumn: 'data_evento',
+                sortDirection: 'desc'
+            },
+            formData: {},
+            isLoading: false,
+            loadingMessage: '',
+            errors: [],
+            notifications: [],
+            notificationSettings: {
+                maxVisible: 5,
+                defaultDuration: 5000,
+                position: 'top-right',
+                enableSounds: false,
+                enableAnimations: this.getDefaultAnimationSetting(),
+                autoCleanupInterval: 300000,
+                maxStoredNotifications: 50,
+                persistentTypes: ['error'],
+                soundVolume: 0.5,
+                customDurations: {
+                    success: 4000,
+                    info: 5000,
+                    warning: 6000,
+                    error: 0
+                }
+            },
+            user: null,
+            isAuthenticated: false
+        };
+
         this.state = {
-            ...this.constructor.prototype.constructor().state,
+            ...defaultState,
             ...newState
         };
 
@@ -210,6 +320,11 @@ class StateService {
                 localStorage.removeItem(`app_state_${key}`);
             }
         });
+
+        // Riavvia cleanup se le impostazioni notifiche sono mantenute
+        if (keysToKeep.includes('notificationSettings')) {
+            this.startAutoCleanup();
+        }
     }
 
     // === METODI DI CONVENIENZA ===
@@ -287,30 +402,264 @@ class StateService {
             options = { duration: options };
         }
 
+        const rawSettings = this.getState('notificationSettings');
+        
+        // Merge con defaults per assicurarsi che tutte le proprietà esistano
+        const defaultSettings = {
+            maxVisible: 5,
+            defaultDuration: 5000,
+            position: 'top-right',
+            enableSounds: false,
+            enableAnimations: true,
+            autoCleanupInterval: 300000,
+            maxStoredNotifications: 50,
+            persistentTypes: ['error'],
+            soundVolume: 0.5,
+            customDurations: {
+                success: 4000,
+                info: 5000,
+                warning: 6000,
+                error: 0
+            }
+        };
+        
+        const settings = { ...defaultSettings, ...rawSettings };
+        
+        const customDuration = (settings.customDurations && settings.customDurations[type] !== undefined)
+            ? settings.customDurations[type] 
+            : settings.defaultDuration;
+
         const notification = {
-            id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, // ID più unico per evitare collisioni
-            type, // 'success', 'error', 'warning', 'info'
+            id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            type,
             message,
             timestamp: new Date(),
+            isVisible: true,
+            isRemoving: false,
             options: {
-                duration: 5000,
-                persistent: false,
+                duration: customDuration,
+                persistent: settings.persistentTypes.includes(type),
                 closable: true,
-                position: 'top-right',
+                position: settings.position,
                 priority: 0,
                 ...options
             }
         };
 
-        const notifications = [...this.getState('notifications'), notification];
-        this.setState('notifications', notifications);
+        // Se persistent è true, forza duration a 0
+        if (notification.options.persistent) {
+            notification.options.duration = 0;
+        }
 
+        const currentNotifications = this.getState('notifications');
+        console.log(`[StateService] Current notifications before adding: ${currentNotifications.length}`, currentNotifications);
+        
+        // Gestisci limite massimo notifiche
+        let notifications = [...currentNotifications, notification];
+        if (notifications.length > settings.maxStoredNotifications) {
+            console.warn(`[StateService] Max stored notifications (${settings.maxStoredNotifications}) exceeded. Trimming old notifications.`);
+            // Rimuovi le notifiche più vecchie (eccetto errori persistenti)
+            const sortedByAge = notifications.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+            const toRemove = sortedByAge.slice(0, notifications.length - settings.maxStoredNotifications);
+            
+            notifications = notifications.filter(n => 
+                !toRemove.includes(n) || (n.options.persistent && n.type === 'error')
+            );
+            console.log(`[StateService] Notifications after trimming: ${notifications.length}`, notifications);
+        }
+
+        this.setState('notifications', notifications);
+        console.log(`[StateService] Notification added. New notifications array length: ${this.getState('notifications').length}`, this.getState('notifications'));
         return notification.id;
     }
 
     removeNotification(id) {
-        const notifications = this.getState('notifications').filter(n => n.id !== id);
+        const before = this.getState('notifications');
+        console.log('[StateService] Notifiche prima della rimozione:', before);
+        const notifications = before.filter(n => n.id !== id);
         this.setState('notifications', notifications);
+        const after = this.getState('notifications');
+        console.log('[StateService] Notifiche dopo la rimozione:', after);
+    }
+
+    /**
+     * Gestione avanzata delle notifiche
+     */
+    
+    /**
+     * Aggiorna le impostazioni delle notifiche
+     */
+    updateNotificationSettings(newSettings) {
+        const currentSettings = this.getState('notificationSettings');
+        const updatedSettings = { ...currentSettings, ...newSettings };
+        this.setState('notificationSettings', updatedSettings);
+        
+        // Riavvia cleanup se l'intervallo è cambiato
+        if (newSettings.autoCleanupInterval !== undefined) {
+            this.startAutoCleanup();
+        }
+    }
+
+    /**
+     * Ottiene le impostazioni delle notifiche
+     */
+    getNotificationSettings() {
+        return this.getState('notificationSettings');
+    }
+
+    /**
+     * Rimuove tutte le notifiche
+     */
+    clearAllNotifications() {
+        this.setState('notifications', []);
+    }
+
+    /**
+     * Rimuove notifiche per tipo
+     */
+    clearNotificationsByType(type) {
+        const notifications = this.getState('notifications').filter(n => n.type !== type);
+        this.setState('notifications', notifications);
+    }
+
+    /**
+     * Rimuove notifiche più vecchie di un certo tempo
+     */
+    clearOldNotifications(maxAge = 300000) { // 5 minuti default
+        const now = new Date();
+        const originalNotifications = this.getState('notifications');
+        const filteredNotifications = originalNotifications.filter(notification => {
+            const age = now - new Date(notification.timestamp);
+            // Non rimuovere notifiche persistenti di tipo error
+            if (notification.options.persistent && notification.type === 'error') {
+                return true;
+            }
+            return age < maxAge;
+        });
+        
+        this.setState('notifications', filteredNotifications);
+        return originalNotifications.length - filteredNotifications.length; // Numero di notifiche rimosse
+    }
+
+    /**
+     * Marca una notifica come in fase di rimozione
+     */
+    markNotificationRemoving(id) {
+        const notifications = this.getState('notifications').map(n => 
+            n.id === id ? { ...n, isRemoving: true } : n
+        );
+        this.setState('notifications', notifications);
+    }
+
+    /**
+     * Ottiene notifiche per tipo
+     */
+    getNotificationsByType(type) {
+        return this.getState('notifications').filter(n => n.type === type);
+    }
+
+    /**
+     * Ottiene notifiche visibili (non in fase di rimozione)
+     */
+    getVisibleNotifications() {
+        return this.getState('notifications').filter(n => n.isVisible && !n.isRemoving);
+    }
+
+    /**
+     * Conta notifiche per tipo
+     */
+    countNotificationsByType(type) {
+        return this.getNotificationsByType(type).length;
+    }
+
+    /**
+     * Verifica se ci sono notifiche di errore attive
+     */
+    hasErrorNotifications() {
+        return this.countNotificationsByType('error') > 0;
+    }
+
+    /**
+     * Sistema di cleanup automatico
+     */
+    startAutoCleanup() {
+        // Pulisci timer esistente
+        if (this.cleanupTimer) {
+            clearInterval(this.cleanupTimer);
+        }
+
+        const settings = this.getState('notificationSettings');
+        
+        // Avvia nuovo timer
+        this.cleanupTimer = setInterval(() => {
+            const removed = this.clearOldNotifications(settings.autoCleanupInterval);
+            if (removed > 0) {
+                logger.debug(`Cleanup automatico: rimosse ${removed} notifiche vecchie`);
+            }
+        }, settings.autoCleanupInterval);
+    }
+
+    /**
+     * Ferma il cleanup automatico
+     */
+    stopAutoCleanup() {
+        if (this.cleanupTimer) {
+            clearInterval(this.cleanupTimer);
+            this.cleanupTimer = null;
+        }
+    }
+
+    /**
+     * Ottiene statistiche sulle notifiche
+     */
+    getNotificationStats() {
+        const notifications = this.getState('notifications');
+        const stats = {
+            total: notifications.length,
+            visible: notifications.filter(n => n.isVisible && !n.isRemoving).length,
+            byType: {
+                success: notifications.filter(n => n.type === 'success').length,
+                error: notifications.filter(n => n.type === 'error').length,
+                warning: notifications.filter(n => n.type === 'warning').length,
+                info: notifications.filter(n => n.type === 'info').length
+            },
+            persistent: notifications.filter(n => n.options.persistent).length,
+            oldest: notifications.length > 0 
+                ? Math.min(...notifications.map(n => new Date(n.timestamp).getTime()))
+                : null,
+            newest: notifications.length > 0 
+                ? Math.max(...notifications.map(n => new Date(n.timestamp).getTime()))
+                : null
+        };
+
+        return stats;
+    }
+
+    /**
+     * Esporta configurazione notifiche per backup
+     */
+    exportNotificationSettings() {
+        return {
+            settings: this.getState('notificationSettings'),
+            timestamp: new Date().toISOString(),
+            version: '1.0'
+        };
+    }
+
+    /**
+     * Importa configurazione notifiche da backup
+     */
+    importNotificationSettings(backup) {
+        try {
+            if (backup.version === '1.0' && backup.settings) {
+                this.updateNotificationSettings(backup.settings);
+                return true;
+            }
+            return false;
+        } catch (error) {
+            logger.error('Errore durante importazione impostazioni notifiche:', error);
+            return false;
+        }
     }
 
     /**
@@ -370,6 +719,19 @@ class StateService {
             tipo_intervento: '',
             sortColumn: 'data_evento',
             sortDirection: 'desc'
+        });
+    }
+
+    /**
+     * Cleanup delle risorse quando il servizio viene distrutto
+     */
+    destroy() {
+        this.stopAutoCleanup();
+        this.subscribers.clear();
+        
+        // Pulisci localStorage se necessario
+        this.persistentKeys.forEach(key => {
+            localStorage.removeItem(`app_state_${key}`);
         });
     }
 }

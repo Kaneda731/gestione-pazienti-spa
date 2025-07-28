@@ -27,8 +27,13 @@ import '../core/utils/extensionErrorHandler.js';
 import '../shared/components/ui/index.js';
 import '../core/services/bootstrapService.js';
 import '../core/services/stateService.js';
-import '../core/services/notificationService.js';
+import { notificationService } from '../core/services/notificationService.js';
 import '../core/services/uiStateService.js';
+
+// Debug: esponi il notificationService globalmente per testing
+if (isDevelopment) {
+    window.notificationService = notificationService;
+}
 
 // Components
 import '../shared/components/forms/CustomSelect.js';

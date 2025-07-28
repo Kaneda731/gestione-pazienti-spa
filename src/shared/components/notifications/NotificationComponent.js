@@ -96,6 +96,7 @@ export class NotificationComponent {
         this.handleTouchStart = this.handleTouchStart.bind(this);
         this.handleTouchMove = this.handleTouchMove.bind(this);
         this.handleTouchEnd = this.handleTouchEnd.bind(this);
+        this.handleTouchCancel = this.handleTouchCancel.bind(this);
         this.close = this.close.bind(this);
 
         // Touch gesture state
@@ -103,7 +104,13 @@ export class NotificationComponent {
         this.touchStartY = 0;
         this.touchCurrentX = 0;
         this.touchCurrentY = 0;
+        this.touchStartTime = 0;
         this.isSwiping = false;
+        this.isLongPress = false;
+        this.longPressTimer = null;
+        this.touchFeedbackTimer = null;
+        this.swipeThreshold = 80; // Soglia per swipe in px
+        this.longPressDelay = 500; // Delay per long press in ms
 
         this.init();
     }
@@ -117,6 +124,11 @@ export class NotificationComponent {
         this.setupEventListeners();
         this.setupAutoClose();
         this.announceToScreenReader();
+        
+        // Ottimizza touch targets dopo che l'elemento è stato creato
+        setTimeout(() => {
+            this.optimizeTouchTargets();
+        }, 0);
     }
 
     /**
@@ -276,12 +288,11 @@ export class NotificationComponent {
         this.element.addEventListener('mouseenter', this.handleMouseEnter);
         this.element.addEventListener('mouseleave', this.handleMouseLeave);
 
-        // Touch events per mobile gestures
-        if (window.innerWidth <= 767) {
-            this.element.addEventListener('touchstart', this.handleTouchStart, { passive: false });
-            this.element.addEventListener('touchmove', this.handleTouchMove, { passive: false });
-            this.element.addEventListener('touchend', this.handleTouchEnd, { passive: false });
-        }
+        // Touch events per mobile gestures - sempre attivi per supporto dinamico
+        this.element.addEventListener('touchstart', this.handleTouchStart, { passive: false });
+        this.element.addEventListener('touchmove', this.handleTouchMove, { passive: false });
+        this.element.addEventListener('touchend', this.handleTouchEnd, { passive: false });
+        this.element.addEventListener('touchcancel', this.handleTouchCancel, { passive: false });
 
         // Pulsante chiusura
         if (this.closeButton) {
@@ -360,8 +371,18 @@ export class NotificationComponent {
     startProgressBar(duration) {
         if (!this.progressElement) return;
         
+        // Imposta durata dell'animazione
         this.progressElement.style.setProperty('--progress-duration', `${duration}ms`);
+        
+        // Attiva progress bar con animazione
         this.progressElement.classList.add('notification__progress--active');
+        
+        // Gestisce fine animazione progress bar
+        this.progressElement.addEventListener('animationend', (e) => {
+            if (e.animationName === 'progressCountdown') {
+                this.progressElement.classList.remove('notification__progress--active');
+            }
+        }, { once: true });
     }
 
     /**
@@ -369,7 +390,8 @@ export class NotificationComponent {
      */
     pauseProgressBar() {
         if (this.progressElement) {
-            this.progressElement.style.animationPlayState = 'paused';
+            this.progressElement.classList.add('notification__progress--paused');
+            this.progressElement.classList.remove('notification__progress--resumed');
         }
     }
 
@@ -378,7 +400,21 @@ export class NotificationComponent {
      */
     resumeProgressBar() {
         if (this.progressElement) {
-            this.progressElement.style.animationPlayState = 'running';
+            this.progressElement.classList.remove('notification__progress--paused');
+            this.progressElement.classList.add('notification__progress--resumed');
+        }
+    }
+
+    /**
+     * Ferma progress bar
+     */
+    stopProgressBar() {
+        if (this.progressElement) {
+            this.progressElement.classList.remove(
+                'notification__progress--active',
+                'notification__progress--paused',
+                'notification__progress--resumed'
+            );
         }
     }
 
@@ -617,7 +653,7 @@ export class NotificationComponent {
     }
 
     /**
-     * Gestisce touch start per swipe gesture
+     * Gestisce touch start per swipe gesture e feedback tattile
      */
     handleTouchStart(e) {
         if (e.touches.length !== 1) return;
@@ -627,13 +663,25 @@ export class NotificationComponent {
         this.touchStartY = touch.clientY;
         this.touchCurrentX = touch.clientX;
         this.touchCurrentY = touch.clientY;
+        this.touchStartTime = Date.now();
         this.isSwiping = false;
+        this.isLongPress = false;
         
+        // Pausa auto-close durante interazione touch
         this.pauseAutoClose();
+        
+        // Feedback visivo immediato per touch
+        this.addTouchFeedback();
+        
+        // Avvia timer per long press
+        this.startLongPressTimer();
+        
+        // Vibrazione tattile se supportata (solo su dispositivi mobili)
+        this.provideTactileFeedback('light');
     }
 
     /**
-     * Gestisce touch move per swipe gesture
+     * Gestisce touch move per swipe gesture con feedback visivo migliorato
      */
     handleTouchMove(e) {
         if (e.touches.length !== 1) return;
@@ -644,45 +692,295 @@ export class NotificationComponent {
         
         const deltaX = this.touchCurrentX - this.touchStartX;
         const deltaY = this.touchCurrentY - this.touchStartY;
+        const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+        
+        // Cancella long press se c'è movimento significativo
+        if (distance > 10) {
+            this.cancelLongPress();
+            this.removeTouchFeedback();
+        }
         
         // Determina se è uno swipe orizzontale
-        if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
+        if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 15) {
             this.isSwiping = true;
             e.preventDefault();
             
-            // Applica trasformazione visiva
-            const progress = Math.min(Math.abs(deltaX) / 100, 1);
-            const opacity = 1 - progress * 0.5;
+            // Calcola progress e feedback visivo migliorato
+            const progress = Math.min(Math.abs(deltaX) / this.swipeThreshold, 1);
+            const opacity = 1 - progress * 0.6;
+            const scale = 1 - progress * 0.05;
             
-            this.element.style.transform = `translateX(${deltaX}px)`;
+            // Applica trasformazione con easing
+            const easedDeltaX = deltaX * (1 - Math.pow(progress, 2) * 0.3);
+            this.element.style.transform = `translateX(${easedDeltaX}px) scale(${scale})`;
             this.element.style.opacity = opacity;
+            
+            // Feedback tattile quando si raggiunge la soglia
+            if (progress >= 0.7 && !this.element.hasAttribute('data-swipe-threshold-reached')) {
+                this.element.setAttribute('data-swipe-threshold-reached', 'true');
+                this.provideTactileFeedback('medium');
+                this.element.classList.add('notification--swipe-threshold');
+            }
         }
     }
 
     /**
-     * Gestisce touch end per swipe gesture
+     * Gestisce touch end per swipe gesture con animazioni fluide
      */
     handleTouchEnd(e) {
+        this.cancelLongPress();
+        this.removeTouchFeedback();
+        
+        const deltaX = this.touchCurrentX - this.touchStartX;
+        const deltaY = this.touchCurrentY - this.touchStartY;
+        const touchDuration = Date.now() - this.touchStartTime;
+        const velocity = Math.abs(deltaX) / touchDuration; // px/ms
+        
+        // Gestione tap semplice
+        if (!this.isSwiping && Math.abs(deltaX) < 10 && Math.abs(deltaY) < 10 && touchDuration < 300) {
+            this.handleTap(e);
+            this.resumeAutoClose();
+            return;
+        }
+        
         if (!this.isSwiping) {
             this.resumeAutoClose();
             return;
         }
         
-        const deltaX = this.touchCurrentX - this.touchStartX;
-        const threshold = 100; // Soglia per swipe
+        // Calcola se il swipe deve essere completato
+        const shouldComplete = Math.abs(deltaX) > this.swipeThreshold || velocity > 0.5;
         
-        if (Math.abs(deltaX) > threshold) {
-            // Swipe completato - chiudi notifica
-            this.element.classList.add('swipe-right');
-            this.close();
+        if (shouldComplete) {
+            // Swipe completato - chiudi notifica con animazione
+            this.element.classList.add('notification--swipe-closing');
+            this.provideTactileFeedback('heavy');
+            
+            // Animazione di chiusura fluida
+            const direction = deltaX > 0 ? 1 : -1;
+            this.element.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.3s ease-out';
+            this.element.style.transform = `translateX(${direction * 100}%) scale(0.9)`;
+            this.element.style.opacity = '0';
+            
+            setTimeout(() => {
+                this.close();
+            }, 300);
         } else {
-            // Swipe incompleto - ripristina posizione
+            // Swipe incompleto - ripristina posizione con animazione elastica
+            this.element.style.transition = 'transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55), opacity 0.3s ease-out';
             this.element.style.transform = '';
             this.element.style.opacity = '';
+            
+            // Rimuovi classe threshold dopo animazione
+            setTimeout(() => {
+                this.element.classList.remove('notification--swipe-threshold');
+                this.element.removeAttribute('data-swipe-threshold-reached');
+                this.element.style.transition = '';
+            }, 400);
+            
             this.resumeAutoClose();
         }
         
         this.isSwiping = false;
+    }
+
+    /**
+     * Gestisce touch cancel (interruzione touch)
+     */
+    handleTouchCancel(e) {
+        this.cancelLongPress();
+        this.removeTouchFeedback();
+        
+        if (this.isSwiping) {
+            // Ripristina posizione se touch viene cancellato durante swipe
+            this.element.style.transition = 'transform 0.3s ease-out, opacity 0.3s ease-out';
+            this.element.style.transform = '';
+            this.element.style.opacity = '';
+            
+            setTimeout(() => {
+                this.element.classList.remove('notification--swipe-threshold');
+                this.element.removeAttribute('data-swipe-threshold-reached');
+                this.element.style.transition = '';
+            }, 300);
+        }
+        
+        this.isSwiping = false;
+        this.resumeAutoClose();
+    }
+
+    /**
+     * Gestisce tap semplice su notifica
+     */
+    handleTap(e) {
+        // Se il tap è su un elemento interattivo, non fare nulla
+        if (e.target.closest('button, a, [role="button"]')) {
+            return;
+        }
+        
+        // Feedback tattile per tap
+        this.provideTactileFeedback('light');
+        
+        // Focus sulla notifica per accessibilità
+        if (this.options.enableKeyboardNavigation) {
+            this.element.focus();
+        }
+        
+        this.dispatchEvent('tapped', { originalEvent: e });
+    }
+
+    /**
+     * Avvia timer per long press
+     */
+    startLongPressTimer() {
+        this.cancelLongPress();
+        
+        this.longPressTimer = setTimeout(() => {
+            if (!this.isSwiping) {
+                this.handleLongPress();
+            }
+        }, this.longPressDelay);
+    }
+
+    /**
+     * Cancella timer long press
+     */
+    cancelLongPress() {
+        if (this.longPressTimer) {
+            clearTimeout(this.longPressTimer);
+            this.longPressTimer = null;
+        }
+        this.isLongPress = false;
+    }
+
+    /**
+     * Gestisce long press
+     */
+    handleLongPress() {
+        this.isLongPress = true;
+        this.provideTactileFeedback('heavy');
+        
+        // Aggiungi classe per feedback visivo
+        this.element.classList.add('notification--long-pressed');
+        
+        // Mostra menu contestuale o azioni aggiuntive se disponibili
+        if (this.options.actions && this.options.actions.length > 0) {
+            this.showContextMenu();
+        } else if (this.options.closable) {
+            // Se non ci sono azioni, offri chiusura rapida
+            this.showQuickCloseHint();
+        }
+        
+        this.dispatchEvent('longPressed');
+    }
+
+    /**
+     * Mostra menu contestuale per azioni
+     */
+    showContextMenu() {
+        // Implementazione base - può essere estesa
+        this.element.classList.add('notification--context-menu-active');
+        
+        // Rimuovi dopo 2 secondi se non c'è interazione
+        setTimeout(() => {
+            this.element.classList.remove('notification--context-menu-active');
+        }, 2000);
+    }
+
+    /**
+     * Mostra hint per chiusura rapida
+     */
+    showQuickCloseHint() {
+        this.element.classList.add('notification--quick-close-hint');
+        
+        setTimeout(() => {
+            this.element.classList.remove('notification--quick-close-hint');
+        }, 1500);
+    }
+
+    /**
+     * Aggiunge feedback visivo per touch
+     */
+    addTouchFeedback() {
+        this.element.classList.add('notification--touched');
+        
+        // Rimuovi automaticamente dopo breve delay
+        this.touchFeedbackTimer = setTimeout(() => {
+            this.removeTouchFeedback();
+        }, 150);
+    }
+
+    /**
+     * Rimuove feedback visivo per touch
+     */
+    removeTouchFeedback() {
+        if (this.touchFeedbackTimer) {
+            clearTimeout(this.touchFeedbackTimer);
+            this.touchFeedbackTimer = null;
+        }
+        
+        this.element.classList.remove('notification--touched', 'notification--long-pressed');
+    }
+
+    /**
+     * Fornisce feedback tattile se supportato
+     */
+    provideTactileFeedback(intensity = 'light') {
+        // Verifica supporto vibrazione e che sia un dispositivo mobile
+        if (!navigator.vibrate || !this.isMobileDevice()) {
+            return;
+        }
+        
+        // Pattern di vibrazione basati sull'intensità
+        const patterns = {
+            light: [10],
+            medium: [20],
+            heavy: [30],
+            success: [10, 50, 10],
+            error: [50, 100, 50]
+        };
+        
+        const pattern = patterns[intensity] || patterns.light;
+        
+        try {
+            navigator.vibrate(pattern);
+        } catch (error) {
+            // Ignora errori di vibrazione
+            console.debug('Vibrazione non disponibile:', error);
+        }
+    }
+
+    /**
+     * Verifica se è un dispositivo mobile
+     */
+    isMobileDevice() {
+        // Verifica user agent per dispositivi mobili noti
+        const mobileUserAgent = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        // Verifica supporto touch
+        const hasTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints && navigator.maxTouchPoints > 0);
+        
+        // Verifica dimensioni schermo (mobile tipicamente < 768px)
+        const isMobileScreen = window.innerWidth <= 767;
+        
+        // È mobile se ha user agent mobile O (ha touch E schermo piccolo)
+        return mobileUserAgent || (hasTouch && isMobileScreen);
+    }
+
+    /**
+     * Ottimizza touch targets per accessibilità
+     */
+    optimizeTouchTargets() {
+        // Assicura che tutti i pulsanti abbiano dimensioni minime adeguate
+        const buttons = this.element.querySelectorAll('button, [role="button"]');
+        
+        buttons.forEach(button => {
+            const rect = button.getBoundingClientRect();
+            
+            // Se il target è troppo piccolo, aggiungi padding
+            if (rect.width < 44 || rect.height < 44) {
+                button.classList.add('notification__touch-target--enhanced');
+            }
+        });
     }
 
     /**
@@ -706,12 +1004,24 @@ export class NotificationComponent {
     handleAnimationEnd(e) {
         if (e.target !== this.element) return;
         
+        const animationName = e.animationName;
+        
+        // Gestisce fine animazione di uscita
         if (this.element.classList.contains('notification--exiting')) {
-            this.remove();
-        } else if (this.element.classList.contains('notification--entering')) {
-            this.element.classList.remove('notification--entering');
-            this.isVisible = true;
-            this.dispatchEvent('shown');
+            if (animationName === 'slideOutRight' || 
+                animationName === 'slideOutUp' || 
+                animationName === 'fadeOut') {
+                this.remove();
+            }
+        } 
+        // Gestisce fine animazione di entrata
+        else if (this.element.classList.contains('notification--entering')) {
+            if (animationName === 'slideInRight' || 
+                animationName === 'slideInDown') {
+                this.element.classList.remove('notification--entering');
+                this.isVisible = true;
+                this.dispatchEvent('shown');
+            }
         }
     }
 
@@ -729,8 +1039,24 @@ export class NotificationComponent {
             prefersReducedMotion = false;
         }
         
+        this.dispatchEvent('showing');
+        
         if (this.options.enableAnimations && !prefersReducedMotion) {
+            // Assicurati che l'elemento sia inizialmente nascosto
+            this.element.style.opacity = '0';
+            this.element.style.transform = this.getInitialTransform();
+            
+            // Forza reflow per assicurare che gli stili iniziali siano applicati
+            this.element.offsetHeight;
+            
+            // Avvia animazione di entrata
             this.element.classList.add('notification--entering');
+            
+            // Rimuovi stili inline per permettere all'animazione CSS di funzionare
+            requestAnimationFrame(() => {
+                this.element.style.opacity = '';
+                this.element.style.transform = '';
+            });
         } else {
             this.isVisible = true;
             this.dispatchEvent('shown');
@@ -740,8 +1066,16 @@ export class NotificationComponent {
         if (this.type === 'error' || this.type === 'warning') {
             setTimeout(() => {
                 this.element.focus();
-            }, 100);
+            }, this.options.enableAnimations && !prefersReducedMotion ? 350 : 100);
         }
+    }
+
+    /**
+     * Ottiene trasformazione iniziale per animazione di entrata
+     */
+    getInitialTransform() {
+        const isMobile = window.innerWidth <= 767;
+        return isMobile ? 'translateY(-100%)' : 'translateX(100%)';
     }
 
     /**
@@ -752,6 +1086,7 @@ export class NotificationComponent {
         
         this.isRemoving = true;
         this.clearAutoCloseTimer();
+        this.stopProgressBar();
         
         this.dispatchEvent('closing');
         
@@ -764,7 +1099,18 @@ export class NotificationComponent {
         }
         
         if (this.options.enableAnimations && !prefersReducedMotion) {
+            // Rimuovi classe entering se presente
+            this.element.classList.remove('notification--entering');
+            
+            // Aggiungi classe exiting per animazione di uscita
             this.element.classList.add('notification--exiting');
+            
+            // Fallback timeout nel caso l'evento animationend non venga triggerato
+            setTimeout(() => {
+                if (this.isRemoving && this.element && this.element.parentNode) {
+                    this.remove();
+                }
+            }, 350); // Leggermente più lungo della durata dell'animazione (0.3s)
         } else {
             this.remove();
         }
@@ -797,11 +1143,11 @@ export class NotificationComponent {
         this.element.removeEventListener('mouseenter', this.handleMouseEnter);
         this.element.removeEventListener('mouseleave', this.handleMouseLeave);
         
-        if (window.innerWidth <= 767) {
-            this.element.removeEventListener('touchstart', this.handleTouchStart);
-            this.element.removeEventListener('touchmove', this.handleTouchMove);
-            this.element.removeEventListener('touchend', this.handleTouchEnd);
-        }
+        // Rimuovi touch event listeners
+        this.element.removeEventListener('touchstart', this.handleTouchStart);
+        this.element.removeEventListener('touchmove', this.handleTouchMove);
+        this.element.removeEventListener('touchend', this.handleTouchEnd);
+        this.element.removeEventListener('touchcancel', this.handleTouchCancel);
         
         if (this.closeButton) {
             this.closeButton.removeEventListener('click', this.close);
@@ -813,11 +1159,16 @@ export class NotificationComponent {
         
         // Pulisci timer
         this.clearAutoCloseTimer();
+        this.cancelLongPress();
+        this.removeTouchFeedback();
         
         if (this.progressTimer) {
             clearTimeout(this.progressTimer);
             this.progressTimer = null;
         }
+
+        // Ferma progress bar
+        this.stopProgressBar();
     }
 
     /**

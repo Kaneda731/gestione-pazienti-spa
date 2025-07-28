@@ -3,7 +3,7 @@ import { eventiCliniciService } from '../../eventi-clinici/services/eventiClinic
 import { postOperativeCalculator } from '../../eventi-clinici/utils/post-operative-calculator.js';
 import { initCustomSelects, updateCustomSelect, CustomSelect } from '../../../shared/components/forms/CustomSelect.js';
 import CustomDatepicker from '../../../shared/components/forms/CustomDatepicker.js';
-import { mostraMessaggio } from '../../../shared/utils/helpers.js';
+import { notificationService } from '../../../core/services/notificationService.js';
 import { sanitizeHtml } from '../../../shared/utils/domSecurity.js';
 
 let eventiDatepicker = null;
@@ -89,7 +89,7 @@ function initializeComponents() {
                 
                 if (selectedDate > today) {
                     instance.clear();
-                    mostraMessaggio('La data dell\'evento non può essere nel futuro', 'warning');
+                    notificationService.warning('La data dell\'evento non può essere nel futuro');
                 }
             }
         }
@@ -204,7 +204,7 @@ async function handleSaveEvento() {
         // Validazione
         const validationResult = validateEventoData(eventoData);
         if (!validationResult.isValid) {
-            mostraMessaggio(validationResult.message, 'danger');
+            notificationService.error(validationResult.message);
             return;
         }
 
@@ -226,7 +226,7 @@ async function handleSaveEvento() {
         // Nascondi form
         hideEventoForm();
         
-        mostraMessaggio('Evento clinico salvato con successo!', 'success');
+        notificationService.success('Evento clinico salvato con successo!');
     } catch (error) {
         console.error('Errore nel salvataggio evento:', error);
         
@@ -242,7 +242,7 @@ async function handleSaveEvento() {
             }
         }
         
-        mostraMessaggio(errorMessage, 'danger');
+        notificationService.error(errorMessage);
     }
 }
 
@@ -401,7 +401,7 @@ export async function loadEventiForCurrentPatient() {
         updatePostOperativeInfo(eventi);
     } catch (error) {
         console.error('Errore nel caricamento eventi:', error);
-        mostraMessaggio('Errore nel caricamento eventi clinici', 'danger');
+        notificationService.error('Errore nel caricamento eventi clinici');
     }
 }
 
@@ -571,10 +571,10 @@ async function deleteEvento(eventoId) {
     try {
         await eventiCliniciService.deleteEvento(eventoId);
         await loadEventiForCurrentPatient();
-        mostraMessaggio('Evento clinico eliminato con successo!', 'success');
+        notificationService.success('Evento clinico eliminato con successo!');
     } catch (error) {
         console.error('Errore nell\'eliminazione evento:', error);
-        mostraMessaggio('Errore nell\'eliminazione evento', 'danger');
+        notificationService.error('Errore nell\'eliminazione evento');
     }
 }
 

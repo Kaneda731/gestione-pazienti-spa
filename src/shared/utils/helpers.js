@@ -82,28 +82,3 @@ export function populateSelectWithOptions(selectElement, options, defaultOptionT
         selectElement.value = currentValue;
     }
 }
-
-/**
- * Mostra un messaggio all'utente in un contenitore specifico.
- * @param {string} message - Il testo del messaggio.
- * @param {string} type - Il tipo di messaggio ('success', 'error', 'info').
- * @param {string} containerId - L'ID del contenitore del messaggio.
- */
-export function mostraMessaggio(message, type = 'info', containerId = 'messaggio-container') {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-
-    const alertType = type === 'error' ? 'danger' : type;
-    const icon = {
-        success: 'check_circle',
-        error: 'error',
-        info: 'info'
-    }[type];
-
-    container.innerHTML = sanitizeHtml(`
-        <div class="alert alert-${alertType} d-flex align-items-center" role="alert">
-            <span class="material-icons me-2">${icon}</span>
-            <div>${message}</div>
-        </div>
-    `);
-}

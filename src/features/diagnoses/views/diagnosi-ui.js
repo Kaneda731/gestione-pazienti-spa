@@ -1,5 +1,5 @@
 // src/features/diagnoses/views/diagnosi-ui.js
-import { mostraMessaggio } from '../../../shared/utils/helpers.js';
+import { notificationService } from '../../../core/services/notificationService.js';
 
 // Contiene gli elementi del DOM per un accesso più facile
 export const dom = {
@@ -85,5 +85,17 @@ export function resetForm() {
  * @param {'info'|'success'|'error'} type 
  */
 export function showFeedback(message, type) {
-    mostraMessaggio(message, type);
+    switch(type) {
+        case 'success':
+            notificationService.success(message);
+            break;
+        case 'error':
+            notificationService.error(message);
+            break;
+        case 'warning':
+            notificationService.warning(message);
+            break;
+        default:
+            notificationService.info(message);
+    }
 }

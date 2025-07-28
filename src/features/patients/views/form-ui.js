@@ -1,7 +1,7 @@
 // src/features/patients/views/form-ui.js
 import { initCustomSelects, updateCustomSelect } from '../../../shared/components/forms/CustomSelect.js';
 import CustomDatepicker from '../../../shared/components/forms/CustomDatepicker.js';
-import { mostraMessaggio } from '../../../shared/utils/helpers.js';
+import { notificationService } from '../../../core/services/notificationService.js';
 import { initEventiCliniciTab, setCurrentPatient, cleanupEventiCliniciTab } from './eventi-clinici-tab.js';
 import { sanitizeHtml } from '../../../shared/utils/domSecurity.js';
 
@@ -298,5 +298,17 @@ export function getFormData() {
  * @param {('success'|'danger')} type - Il tipo di messaggio.
  */
 export function showFeedbackMessage(message, type) {
-    mostraMessaggio(message, type);
+    switch(type) {
+        case 'success':
+            notificationService.success(message);
+            break;
+        case 'error':
+            notificationService.error(message);
+            break;
+        case 'warning':
+            notificationService.warning(message);
+            break;
+        default:
+            notificationService.info(message);
+    }
 }

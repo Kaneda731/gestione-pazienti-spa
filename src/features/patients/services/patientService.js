@@ -11,6 +11,7 @@ import { stateService } from "/src/core/services/stateService.js";
 import { notificationService } from "/src/core/services/notificationService.js";
 import { logger } from "/src/core/services/loggerService.js";
 import { patientApi } from "./patientApi.js";
+import { eventiCliniciService } from "/src/features/eventi-clinici/services/eventiCliniciService.js";
 import { validatePatientData, validateDischargeData } from "./patientValidation.js";
 import { generateCSV, downloadCSV } from "/src/shared/utils/csvUtils.js";
 
@@ -91,6 +92,17 @@ class PatientService {
 
       const newPatient = await patientApi.createPatient(dataToInsert);
       this.invalidateCache();
+
+      // Se il paziente viene creato come infetto, crea l'evento clinico corrispondente
+      if (newPatient.infetto) {
+        const infectionDetails = {
+          data_evento: newPatient.data_infezione,
+          agente_patogeno: patientData.agente_patogeno,
+          descrizione: patientData.descrizione_infezione
+        };
+        await this._handleInfectionEventCreation(newPatient.id, infectionDetails);
+      }
+
       notificationService.success("Paziente creato con successo!");
       return newPatient;
     } catch (error) {
@@ -107,10 +119,28 @@ class PatientService {
    */
   async updatePatient(id, patientData, options = { showNotification: true }) {
     try {
+      // Prima di aggiornare, otteniamo lo stato precedente del paziente
+      const oldPatient = await this.getPatientById(id);
+
       stateService.setLoading(true, "Aggiornamento paziente...");
       const updatedPatient = await patientApi.updatePatient(id, patientData);
       
       this.cache.delete(`patient_${id}`);
+
+      // Controlla se lo stato di infezione è cambiato
+      const wasInfected = oldPatient.infetto;
+      const isInfected = updatedPatient.infetto;
+
+      if (!wasInfected && isInfected) {
+        // Il paziente è stato appena contrassegnato come infetto
+        const infectionDetails = {
+          data_evento: updatedPatient.data_infezione,
+          agente_patogeno: patientData.agente_patogeno,
+          descrizione: patientData.descrizione_infezione
+        };
+        await this._handleInfectionEventCreation(id, infectionDetails);
+      }
+      // Nota: non gestiamo il caso `isInfected -> wasInfected` per non eliminare eventi storici.
 
       if (options.showNotification) {
         notificationService.success("Paziente aggiornato con successo!");
@@ -341,6 +371,27 @@ class PatientService {
     } catch (error) {
       logger.error("❌ Errore durante debug:", error);
       return { error: error.message };
+    }
+  }
+
+  /**
+   * Gestisce la creazione di un evento di infezione quando un paziente viene marcato come infetto.
+   * @private
+   */
+  async _handleInfectionEventCreation(pazienteId, infectionDetails) {
+    try {
+      const eventoData = {
+        paziente_id: pazienteId,
+        tipo_evento: 'infezione',
+        // Usa la data fornita o la data odierna come fallback
+        data_evento: infectionDetails.data_evento || new Date().toISOString().split('T')[0],
+        descrizione: infectionDetails.descrizione || 'Infezione registrata tramite form paziente.',
+        agente_patogeno: infectionDetails.agente_patogeno || 'Non specificato'
+      };
+      await eventiCliniciService.createEvento(eventoData);
+      logger.log(`Evento di infezione creato automaticamente per il paziente ${pazienteId}`);
+    } catch (error) {
+      notificationService.error(`Non è stato possibile creare l'evento di infezione automatico: ${error.message}`);
     }
   }
 }

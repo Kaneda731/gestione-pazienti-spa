@@ -5,6 +5,7 @@ import { initCustomSelects, updateCustomSelect, CustomSelect } from '../../../sh
 import CustomDatepicker from '../../../shared/components/forms/CustomDatepicker.js';
 import { notificationService } from '../../../core/services/notificationService.js';
 import { sanitizeHtml } from '../../../shared/utils/domSecurity.js';
+import { ResolveInfectionModal } from '../../eventi-clinici/components/ResolveInfectionModal.js';
 
 let eventiDatepicker = null;
 let currentPatientId = null;
@@ -414,6 +415,13 @@ function renderEventiList(eventi) {
         const dataFormatted = convertDateFromISO(evento.data_evento);
         const tipoIcon = evento.tipo_evento === 'intervento' ? 'medical_services' : 'coronavirus';
         const tipoClass = evento.tipo_evento === 'intervento' ? 'primary' : 'warning';
+
+        let statusBadge = '';
+        if (evento.tipo_evento === 'infezione' && evento.data_fine_evento) {
+            statusBadge = `<span class="badge bg-success ms-2">Risolto il ${convertDateFromISO(evento.data_fine_evento)}</span>`;
+        }
+
+        const isRisolto = evento.tipo_evento === 'infezione' && evento.data_fine_evento;
         
         return `
             <div class="card mb-3 evento-card" data-evento-id="${evento.id}">
@@ -426,6 +434,7 @@ function renderEventiList(eventi) {
                                     ${evento.tipo_evento === 'intervento' ? 'Intervento' : 'Infezione'}
                                 </span>
                                 <small class="text-muted">${dataFormatted}</small>
+                                ${statusBadge}
                             </div>
                             
                             ${evento.tipo_intervento ? `<p class="mb-1"><strong>Tipo:</strong> ${evento.tipo_intervento}</p>` : ''}
@@ -441,6 +450,11 @@ function renderEventiList(eventi) {
                                 <li><a class="dropdown-item edit-evento" href="#" data-evento-id="${evento.id}">
                                     <span class="material-icons me-2" style="font-size: 16px;">edit</span>Modifica
                                 </a></li>
+                                ${evento.tipo_evento === 'infezione' && !isRisolto ? `
+                                <li><a class="dropdown-item resolve-infezione" href="#" data-evento-id="${evento.id}" data-start-date="${evento.data_evento}">
+                                    <span class="material-icons me-2" style="font-size: 16px;">check_circle</span>Risolvi
+                                </a></li>
+                                ` : ''}
                                 <li><a class="dropdown-item delete-evento text-danger" href="#" data-evento-id="${evento.id}">
                                     <span class="material-icons me-2" style="font-size: 16px;">delete</span>Elimina
                                 </a></li>
@@ -468,6 +482,15 @@ function renderEventiList(eventi) {
             e.preventDefault();
             const eventoId = e.currentTarget.dataset.eventoId;
             deleteEvento(eventoId);
+        });
+    });
+
+    eventiList.querySelectorAll('.resolve-infezione').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const eventoId = e.currentTarget.dataset.eventoId;
+            const startDate = e.currentTarget.dataset.startDate;
+            resolveInfezione(eventoId, startDate);
         });
     });
 }
@@ -564,6 +587,26 @@ async function deleteEvento(eventoId) {
     } catch (error) {
         // La notifica di errore è già gestita da eventiCliniciService.
         logger.error('Errore catturato in deleteEvento:', error.message);
+    }
+}
+
+/**
+ * Apre il modal per risolvere un'infezione e gestisce il salvataggio.
+ * @param {string} eventoId - L'ID dell'evento di infezione.
+ * @param {string} startDate - La data di inizio dell'infezione, per validazione.
+ */
+async function resolveInfezione(eventoId, startDate) {
+    const modal = new ResolveInfectionModal({ minDate: startDate });
+    const dataFine = await modal.show();
+
+    if (dataFine) {
+        try {
+            await eventiCliniciService.resolveInfezione(eventoId, dataFine);
+            await loadEventiForCurrentPatient(); // Ricarica la lista per mostrare lo stato aggiornato
+        } catch (error) {
+            // L'errore è già gestito e notificato dal service, non serve fare altro.
+            logger.error("Errore catturato durante la risoluzione dell'infezione:", error);
+        }
     }
 }
 

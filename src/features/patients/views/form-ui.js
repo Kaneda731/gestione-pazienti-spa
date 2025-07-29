@@ -2,6 +2,7 @@
 import { initCustomSelects, updateCustomSelect } from '../../../shared/components/forms/CustomSelect.js';
 import CustomDatepicker from '../../../shared/components/forms/CustomDatepicker.js';
 import { notificationService } from '../../../core/services/notificationService.js';
+import { InfectionEventModal } from '../../eventi-clinici/components/InfectionEventModal.js';
 import { initEventiCliniciTab, setCurrentPatient, cleanupEventiCliniciTab } from './eventi-clinici-tab.js';
 import { sanitizeHtml } from '../../../shared/utils/domSecurity.js';
 
@@ -38,8 +39,8 @@ function setupConditionalFieldsLogic() {
 
     const infettoCheckbox = document.getElementById('infetto');
     if (infettoCheckbox) {
-        infettoCheckbox.addEventListener('change', (e) => {
-            handleInfettoChange(e.target.checked);
+        infettoCheckbox.addEventListener('change', async (e) => {
+            await handleInfettoChange(e);
         });
     }
 
@@ -105,24 +106,47 @@ export function handleTipoDimissioneChange(tipoDimissione) {
 }
 
 /**
- * Gestisce la visualizzazione condizionale del campo data infezione.
- * @param {boolean} isInfetto - Se il paziente è infetto.
+ * Gestisce l'interazione dell'utente con la checkbox "Infetto", aprendo il modal.
+ * @param {Event} event - L'evento change della checkbox.
  */
-export function handleInfettoChange(isInfetto) {
-    const dataInfezioneContainer = document.getElementById('data-infezione-container');
-    const dataInfezioneInput = document.getElementById('data_infezione');
+export async function handleInfettoChange(event) {
+    const checkbox = event.target;
+    if (checkbox.checked) {
+        const patientName = `${document.getElementById('nome').value} ${document.getElementById('cognome').value}`.trim();
+        const modal = new InfectionEventModal({ patientName });
+        const eventData = await modal.show();
 
-    if (isInfetto) {
-        dataInfezioneContainer.style.display = 'block';
-        // Se non c'è già una data, suggerisci la data odierna
-        if (!dataInfezioneInput.value) {
-            const today = new Date();
-            const formattedDate = `${today.getDate().toString().padStart(2, '0')}/${(today.getMonth() + 1).toString().padStart(2, '0')}/${today.getFullYear()}`;
-            dataInfezioneInput.value = formattedDate;
+        if (eventData) {
+            // L'utente ha confermato, popoliamo i campi nascosti e aggiorniamo la UI
+            const [year, month, day] = eventData.data_evento.split('-');
+            document.getElementById('data_infezione').value = `${day}/${month}/${year}`;
+            document.getElementById('agente_patogeno_hidden').value = eventData.agente_patogeno;
+            document.getElementById('descrizione_hidden').value = eventData.descrizione;
+            updateInfectionUI(true);
+        } else {
+            // L'utente ha annullato, deseleziona la checkbox
+            checkbox.checked = false;
+            updateInfectionUI(false);
         }
     } else {
-        dataInfezioneContainer.style.display = 'none';
-        dataInfezioneInput.value = '';
+        // L'utente ha deselezionato la checkbox, pulisci i dati e nascondi la UI
+        updateInfectionUI(false);
+    }
+}
+
+/**
+ * Aggiorna la UI relativa all'infezione (mostra/nasconde campo data e pulisce i dati).
+ * @param {boolean} isInfetto - Se il paziente è considerato infetto.
+ */
+function updateInfectionUI(isInfetto) {
+    const dataInfezioneContainer = document.getElementById('data-infezione-container');
+    if (isInfetto) {
+        dataInfezioneContainer.style.display = 'block';
+    } else {
+        document.getElementById('data-infezione-container').style.display = 'none';
+        document.getElementById('data_infezione').value = '';
+        document.getElementById('agente_patogeno_hidden').value = '';
+        document.getElementById('descrizione_hidden').value = '';
     }
 }
 
@@ -208,8 +232,10 @@ export function populateForm(patient) {
     document.getElementById('codice_dimissione').value = patient.codice_dimissione || '';
 
     // Mostra/nascondi campi condizionali basati sul tipo dimissione e stato infetto
+    const isInfetto = patient.infetto || false;
+    document.getElementById('infetto').checked = isInfetto;
     handleTipoDimissioneChange(patient.tipo_dimissione || '');
-    handleInfettoChange(patient.infetto || false);
+    updateInfectionUI(isInfetto); // Usa la nuova funzione che non apre il modal
 
     // Imposta il paziente corrente per il tab eventi clinici
     setCurrentPatient(patient.id);
@@ -258,6 +284,10 @@ export function getFormData() {
     // Gestisci la checkbox, che non viene inviata se non è spuntata
     data.infetto = form.querySelector('#infetto').checked;
     
+    // Raccogli i dati dall'evento di infezione (se presenti)
+    data.agente_patogeno = form.querySelector('#agente_patogeno_hidden').value || null;
+    data.descrizione_infezione = form.querySelector('#descrizione_hidden').value || null;
+
     // Converti le date dal formato dd/mm/yyyy a yyyy-mm-dd per Supabase
     const dateFields = ['data_nascita', 'data_ricovero', 'data_dimissione', 'data_infezione', 'data_evento'];
     dateFields.forEach(field => {

@@ -191,6 +191,11 @@ class EventiCliniciService {
 
       if (error) throw error;
 
+      // Se l'evento è un'infezione, aggiorna lo stato del paziente
+      if (eventoData.tipo_evento === 'infezione') {
+        await this._updatePazienteInfezioneStatus(eventoData.paziente_id);
+      }
+
       // Invalida cache
       this.invalidateCache();
 
@@ -240,6 +245,16 @@ class EventiCliniciService {
 
       if (error) throw error;
 
+      // Se il tipo di evento è cambiato o era/è un'infezione,
+      // è necessario ricalcolare lo stato di infezione del paziente.
+      const oldType = existingEvento.tipo_evento;
+      const newType = data.tipo_evento;
+      const pazienteId = data.paziente_id;
+
+      if (oldType === 'infezione' || newType === 'infezione') {
+        await this._updatePazienteInfezioneStatus(pazienteId);
+      }
+
       // Invalida cache
       this.invalidateCache();
 
@@ -261,12 +276,33 @@ class EventiCliniciService {
     try {
       stateService.setLoading(true, "Eliminazione evento clinico...");
 
+      // Prima di eliminare, recupera l'evento per ottenere il paziente_id
+      const { data: evento, error: fetchError } = await supabase
+        .from("eventi_clinici")
+        .select("paziente_id, tipo_evento")
+        .eq("id", id)
+        .single();
+
+      if (fetchError) {
+        // Se l'evento non esiste più, non c'è bisogno di fare nulla.
+        if (fetchError.code === 'PGRST116') {
+            logger.log(`Evento con id ${id} già eliminato.`);
+            return;
+        }
+        throw fetchError;
+      }
+
       const { error } = await supabase
         .from("eventi_clinici")
         .delete()
         .eq("id", id);
 
       if (error) throw error;
+
+      // Se l'evento era un'infezione, aggiorna lo stato del paziente
+      if (evento && evento.tipo_evento === 'infezione') {
+        await this._updatePazienteInfezioneStatus(evento.paziente_id);
+      }
 
       // Invalida cache
       this.invalidateCache();
@@ -275,6 +311,44 @@ class EventiCliniciService {
     } catch (error) {
       console.error("Errore nell'eliminazione evento:", error);
       notificationService.error(`Errore nell'eliminazione: ${error.message}`);
+      throw error;
+    } finally {
+      stateService.setLoading(false);
+    }
+  }
+
+  /**
+   * Risolve un evento di infezione impostando la data di fine.
+   * @param {string} eventoId - L'ID dell'evento di infezione.
+   * @param {string} dataFine - La data di risoluzione in formato YYYY-MM-DD.
+   */
+  async resolveInfezione(eventoId, dataFine) {
+    try {
+      stateService.setLoading(true, "Risoluzione infezione...");
+
+      if (!eventoId || !dataFine) {
+        throw new Error("ID evento e data di fine sono obbligatori.");
+      }
+
+      const { data: evento, error: updateError } = await supabase
+        .from("eventi_clinici")
+        .update({ data_fine_evento: dataFine })
+        .eq("id", eventoId)
+        .select("paziente_id")
+        .single();
+
+      if (updateError) throw updateError;
+
+      // Aggiorna lo stato generale del paziente
+      if (evento && evento.paziente_id) {
+        await this._updatePazienteInfezioneStatus(evento.paziente_id);
+      }
+
+      this.invalidateCache();
+      notificationService.success("Infezione risolta con successo!");
+    } catch (error) {
+      logger.error("Errore nella risoluzione dell'infezione:", error);
+      notificationService.error(`Errore nella risoluzione: ${error.message}`);
       throw error;
     } finally {
       stateService.setLoading(false);
@@ -446,6 +520,56 @@ class EventiCliniciService {
     } catch (error) {
       console.error("Errore nel caricamento statistiche eventi:", error);
       throw error;
+    }
+  }
+
+  /**
+   * Aggiorna lo stato di infezione e la data_infezione di un paziente
+   * basandosi sui suoi eventi clinici di tipo 'infezione'.
+   * @private
+   */
+  async _updatePazienteInfezioneStatus(pazienteId) {
+    if (!pazienteId) return;
+
+    try {
+      // Cerca l'infezione più recente per il paziente
+      const { data: infezioni, error: infezioniError } = await supabase
+        .from("eventi_clinici")
+        .select("data_evento, data_fine_evento")
+        .eq("paziente_id", pazienteId)
+        .eq("tipo_evento", "infezione")
+        .is("data_fine_evento", null) // Cerca solo infezioni "aperte"
+        .order("data_evento", { ascending: false })
+        .limit(1);
+
+      if (infezioniError) {
+        throw new Error(`Errore nel recupero delle infezioni per il paziente ${pazienteId}: ${infezioniError.message}`);
+      }
+
+      const latestInfection = infezioni && infezioni.length > 0 ? infezioni[0] : null;
+
+      const updateData = {
+        infetto: !!latestInfection,
+        data_infezione: latestInfection ? latestInfection.data_evento : null,
+      };
+
+      // Aggiorna la tabella pazienti
+      const { error: updateError } = await supabase
+        .from("pazienti")
+        .update(updateData)
+        .eq("id", pazienteId);
+
+      if (updateError) {
+        throw new Error(`Errore nell'aggiornamento dello stato infezione del paziente ${pazienteId}: ${updateError.message}`);
+      }
+
+      logger.log(`Stato infezione per paziente ${pazienteId} aggiornato: infetto=${updateData.infetto}`);
+
+    } catch (error) {
+      logger.error(error.message);
+      // Non rilanciare l'errore per non bloccare l'operazione principale (es. cancellazione evento)
+      // Ma notifica l'utente che qualcosa è andato storto con la sincronizzazione.
+      notificationService.warn(`Non è stato possibile sincronizzare lo stato di infezione del paziente. Dettagli: ${error.message}`);
     }
   }
 }

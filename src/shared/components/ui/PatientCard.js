@@ -62,7 +62,7 @@ export class PatientCard {
      * @returns {boolean} True se il paziente è infetto
      */
     isPatientInfected() {
-        return this.patient.flag_infetto === true || this.patient.flag_infetto === 'true';
+        return this.patient.infetto === true || this.patient.infetto === 'true';
     }
 
     /**

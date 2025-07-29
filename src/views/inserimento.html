@@ -23,10 +23,6 @@
 
                     <form id="form-inserimento" novalidate>
                         <input type="hidden" id="paziente-id" name="id">
-                        <!-- Campi nascosti per i dati del modal infezione -->
-                        <input type="hidden" id="agente_patogeno_hidden" name="agente_patogeno_hidden">
-                        <input type="hidden" id="descrizione_hidden" name="descrizione_hidden">
-
                         <div id="messaggio-container" class="mb-3"></div>
                         
                         <!-- Tab Content -->
@@ -101,20 +97,12 @@
                             </div>
 
                             <!-- Flag Infetto -->
-                            <div class="col-md-6 d-flex align-items-center mt-3">
+                            <div class="col-md-12 mt-3">
                                 <div class="form-check form-switch">
                                     <input class="form-check-input" type="checkbox" id="infetto" name="infetto">
                                     <label class="form-check-label" for="infetto">Paziente Infetto</label>
                                 </div>
-                            </div>
-
-                            <!-- Data Infezione (condizionale) -->
-                            <div class="col-md-6 mt-3" id="data-infezione-container" style="display: none;">
-                                <label for="data_infezione" class="form-label">Data Infezione</label>
-                                <div class="input-group-icon">
-                                    <input type="text" class="form-control" id="data_infezione" name="data_infezione" data-datepicker placeholder="gg/mm/aaaa">
-                                    <span class="material-icons input-icon">calendar_today</span>
-                                </div>
+                                <small id="infetto-helper-text" class="form-text text-muted" style="display: none;"></small>
                             </div>
 
                             <!-- Sezione Dimissione/Trasferimento -->

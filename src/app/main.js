@@ -29,6 +29,15 @@ import { stateService } from '../core/services/stateService.js';
 import { notificationService } from '../core/services/notificationService.js';
 import '../core/services/uiStateService.js';
 
+// Emergency commands (sempre disponibili per sicurezza)
+import '../core/services/emergencyCommands.js';
+
+// Debug utils (solo in development)
+if (isDevelopment) {
+    import('../core/services/notificationDebugUtils.js');
+    import('../core/services/notificationServiceSimple.js');
+}
+
 // Debug: esponi il notificationService globalmente per testing
 if (isDevelopment) {
     window.notificationService = notificationService;
@@ -85,11 +94,18 @@ async function initializeApp() {
         
     } catch (error) {
         console.error('❌ Errore durante l\'inizializzazione dell\'applicazione:', error);
+        
+        // Messaggio di debug per loop infiniti
+        if (isDevelopment) {
+            console.log('🚨 If you see infinite error loops, run: window.notificationEmergencyReset()');
+        }
+        
         document.body.innerHTML = `
             <div class="container mt-5">
                 <div class="alert alert-danger" role="alert">
                     <h4 class="alert-heading">Errore di inizializzazione</h4>
                     <p>Si è verificato un errore durante l'avvio dell'applicazione.</p>
+                    ${isDevelopment ? '<p><small>Dev: Controlla la console per comandi di debug</small></p>' : ''}
                     <hr>
                     <p class="mb-0">Ricarica la pagina per riprovare.</p>
                 </div>

@@ -2,6 +2,7 @@
 
 import { Modal } from '../../../core/services/bootstrapService.js';
 import CustomDatepicker from '../../../shared/components/forms/CustomDatepicker.js';
+import { sanitizeHtml } from '../../../shared/utils/domSecurity.js';
 
 /**
  * Componente per un modal dedicato alla risoluzione di un evento di infezione.
@@ -9,6 +10,7 @@ import CustomDatepicker from '../../../shared/components/forms/CustomDatepicker.
 export class ResolveInfectionModal {
     constructor(options = {}) {
         this.options = {
+            eventoId: null,
             title: 'Risolvi Infezione',
             defaultDate: new Date().toISOString().split('T')[0],
             minDate: null, // Data minima per la risoluzione (es. data inizio infezione)
@@ -43,7 +45,8 @@ export class ResolveInfectionModal {
                 const formattedDate = selectedDate ? selectedDate.toISOString().split('T')[0] : null;
 
                 if (!formattedDate) {
-                    alert('La data di risoluzione è obbligatoria.');
+                    // alert('La data di risoluzione è obbligatoria.');
+                    this.showError('La data di risoluzione è obbligatoria.');
                     return;
                 }
 
@@ -79,7 +82,7 @@ export class ResolveInfectionModal {
                                     <input type="text" class="form-control" id="data_fine_evento" name="data_fine_evento" data-datepicker placeholder="gg/mm/aaaa" required>
                                     <span class="material-icons input-icon">calendar_today</span>
                                 </div>
-                            </div>
+                                <div id="resolve-modal-message-container" class="mt-2 text-danger small"></div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
                                 <button type="submit" class="btn btn-primary">Salva Risoluzione</button>
@@ -89,5 +92,16 @@ export class ResolveInfectionModal {
                 </div>
             </div>
         `;
+    }
+
+    showError(message) {
+        const messageContainer = document.getElementById('resolve-modal-message-container');
+        if (messageContainer) {
+            messageContainer.innerHTML = sanitizeHtml(message);
+        }
+    }
+
+    clearError() {
+        this.showError('');
     }
 }

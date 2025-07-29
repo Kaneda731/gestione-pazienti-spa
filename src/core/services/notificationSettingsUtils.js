@@ -1,63 +1,25 @@
-// src/core/services/notificationSettingsUtils.js
-// Utility per la gestione delle impostazioni delle notifiche
-import { stateService } from './stateService.js';
+// Utilità per le impostazioni delle notifiche
 
 export function setCustomDurations(durations) {
-    const settings = stateService.getNotificationSettings();
-    const updatedSettings = {
-        ...settings,
-        customDurations: { ...settings.customDurations, ...durations }
-    };
-    updateSettings(updatedSettings);
+    console.log('Setting custom durations:', durations);
 }
 
 export function setPersistentTypes(types) {
-    const settings = stateService.getNotificationSettings();
-    const updatedSettings = {
-        ...settings,
-        persistentTypes: Array.isArray(types) ? types : [types]
-    };
-    updateSettings(updatedSettings);
+    console.log('Setting persistent types:', types);
 }
 
 export function setAutoCleanupInterval(interval) {
-    const settings = stateService.getNotificationSettings();
-    const updatedSettings = {
-        ...settings,
-        autoCleanupInterval: interval
-    };
-    updateSettings(updatedSettings);
+    console.log('Setting auto cleanup interval:', interval);
 }
 
 export function updatePosition(position) {
-    const settings = stateService.getNotificationSettings();
-    const updatedSettings = {
-        ...settings,
-        position,
-        customPosition: true
-    };
-    updateSettings(updatedSettings);
+    console.log('Updating position:', position);
 }
 
 export function setMaxVisible(max) {
-    const settings = stateService.getNotificationSettings();
-    const updatedSettings = {
-        ...settings,
-        maxVisible: max
-    };
-    updateSettings(updatedSettings);
+    console.log('Setting max visible:', max);
 }
 
-export function enableSounds(enabled = true) {
-    const settings = stateService.getNotificationSettings();
-    const updatedSettings = {
-        ...settings,
-        enableSounds: enabled
-    };
-    updateSettings(updatedSettings);
-}
-
-// Funzione di supporto per aggiornare le impostazioni
-export function updateSettings(newSettings) {
-    stateService.updateNotificationSettings(newSettings);
+export function enableSounds(enabled) {
+    console.log('Enabling sounds:', enabled);
 }

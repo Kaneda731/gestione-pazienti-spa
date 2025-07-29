@@ -2,8 +2,7 @@
 import { initCustomSelects, updateCustomSelect } from '../../../shared/components/forms/CustomSelect.js';
 import CustomDatepicker from '../../../shared/components/forms/CustomDatepicker.js';
 import { notificationService } from '../../../core/services/notificationService.js';
-import { InfectionEventModal } from '../../eventi-clinici/components/InfectionEventModal.js';
-import { initEventiCliniciTab, setCurrentPatient, cleanupEventiCliniciTab } from './eventi-clinici-tab.js';
+import { initEventiCliniciTab, setCurrentPatient, cleanupEventiCliniciTab, isPatientCurrentlyInfected } from './eventi-clinici-tab.js';
 import { sanitizeHtml } from '../../../shared/utils/domSecurity.js';
 
 let datepickerInstance = null;
@@ -22,8 +21,8 @@ export function initializeFormComponents() {
     // Aggiungi event listener per la gestione condizionale dei campi
     setupConditionalFieldsLogic();
     
-    // Inizializza il tab degli eventi clinici
-    initEventiCliniciTab();
+    // Inizializza il tab degli eventi clinici, passando la funzione di callback per aggiornare la UI
+    initEventiCliniciTab(updateInfectionStatusFromEvents);
 }
 
 /**
@@ -34,13 +33,6 @@ function setupConditionalFieldsLogic() {
     if (tipoDimissioneSelect) {
         tipoDimissioneSelect.addEventListener('change', (e) => {
             handleTipoDimissioneChange(e.target.value);
-        });
-    }
-
-    const infettoCheckbox = document.getElementById('infetto');
-    if (infettoCheckbox) {
-        infettoCheckbox.addEventListener('change', async (e) => {
-            await handleInfettoChange(e);
         });
     }
 
@@ -106,47 +98,25 @@ export function handleTipoDimissioneChange(tipoDimissione) {
 }
 
 /**
- * Gestisce l'interazione dell'utente con la checkbox "Infetto", aprendo il modal.
- * @param {Event} event - L'evento change della checkbox.
+ * Aggiorna lo stato del checkbox 'infetto' in base agli eventi clinici.
+ * Rende il checkbox di sola lettura e mostra un messaggio di aiuto.
+ * Questa funzione viene chiamata dalla logica della tab eventi clinici.
  */
-export async function handleInfettoChange(event) {
-    const checkbox = event.target;
-    if (checkbox.checked) {
-        const patientName = `${document.getElementById('nome').value} ${document.getElementById('cognome').value}`.trim();
-        const modal = new InfectionEventModal({ patientName });
-        const eventData = await modal.show();
+function updateInfectionStatusFromEvents() {
+    const infettoCheckbox = document.getElementById('infetto');
+    const infettoHelper = document.getElementById('infetto-helper-text');
+    if (!infettoCheckbox || !infettoHelper) return;
 
-        if (eventData) {
-            // L'utente ha confermato, popoliamo i campi nascosti e aggiorniamo la UI
-            const [year, month, day] = eventData.data_evento.split('-');
-            document.getElementById('data_infezione').value = `${day}/${month}/${year}`;
-            document.getElementById('agente_patogeno_hidden').value = eventData.agente_patogeno;
-            document.getElementById('descrizione_hidden').value = eventData.descrizione;
-            updateInfectionUI(true);
-        } else {
-            // L'utente ha annullato, deseleziona la checkbox
-            checkbox.checked = false;
-            updateInfectionUI(false);
-        }
-    } else {
-        // L'utente ha deselezionato la checkbox, pulisci i dati e nascondi la UI
-        updateInfectionUI(false);
-    }
-}
+    const isInfetto = isPatientCurrentlyInfected();
 
-/**
- * Aggiorna la UI relativa all'infezione (mostra/nasconde campo data e pulisce i dati).
- * @param {boolean} isInfetto - Se il paziente è considerato infetto.
- */
-function updateInfectionUI(isInfetto) {
-    const dataInfezioneContainer = document.getElementById('data-infezione-container');
+    infettoCheckbox.checked = isInfetto;
+    infettoCheckbox.disabled = true; // Il checkbox è sempre gestito dagli eventi
+
     if (isInfetto) {
-        dataInfezioneContainer.style.display = 'block';
+        infettoHelper.textContent = 'Stato gestito dagli eventi di infezione attivi.';
+        infettoHelper.style.display = 'block';
     } else {
-        document.getElementById('data-infezione-container').style.display = 'none';
-        document.getElementById('data_infezione').value = '';
-        document.getElementById('agente_patogeno_hidden').value = '';
-        document.getElementById('descrizione_hidden').value = '';
+        infettoHelper.style.display = 'none';
     }
 }
 
@@ -232,11 +202,8 @@ export function populateForm(patient) {
     document.getElementById('codice_dimissione').value = patient.codice_dimissione || '';
 
     // Mostra/nascondi campi condizionali basati sul tipo dimissione e stato infetto
-    const isInfetto = patient.infetto || false;
-    document.getElementById('infetto').checked = isInfetto;
     handleTipoDimissioneChange(patient.tipo_dimissione || '');
-    updateInfectionUI(isInfetto); // Usa la nuova funzione che non apre il modal
-
+    
     // Imposta il paziente corrente per il tab eventi clinici
     setCurrentPatient(patient.id);
 
@@ -281,12 +248,8 @@ export function getFormData() {
     const formData = new FormData(form);
     const data = Object.fromEntries(formData.entries());
 
-    // Gestisci la checkbox, che non viene inviata se non è spuntata
-    data.infetto = form.querySelector('#infetto').checked;
-    
-    // Raccogli i dati dall'evento di infezione (se presenti)
-    data.agente_patogeno = form.querySelector('#agente_patogeno_hidden').value || null;
-    data.descrizione_infezione = form.querySelector('#descrizione_hidden').value || null;
+    // Il flag 'infetto' è ora determinato dalla presenza di eventi di infezione attivi.
+    data.infetto = isPatientCurrentlyInfected();
 
     // Converti le date dal formato dd/mm/yyyy a yyyy-mm-dd per Supabase
     const dateFields = ['data_nascita', 'data_ricovero', 'data_dimissione', 'data_infezione', 'data_evento'];
@@ -312,11 +275,6 @@ export function getFormData() {
     if (tipoDimissione !== 'trasferimento_esterno') {
         data.clinica_destinazione = null;
         data.codice_clinica = null;
-    }
-
-    // Se il paziente non è infetto, rimuovi la data infezione
-    if (!data.infetto) {
-        data.data_infezione = null;
     }
 
     return data;

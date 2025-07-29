@@ -3,983 +3,1619 @@
    =================================== */
 
 /* Import container styles */
-@import 'notification-container';
+@import "notification-container";
 
 /* Variabili specifiche per notifiche */
 :root {
-    /* Colori notifiche - Basati su design system esistente */
-    --notification-success-bg: var(--success-color);
-    --notification-success-text: var(--success-dark);
-    --notification-success-border: var(--success-light);
-    --notification-error-bg: var(--danger-color);
-    --notification-error-text: var(--danger-dark);
-    --notification-error-border: var(--danger-light);
-    --notification-warning-bg: var(--warning-color);
-    --notification-warning-text: var(--warning-dark);
-    --notification-warning-border: var(--warning-light);
-    --notification-info-bg: var(--info-color);
-    --notification-info-text: var(--info-dark);
-    --notification-info-border: var(--info-light);
+  /* Colori notifiche - Basati su design system esistente */
+  --notification-success-bg: var(--success-color);
+  --notification-success-text: var(--success-dark);
+  --notification-success-border: var(--success-light);
+  --notification-error-bg: var(--danger-color);
+  --notification-error-text: var(--danger-dark);
+  --notification-error-border: var(--danger-light);
+  --notification-warning-bg: var(--warning-color);
+  --notification-warning-text: var(--warning-dark);
+  --notification-warning-border: var(--warning-light);
+  --notification-info-bg: var(--info-color);
+  --notification-info-text: var(--info-dark);
+  --notification-info-border: var(--info-light);
 
-    /* RGB values per effetti con alpha */
-    --primary-rgb: 13, 110, 253;
-    --success-rgb: 25, 135, 84;
-    --danger-rgb: 220, 53, 69;
-    --warning-rgb: 255, 193, 7;
-    --info-rgb: 13, 202, 240;
+  /* RGB values per effetti con alpha */
+  --primary-rgb: 13, 110, 253;
+  --success-rgb: 25, 135, 84;
+  --danger-rgb: 220, 53, 69;
+  --warning-rgb: 255, 193, 7;
+  --info-rgb: 13, 202, 240;
 
-    /* Layout e dimensioni */
-    --notification-border-radius: var(--border-radius);
-    --notification-shadow: var(--shadow-lg);
-    --notification-padding: var(--spacing-md);
-    --notification-gap: var(--spacing-sm);
-    --notification-z-index: 1050;
+  /* Layout e dimensioni */
+  --notification-border-radius: var(--border-radius);
+  --notification-shadow: var(--shadow-lg);
+  --notification-padding: var(--spacing-md);
+  --notification-gap: var(--spacing-sm);
+  --notification-z-index: 1050;
 
-    /* Touch targets (mobile-first) */
-    --notification-min-height: 52px;
-    --notification-close-size: 44px;
-    --notification-action-height: 44px;
+  /* Touch targets (mobile-first) */
+  --notification-min-height: 52px;
+  --notification-close-size: 44px;
+  --notification-action-height: 44px;
 
-    /* Animazioni */
-    --notification-transition: var(--transition);
-    --notification-slide-distance: 100%;
-    --notification-fade-duration: 0.3s;
-    --notification-entrance-easing: cubic-bezier(0.34, 1.56, 0.64, 1);
-    --notification-exit-easing: cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    --notification-scale-factor: 0.95;
+  /* Animazioni */
+  --notification-transition: var(--transition);
+  --notification-slide-distance: 100%;
+  --notification-fade-duration: 0.3s;
+  --notification-entrance-easing: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --notification-exit-easing: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --notification-scale-factor: 0.95;
 
-    /* Responsive breakpoints */
-    --notification-mobile-width: calc(100vw - 2rem);
-    --notification-tablet-width: 380px;
-    --notification-desktop-width: 400px;
-    --notification-container-padding-mobile: 1rem;
-    --notification-container-padding-tablet: 1.5rem;
-    --notification-container-padding-desktop: 2rem;
+  /* Responsive breakpoints */
+  --notification-mobile-width: calc(100vw - 2rem);
+  --notification-tablet-width: 380px;
+  --notification-desktop-width: 400px;
+  --notification-container-padding-mobile: 1rem;
+  --notification-container-padding-tablet: 1.5rem;
+  --notification-container-padding-desktop: 2rem;
 }
 
 /* Container principale per notifiche */
 .notification-container {
-    position: fixed;
-    z-index: var(--notification-z-index);
-    pointer-events: none;
-    display: flex;
-    flex-direction: column;
-    gap: var(--notification-gap);
-    max-height: 100vh;
-    overflow: hidden;
+  position: fixed;
+  z-index: var(--notification-z-index);
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--notification-gap);
+  max-height: 100vh;
+  overflow: visible;
 
-    /* Posizionamento responsive */
-    &[data-position="top-right"] {
-        top: var(--notification-container-padding-mobile);
-        right: var(--notification-container-padding-mobile);
-        left: var(--notification-container-padding-mobile);
+  /* Posizionamento responsive */
+  &[data-position="top-right"] {
+    top: var(--notification-container-padding-mobile);
+    right: var(--notification-container-padding-mobile);
+    left: var(--notification-container-padding-mobile);
 
-        @media (min-width: 768px) {
-            top: var(--notification-container-padding-tablet);
-            right: var(--notification-container-padding-tablet);
-            left: auto;
-            width: var(--notification-tablet-width);
-        }
-
-        @media (min-width: 992px) {
-            top: var(--notification-container-padding-desktop);
-            right: var(--notification-container-padding-desktop);
-            width: var(--notification-desktop-width);
-        }
+    @media (min-width: 768px) {
+      top: var(--notification-container-padding-tablet);
+      right: var(--notification-container-padding-tablet);
+      left: auto;
+      width: var(--notification-tablet-width);
     }
 
-    &[data-position="top-left"] {
-        top: var(--notification-container-padding-mobile);
-        left: var(--notification-container-padding-mobile);
-        right: var(--notification-container-padding-mobile);
+    @media (min-width: 992px) {
+      top: var(--notification-container-padding-desktop);
+      right: var(--notification-container-padding-desktop);
+      width: var(--notification-desktop-width);
+    }
+  }
 
-        @media (min-width: 768px) {
-            top: var(--notification-container-padding-tablet);
-            left: var(--notification-container-padding-tablet);
-            right: auto;
-            width: var(--notification-tablet-width);
-        }
+  &[data-position="top-left"] {
+    top: var(--notification-container-padding-mobile);
+    left: var(--notification-container-padding-mobile);
+    right: var(--notification-container-padding-mobile);
 
-        @media (min-width: 992px) {
-            top: var(--notification-container-padding-desktop);
-            left: var(--notification-container-padding-desktop);
-            width: var(--notification-desktop-width);
-        }
+    @media (min-width: 768px) {
+      top: var(--notification-container-padding-tablet);
+      left: var(--notification-container-padding-tablet);
+      right: auto;
+      width: var(--notification-tablet-width);
     }
 
-    &[data-position="top-center"] {
-        top: var(--notification-container-padding-mobile);
-        left: 50%;
-        transform: translateX(-50%);
-        width: var(--notification-mobile-width);
+    @media (min-width: 992px) {
+      top: var(--notification-container-padding-desktop);
+      left: var(--notification-container-padding-desktop);
+      width: var(--notification-desktop-width);
+    }
+  }
 
-        @media (min-width: 768px) {
-            top: var(--notification-container-padding-tablet);
-            width: var(--notification-tablet-width);
-        }
+  &[data-position="top-center"] {
+    top: var(--notification-container-padding-mobile);
+    left: 50%;
+    transform: translateX(-50%);
+    width: var(--notification-mobile-width);
 
-        @media (min-width: 992px) {
-            top: var(--notification-container-padding-desktop);
-            width: var(--notification-desktop-width);
-        }
+    @media (min-width: 768px) {
+      top: var(--notification-container-padding-tablet);
+      width: var(--notification-tablet-width);
     }
 
-    &[data-position="bottom-right"] {
-        bottom: var(--notification-container-padding-mobile);
-        right: var(--notification-container-padding-mobile);
-        left: var(--notification-container-padding-mobile);
-        flex-direction: column-reverse;
+    @media (min-width: 992px) {
+      top: var(--notification-container-padding-desktop);
+      width: var(--notification-desktop-width);
+    }
+  }
 
-        @media (min-width: 768px) {
-            bottom: var(--notification-container-padding-tablet);
-            right: var(--notification-container-padding-tablet);
-            left: auto;
-            width: var(--notification-tablet-width);
-        }
+  &[data-position="bottom-right"] {
+    bottom: var(--notification-container-padding-mobile);
+    right: var(--notification-container-padding-mobile);
+    left: var(--notification-container-padding-mobile);
+    flex-direction: column-reverse;
 
-        @media (min-width: 992px) {
-            bottom: var(--notification-container-padding-desktop);
-            right: var(--notification-container-padding-desktop);
-            width: var(--notification-desktop-width);
-        }
+    @media (min-width: 768px) {
+      bottom: var(--notification-container-padding-tablet);
+      right: var(--notification-container-padding-tablet);
+      left: auto;
+      width: var(--notification-tablet-width);
     }
 
-    &[data-position="bottom-left"] {
-        bottom: var(--notification-container-padding-mobile);
-        left: var(--notification-container-padding-mobile);
-        right: var(--notification-container-padding-mobile);
-        flex-direction: column-reverse;
+    @media (min-width: 992px) {
+      bottom: var(--notification-container-padding-desktop);
+      right: var(--notification-container-padding-desktop);
+      width: var(--notification-desktop-width);
+    }
+  }
 
-        @media (min-width: 768px) {
-            bottom: var(--notification-container-padding-tablet);
-            left: var(--notification-container-padding-tablet);
-            right: auto;
-            width: var(--notification-tablet-width);
-        }
+  &[data-position="bottom-left"] {
+    bottom: var(--notification-container-padding-mobile);
+    left: var(--notification-container-padding-mobile);
+    right: var(--notification-container-padding-mobile);
+    flex-direction: column-reverse;
 
-        @media (min-width: 992px) {
-            bottom: var(--notification-container-padding-desktop);
-            left: var(--notification-container-padding-desktop);
-            width: var(--notification-desktop-width);
-        }
+    @media (min-width: 768px) {
+      bottom: var(--notification-container-padding-tablet);
+      left: var(--notification-container-padding-tablet);
+      right: auto;
+      width: var(--notification-tablet-width);
     }
 
-    &[data-position="bottom-center"] {
-        bottom: var(--notification-container-padding-mobile);
-        left: 50%;
-        transform: translateX(-50%);
-        width: var(--notification-mobile-width);
-        flex-direction: column-reverse;
-
-        @media (min-width: 768px) {
-            bottom: var(--notification-container-padding-tablet);
-            width: var(--notification-tablet-width);
-        }
-
-        @media (min-width: 992px) {
-            bottom: var(--notification-container-padding-desktop);
-            width: var(--notification-desktop-width);
-        }
+    @media (min-width: 992px) {
+      bottom: var(--notification-container-padding-desktop);
+      left: var(--notification-container-padding-desktop);
+      width: var(--notification-desktop-width);
     }
+  }
+
+  &[data-position="bottom-center"] {
+    bottom: var(--notification-container-padding-mobile);
+    left: 50%;
+    transform: translateX(-50%);
+    width: var(--notification-mobile-width);
+    flex-direction: column-reverse;
+
+    @media (min-width: 768px) {
+      bottom: var(--notification-container-padding-tablet);
+      width: var(--notification-tablet-width);
+    }
+
+    @media (min-width: 992px) {
+      bottom: var(--notification-container-padding-desktop);
+      width: var(--notification-desktop-width);
+    }
+  }
 }
 
 /* Componente singola notifica */
 .notification {
-    position: relative;
-    display: flex;
-    align-items: flex-start;
-    min-height: var(--notification-min-height);
-    padding: var(--notification-padding);
-    border-radius: var(--notification-border-radius);
-    box-shadow: var(--notification-shadow);
-    backdrop-filter: var(--glass-blur);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    pointer-events: auto;
-    overflow: hidden;
-    font-family: var(--font-family-base);
-    font-size: var(--font-size-sm);
-    line-height: var(--line-height-base);
-    transition: var(--notification-transition);
-    transform: translateX(0);
-    opacity: 1;
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  min-height: var(--notification-min-height);
+  padding: var(--notification-padding);
+  border-radius: var(--notification-border-radius);
+  box-shadow: var(--notification-shadow);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  pointer-events: auto;
+  overflow: visible;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-base);
+  transition: var(--notification-transition);
+  transform: translateX(0);
+  opacity: 1;
 
-    /* Glassmorphism effect */
-    background: var(--glass-bg-strong);
+  /* Glassmorphism effect */
+  background: var(--glass-bg-strong);
 
-    /* Hover effects per desktop */
-    @media (min-width: 992px) {
-        &:hover {
-            transform: translateY(-2px) scale(1.02);
-            box-shadow: var(--shadow-xl);
-        }
+  /* Hover effects per desktop */
+  @media (min-width: 992px) {
+    &:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: var(--shadow-xl);
     }
+  }
 
-    /* Focus per accessibilità */
-    &:focus-within {
-        outline: var(--focus-outline);
-        outline-offset: var(--focus-outline-offset);
-        box-shadow: var(--focus-shadow), var(--notification-shadow);
+  /* Focus per accessibilità */
+  &:focus-within {
+    outline: var(--focus-outline);
+    outline-offset: var(--focus-outline-offset);
+    box-shadow: var(--focus-shadow), var(--notification-shadow);
+  }
+
+  /* Varianti per tipo */
+  &--success {
+    background: linear-gradient(
+      135deg,
+      rgba(16, 185, 129, 0.1),
+      rgba(52, 211, 153, 0.15)
+    );
+    border-left: 4px solid var(--notification-success-bg);
+    color: var(--notification-success-text);
+
+    .notification__icon {
+      color: var(--notification-success-bg);
     }
+  }
 
-    /* Varianti per tipo */
-    &--success {
-        background: linear-gradient(135deg, 
-            rgba(16, 185, 129, 0.1), 
-            rgba(52, 211, 153, 0.15)
-        );
-        border-left: 4px solid var(--notification-success-bg);
-        color: var(--notification-success-text);
+  &--error {
+    background: linear-gradient(
+      135deg,
+      rgba(239, 68, 68, 0.1),
+      rgba(248, 113, 113, 0.15)
+    );
+    border-left: 4px solid var(--notification-error-bg);
+    color: var(--notification-error-text);
 
-        .notification__icon {
-            color: var(--notification-success-bg);
-        }
+    .notification__icon {
+      color: var(--notification-error-bg);
     }
+  }
 
-    &--error {
-        background: linear-gradient(135deg, 
-            rgba(239, 68, 68, 0.1), 
-            rgba(248, 113, 113, 0.15)
-        );
-        border-left: 4px solid var(--notification-error-bg);
-        color: var(--notification-error-text);
+  &--warning {
+    background: linear-gradient(
+      135deg,
+      rgba(245, 158, 11, 0.1),
+      rgba(251, 191, 36, 0.15)
+    );
+    border-left: 4px solid var(--notification-warning-bg);
+    color: var(--notification-warning-text);
 
-        .notification__icon {
-            color: var(--notification-error-bg);
-        }
+    .notification__icon {
+      color: var(--notification-warning-bg);
     }
+  }
 
-    &--warning {
-        background: linear-gradient(135deg, 
-            rgba(245, 158, 11, 0.1), 
-            rgba(251, 191, 36, 0.15)
-        );
-        border-left: 4px solid var(--notification-warning-bg);
-        color: var(--notification-warning-text);
+  &--info {
+    background: linear-gradient(
+      135deg,
+      rgba(6, 182, 212, 0.1),
+      rgba(34, 211, 238, 0.15)
+    );
+    border-left: 4px solid var(--notification-info-bg);
+    color: var(--notification-info-text);
 
-        .notification__icon {
-            color: var(--notification-warning-bg);
-        }
+    .notification__icon {
+      color: var(--notification-info-bg);
     }
+  }
 
-    &--info {
-        background: linear-gradient(135deg, 
-            rgba(6, 182, 212, 0.1), 
-            rgba(34, 211, 238, 0.15)
-        );
-        border-left: 4px solid var(--notification-info-bg);
-        color: var(--notification-info-text);
+  /* Stati di animazione */
+  &--entering {
+    animation: slideInRight var(--notification-fade-duration)
+      var(--notification-entrance-easing);
+  }
 
-        .notification__icon {
-            color: var(--notification-info-bg);
-        }
-    }
+  &--exiting {
+    animation: slideOutRight var(--notification-fade-duration)
+      var(--notification-exit-easing);
+  }
 
-    /* Stati di animazione */
+  &--removing {
+    animation: fadeOut var(--notification-fade-duration)
+      var(--notification-exit-easing);
+  }
+
+  &--sliding-up {
+    animation: slideUp var(--notification-fade-duration)
+      var(--notification-exit-easing);
+  }
+
+  &--sliding-down {
+    animation: slideDown var(--notification-fade-duration)
+      var(--notification-entrance-easing);
+  }
+
+  /* Mobile: animazione dall'alto */
+  @media (max-width: 767px) {
     &--entering {
-        animation: slideInRight var(--notification-fade-duration) var(--notification-entrance-easing);
+      animation: slideInDown var(--notification-fade-duration)
+        var(--notification-entrance-easing);
     }
 
     &--exiting {
-        animation: slideOutRight var(--notification-fade-duration) var(--notification-exit-easing);
+      animation: slideOutUp var(--notification-fade-duration)
+        var(--notification-exit-easing);
     }
-
-    &--removing {
-        animation: fadeOut var(--notification-fade-duration) var(--notification-exit-easing);
-    }
-
-    &--sliding-up {
-        animation: slideUp var(--notification-fade-duration) var(--notification-exit-easing);
-    }
-
-    &--sliding-down {
-        animation: slideDown var(--notification-fade-duration) var(--notification-entrance-easing);
-    }
-
-    /* Mobile: animazione dall'alto */
-    @media (max-width: 767px) {
-        &--entering {
-            animation: slideInDown var(--notification-fade-duration) var(--notification-entrance-easing);
-        }
-
-        &--exiting {
-            animation: slideOutUp var(--notification-fade-duration) var(--notification-exit-easing);
-        }
-    }
+  }
 }
 
 /* Contenuto della notifica */
 .notification__content {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--spacing-sm);
-    flex: 1;
-    min-width: 0; /* Per text truncation */
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  flex: 1;
+  min-width: 0; /* Per text truncation */
 }
 
 .notification__icon {
-    flex-shrink: 0;
-    font-family: 'Material Icons';
-    font-size: var(--icon-size-base);
-    line-height: 1;
-    margin-top: 2px; /* Allineamento ottico */
+  flex-shrink: 0;
+  font-family: "Material Icons";
+  font-size: var(--icon-size-base);
+  line-height: 1;
+  margin-top: 2px; /* Allineamento ottico */
 
-    @media (min-width: 768px) {
-        font-size: var(--icon-size-lg);
-    }
+  @media (min-width: 768px) {
+    font-size: var(--icon-size-lg);
+  }
 }
 
 .notification__body {
-    flex: 1;
-    min-width: 0;
+  flex: 1;
+  min-width: 0;
 }
 
 .notification__title {
-    font-weight: var(--font-weight-bold);
-    font-size: var(--font-size-base);
-    margin-bottom: var(--spacing-xs);
-    line-height: 1.4;
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-base);
+  margin-bottom: var(--spacing-xs);
+  line-height: 1.4;
 }
 
 .notification__message {
-    font-weight: var(--font-weight-base);
-    color: var(--text-primary);
-    line-height: 1.5;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
+  font-weight: var(--font-weight-base);
+  color: var(--text-primary);
+  line-height: 1.5;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 /* Azioni della notifica */
 .notification__actions {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--spacing-xs);
-    flex-shrink: 0;
-    margin-left: var(--spacing-sm);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-xs);
+  flex-shrink: 0;
+  margin-left: var(--spacing-sm);
 }
 
 .notification__close {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: var(--notification-close-size);
-    height: var(--notification-close-size);
-    min-width: var(--notification-close-size);
-    min-height: var(--notification-close-size);
-    border: none;
-    background: transparent;
-    border-radius: var(--border-radius-sm);
-    cursor: pointer;
-    transition: var(--notification-transition);
-    color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--notification-close-size);
+  height: var(--notification-close-size);
+  min-width: var(--notification-close-size);
+  min-height: var(--notification-close-size);
+  border: none;
+  background: transparent;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  transition: var(--notification-transition);
+  color: var(--text-muted);
 
-    &:hover {
-        background: rgba(0, 0, 0, 0.1);
-        color: var(--text-primary);
-        transform: scale(1.1);
-    }
+  &:hover {
+    background: rgba(0, 0, 0, 0.1);
+    color: var(--text-primary);
+    transform: scale(1.1);
+  }
 
-    &:focus {
-        outline: var(--focus-outline);
-        outline-offset: 2px;
-        background: var(--focus-bg);
-    }
+  &:focus {
+    outline: var(--focus-outline);
+    outline-offset: 2px;
+    background: var(--focus-bg);
+  }
 
-    &:active {
-        transform: scale(0.95);
-    }
+  &:active {
+    transform: scale(0.95);
+  }
 
-    .material-icons {
-        font-size: 1.25rem;
-    }
+  .material-icons {
+    font-size: 1.25rem;
+  }
 }
 
 .notification__action-btn {
-    min-height: var(--notification-action-height);
-    padding: var(--spacing-xs) var(--spacing-sm);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: var(--border-radius-sm);
-    background: rgba(255, 255, 255, 0.8);
-    color: var(--text-primary);
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-bold);
-    cursor: pointer;
-    transition: var(--notification-transition);
+  min-height: var(--notification-action-height);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: var(--border-radius-sm);
+  background: rgba(255, 255, 255, 0.8);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+  transition: var(--notification-transition);
+
+  &:hover {
+    background: rgba(255, 255, 255, 1);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+  }
+
+  &:focus {
+    outline: var(--focus-outline);
+    outline-offset: 2px;
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &--primary {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-dark);
 
     &:hover {
-        background: rgba(255, 255, 255, 1);
-        transform: translateY(-1px);
-        box-shadow: var(--shadow-sm);
+      background: var(--primary-dark);
     }
+  }
 
-    &:focus {
-        outline: var(--focus-outline);
-        outline-offset: 2px;
+  &--secondary {
+    background: var(--secondary-color);
+    color: white;
+    border-color: var(--secondary-dark);
+
+    &:hover {
+      background: var(--secondary-dark);
     }
-
-    &:active {
-        transform: translateY(0);
-    }
-
-    &--primary {
-        background: var(--primary-color);
-        color: white;
-        border-color: var(--primary-dark);
-
-        &:hover {
-            background: var(--primary-dark);
-        }
-    }
-
-    &--secondary {
-        background: var(--secondary-color);
-        color: white;
-        border-color: var(--secondary-dark);
-
-        &:hover {
-            background: var(--secondary-dark);
-        }
-    }
+  }
 }
 
 /* Progress bar per auto-close con gestione timer migliorata */
 .notification__progress {
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 4px !important;
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-radius: 0 0 var(--notification-border-radius)
+    var(--notification-border-radius);
+  overflow: hidden !important;
+  opacity: 1 !important;
+  transition: opacity 0.2s ease-in-out, height 0.2s ease-in-out;
+  z-index: 10 !important;
+
+  /* Progress bar controllata da JavaScript */
+  &--js-controlled {
+    /* Disabilita animazioni CSS quando controllata da JS */
+    &::after {
+      animation: none !important;
+      transition: none !important;
+    }
+
+    /* Ottimizzazioni GPU per progress bar JS */
+    will-change: transform;
+    transform: translateZ(0);
+
+    .notification__progress-fill {
+      will-change: transform;
+      transform: translateZ(0);
+      backface-visibility: hidden;
+    }
+  }
+
+  /* Placeholder per progress bar JavaScript */
+  &--js-placeholder {
+    /* Nasconde il placeholder, verrà sostituito da JS */
+    display: none;
+
+    /* Quando viene attivato da JS */
+    &.notification__progress--js-controlled {
+      display: block;
+    }
+  }
+
+  /* Indicatori di stato per debug */
+  &--js-controlled::before {
+    content: "";
     position: absolute;
-    bottom: 0;
+    top: -1px;
     left: 0;
     right: 0;
-    height: 3px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 0 0 var(--notification-border-radius) var(--notification-border-radius);
-    overflow: hidden;
+    height: 1px;
+    background: rgba(106, 90, 205, 0.6);
     opacity: 0;
-    transition: opacity 0.2s ease-in-out, height 0.2s ease-in-out;
-    z-index: 1;
+    transition: opacity 0.2s ease;
+  }
+
+  /* Mostra indicatore in modalità debug */
+  [data-debug="true"] &--js-controlled::before {
+    opacity: 1;
+  }
+
+  &::after {
+    content: "" !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    height: 100% !important;
+    width: 100% !important;
+    background: currentColor !important;
+    opacity: 0.8 !important;
+    transform-origin: left !important;
+    transform: scaleX(1) !important;
+    transition: transform 0.1s ease-out !important;
+    will-change: transform !important;
+  }
+
+  &--active {
+    opacity: 1 !important;
 
     &::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        height: 100%;
-        width: 100%;
-        background: currentColor;
-        opacity: 0.8;
-        transform-origin: left;
-        transform: scaleX(1);
-        transition: transform 0.1s ease-out;
-        will-change: transform;
+      animation: progressCountdown var(--progress-duration, 4000ms) linear
+        forwards !important;
     }
+  }
 
-    &--active {
-        opacity: 1;
+  &--paused::after {
+    animation-play-state: paused !important;
+  }
 
-        &::after {
-            animation: progressCountdown var(--progress-duration, 4s) linear forwards;
-        }
+  &--resumed::after {
+    animation-play-state: running !important;
+    /* Riavvia animazione con nuovo timing */
+    animation: progressCountdown var(--progress-duration, 4s) linear forwards;
+  }
+
+  /* Colori progress bar differenziati per tipo */
+  .notification--success & {
+    color: var(--notification-success-bg);
+    background: rgba(var(--success-rgb), 0.2);
+  }
+
+  .notification--error & {
+    color: var(--notification-error-bg);
+    background: rgba(var(--danger-rgb), 0.2);
+  }
+
+  .notification--warning & {
+    color: var(--notification-warning-bg);
+    background: rgba(var(--warning-rgb), 0.2);
+  }
+
+  .notification--info & {
+    color: var(--notification-info-bg);
+    background: rgba(var(--info-rgb), 0.2);
+  }
+
+  /* Pausa automatica su hover/focus per desktop */
+  @media (min-width: 992px) {
+    .notification:hover &::after,
+    .notification:focus-within &::after {
+      animation-play-state: paused !important;
     }
+  }
 
-    &--paused::after {
-        animation-play-state: paused !important;
-    }
+  /* Pausa su touch interaction per mobile */
+  .notification--touched &::after,
+  .notification--long-pressed &::after {
+    animation-play-state: paused !important;
+  }
 
-    &--resumed::after {
-        animation-play-state: running !important;
-        /* Riavvia animazione con nuovo timing */
-        animation: progressCountdown var(--progress-duration, 4s) linear forwards;
+  /* Effetto pulsante quando in pausa */
+  &--paused {
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: currentColor;
+      opacity: 0.3;
+      animation: pausePulse 2s ease-in-out infinite;
     }
+  }
 
-    /* Colori progress bar differenziati per tipo */
-    .notification--success & {
-        color: var(--notification-success-bg);
-        background: rgba(var(--success-rgb), 0.2);
-    }
+  /* Indicatore visivo per timer differenziati */
+  .notification--success &::after {
+    /* 4 secondi - veloce */
+    box-shadow: 0 0 4px rgba(var(--success-rgb), 0.6);
+  }
 
-    .notification--error & {
-        color: var(--notification-error-bg);
-        background: rgba(var(--danger-rgb), 0.2);
-    }
+  .notification--info &::after {
+    /* 5 secondi - normale */
+    box-shadow: 0 0 4px rgba(var(--info-rgb), 0.6);
+  }
 
-    .notification--warning & {
-        color: var(--notification-warning-bg);
-        background: rgba(var(--warning-rgb), 0.2);
-    }
+  .notification--warning &::after {
+    /* 6 secondi - lento */
+    box-shadow: 0 0 4px rgba(var(--warning-rgb), 0.6);
+  }
 
-    .notification--info & {
-        color: var(--notification-info-bg);
-        background: rgba(var(--info-rgb), 0.2);
-    }
-
-    /* Pausa automatica su hover/focus per desktop */
-    @media (min-width: 992px) {
-        .notification:hover &::after,
-        .notification:focus-within &::after {
-            animation-play-state: paused !important;
-        }
-    }
-
-    /* Pausa su touch interaction per mobile */
-    .notification--touched &::after,
-    .notification--long-pressed &::after {
-        animation-play-state: paused !important;
-    }
-
-    /* Effetto pulsante quando in pausa */
-    &--paused {
-        &::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: currentColor;
-            opacity: 0.3;
-            animation: pausePulse 2s ease-in-out infinite;
-        }
-    }
-
-    /* Indicatore visivo per timer differenziati */
-    .notification--success &::after {
-        /* 4 secondi - veloce */
-        box-shadow: 0 0 4px rgba(var(--success-rgb), 0.6);
-    }
-
-    .notification--info &::after {
-        /* 5 secondi - normale */
-        box-shadow: 0 0 4px rgba(var(--info-rgb), 0.6);
-    }
-
-    .notification--warning &::after {
-        /* 6 secondi - lento */
-        box-shadow: 0 0 4px rgba(var(--warning-rgb), 0.6);
-    }
-
-    .notification--error & {
-        /* Persistente - nessuna progress bar */
-        display: none;
-    }
+  .notification--error & {
+    /* Persistente - nessuna progress bar */
+    display: none;
+  }
 }
 
 /* Animazioni */
 @keyframes slideInRight {
-    from {
-        transform: translateX(var(--notification-slide-distance));
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
+  from {
+    transform: translateX(var(--notification-slide-distance));
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 @keyframes slideOutRight {
-    from {
-        transform: translateX(0);
-        opacity: 1;
-    }
-    to {
-        transform: translateX(var(--notification-slide-distance));
-        opacity: 0;
-    }
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(var(--notification-slide-distance));
+    opacity: 0;
+  }
 }
 
 @keyframes slideInDown {
-    from {
-        transform: translateY(-100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 @keyframes slideOutUp {
-    from {
-        transform: translateY(0);
-        opacity: 1;
-    }
-    to {
-        transform: translateY(-100%);
-        opacity: 0;
-    }
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
 }
 
 @keyframes fadeOut {
-    from {
-        opacity: 1;
-        transform: scale(1);
-    }
-    to {
-        opacity: 0;
-        transform: scale(var(--notification-scale-factor));
-    }
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(var(--notification-scale-factor));
+  }
 }
 
 @keyframes progressCountdown {
-    from {
-        transform: scaleX(1);
-    }
-    to {
-        transform: scaleX(0);
-    }
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
 }
 
 @keyframes pausePulse {
-    0%, 100% {
-        opacity: 0.2;
-    }
-    50% {
-        opacity: 0.4;
-    }
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.4;
+  }
 }
 
 /* Animazione per notifiche che si spostano nello stack */
 @keyframes slideUp {
-    from {
-        transform: translateY(0);
-    }
-    to {
-        transform: translateY(calc(-100% - var(--notification-gap)));
-    }
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(calc(-100% - var(--notification-gap)));
+  }
 }
 
 @keyframes slideDown {
-    from {
-        transform: translateY(calc(-100% - var(--notification-gap)));
-    }
-    to {
-        transform: translateY(0);
-    }
+  from {
+    transform: translateY(calc(-100% - var(--notification-gap)));
+  }
+  to {
+    transform: translateY(0);
+  }
 }
 
 /* Supporto per prefers-reduced-motion */
 @media (prefers-reduced-motion: reduce) {
-    .notification {
-        animation: none !important;
-        transition: none !important;
-        transform: none !important;
-    }
+  .notification {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
 
-    .notification__progress::after {
-        animation: none !important;
-    }
+  .notification__progress::after {
+    animation: none !important;
+  }
 
-    .notification:hover {
-        transform: none !important;
-    }
+  .notification:hover {
+    transform: none !important;
+  }
 
-    .notification__close:hover {
-        transform: none !important;
-    }
+  .notification__close:hover {
+    transform: none !important;
+  }
 
-    .notification__action-btn:hover {
-        transform: none !important;
-    }
+  .notification__action-btn:hover {
+    transform: none !important;
+  }
 }
 
 /* Tema scuro */
 [data-bs-theme="dark"] {
-    .notification {
-        background: rgba(30, 41, 59, 0.95);
-        border-color: rgba(255, 255, 255, 0.1);
-        color: var(--text-light);
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  .notification {
+    background: rgba(30, 41, 59, 0.95);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: var(--text-light);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 
-        &--success {
-            background: linear-gradient(135deg, 
-                rgba(16, 185, 129, 0.2), 
-                rgba(52, 211, 153, 0.25)
-            );
-        }
-
-        &--error {
-            background: linear-gradient(135deg, 
-                rgba(239, 68, 68, 0.2), 
-                rgba(248, 113, 113, 0.25)
-            );
-        }
-
-        &--warning {
-            background: linear-gradient(135deg, 
-                rgba(245, 158, 11, 0.2), 
-                rgba(251, 191, 36, 0.25)
-            );
-        }
-
-        &--info {
-            background: linear-gradient(135deg, 
-                rgba(6, 182, 212, 0.2), 
-                rgba(34, 211, 238, 0.25)
-            );
-        }
+    &--success {
+      background: linear-gradient(
+        135deg,
+        rgba(16, 185, 129, 0.2),
+        rgba(52, 211, 153, 0.25)
+      );
     }
 
-    .notification__message {
-        color: var(--text-light);
+    &--error {
+      background: linear-gradient(
+        135deg,
+        rgba(239, 68, 68, 0.2),
+        rgba(248, 113, 113, 0.25)
+      );
     }
 
-    .notification__close {
-        color: var(--text-light);
-
-        &:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-        }
-
-        &:focus {
-            background: rgba(255, 255, 255, 0.2);
-        }
+    &--warning {
+      background: linear-gradient(
+        135deg,
+        rgba(245, 158, 11, 0.2),
+        rgba(251, 191, 36, 0.25)
+      );
     }
 
-    .notification__action-btn {
-        background: rgba(255, 255, 255, 0.1);
-        color: var(--text-light);
-        border-color: rgba(255, 255, 255, 0.2);
+    &--info {
+      background: linear-gradient(
+        135deg,
+        rgba(6, 182, 212, 0.2),
+        rgba(34, 211, 238, 0.25)
+      );
+    }
+  }
 
-        &:hover {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-        }
+  .notification__message {
+    color: var(--text-light);
+  }
+
+  .notification__close {
+    color: var(--text-light);
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
     }
 
-    .notification__progress {
-        background: rgba(255, 255, 255, 0.1);
+    &:focus {
+      background: rgba(255, 255, 255, 0.2);
     }
+  }
+
+  .notification__action-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-light);
+    border-color: rgba(255, 255, 255, 0.2);
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+    }
+  }
+
+  .notification__progress {
+    background: rgba(255, 255, 255, 0.1);
+  }
 }
 
 /* Accessibilità - Screen reader only */
 .notification__sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* Live region per annunci screen reader */
 #notification-announcer {
-    @extend .notification__sr-only;
+  @extend .notification__sr-only;
 }
 
 /* Gestione stack notifiche multiple */
 .notification-container .notification:not(:last-child) {
-    margin-bottom: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
 }
 
 /* Limite massimo notifiche visibili */
-.notification-container .notification:nth-child(n+6) {
-    display: none;
+.notification-container .notification:nth-child(n + 6) {
+  display: none;
 }
 
 @media (max-width: 767px) {
-    .notification-container .notification:nth-child(n+4) {
-        display: none;
-    }
+  .notification-container .notification:nth-child(n + 4) {
+    display: none;
+  }
 }
 
 @media (min-width: 768px) and (max-width: 991px) {
-    .notification-container .notification:nth-child(n+5) {
-        display: none;
-    }
+  .notification-container .notification:nth-child(n + 5) {
+    display: none;
+  }
 }
 
 /* Touch gestures e interazioni mobile */
 .notification {
-    touch-action: pan-x;
-    
-    /* Stati touch feedback */
-    &--touched {
-        transform: scale(0.98);
-        transition: transform 0.1s ease-out;
+  touch-action: pan-x;
+
+  /* Stati touch feedback */
+  &--touched {
+    transform: scale(0.98);
+    transition: transform 0.1s ease-out;
+  }
+
+  &--long-pressed {
+    transform: scale(1.02);
+    box-shadow: var(--shadow-xl), 0 0 0 2px rgba(var(--primary-rgb), 0.3);
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+  }
+
+  &--swipe-threshold {
+    box-shadow: var(--shadow-xl), 0 0 0 2px rgba(var(--success-rgb), 0.4);
+
+    &::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      right: -10px;
+      transform: translateY(-50%);
+      width: 0;
+      height: 0;
+      border-left: 8px solid var(--success-color);
+      border-top: 6px solid transparent;
+      border-bottom: 6px solid transparent;
+      opacity: 0.8;
     }
-    
-    &--long-pressed {
-        transform: scale(1.02);
-        box-shadow: var(--shadow-xl), 0 0 0 2px rgba(var(--primary-rgb), 0.3);
-        transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+  }
+
+  &--swipe-closing {
+    pointer-events: none;
+  }
+
+  &--context-menu-active {
+    box-shadow: var(--shadow-xl), 0 0 0 3px rgba(var(--info-rgb), 0.3);
+
+    .notification__actions {
+      transform: scale(1.1);
+      transition: transform 0.2s ease-out;
     }
-    
-    &--swipe-threshold {
-        box-shadow: var(--shadow-xl), 0 0 0 2px rgba(var(--success-rgb), 0.4);
-        
-        &::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            right: -10px;
-            transform: translateY(-50%);
-            width: 0;
-            height: 0;
-            border-left: 8px solid var(--success-color);
-            border-top: 6px solid transparent;
-            border-bottom: 6px solid transparent;
-            opacity: 0.8;
-        }
+  }
+
+  &--quick-close-hint {
+    animation: pulseClose 1.5s ease-in-out;
+
+    .notification__close {
+      animation: bounceClose 0.6s ease-out;
     }
-    
-    &--swipe-closing {
-        pointer-events: none;
-    }
-    
-    &--context-menu-active {
-        box-shadow: var(--shadow-xl), 0 0 0 3px rgba(var(--info-rgb), 0.3);
-        
-        .notification__actions {
-            transform: scale(1.1);
-            transition: transform 0.2s ease-out;
-        }
-    }
-    
-    &--quick-close-hint {
-        animation: pulseClose 1.5s ease-in-out;
-        
-        .notification__close {
-            animation: bounceClose 0.6s ease-out;
-        }
-    }
-    
-    /* Swipe animations */
-    &.swipe-right {
-        transform: translateX(100%) scale(0.9);
-        opacity: 0;
-        transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
-                    opacity 0.3s ease-out,
-                    scale 0.3s ease-out;
-    }
-    
-    &.swipe-left {
-        transform: translateX(-100%) scale(0.9);
-        opacity: 0;
-        transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
-                    opacity 0.3s ease-out,
-                    scale 0.3s ease-out;
-    }
+  }
+
+  /* Swipe animations */
+  &.swipe-right {
+    transform: translateX(100%) scale(0.9);
+    opacity: 0;
+    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+      opacity 0.3s ease-out, scale 0.3s ease-out;
+  }
+
+  &.swipe-left {
+    transform: translateX(-100%) scale(0.9);
+    opacity: 0;
+    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+      opacity 0.3s ease-out, scale 0.3s ease-out;
+  }
 }
 
 /* Touch target enhancements */
 .notification__touch-target--enhanced {
-    position: relative;
-    
-    &::before {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        min-width: var(--notification-close-size);
-        min-height: var(--notification-close-size);
-        z-index: -1;
-    }
+  position: relative;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    min-width: var(--notification-close-size);
+    min-height: var(--notification-close-size);
+    z-index: -1;
+  }
 }
 
 /* Animazioni per feedback touch */
 @keyframes pulseClose {
-    0%, 100% { 
-        box-shadow: var(--notification-shadow); 
-    }
-    50% { 
-        box-shadow: var(--notification-shadow), 0 0 0 4px rgba(var(--danger-rgb), 0.2); 
-    }
+  0%,
+  100% {
+    box-shadow: var(--notification-shadow);
+  }
+  50% {
+    box-shadow: var(--notification-shadow),
+      0 0 0 4px rgba(var(--danger-rgb), 0.2);
+  }
 }
 
 @keyframes bounceClose {
-    0%, 20%, 50%, 80%, 100% {
-        transform: translateY(0) scale(1);
-    }
-    40% {
-        transform: translateY(-3px) scale(1.1);
-    }
-    60% {
-        transform: translateY(-1px) scale(1.05);
-    }
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  40% {
+    transform: translateY(-3px) scale(1.1);
+  }
+  60% {
+    transform: translateY(-1px) scale(1.05);
+  }
 }
 
 /* Miglioramenti responsive per touch */
 @media (max-width: 767px) {
-    .notification {
-        /* Aumenta padding per touch più facile */
-        padding: calc(var(--notification-padding) * 1.2);
-        
-        /* Assicura altezza minima maggiore su mobile */
-        min-height: calc(var(--notification-min-height) + 8px);
-        
-        &__close {
-            /* Aumenta area touch su mobile */
-            width: calc(var(--notification-close-size) + 4px);
-            height: calc(var(--notification-close-size) + 4px);
-            min-width: calc(var(--notification-close-size) + 4px);
-            min-height: calc(var(--notification-close-size) + 4px);
-        }
-        
-        &__action-btn {
-            /* Aumenta altezza pulsanti azione su mobile */
-            min-height: calc(var(--notification-action-height) + 4px);
-            padding: calc(var(--spacing-xs) + 2px) calc(var(--spacing-sm) + 2px);
-        }
-        
-        &__icon {
-            /* Icona leggermente più grande su mobile */
-            font-size: calc(var(--icon-size-base) + 2px);
-        }
+  .notification {
+    /* Aumenta padding per touch più facile */
+    padding: calc(var(--notification-padding) * 1.2);
+
+    /* Assicura altezza minima maggiore su mobile */
+    min-height: calc(var(--notification-min-height) + 8px);
+
+    &__close {
+      /* Aumenta area touch su mobile */
+      width: calc(var(--notification-close-size) + 4px);
+      height: calc(var(--notification-close-size) + 4px);
+      min-width: calc(var(--notification-close-size) + 4px);
+      min-height: calc(var(--notification-close-size) + 4px);
     }
+
+    &__action-btn {
+      /* Aumenta altezza pulsanti azione su mobile */
+      min-height: calc(var(--notification-action-height) + 4px);
+      padding: calc(var(--spacing-xs) + 2px) calc(var(--spacing-sm) + 2px);
+    }
+
+    &__icon {
+      /* Icona leggermente più grande su mobile */
+      font-size: calc(var(--icon-size-base) + 2px);
+    }
+  }
 }
 
 /* Supporto per dispositivi con hover limitato (touch-only) */
 @media (hover: none) and (pointer: coarse) {
-    .notification {
-        &:hover {
-            transform: none;
-            box-shadow: var(--notification-shadow);
-        }
-        
-        &__close:hover {
-            transform: none;
-            background: rgba(0, 0, 0, 0.1);
-        }
-        
-        &__action-btn:hover {
-            transform: none;
-        }
+  .notification {
+    &:hover {
+      transform: none;
+      box-shadow: var(--notification-shadow);
     }
+
+    &__close:hover {
+      transform: none;
+      background: rgba(0, 0, 0, 0.1);
+    }
+
+    &__action-btn:hover {
+      transform: none;
+    }
+  }
 }
 
 /* Supporto per dispositivi con touch preciso (stylus) */
 @media (hover: hover) and (pointer: fine) {
-    .notification {
-        &--touched {
-            transform: none;
-        }
+  .notification {
+    &--touched {
+      transform: none;
     }
+  }
 }
 
 /* High contrast mode support */
 @media (prefers-contrast: high) {
-    .notification {
-        border: 2px solid;
-        
-        &--success {
-            border-color: var(--notification-success-bg);
-        }
-        
-        &--error {
-            border-color: var(--notification-error-bg);
-        }
-        
-        &--warning {
-            border-color: var(--notification-warning-bg);
-        }
-        
-        &--info {
-            border-color: var(--notification-info-bg);
-        }
+  .notification {
+    border: 2px solid;
+
+    &--success {
+      border-color: var(--notification-success-bg);
     }
-    
-    .notification__close {
-        border: 1px solid currentColor;
+
+    &--error {
+      border-color: var(--notification-error-bg);
     }
+
+    &--warning {
+      border-color: var(--notification-warning-bg);
+    }
+
+    &--info {
+      border-color: var(--notification-info-bg);
+    }
+  }
+
+  .notification__close {
+    border: 1px solid currentColor;
+  }
+}
+
+/* ===================================
+   PERFORMANCE OPTIMIZATIONS
+   =================================== */
+
+/* Virtual scrolling container */
+.notification-virtual-viewport {
+  height: 100%;
+  overflow-y: auto;
+  position: relative;
+  /* GPU acceleration */
+  will-change: scroll-position;
+  transform: translateZ(0);
+
+  /* Smooth scrolling */
+  scroll-behavior: smooth;
+
+  /* Ottimizzazioni scrolling */
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.3);
+    }
+  }
+}
+
+.notification-virtual-content {
+  position: relative;
+  width: 100%;
+  /* GPU acceleration per positioning */
+  will-change: height;
+  transform: translateZ(0);
+}
+
+/* Notifiche ottimizzate per performance */
+.notification--optimized {
+  /* GPU acceleration */
+  will-change: transform, opacity;
+  transform: translateZ(0);
+
+  /* Ottimizza rendering */
+  contain: layout style paint;
+
+  /* Riduce reflow/repaint */
+  box-sizing: border-box;
+
+  /* Semplifica struttura per performance */
+  .notification__content {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+  }
+
+  .notification__icon {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .notification__message {
+    flex: 1;
+    min-width: 0;
+    /* Ottimizza text rendering */
+    text-rendering: optimizeSpeed;
+    font-smooth: never;
+    -webkit-font-smoothing: subpixel-antialiased;
+  }
+
+  .notification__close {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+
+    /* Ottimizza hover */
+    transition: background-color 0.1s ease;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.1);
+    }
+  }
+}
+
+/* Modalità performance ridotta */
+.notification-container--performance-mode {
+  .notification {
+    /* Disabilita effetti costosi */
+    backdrop-filter: none !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+
+    /* Semplifica animazioni */
+    transition: opacity 0.2s ease !important;
+
+    &:hover {
+      transform: none !important;
+    }
+  }
+
+  .notification__progress {
+    /* Semplifica progress bar */
+    &::after {
+      transition: width 0.1s linear !important;
+      animation: none !important;
+    }
+  }
+}
+
+/* Ottimizzazioni per dispositivi con poca memoria */
+@media (max-device-memory: 2gb) {
+  .notification {
+    /* Riduci effetti visivi */
+    backdrop-filter: none;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+    /* Semplifica gradients */
+    &--success,
+    &--error,
+    &--warning,
+    &--info {
+      background: var(--notification-bg-simple, rgba(255, 255, 255, 0.95));
+    }
+  }
+
+  .notification__progress {
+    /* Disabilita progress bar animata */
+    display: none;
+  }
+}
+
+/* Ottimizzazioni per CPU lente */
+@media (max-device-cpu: 2) {
+  .notification {
+    /* Disabilita animazioni complesse */
+    animation: none !important;
+    transition: opacity 0.2s ease !important;
+
+    &--entering {
+      opacity: 1;
+    }
+
+    &--exiting {
+      opacity: 0;
+    }
+  }
+}
+
+/* Batch rendering per molte notifiche */
+.notification-batch-container {
+  /* Ottimizza per rendering di gruppo */
+  contain: layout style;
+
+  .notification {
+    /* Riduce complessità individuale */
+    contain: layout paint;
+
+    /* Semplifica struttura */
+    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-xs);
+
+    /* Ottimizza text */
+    .notification__message {
+      /* Limita righe per performance */
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  }
+}
+
+/* Lazy loading states */
+.notification--lazy-loading {
+  opacity: 0.5;
+  pointer-events: none;
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 16px;
+    height: 16px;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+/* Memory-efficient animations */
+.notification--memory-efficient {
+  /* Usa solo transform e opacity */
+  &.notification--entering {
+    animation: fadeInSimple 0.2s ease-out;
+  }
+
+  &.notification--exiting {
+    animation: fadeOutSimple 0.2s ease-in;
+  }
+}
+
+@keyframes fadeInSimple {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOutSimple {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* GPU acceleration hints */
+.notification--gpu-accelerated {
+  /* Force GPU layer */
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+
+  /* Ottimizza compositing */
+  isolation: isolate;
+}
+
+/* Intersection observer optimizations */
+.notification--observed {
+  /* Prepara per visibility changes */
+  contain: layout style paint;
+
+  &[data-visible="false"] {
+    /* Ottimizza elementi non visibili */
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
+
+/* ===================================
+   ERROR HANDLING E FALLBACK STYLES
+   =================================== */
+
+/* Notifiche di fallback quando il sistema principale fallisce */
+.notification--fallback {
+  /* Stili inline di base sono già applicati via JS */
+  /* Questi sono override per migliorare l'aspetto */
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  border-radius: 6px !important;
+
+  /* Assicura che sia sempre visibile */
+  z-index: 9999 !important;
+  position: relative !important;
+
+  /* Migliora leggibilità */
+  line-height: 1.5 !important;
+
+  /* Hover effect semplice */
+  &:hover {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2) !important;
+  }
+}
+
+/* Notifiche senza animazioni (per reduced motion o errori animazione) */
+.notification--no-animations {
+  animation: none !important;
+  transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out !important;
+
+  &.notification--entering {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  &.notification--exiting {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  &.notification--removing {
+    opacity: 0;
+  }
+
+  /* Disabilita tutti gli effetti hover che usano transform */
+  &:hover {
+    transform: none !important;
+  }
+
+  .notification__close:hover {
+    transform: none !important;
+  }
+
+  .notification__action-btn:hover {
+    transform: none !important;
+  }
+
+  /* Progress bar senza animazioni */
+  .notification__progress::after {
+    animation: none !important;
+    transition: width 0.1s linear !important;
+  }
+}
+
+/* Container di fallback quando il sistema principale non si inizializza */
+.notification-container--fallback {
+  /* Stili inline di base sono già applicati via JS */
+  /* Questi sono override per migliorare l'aspetto */
+
+  .notification {
+    margin-bottom: 8px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+/* Stato di errore per notifiche che non riescono a renderizzare correttamente */
+.notification--error-state {
+  background: linear-gradient(
+    135deg,
+    rgba(239, 68, 68, 0.1),
+    rgba(248, 113, 113, 0.15)
+  ) !important;
+  border: 1px solid rgba(239, 68, 68, 0.3) !important;
+  border-left: 4px solid var(--danger-color) !important;
+
+  /* Indicatore visivo di errore */
+  &::before {
+    content: "⚠";
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    font-size: 12px;
+    color: var(--danger-color);
+    opacity: 0.7;
+    z-index: 1;
+  }
+}
+
+/* Stili per notifiche in queue (DOM non ready) */
+.notification--queued {
+  opacity: 0.7;
+  pointer-events: none;
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 10px,
+      rgba(255, 255, 255, 0.1) 10px,
+      rgba(255, 255, 255, 0.1) 20px
+    );
+    pointer-events: none;
+    z-index: 1;
+  }
+}
+
+/* Indicatori di debug per sviluppo */
+.notification--debug {
+  &::before {
+    content: "DEBUG";
+    position: absolute;
+    top: -8px;
+    left: 8px;
+    background: var(--warning-color);
+    color: white;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-weight: bold;
+    z-index: 2;
+  }
+}
+
+/* Graceful degradation per funzionalità avanzate */
+.notification--degraded {
+  /* Rimuovi effetti avanzati */
+  backdrop-filter: none !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+
+  /* Semplifica background */
+  &.notification--success {
+    background: rgba(16, 185, 129, 0.1) !important;
+  }
+
+  &.notification--error {
+    background: rgba(239, 68, 68, 0.1) !important;
+  }
+
+  &.notification--warning {
+    background: rgba(245, 158, 11, 0.1) !important;
+  }
+
+  &.notification--info {
+    background: rgba(6, 182, 212, 0.1) !important;
+  }
+
+  /* Disabilita progress bar complessa */
+  .notification__progress {
+    display: none !important;
+  }
+}
+
+/* Supporto per browser molto vecchi */
+.notification--legacy {
+  /* Fallback per flexbox */
+  display: block !important;
+
+  .notification__content {
+    display: block !important;
+
+    .notification__icon {
+      float: left;
+      margin-right: 8px;
+    }
+
+    .notification__body {
+      overflow: hidden;
+    }
+  }
+
+  .notification__actions {
+    display: block !important;
+    text-align: right;
+    margin-top: 8px;
+
+    .notification__close,
+    .notification__action-btn {
+      display: inline-block;
+      margin-left: 4px;
+    }
+  }
+
+  /* Clearfix */
+  &::after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+}
+
+/* Stili per recovery automatico */
+.notification--recovering {
+  animation: recoverPulse 2s ease-in-out infinite;
+
+  &::before {
+    content: "🔄";
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    font-size: 12px;
+    opacity: 0.6;
+    z-index: 1;
+  }
+}
+
+@keyframes recoverPulse {
+  0%,
+  100% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 0 2px rgba(var(--info-rgb), 0.3);
+  }
+}
+
+/* Supporto per situazioni di emergenza (tutti i sistemi falliti) */
+.notification--emergency {
+  position: fixed !important;
+  top: 20px !important;
+  right: 20px !important;
+  z-index: 99999 !important;
+  background: #f8d7da !important;
+  color: #721c24 !important;
+  border: 2px solid #f5c6cb !important;
+  padding: 12px 16px !important;
+  border-radius: 4px !important;
+  font-family: monospace !important;
+  font-size: 12px !important;
+  max-width: 300px !important;
+  word-wrap: break-word !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+
+  &::before {
+    content: "🚨 EMERGENCY: ";
+    font-weight: bold;
+  }
+}
+
+/* Media queries per fallback responsive */
+@media (max-width: 767px) {
+  .notification--fallback,
+  .notification--emergency {
+    left: 10px !important;
+    right: 10px !important;
+    max-width: none !important;
+  }
+}
+
+/* Supporto per prefers-reduced-motion nei fallback */
+@media (prefers-reduced-motion: reduce) {
+  .notification--recovering {
+    animation: none !important;
+  }
+
+  .notification--no-animations {
+    transition: none !important;
+  }
+}
+
+/* Tema scuro per fallback */
+[data-bs-theme="dark"] {
+  .notification--fallback {
+    background: rgba(30, 41, 59, 0.95) !important;
+    color: #e2e8f0 !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+  }
+
+  .notification--emergency {
+    background: rgba(127, 29, 29, 0.95) !important;
+    color: #fecaca !important;
+    border-color: rgba(248, 113, 113, 0.5) !important;
+  }
 }

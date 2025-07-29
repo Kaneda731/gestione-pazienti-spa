@@ -10,11 +10,13 @@ import { ResolveInfectionModal } from '../../eventi-clinici/components/ResolveIn
 let eventiDatepicker = null;
 let currentPatientId = null;
 let currentEventi = [];
+let onStatusChangeCallback = null;
 
 /**
  * Inizializza il tab degli eventi clinici
  */
-export function initEventiCliniciTab() {
+export function initEventiCliniciTab(onStatusChange) {
+    onStatusChangeCallback = onStatusChange;
     setupEventListeners();
     initializeComponents();
 }
@@ -388,6 +390,7 @@ export async function loadEventiForCurrentPatient() {
         currentEventi = eventi;
         renderEventiList(eventi);
         updatePostOperativeInfo(eventi);
+        syncInfectionStatusWithForm(); // Sincronizza lo stato con il form principale
     } catch (error) {
         // La notifica di errore è già gestita da eventiCliniciService.
         // Logghiamo l'errore per debug, ma non mostriamo una notifica duplicata.
@@ -583,6 +586,7 @@ async function deleteEvento(eventoId) {
     try {
         await eventiCliniciService.deleteEvento(eventoId);
         await loadEventiForCurrentPatient();
+        // syncInfectionStatusWithForm() è già chiamato da loadEventiForCurrentPatient
         // La notifica di successo è già gestita da eventiCliniciService
     } catch (error) {
         // La notifica di errore è già gestita da eventiCliniciService.
@@ -597,16 +601,35 @@ async function deleteEvento(eventoId) {
  */
 async function resolveInfezione(eventoId, startDate) {
     const modal = new ResolveInfectionModal({ minDate: startDate });
+
     const dataFine = await modal.show();
 
     if (dataFine) {
         try {
             await eventiCliniciService.resolveInfezione(eventoId, dataFine);
-            await loadEventiForCurrentPatient(); // Ricarica la lista per mostrare lo stato aggiornato
+            await loadEventiForCurrentPatient(); // Ricarica e sincronizza
         } catch (error) {
             // L'errore è già gestito e notificato dal service, non serve fare altro.
             logger.error("Errore catturato durante la risoluzione dell'infezione:", error);
         }
+    }
+}
+
+/**
+ * Controlla se il paziente ha infezioni attive (non risolte).
+ * @returns {boolean} True se ci sono infezioni attive, altrimenti false.
+ */
+export function isPatientCurrentlyInfected() {
+    if (!currentEventi || currentEventi.length === 0) return false;
+    return currentEventi.some(e => e.tipo_evento === 'infezione' && !e.data_fine_evento);
+}
+
+/**
+ * Chiama la funzione nel form-ui per aggiornare lo stato del checkbox 'infetto'.
+ */
+function syncInfectionStatusWithForm() {
+    if (typeof onStatusChangeCallback === 'function') {
+        onStatusChangeCallback();
     }
 }
 

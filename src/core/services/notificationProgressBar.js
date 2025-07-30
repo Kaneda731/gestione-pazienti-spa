@@ -67,8 +67,6 @@ export class NotificationProgressBar {
 
     if (this.progressBar && this.progressFill) {
       this.start();
-    } else {
-      console.error("❌ Progress bar elements not found after initialization");
     }
   }
 
@@ -139,10 +137,6 @@ export class NotificationProgressBar {
     // Pulisci il placeholder e aggiungi il fill
     placeholder.innerHTML = "";
     placeholder.appendChild(progressFill);
-
-    console.log(
-      `✅ JS Progress bar placeholder replaced for ${this.type} notification (${this.duration}ms)`
-    );
   }
 
   createProgressBar() {
@@ -207,10 +201,6 @@ export class NotificationProgressBar {
 
     progressBar.appendChild(progressFill);
     this.element.appendChild(progressBar);
-
-    console.log(
-      `✅ JS Progress bar created for ${this.type} notification (${this.duration}ms)`
-    );
   }
 
   /**
@@ -220,11 +210,7 @@ export class NotificationProgressBar {
     if (this.isDestroyed) return;
 
     this.startTime = performance.now();
-    this.lastLoggedProgress = -1; // Reset debug counter
-
-    console.log(
-      `🚀 Starting progress bar animation for ${this.type} (${this.duration}ms)`
-    );
+    this.lastLoggedProgress = -1;
 
     this.animate({
       timing: this.timing,
@@ -287,12 +273,7 @@ export class NotificationProgressBar {
     const countdownProgress = 1 - progress;
 
     // Debug: log del progresso ogni 10%
-    if (Math.floor(countdownProgress * 10) !== this.lastLoggedProgress) {
-      this.lastLoggedProgress = Math.floor(countdownProgress * 10);
-      console.log(
-        `🎬 Progress bar animation: ${Math.round(countdownProgress * 100)}%`
-      );
-    }
+
 
     // Applica transform con GPU acceleration
     this.progressFill.style.transform = `scaleX(${countdownProgress})`;
@@ -312,8 +293,6 @@ export class NotificationProgressBar {
     if (!this.isPaused && !this.isDestroyed) {
       this.isPaused = true;
       this.pauseStartTime = performance.now();
-
-      console.log("⏸️ Progress bar paused");
     }
   }
 
@@ -326,8 +305,6 @@ export class NotificationProgressBar {
         this.pausedTime += performance.now() - this.pauseStartTime;
         this.pauseStartTime = null;
       }
-
-      console.log("▶️ Progress bar resumed");
     }
   }
 
@@ -344,8 +321,6 @@ export class NotificationProgressBar {
 
   onComplete() {
     if (this.isDestroyed) return;
-
-    console.log("✅ Progress bar animation completed");
 
     // Dispatch evento personalizzato per notificare il completamento
     const event = new CustomEvent("progressComplete", {

@@ -65,7 +65,6 @@ export class NotificationLazyLoader {
             return module;
         } catch (error) {
             this.loadingPromises.delete(moduleName);
-            console.error(`Failed to load module ${moduleName}:`, error);
             throw error;
         }
     }
@@ -80,15 +79,12 @@ export class NotificationLazyLoader {
             const module = await import(importPath);
             
             const loadTime = performance.now() - startTime;
-            console.log(`✅ Lazy loaded ${moduleName} in ${loadTime.toFixed(2)}ms`);
             
             // Traccia performance
             this.trackLoadingPerformance(moduleName, loadTime);
             
             return module;
         } catch (error) {
-            console.error(`❌ Failed to lazy load ${moduleName}:`, error);
-            
             // Tenta fallback se disponibile
             return this.loadFallback(moduleName);
         }

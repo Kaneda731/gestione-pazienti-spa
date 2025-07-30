@@ -23,7 +23,6 @@ export class NotificationSoundManager {
         try {
             // Controlla se l'audio è supportato
             if (!this.isAudioSupported()) {
-                console.warn('Audio non supportato in questo browser');
                 return;
             }
             
@@ -35,7 +34,7 @@ export class NotificationSoundManager {
             
             this.isInitialized = true;
         } catch (error) {
-            console.warn('Errore inizializzazione NotificationSoundManager:', error);
+            // Inizializzazione fallita silenziosamente
         }
     }
     
@@ -55,7 +54,7 @@ export class NotificationSoundManager {
                 }
             }
         } catch (error) {
-            console.warn('Impossibile inizializzare AudioContext:', error);
+            // AudioContext non disponibile
         }
     }
     
@@ -100,7 +99,6 @@ export class NotificationSoundManager {
         try {
             const soundConfig = this.sounds.get(type);
             if (!soundConfig) {
-                console.warn(`Suono non trovato per tipo: ${type}`);
                 return;
             }
             
@@ -110,7 +108,7 @@ export class NotificationSoundManager {
                 await this.playHTMLAudioSound(type, options);
             }
         } catch (error) {
-            console.warn(`Errore riproduzione suono ${type}:`, error);
+            // Riproduzione suono fallita silenziosamente
         }
     }
     
@@ -235,7 +233,7 @@ export class NotificationSoundManager {
                 info: newSettings.info !== false
             }));
         } catch (error) {
-            console.warn('Impossibile salvare preferenze suoni:', error);
+            // Salvataggio preferenze fallito silenziosamente
         }
     }
     

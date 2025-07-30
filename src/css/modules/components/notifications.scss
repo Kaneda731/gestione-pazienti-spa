@@ -334,7 +334,7 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 0 0 var(--notification-border-radius) var(--notification-border-radius);
   overflow: hidden;
 
@@ -346,7 +346,8 @@
     height: 100%;
     width: 100%;
     background: currentColor;
-    opacity: 0.8;
+    opacity: 0.0001;
+    transition: transform 0.8;
     transform-origin: left;
     transform: scaleX(1);
     transition: transform 0.1s ease-out;
@@ -507,7 +508,7 @@
   }
 
   .notification__progress {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.082);
   }
 }
 

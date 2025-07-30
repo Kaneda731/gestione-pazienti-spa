@@ -449,8 +449,6 @@ export class NotificationAnimationManager {
    * Ottimizzazioni per dispositivi con performance scarse
    */
   optimizeForLowPerformance() {
-    console.warn("Low animation performance detected, applying optimizations");
-
     // Riduci durata animazioni
     this.defaultDuration = Math.max(this.defaultDuration * 0.7, 150);
 

@@ -337,6 +337,20 @@ class NotificationService {
             }
             // Pulisci timer e progress bar
             stopAutoCloseTimer(this.timers, id);
+            
+            // Cleanup progress bar JavaScript se presente
+            if (this.notificationContainer) {
+                const element = this.notificationContainer.container?.querySelector(`[data-id="${id}"]`);
+                if (element && element._progressBarInstance) {
+                    try {
+                        element._progressBarInstance.destroy();
+                        element._progressBarInstance = null;
+                        console.log('🧹 Progress bar instance cleaned up for notification:', id);
+                    } catch (cleanupError) {
+                        console.warn('⚠️ Error cleaning up progress bar:', cleanupError);
+                    }
+                }
+            }
 
             if (this.notificationContainer) {
                 const element = this.notificationContainer.container?.querySelector(`[data-id="${id}"]`);

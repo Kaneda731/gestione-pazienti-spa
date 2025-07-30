@@ -469,8 +469,9 @@
 
   /* Progress bar controllata da JavaScript */
   &--js-controlled {
-    /* Disabilita animazioni CSS quando controllata da JS */
+    /* Disabilita completamente animazioni CSS quando controllata da JS */
     &::after {
+      display: none !important;
       animation: none !important;
       transition: none !important;
     }
@@ -488,12 +489,13 @@
 
   /* Placeholder per progress bar JavaScript */
   &--js-placeholder {
-    /* Nasconde il placeholder, verrà sostituito da JS */
-    display: none;
+    /* Il placeholder è visibile ma verrà sostituito da JS */
+    display: block;
+    opacity: 0.5; /* Mostra che è in attesa */
 
-    /* Quando viene attivato da JS */
+    /* Quando viene sostituito da JS */
     &.notification__progress--js-controlled {
-      display: block;
+      opacity: 1;
     }
   }
 
@@ -515,7 +517,8 @@
     opacity: 1;
   }
 
-  &::after {
+  /* Stili ::after solo per progress bar CSS, non JavaScript */
+  &:not(.notification__progress--js-controlled)::after {
     content: "" !important;
     position: absolute !important;
     top: 0 !important;
@@ -530,7 +533,7 @@
     will-change: transform !important;
   }
 
-  &--active {
+  &--active:not(.notification__progress--js-controlled) {
     opacity: 1 !important;
 
     &::after {

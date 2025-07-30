@@ -109,6 +109,7 @@ export function createNotificationElement({
             // Progress bar per auto-close - usa sempre JavaScript per controllo preciso
             const notificationDuration = getDurationForType(notification.type, options.duration);
             if (notificationDuration > 0 && !options.persistent) {
+                console.log(`🔧 Creating progress bar placeholder for ${notification.type} (${notificationDuration}ms)`);
                 // Placeholder per progress bar JavaScript
                 contentHtml += `
                     <div class="notification__progress notification__progress--js-placeholder" 
@@ -174,28 +175,65 @@ export function createNotificationElement({
             // Touch events sono opzionali, continua senza
         }
 
-        // Auto-close timer con gestione errori (ripristinato funzionamento originale)
+        // Auto-close con progress bar JavaScript
         try {
             const notificationDuration = getDurationForType(notification.type, options.duration);
             if (notificationDuration > 0 && !options.persistent) {
-                startAutoCloseTimer(
-                    timers,
-                    notification.id,
-                    notificationDuration,
-                    () => {
+                const progressBarPlaceholder = div.querySelector('.notification__progress--js-placeholder');
+                console.log('🔍 Looking for progress bar placeholder:', progressBarPlaceholder);
+                
+                if (progressBarPlaceholder) {
+                    // Crea progress bar JavaScript che gestisce anche l'autoclose
+                    const progressBarInstance = createProgressBar(div, notificationDuration, notification.type);
+                    
+                    // Gestisci eventi hover per pausa/resume (solo desktop)
+                    if (window.innerWidth > 768) {
+                        div.addEventListener('mouseenter', () => {
+                            if (progressBarInstance) progressBarInstance.pause();
+                        });
+                        
+                        div.addEventListener('mouseleave', () => {
+                            if (progressBarInstance) progressBarInstance.resume();
+                        });
+                    }
+                    
+                    // Ascolta completamento progress bar per autoclose
+                    div.addEventListener('progressComplete', () => {
                         try {
                             removeNotification(notification.id);
                         } catch (removeError) {
-                            console.error('❌ Error in auto-close callback:', removeError);
-                            // Fallback: rimuovi elemento dal DOM
+                            console.error('❌ Error in progress complete callback:', removeError);
                             if (div.parentNode) {
                                 div.remove();
                             }
                         }
-                    }
-                );
-                
-                console.log(`✅ CSS progress bar used for ${notification.type} (${notificationDuration}ms)`);
+                    });
+                    
+                    // Salva riferimento per cleanup
+                    div._progressBarInstance = progressBarInstance;
+                    
+                    console.log(`✅ JavaScript progress bar initialized for ${notification.type} (${notificationDuration}ms)`);
+                    
+                } else {
+                    // Fallback al timer tradizionale se non c'è placeholder
+                    startAutoCloseTimer(
+                        timers,
+                        notification.id,
+                        notificationDuration,
+                        () => {
+                            try {
+                                removeNotification(notification.id);
+                            } catch (removeError) {
+                                console.error('❌ Error in auto-close callback:', removeError);
+                                if (div.parentNode) {
+                                    div.remove();
+                                }
+                            }
+                        }
+                    );
+                    
+                    console.log(`✅ Fallback timer used for ${notification.type} (${notificationDuration}ms)`);
+                }
             }
         } catch (timerError) {
             console.error('❌ Error setting up auto-close timer:', timerError);

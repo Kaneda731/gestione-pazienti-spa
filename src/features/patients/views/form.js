@@ -95,14 +95,20 @@ export async function initInserimentoView() {
 
     // 2. Manipola il DOM con i dati caricati
     renderDiagnosiOptions(diagnosiOptions);
-    if (patientToEdit) {
-      populateForm(patientToEdit);
-      
-      // Aggiorna il titolo del form per la modalità modifica
-      const titleElement = document.getElementById('inserimento-title');
-      if (titleElement) {
+    
+    // Aggiorna il titolo del form in base alla modalità
+    const titleElement = document.getElementById('inserimento-title');
+    if (titleElement) {
+      if (patientToEdit) {
+        // Modalità modifica
         titleElement.innerHTML = `
-          <span class="material-icons me-2">edit</span>Modifica Paziente: ${patientToEdit.nome} ${patientToEdit.cognome}
+          <span class="material-icons text-primary me-2">person</span><span class="patient-name fw-bold">${patientToEdit.nome} ${patientToEdit.cognome}</span>
+        `;
+        populateForm(patientToEdit);
+      } else {
+        // Modalità creazione
+        titleElement.innerHTML = `
+          <span class="material-icons text-primary me-2">person_add</span>Inserimento Nuovo Paziente
         `;
       }
     }

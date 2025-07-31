@@ -362,6 +362,8 @@ class ChartTypeManager {
    * @returns {Object} - L'istanza del grafico creato
    */
   renderBarChart(container, data, options = {}) {
+    // Aggiungi classe specifica per container bar chart
+    container.classList.add('bar-chart-container');
     const canvas = this.createCanvas(container);
     const ctx = canvas.getContext('2d');
     const { labels, values } = this.prepareChartData(data);
@@ -388,63 +390,63 @@ class ChartTypeManager {
       }]
     };
     
+    // Legenda sempre visibile a destra, font piccolo, boxWidth ridotto
     const defaultOptions = {
       type: 'bar',
       data: chartData,
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        indexAxis: options.horizontal ? 'y' : 'x', // Supporto per barre orizzontali
+        indexAxis: options.horizontal ? 'y' : 'x',
         scales: {
           y: {
             beginAtZero: true,
-            ticks: {
-              precision: 0,
-              font: {
-                size: 12
-              }
-            },
-            grid: {
-              display: true,
-              color: 'rgba(0, 0, 0, 0.05)'
-            }
+            ticks: { precision: 0, font: { size: 12 } },
+            grid: { display: true, color: 'rgba(0, 0, 0, 0.05)' }
           },
           x: {
-            ticks: {
-              maxRotation: 45,
-              minRotation: 0,
-              font: {
-                size: 12
-              },
-              autoSkip: true,
-              maxTicksLimit: 15
-            },
-            grid: {
-              display: false
-            }
+            ticks: { maxRotation: 45, minRotation: 0, font: { size: 12 }, autoSkip: true, maxTicksLimit: 15 },
+            grid: { display: false }
           }
         },
         plugins: {
           legend: {
-            display: options.showLegend || false,
-            position: 'top',
+            display: true,
+            position: 'right',
             labels: {
-              font: { size: 12 },
+              font: { size: 11 },
               usePointStyle: true,
-              boxWidth: 10
+              boxWidth: 10,
+              padding: 8,
+              boxHeight: 10,
+              // Forza overflow scrollabile lato CSS
+              color: '#333',
+              // NB: per overflow serve anche CSS esterno su .chartjs-legend
+              generateLabels: (chart) => {
+                const data = chart.data;
+                if (data.labels.length && data.datasets.length) {
+                  return data.labels.map((label, i) => {
+                    const dataset = data.datasets[0];
+                    const backgroundColor = dataset.backgroundColor[i];
+                    return {
+                      text: label,
+                      fillStyle: backgroundColor,
+                      strokeStyle: backgroundColor,
+                      lineWidth: 0,
+                      hidden: false,
+                      index: i
+                    };
+                  });
+                }
+                return [];
+              }
             }
           },
           title: {
             display: !!options.title,
             text: options.title || '',
-            font: {
-              size: 16,
-              weight: 'bold'
-            },
-            padding: {
-              top: 10,
-              bottom: 20
-            }
+            font: { size: 16, weight: 'bold' },
+            padding: { top: 10, bottom: 20 }
           },
           tooltip: {
             enabled: false,
@@ -455,9 +457,7 @@ class ChartTypeManager {
             cornerRadius: 6,
             displayColors: true,
             callbacks: {
-              title: (tooltipItems) => {
-                return tooltipItems[0].label || '';
-              },
+              title: (tooltipItems) => tooltipItems[0].label || '',
               label: (context) => {
                 const label = context.dataset.label || '';
                 const value = context.parsed.y || context.parsed.x || 0;
@@ -466,28 +466,19 @@ class ChartTypeManager {
                 return label + ': ' + value + ' (' + percentage + '%)';
               },
               afterLabel: (context) => {
-                // Aggiungi informazioni aggiuntive nel tooltip
                 const dataset = context.dataset;
                 const total = dataset.data.reduce((a, b) => a + b, 0);
                 return 'Percentuale sul totale: ' + ((context.parsed.y / total) * 100).toFixed(1) + '%';
               }
             }
           },
-          // Etichette con valori direttamente sulle barre (disabilitate di default)
           datalabels: false
         },
-        // Migliora l'interattività
-        hover: {
-          mode: 'index',
-          intersect: false
-        },
+        hover: { mode: 'index', intersect: false },
         animation: {
           duration: 800,
           easing: 'easeOutQuart',
-          delay: (context) => {
-            // Aggiungi un leggero ritardo per creare un effetto a cascata
-            return context.dataIndex * 50;
-          }
+          delay: (context) => context.dataIndex * 50
         }
       }
     };
@@ -496,6 +487,8 @@ class ChartTypeManager {
     const chartOptions = this.mergeOptions(defaultOptions, options);
     
     return new this.Chart(ctx, chartOptions);
+
+    // Rimuovi la classe quando il grafico viene distrutto (cleanup gestito altrove)
   }
   
   /**

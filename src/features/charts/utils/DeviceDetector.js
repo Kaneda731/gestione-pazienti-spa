@@ -138,8 +138,13 @@ class DeviceDetector {
    */
   _setupResizeListener() {
     // Verifica che window sia disponibile (per evitare errori in ambienti SSR)
-    if (typeof window === 'undefined') {
-      console.warn('Window non disponibile, impossibile configurare i listener di resize');
+    if (
+      typeof window === 'undefined' ||
+      window == null ||
+      typeof window.addEventListener !== 'function' ||
+      window.addEventListener == null
+    ) {
+      console.warn('Window/addEventListener non disponibile, impossibile configurare i listener di resize');
       return;
     }
     
@@ -185,10 +190,7 @@ class DeviceDetector {
     }, 250);
 
     try {
-      // Aggiungi il listener per il ridimensionamento
       window.addEventListener('resize', handleResize);
-      
-      // Aggiungi anche un listener per il cambio di orientamento sui dispositivi mobili
       window.addEventListener('orientationchange', handleResize);
     } catch (error) {
       console.error('Errore durante l\'aggiunta dei listener di resize:', error);

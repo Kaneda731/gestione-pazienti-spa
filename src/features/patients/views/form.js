@@ -102,7 +102,7 @@ export async function initInserimentoView() {
       if (patientToEdit) {
         // Modalità modifica
         titleElement.innerHTML = `
-          <span class="material-icons text-primary me-2">person</span><span class="patient-name fw-bold">${patientToEdit.nome} ${patientToEdit.cognome}</span>
+          <span class="patient-name fw-bold">${patientToEdit.nome} ${patientToEdit.cognome}</span>
         `;
         populateForm(patientToEdit);
       } else {

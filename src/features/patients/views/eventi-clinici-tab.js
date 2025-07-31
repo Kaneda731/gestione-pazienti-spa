@@ -4,6 +4,7 @@ import { postOperativeCalculator } from '../../eventi-clinici/utils/post-operati
 import { initCustomSelects, updateCustomSelect, CustomSelect } from '../../../shared/components/forms/CustomSelect.js';
 import CustomDatepicker from '../../../shared/components/forms/CustomDatepicker.js';
 import { notificationService } from '../../../core/services/notificationService.js';
+import { logger } from '../../../core/services/loggerService.js';
 import { sanitizeHtml } from '../../../shared/utils/domSecurity.js';
 import { ResolveInfectionModal } from '../../eventi-clinici/components/ResolveInfectionModal.js';
 
@@ -223,11 +224,21 @@ async function handleSaveEvento() {
             await eventiCliniciService.createEvento(eventoData);
         }
 
-        // Ricarica lista eventi
+        // Ricarica lista eventi e aggiorna la visualizzazione
         await loadEventiForCurrentPatient();
         
-        // Nascondi form
+        // Nascondi form immediatamente dopo il reload
         hideEventoForm();
+        
+        // Forza un refresh della visualizzazione per assicurarsi che l'evento appaia
+        const eventiList = document.getElementById('eventi-list');
+        if (eventiList) {
+            // Trigger un piccolo flash per indicare che la lista è stata aggiornata
+            eventiList.style.opacity = '0.7';
+            setTimeout(() => {
+                eventiList.style.opacity = '1';
+            }, 150);
+        }
         
         // La notifica di successo è già gestita da eventiCliniciService
     } catch (error) {
@@ -406,15 +417,23 @@ function renderEventiList(eventi) {
     const noEventiMessage = document.getElementById('no-eventi-message');
     
     if (!eventi || eventi.length === 0) {
-        noEventiMessage.style.display = 'block';
-        eventiList.innerHTML = '';
-        eventiList.appendChild(noEventiMessage);
+        if (noEventiMessage) {
+            noEventiMessage.style.display = 'block';
+        }
+        eventiList.innerHTML = '<div class="text-center text-muted py-4">Nessun evento clinico registrato</div>';
+        if (noEventiMessage) {
+            eventiList.appendChild(noEventiMessage);
+        }
         return;
     }
 
-    noEventiMessage.style.display = 'none';
+    if (noEventiMessage) {
+        noEventiMessage.style.display = 'none';
+    }
     
-    const eventiHTML = eventi.map(evento => {
+    let eventiHTML;
+    try {
+        eventiHTML = eventi.map(evento => {
         const dataFormatted = convertDateFromISO(evento.data_evento);
         const tipoIcon = evento.tipo_evento === 'intervento' ? 'medical_services' : 'coronavirus';
         const tipoClass = evento.tipo_evento === 'intervento' ? 'primary' : 'warning';
@@ -467,7 +486,11 @@ function renderEventiList(eventi) {
                 </div>
             </div>
         `;
-    }).join('');
+        }).join('');
+    } catch (error) {
+        logger.error('Errore durante generazione HTML eventi:', error);
+        eventiHTML = '<div class="alert alert-danger">Errore nel caricamento eventi</div>';
+    }
 
     eventiList.innerHTML = sanitizeHtml(eventiHTML);
 

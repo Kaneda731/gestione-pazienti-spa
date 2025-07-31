@@ -15,11 +15,55 @@ async function handleFormSubmit(event, state) {
   event.preventDefault();
 
   // Con novalidate nel form HTML, non abbiamo più problemi di validazione
-  const patientData = getFormData();
+  const formData = getFormData();
 
   try {
     showFeedbackMessage("Salvataggio in corso...", "info");
-    await savePatient(patientData, state.patientId);
+    
+    // Separa i dati del paziente dai dati temporanei di infezione
+    const patientData = {};
+    const tempData = {};
+    
+    Object.keys(formData).forEach(key => {
+      if (key.startsWith('_')) {
+        tempData[key] = formData[key];
+      } else {
+        patientData[key] = formData[key];
+      }
+    });
+
+    let result;
+    
+    if (state.mode === "edit") {
+      // Modalità modifica - usa il metodo esistente
+      result = await savePatient(patientData, state.patientId);
+      
+      // Se ci sono dati di infezione, gestiscili separatamente
+      if (tempData._hasInfectionData && tempData._infectionData) {
+        const { patientService } = await import('../services/patientService.js');
+        await patientService.handleInfectionEventCreation(state.patientId, tempData._infectionData);
+      }
+    } else {
+      // Modalità inserimento
+      if (tempData._hasInfectionData && tempData._infectionData) {
+        // Usa il nuovo metodo per creazione coordinata
+        const { patientService } = await import('../services/patientService.js');
+        const transactionResult = await patientService.createPatientWithInfection(
+          patientData, 
+          tempData._infectionData
+        );
+        result = transactionResult.patient;
+      } else {
+        // Creazione normale senza infezione
+        result = await savePatient(patientData, null);
+      }
+    }
+
+    // Aggiorna il currentPatientId per la tab eventi clinici
+    if (result && result.id) {
+      const { setCurrentPatient } = await import('./eventi-clinici-tab.js');
+      setCurrentPatient(result.id);
+    }
 
     const action = state.mode === "edit" ? "aggiornato" : "inserito";
     showFeedbackMessage(`Paziente ${action} con successo!`, "success");
@@ -53,12 +97,26 @@ export async function initInserimentoView() {
     renderDiagnosiOptions(diagnosiOptions);
     if (patientToEdit) {
       populateForm(patientToEdit);
+      
+      // Aggiorna il titolo del form per la modalità modifica
+      const titleElement = document.getElementById('inserimento-title');
+      if (titleElement) {
+        titleElement.innerHTML = `
+          <span class="material-icons me-2">edit</span>Modifica Paziente: ${patientToEdit.nome} ${patientToEdit.cognome}
+        `;
+      }
     }
 
     // 3. Solo ora, inizializza i componenti (datepicker, custom select)
     initializeFormComponents();
 
-    // 4. Aggiungi l'event listener per il submit
+    // 4. Se siamo in modalità modifica, imposta il paziente corrente per la tab eventi clinici
+    if (state.mode === "edit" && state.patientId) {
+      const { setCurrentPatient } = await import('./eventi-clinici-tab.js');
+      setCurrentPatient(state.patientId);
+    }
+
+    // 5. Aggiungi l'event listener per il submit
     formElement.addEventListener("submit", submitHandler);
   } catch (error) {
     showFeedbackMessage(error.message, "danger");

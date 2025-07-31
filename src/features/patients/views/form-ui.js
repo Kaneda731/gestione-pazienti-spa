@@ -4,6 +4,8 @@ import CustomDatepicker from '../../../shared/components/forms/CustomDatepicker.
 import { notificationService } from '../../../core/services/notificationService.js';
 import { initEventiCliniciTab, setCurrentPatient, cleanupEventiCliniciTab, isPatientCurrentlyInfected } from './eventi-clinici-tab.js';
 import { sanitizeHtml } from '../../../shared/utils/domSecurity.js';
+import { InfectionEventModal } from '../../eventi-clinici/components/InfectionEventModal.js';
+import infectionDataManager from '../services/infectionDataManager.js';
 
 let datepickerInstance = null;
 
@@ -20,6 +22,9 @@ export function initializeFormComponents() {
 
     // Aggiungi event listener per la gestione condizionale dei campi
     setupConditionalFieldsLogic();
+    
+    // Inizializza la gestione del flag infezione
+    setupInfectionFlagHandler();
     
     // Inizializza il tab degli eventi clinici, passando la funzione di callback per aggiornare la UI
     initEventiCliniciTab(updateInfectionStatusFromEvents);
@@ -99,7 +104,7 @@ export function handleTipoDimissioneChange(tipoDimissione) {
 
 /**
  * Aggiorna lo stato del checkbox 'infetto' in base agli eventi clinici.
- * Rende il checkbox di sola lettura e mostra un messaggio di aiuto.
+ * Gestisce la logica di abilitazione/disabilitazione del checkbox.
  * Questa funzione viene chiamata dalla logica della tab eventi clinici.
  */
 function updateInfectionStatusFromEvents() {
@@ -108,15 +113,28 @@ function updateInfectionStatusFromEvents() {
     if (!infettoCheckbox || !infettoHelper) return;
 
     const isInfetto = isPatientCurrentlyInfected();
-
-    infettoCheckbox.checked = isInfetto;
-    infettoCheckbox.disabled = true; // Il checkbox è sempre gestito dagli eventi
+    const hasNewInfectionData = infectionDataManager.hasValidInfectionData();
 
     if (isInfetto) {
+        // Se ci sono eventi di infezione attivi, il checkbox è gestito dagli eventi
+        infettoCheckbox.checked = true;
+        infettoCheckbox.disabled = true;
         infettoHelper.textContent = 'Stato gestito dagli eventi di infezione attivi.';
         infettoHelper.style.display = 'block';
+        
+        // Pulisci i dati temporanei se ci sono eventi attivi
+        if (hasNewInfectionData) {
+            infectionDataManager.clearInfectionData();
+            updateInfectionIndicator();
+        }
     } else {
+        // Se non ci sono eventi attivi, abilita il checkbox per nuovi inserimenti
+        infettoCheckbox.disabled = false;
+        infettoCheckbox.checked = hasNewInfectionData;
         infettoHelper.style.display = 'none';
+        
+        // Aggiorna l'indicatore visivo
+        updateInfectionIndicator();
     }
 }
 
@@ -150,6 +168,158 @@ function updatePatientTitle() {
 }
 
 /**
+ * Configura l'event listener per il checkbox "infetto" per gestire la modal di infezione
+ */
+export function setupInfectionFlagHandler() {
+    const infettoCheckbox = document.getElementById('infetto');
+    const infettoLabel = document.querySelector('label[for="infetto"]');
+    
+    if (!infettoCheckbox || !infettoLabel) return;
+
+    // Aggiungi event listener per il toggle del checkbox
+    infettoCheckbox.addEventListener('change', async (e) => {
+        const isChecked = e.target.checked;
+        
+        if (isChecked) {
+            // Se il checkbox viene selezionato, mostra la modal per i dati di infezione
+            const infectionData = await showInfectionModal();
+            
+            if (infectionData) {
+                // Salva i dati temporaneamente
+                infectionDataManager.setInfectionData(infectionData);
+                updateInfectionIndicator();
+            } else {
+                // Se l'utente annulla, deseleziona il checkbox
+                e.target.checked = false;
+                infectionDataManager.clearInfectionData();
+                updateInfectionIndicator();
+            }
+        } else {
+            // Se il checkbox viene deselezionato, pulisci i dati
+            clearInfectionData();
+        }
+    });
+
+    // Aggiungi indicatore visivo iniziale
+    updateInfectionIndicator();
+}
+
+/**
+ * Mostra la modal per raccogliere i dati di infezione
+ * @returns {Promise<Object|null>} Promise che si risolve con i dati dell'infezione o null se annullato
+ */
+export async function showInfectionModal() {
+    const nomeInput = document.getElementById('nome');
+    const cognomeInput = document.getElementById('cognome');
+    const patientName = nomeInput && cognomeInput 
+        ? `${nomeInput.value.trim()} ${cognomeInput.value.trim()}`.trim()
+        : '';
+
+    // Usa i dati esistenti se disponibili
+    const existingData = infectionDataManager.getInfectionData();
+    
+    const modal = new InfectionEventModal({
+        title: 'Dati Infezione Paziente',
+        patientName: patientName || 'Nuovo Paziente',
+        defaultDate: existingData?.data_evento || new Date().toISOString().split('T')[0]
+    });
+
+    try {
+        const result = await modal.show();
+        return result;
+    } catch (error) {
+        console.error('Errore nella modal di infezione:', error);
+        notificationService.error('Errore nell\'apertura della modal di infezione');
+        return null;
+    }
+}
+
+/**
+ * Restituisce i dati di infezione correnti
+ * @returns {Object|null} Dati di infezione o null se non presenti
+ */
+export function getInfectionData() {
+    return infectionDataManager.getInfectionData();
+}
+
+/**
+ * Pulisce i dati temporanei di infezione
+ */
+export function clearInfectionData() {
+    infectionDataManager.clearInfectionData();
+    updateInfectionIndicator();
+    
+    // Deseleziona il checkbox se necessario
+    const infettoCheckbox = document.getElementById('infetto');
+    if (infettoCheckbox && infettoCheckbox.checked) {
+        infettoCheckbox.checked = false;
+    }
+}
+
+/**
+ * Verifica se ci sono dati di infezione validi
+ * @returns {boolean} True se ci sono dati validi
+ */
+export function hasValidInfectionData() {
+    return infectionDataManager.hasValidInfectionData();
+}
+
+/**
+ * Verifica se ci sono dati di infezione (anche se non validi)
+ * @returns {boolean} True se ci sono dati presenti
+ */
+export function hasInfectionData() {
+    return infectionDataManager.hasInfectionData();
+}
+
+/**
+ * Aggiorna l'indicatore visivo per la presenza di dati di infezione
+ */
+function updateInfectionIndicator() {
+    const infettoLabel = document.querySelector('label[for="infetto"]');
+    const infettoCheckbox = document.getElementById('infetto');
+    
+    if (!infettoLabel || !infettoCheckbox) return;
+
+    // Rimuovi indicatori esistenti
+    const existingBadge = infettoLabel.querySelector('.infection-data-badge');
+    if (existingBadge) {
+        existingBadge.remove();
+    }
+
+    // Se ci sono dati di infezione, aggiungi un badge
+    if (infectionDataManager.hasInfectionData()) {
+        const isValid = infectionDataManager.hasValidInfectionData();
+        const badge = document.createElement('span');
+        badge.className = `badge ms-2 infection-data-badge ${isValid ? 'bg-success' : 'bg-warning'}`;
+        badge.innerHTML = isValid 
+            ? '<span class="material-icons" style="font-size: 12px;">check_circle</span> Dati inseriti'
+            : '<span class="material-icons" style="font-size: 12px;">warning</span> Dati incompleti';
+        
+        infettoLabel.appendChild(badge);
+
+        // Aggiungi tooltip con dettagli
+        const infectionData = infectionDataManager.getInfectionData();
+        if (infectionData) {
+            badge.title = `Data: ${infectionData.data_evento || 'Non specificata'}\nAgente: ${infectionData.agente_patogeno || 'Non specificato'}`;
+        }
+
+        // Aggiungi click handler per riaprire la modal
+        badge.style.cursor = 'pointer';
+        badge.addEventListener('click', async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const updatedData = await showInfectionModal();
+            if (updatedData) {
+                infectionDataManager.setInfectionData(updatedData);
+                updateInfectionIndicator();
+            }
+        });
+    }
+}
+
+/**
  * Distrugge le istanze dei componenti per evitare memory leak.
  */
 export function cleanupFormComponents() {
@@ -157,6 +327,9 @@ export function cleanupFormComponents() {
         datepickerInstance.destroy();
         datepickerInstance = null;
     }
+    
+    // Cleanup dei dati temporanei di infezione
+    infectionDataManager.clearInfectionData();
     
     // Cleanup del tab eventi clinici
     cleanupEventiCliniciTab();
@@ -169,10 +342,20 @@ export function cleanupFormComponents() {
 export function populateForm(patient) {
     if (!patient) return;
 
-    document.getElementById('paziente-id').value = patient.id || '';
-    document.getElementById('nome').value = patient.nome || '';
-    document.getElementById('cognome').value = patient.cognome || '';
-    
+    // Funzione helper per impostare il valore di un elemento in modo sicuro
+    const setElementValue = (id, value) => {
+        const element = document.getElementById(id);
+        if (element) {
+            if (element.type === 'checkbox') {
+                element.checked = Boolean(value);
+            } else {
+                element.value = value || '';
+            }
+        } else {
+            console.warn(`Elemento con ID '${id}' non trovato durante populateForm`);
+        }
+    };
+
     // Converti le date da yyyy-mm-dd a dd/mm/yyyy per il datepicker
     const formatDateForDisplay = (dateStr) => {
         if (!dateStr) return '';
@@ -183,26 +366,33 @@ export function populateForm(patient) {
         return dateStr;
     };
     
-    document.getElementById('data_nascita').value = formatDateForDisplay(patient.data_nascita || '');
-    document.getElementById('data_ricovero').value = formatDateForDisplay(patient.data_ricovero || '');
-    document.getElementById('data_dimissione').value = formatDateForDisplay(patient.data_dimissione || '');
-    document.getElementById('diagnosi').value = patient.diagnosi || '';
-    document.getElementById('reparto_appartenenza').value = patient.reparto_appartenenza || '';
-    document.getElementById('reparto_provenienza').value = patient.reparto_provenienza || '';
-    document.getElementById('livello_assistenza').value = patient.livello_assistenza || '';
-    document.getElementById('codice_rad').value = patient.codice_rad || '';
-    document.getElementById('infetto').checked = patient.infetto || false;
-    document.getElementById('data_infezione').value = formatDateForDisplay(patient.data_infezione || '');
+    // Popola tutti i campi usando la funzione helper
+    setElementValue('paziente-id', patient.id);
+    setElementValue('nome', patient.nome);
+    setElementValue('cognome', patient.cognome);
+    setElementValue('data_nascita', formatDateForDisplay(patient.data_nascita));
+    setElementValue('data_ricovero', formatDateForDisplay(patient.data_ricovero));
+    setElementValue('data_dimissione', formatDateForDisplay(patient.data_dimissione));
+    setElementValue('diagnosi', patient.diagnosi);
+    setElementValue('reparto_appartenenza', patient.reparto_appartenenza);
+    setElementValue('reparto_provenienza', patient.reparto_provenienza);
+    setElementValue('livello_assistenza', patient.livello_assistenza);
+    setElementValue('codice_rad', patient.codice_rad);
+    setElementValue('infetto', patient.infetto);
 
     // Popola i nuovi campi per dimissione/trasferimento
-    document.getElementById('tipo_dimissione').value = patient.tipo_dimissione || '';
-    document.getElementById('reparto_destinazione').value = patient.reparto_destinazione || '';
-    document.getElementById('clinica_destinazione').value = patient.clinica_destinazione || '';
-    document.getElementById('codice_clinica').value = patient.codice_clinica || '';
-    document.getElementById('codice_dimissione').value = patient.codice_dimissione || '';
+    setElementValue('tipo_dimissione', patient.tipo_dimissione);
+    setElementValue('reparto_destinazione', patient.reparto_destinazione);
+    setElementValue('clinica_destinazione', patient.clinica_destinazione);
+    setElementValue('codice_clinica', patient.codice_clinica);
+    setElementValue('codice_dimissione', patient.codice_dimissione);
 
     // Mostra/nascondi campi condizionali basati sul tipo dimissione e stato infetto
     handleTipoDimissioneChange(patient.tipo_dimissione || '');
+    
+    // Pulisci i dati temporanei di infezione quando si carica un paziente esistente
+    infectionDataManager.clearInfectionData();
+    updateInfectionIndicator();
     
     // Imposta il paziente corrente per il tab eventi clinici
     setCurrentPatient(patient.id);
@@ -248,8 +438,20 @@ export function getFormData() {
     const formData = new FormData(form);
     const data = Object.fromEntries(formData.entries());
 
-    // Il flag 'infetto' è ora determinato dalla presenza di eventi di infezione attivi.
-    data.infetto = isPatientCurrentlyInfected();
+    // Determina lo stato infetto: se ci sono eventi clinici attivi, usa quello stato
+    // altrimenti usa il flag del checkbox se ci sono dati di infezione validi
+    const hasActiveInfection = isPatientCurrentlyInfected();
+    const hasNewInfectionData = infectionDataManager.hasValidInfectionData();
+    
+    data.infetto = hasActiveInfection || hasNewInfectionData;
+
+    // Aggiungi i dati di infezione se presenti e validi
+    if (hasNewInfectionData && !hasActiveInfection) {
+        const infectionData = infectionDataManager.getInfectionData();
+        data._hasInfectionData = true;
+        data._infectionData = infectionData;
+        data._requiresInfectionEvent = true;
+    }
 
     // Converti le date dal formato dd/mm/yyyy a yyyy-mm-dd per Supabase
     const dateFields = ['data_nascita', 'data_ricovero', 'data_dimissione', 'data_infezione', 'data_evento'];

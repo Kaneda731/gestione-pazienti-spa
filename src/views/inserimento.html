@@ -1,296 +1,580 @@
 <div class="view">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h3 id="inserimento-title"><span class="material-icons me-2">person_add</span>Inserimento Nuovo Paziente</h3>
-                    <button class="btn btn-sm btn-back-menu" data-view="home">
-                        <span class="material-icons me-1" style="vertical-align: text-bottom;">arrow_back</span>Torna al Menu
-                    </button>
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h3 id="inserimento-title">
+        <span class="material-icons me-2">person_add</span>Inserimento Nuovo
+        Paziente
+      </h3>
+      <button class="btn btn-sm btn-back-menu" data-view="home">
+        <span class="material-icons me-1" style="vertical-align: text-bottom"
+          >arrow_back</span
+        >Torna al Menu
+      </button>
+    </div>
+    <div class="card-body">
+      <!-- Tab Navigation -->
+      <ul class="nav nav-tabs mb-4" id="patient-form-tabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button
+            class="nav-link active"
+            id="dati-paziente-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#dati-paziente"
+            type="button"
+            role="tab"
+            aria-controls="dati-paziente"
+            aria-selected="true"
+          >
+            <span class="material-icons me-2">person</span>Dati Paziente
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button
+            class="nav-link"
+            id="eventi-clinici-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#eventi-clinici"
+            type="button"
+            role="tab"
+            aria-controls="eventi-clinici"
+            aria-selected="false"
+          >
+            <span class="material-icons me-2">medical_services</span>Eventi
+            Clinici
+          </button>
+        </li>
+      </ul>
+
+      <form id="form-inserimento" novalidate>
+        <input type="hidden" id="paziente-id" name="id" />
+        <div id="messaggio-container" class="mb-3"></div>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="patient-form-tab-content">
+          <!-- Dati Paziente Tab -->
+          <div
+            class="tab-pane fade show active"
+            id="dati-paziente"
+            role="tabpanel"
+            aria-labelledby="dati-paziente-tab"
+          >
+            <div class="row g-3 align-items-end">
+              <!-- Dati Anagrafici -->
+              <div class="col-md-4">
+                <label for="nome" class="form-label">Nome</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="nome"
+                  name="nome"
+                  required
+                />
+              </div>
+              <div class="col-md-4">
+                <label for="cognome" class="form-label">Cognome</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="cognome"
+                  name="cognome"
+                  required
+                />
+              </div>
+              <div class="col-md-4">
+                <label for="data_nascita" class="form-label"
+                  >Data di Nascita</label
+                >
+                <div class="input-group-icon">
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="data_nascita"
+                    name="data_nascita"
+                    data-datepicker
+                    placeholder="gg/mm/aaaa"
+                  />
+                  <span class="material-icons input-icon">calendar_today</span>
                 </div>
-                <div class="card-body">
-                    <!-- Tab Navigation -->
-                    <ul class="nav nav-tabs mb-4" id="patient-form-tabs" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="dati-paziente-tab" data-bs-toggle="tab" data-bs-target="#dati-paziente" type="button" role="tab" aria-controls="dati-paziente" aria-selected="true">
-                                <span class="material-icons me-2">person</span>Dati Paziente
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="eventi-clinici-tab" data-bs-toggle="tab" data-bs-target="#eventi-clinici" type="button" role="tab" aria-controls="eventi-clinici" aria-selected="false">
-                                <span class="material-icons me-2">medical_services</span>Eventi Clinici
-                            </button>
-                        </li>
-                    </ul>
+              </div>
 
-                    <form id="form-inserimento" novalidate>
-                        <input type="hidden" id="paziente-id" name="id">
-                        <div id="messaggio-container" class="mb-3"></div>
-                        
-                        <!-- Tab Content -->
-                        <div class="tab-content" id="patient-form-tab-content">
-                            <!-- Dati Paziente Tab -->
-                            <div class="tab-pane fade show active" id="dati-paziente" role="tabpanel" aria-labelledby="dati-paziente-tab">
-                                <div class="row g-3 align-items-end">
-                            <!-- Dati Anagrafici -->
-                            <div class="col-md-4">
-                                <label for="nome" class="form-label">Nome</label>
-                                <input type="text" class="form-control" id="nome" name="nome" required>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="cognome" class="form-label">Cognome</label>
-                                <input type="text" class="form-control" id="cognome" name="cognome" required>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="data_nascita" class="form-label">Data di Nascita</label>
-                                <div class="input-group-icon">
-                                    <input type="text" class="form-control" id="data_nascita" name="data_nascita" data-datepicker placeholder="gg/mm/aaaa">
-                                    <span class="material-icons input-icon">calendar_today</span>
-                                </div>
-                            </div>
-
-                            <!-- Dati Ricovero -->
-                            <div class="col-md-4">
-                                <label for="data_ricovero" class="form-label">Data di Ricovero</label>
-                                <div class="input-group-icon">
-                                    <input type="text" class="form-control" id="data_ricovero" name="data_ricovero" data-datepicker placeholder="gg/mm/aaaa" required>
-                                    <span class="material-icons input-icon">calendar_today</span>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="diagnosi" class="form-label">Diagnosi</label>
-                                <select class="form-select" id="diagnosi" name="diagnosi" required data-custom="true">
-                                    <option value="">Seleziona diagnosi...</option>
-                                </select>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="codice_rad" class="form-label">Codice RAD</label>
-                                <input type="text" class="form-control" id="codice_rad" name="codice_rad">
-                            </div>
-                            
-                            <div class="col-md-4">
-                                <label for="reparto_appartenenza" class="form-label">Reparto Appartenenza</label>
-                                <select class="form-select" id="reparto_appartenenza" name="reparto_appartenenza" required data-custom="true">
-                                    <option value="">Seleziona...</option>
-                                    <option value="Ortopedia">Ortopedia</option>
-                                    <option value="Chirurgia Arti">Chirurgia Arti</option>
-                                    <option value="Plastica">Plastica</option>
-                                </select>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="reparto_provenienza" class="form-label">Reparto Provenienza</label>
-                                <select class="form-select" id="reparto_provenienza" name="reparto_provenienza" data-custom="true">
-                                    <option value="">Seleziona...</option>
-                                    <option value="AR">AR</option>
-                                    <option value="PO">PO</option>
-                                    <option value="CO">CO</option>
-                                    <option value="CR">CR</option>
-                                    <option value="PS">PS</option>
-                                </select>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="livello_assistenza" class="form-label">Livello Assistenza</label>
-                                <select class="form-select" id="livello_assistenza" name="livello_assistenza" required data-custom="true">
-                                    <option value="">Seleziona...</option>
-                                    <option value="Bassa">Bassa</option>
-                                    <option value="Media">Media</option>
-                                    <option value="Alta">Alta</option>
-                                </select>
-                            </div>
-
-                            <!-- Flag Infetto -->
-                            <div class="col-md-12 mt-3">
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" id="infetto" name="infetto">
-                                    <label class="form-check-label" for="infetto">Paziente Infetto</label>
-                                </div>
-                                <small id="infetto-helper-text" class="form-text text-muted" style="display: none;"></small>
-                            </div>
-
-                            <!-- Sezione Dimissione/Trasferimento -->
-                            <div class="col-12 discharge-transfer-section">
-                                <h5>
-                                    <span class="material-icons">transfer_within_a_station</span>
-                                    Informazioni Dimissione/Trasferimento
-                                </h5>
-                                <div class="row g-3">
-                            
-                            <div class="col-md-4">
-                                <label for="data_dimissione" class="form-label">Data di Dimissione</label>
-                                <div class="input-group-icon">
-                                    <input type="text" class="form-control" id="data_dimissione" name="data_dimissione" data-datepicker placeholder="gg/mm/aaaa">
-                                    <span class="material-icons input-icon">calendar_today</span>
-                                </div>
-                            </div>
-
-                            <div class="col-md-4">
-                                <label for="tipo_dimissione" class="form-label">Tipo Dimissione</label>
-                                <select class="form-select" id="tipo_dimissione" name="tipo_dimissione" data-custom="true">
-                                    <option value="">Seleziona...</option>
-                                    <option value="dimissione">Dimissione</option>
-                                    <option value="trasferimento_interno">Trasferimento Interno</option>
-                                    <option value="trasferimento_esterno">Trasferimento Esterno</option>
-                                </select>
-                            </div>
-
-                            <div class="col-md-4">
-                                <label for="codice_dimissione" class="form-label">Codice Dimissione</label>
-                                <select class="form-select" id="codice_dimissione" name="codice_dimissione" data-custom="true">
-                                    <option value="">Seleziona...</option>
-                                    <option value="3">3 - Dimissione Ordinaria</option>
-                                    <option value="6">6 - Trasferimento</option>
-                                </select>
-                            </div>
-
-                            <div class="col-md-4" id="reparto-destinazione-container" style="display: none;">
-                                <label for="reparto_destinazione" class="form-label">Reparto Destinazione</label>
-                                <select class="form-select" id="reparto_destinazione" name="reparto_destinazione" data-custom="true">
-                                    <option value="">Seleziona...</option>
-                                    <option value="Cardiologia">Cardiologia</option>
-                                    <option value="Neurologia">Neurologia</option>
-                                    <option value="Medicina Interna">Medicina Interna</option>
-                                    <option value="Pneumologia">Pneumologia</option>
-                                    <option value="Gastroenterologia">Gastroenterologia</option>
-                                    <option value="Urologia">Urologia</option>
-                                    <option value="Ginecologia">Ginecologia</option>
-                                    <option value="Pediatria">Pediatria</option>
-                                </select>
-                            </div>
-
-                            <div class="col-md-4" id="clinica-destinazione-container" style="display: none;">
-                                <label for="clinica_destinazione" class="form-label">Clinica Destinazione</label>
-                                <input type="text" class="form-control" id="clinica_destinazione" name="clinica_destinazione" placeholder="Nome clinica di destinazione">
-                            </div>
-
-                            <div class="col-md-4" id="codice-clinica-container" style="display: none;">
-                                <label for="codice_clinica" class="form-label">Codice Clinica</label>
-                                <select class="form-select" id="codice_clinica" name="codice_clinica" data-custom="true">
-                                    <option value="">Seleziona...</option>
-                                    <option value="56">56 - Riabilitazione Generale</option>
-                                    <option value="60">60 - Riabilitazione Specialistica</option>
-                                </select>
-                            </div>
-
-                                </div>
-                            </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Eventi Clinici Tab -->
-                            <div class="tab-pane fade" id="eventi-clinici" role="tabpanel" aria-labelledby="eventi-clinici-tab">
-                                <div class="row g-3">
-                                    <!-- Lista Eventi Esistenti -->
-                                    <div class="col-12">
-                                        <div class="d-flex justify-content-between align-items-center mb-3">
-                                            <h5 class="mb-0">
-                                                <span class="material-icons me-2" style="vertical-align: text-bottom;">timeline</span>
-                                                Eventi Clinici
-                                            </h5>
-                                            <button type="button" class="btn btn-outline-primary btn-sm" id="add-evento-btn">
-                                                <span class="material-icons me-1" style="vertical-align: text-bottom;">add</span>
-                                                Aggiungi Evento
-                                            </button>
-                                        </div>
-                                        
-                                        <!-- Conteggio Giorni Post-Operatori -->
-                                        <div id="post-op-info" class="alert alert-info d-none">
-                                            <div class="d-flex align-items-center">
-                                                <span class="material-icons me-2">schedule</span>
-                                                <span id="post-op-text"></span>
-                                            </div>
-                                        </div>
-                                        
-                                        <!-- Lista Eventi -->
-                                        <div id="eventi-list" class="eventi-list">
-                                            <div class="text-center text-muted py-4" id="no-eventi-message">
-                                                <span class="material-icons mb-2" style="font-size: 3rem; opacity: 0.5;">event_note</span>
-                                                <p>Nessun evento clinico registrato</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Form Nuovo Evento (nascosto di default) -->
-                                    <div class="col-12" id="nuovo-evento-form" style="display: none;">
-                                        <div class="card border-primary">
-                                            <div class="card-header bg-primary text-white">
-                                                <div class="d-flex justify-content-between align-items-center">
-                                                    <h6 class="mb-0">
-                                                        <span class="material-icons me-2" style="vertical-align: text-bottom;">add_circle</span>
-                                                        Nuovo Evento Clinico
-                                                    </h6>
-                                                    <button type="button" class="btn btn-sm btn-outline-light" id="cancel-evento-btn">
-                                                        <span class="material-icons" style="font-size: 16px;">close</span>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            <div class="card-body">
-                                                <div class="row g-3">
-                                                    <input type="hidden" id="evento-id" name="evento_id">
-                                                    
-                                                    <div class="col-md-4">
-                                                        <label for="evento-tipo" class="form-label">Tipo Evento</label>
-                                                        <select class="form-select" id="evento-tipo" name="tipo_evento" required data-custom="true">
-                                                            <option value="">Seleziona...</option>
-                                                            <option value="intervento">Intervento Chirurgico</option>
-                                                            <option value="infezione">Infezione</option>
-                                                        </select>
-                                                    </div>
-                                                    
-                                                    <div class="col-md-4">
-                                                        <label for="evento-data" class="form-label">Data Evento</label>
-                                                        <div class="input-group-icon">
-                                                            <input type="text" class="form-control" id="evento-data" name="data_evento" data-datepicker placeholder="gg/mm/aaaa" required>
-                                                            <span class="material-icons input-icon">calendar_today</span>
-                                                        </div>
-                                                    </div>
-                                                    
-                                                    <div class="col-md-4" id="tipo-intervento-container" style="display: none;">
-                                                        <label for="evento-tipo-intervento" class="form-label">Tipo Intervento</label>
-                                                        <select class="form-select" id="evento-tipo-intervento" name="tipo_intervento" data-custom="true">
-                                                            <option value="">Seleziona...</option>
-                                                            <option value="Chirurgia Ortopedica">Chirurgia Ortopedica</option>
-                                                            <option value="Chirurgia Plastica">Chirurgia Plastica</option>
-                                                            <option value="Chirurgia Vascolare">Chirurgia Vascolare</option>
-                                                            <option value="Chirurgia Generale">Chirurgia Generale</option>
-                                                            <option value="Altro">Altro</option>
-                                                        </select>
-                                                    </div>
-                                                    
-                                                    <div class="col-md-4" id="agente-patogeno-container" style="display: none;">
-                                                        <label for="evento-agente-patogeno" class="form-label">Agente Patogeno</label>
-                                                        <input type="text" class="form-control" id="evento-agente-patogeno" name="agente_patogeno" placeholder="Es. Staphylococcus aureus">
-                                                    </div>
-                                                    
-                                                    <div class="col-12">
-                                                        <label for="evento-descrizione" class="form-label">Descrizione</label>
-                                                        <textarea class="form-control" id="evento-descrizione" name="descrizione" rows="3" placeholder="Descrizione dettagliata dell'evento..."></textarea>
-                                                    </div>
-                                                    
-                                                    <div class="col-12 text-end">
-                                                        <button type="button" class="btn btn-secondary me-2" id="cancel-evento-btn-2">Annulla</button>
-                                                        <button type="button" class="btn btn-primary" id="save-evento-btn">
-                                                            <span class="material-icons me-1" style="vertical-align: text-bottom;">save</span>
-                                                            Salva Evento
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Pulsante Salva Paziente (fuori dai tab) -->
-                        <div class="row mt-4">
-                            <div class="col-12 text-center">
-                                <button type="submit" id="save-patient-btn" class="btn btn-primary btn-lg">
-                                    <span class="material-icons me-1" style="vertical-align: middle;">save</span>
-                                    Salva Paziente
-                                </button>
-                            </div>
-                            <!-- Zona cuscinetto per risolvere bug di scroll su mobile -->
-                            <div class="col-12" style="height: 100px;"></div>
-                        </div>
-                    </form>
+              <!-- Dati Ricovero -->
+              <div class="col-md-4">
+                <label for="data_ricovero" class="form-label"
+                  >Data di Ricovero</label
+                >
+                <div class="input-group-icon">
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="data_ricovero"
+                    name="data_ricovero"
+                    data-datepicker
+                    placeholder="gg/mm/aaaa"
+                    required
+                  />
+                  <span class="material-icons input-icon">calendar_today</span>
                 </div>
+              </div>
+              <div class="col-md-4">
+                <label for="diagnosi" class="form-label">Diagnosi</label>
+                <select
+                  class="form-select"
+                  id="diagnosi"
+                  name="diagnosi"
+                  required
+                  data-custom="true"
+                >
+                  <option value="">Seleziona diagnosi...</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label for="codice_rad" class="form-label">Codice RAD</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="codice_rad"
+                  name="codice_rad"
+                />
+              </div>
+
+              <div class="col-md-4">
+                <label for="reparto_appartenenza" class="form-label"
+                  >Reparto Appartenenza</label
+                >
+                <select
+                  class="form-select"
+                  id="reparto_appartenenza"
+                  name="reparto_appartenenza"
+                  required
+                  data-custom="true"
+                >
+                  <option value="">Seleziona...</option>
+                  <option value="Ortopedia">Ortopedia</option>
+                  <option value="Chirurgia Arti">Chirurgia Arti</option>
+                  <option value="Plastica">Plastica</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label for="reparto_provenienza" class="form-label"
+                  >Reparto Provenienza</label
+                >
+                <select
+                  class="form-select"
+                  id="reparto_provenienza"
+                  name="reparto_provenienza"
+                  data-custom="true"
+                >
+                  <option value="">Seleziona...</option>
+                  <option value="AR">AR</option>
+                  <option value="PO">PO</option>
+                  <option value="CO">CO</option>
+                  <option value="CR">CR</option>
+                  <option value="PS">PS</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label for="livello_assistenza" class="form-label"
+                  >Livello Assistenza</label
+                >
+                <select
+                  class="form-select"
+                  id="livello_assistenza"
+                  name="livello_assistenza"
+                  required
+                  data-custom="true"
+                >
+                  <option value="">Seleziona...</option>
+                  <option value="Bassa">Bassa</option>
+                  <option value="Media">Media</option>
+                  <option value="Alta">Alta</option>
+                </select>
+              </div>
+
+              <!-- Flag Infetto -->
+              <div class="col-md-12 mt-3">
+                <div class="form-check form-switch">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    id="infetto"
+                    name="infetto"
+                  />
+                  <label class="form-check-label" for="infetto"
+                    >Paziente Infetto</label
+                  >
+                </div>
+                <small
+                  id="infetto-helper-text"
+                  class="form-text text-muted"
+                  style="display: none"
+                ></small>
+              </div>
+
+              <!-- Sezione Dimissione/Trasferimento -->
+              <div class="col-12 discharge-transfer-section">
+                <h5>
+                  <span class="material-icons">transfer_within_a_station</span>
+                  Informazioni Dimissione/Trasferimento
+                </h5>
+                <div class="row g-3">
+                  <div class="col-md-4">
+                    <label for="data_dimissione" class="form-label"
+                      >Data di Dimissione</label
+                    >
+                    <div class="input-group-icon">
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="data_dimissione"
+                        name="data_dimissione"
+                        data-datepicker
+                        placeholder="gg/mm/aaaa"
+                      />
+                      <span class="material-icons input-icon"
+                        >calendar_today</span
+                      >
+                    </div>
+                  </div>
+
+                  <div class="col-md-4">
+                    <label for="tipo_dimissione" class="form-label"
+                      >Tipo Dimissione</label
+                    >
+                    <select
+                      class="form-select"
+                      id="tipo_dimissione"
+                      name="tipo_dimissione"
+                      data-custom="true"
+                    >
+                      <option value="">Seleziona...</option>
+                      <option value="dimissione">Dimissione</option>
+                      <option value="trasferimento_interno">
+                        Trasferimento Interno
+                      </option>
+                      <option value="trasferimento_esterno">
+                        Trasferimento Esterno
+                      </option>
+                    </select>
+                  </div>
+
+                  <div class="col-md-4">
+                    <label for="codice_dimissione" class="form-label"
+                      >Codice Dimissione</label
+                    >
+                    <select
+                      class="form-select"
+                      id="codice_dimissione"
+                      name="codice_dimissione"
+                      data-custom="true"
+                    >
+                      <option value="">Seleziona...</option>
+                      <option value="3">3 - Dimissione Ordinaria</option>
+                      <option value="6">6 - Trasferimento</option>
+                    </select>
+                  </div>
+
+                  <div
+                    class="col-md-4"
+                    id="reparto-destinazione-container"
+                    style="display: none"
+                  >
+                    <label for="reparto_destinazione" class="form-label"
+                      >Reparto Destinazione</label
+                    >
+                    <select
+                      class="form-select"
+                      id="reparto_destinazione"
+                      name="reparto_destinazione"
+                      data-custom="true"
+                    >
+                      <option value="">Seleziona...</option>
+                      <option value="Cardiologia">Cardiologia</option>
+                      <option value="Neurologia">Neurologia</option>
+                      <option value="Medicina Interna">Medicina Interna</option>
+                      <option value="Pneumologia">Pneumologia</option>
+                      <option value="Gastroenterologia">
+                        Gastroenterologia
+                      </option>
+                      <option value="Urologia">Urologia</option>
+                      <option value="Ginecologia">Ginecologia</option>
+                      <option value="Pediatria">Pediatria</option>
+                    </select>
+                  </div>
+
+                  <div
+                    class="col-md-4"
+                    id="clinica-destinazione-container"
+                    style="display: none"
+                  >
+                    <label for="clinica_destinazione" class="form-label"
+                      >Clinica Destinazione</label
+                    >
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="clinica_destinazione"
+                      name="clinica_destinazione"
+                      placeholder="Nome clinica di destinazione"
+                    />
+                  </div>
+
+                  <div
+                    class="col-md-4"
+                    id="codice-clinica-container"
+                    style="display: none"
+                  >
+                    <label for="codice_clinica" class="form-label"
+                      >Codice Clinica</label
+                    >
+                    <select
+                      class="form-select"
+                      id="codice_clinica"
+                      name="codice_clinica"
+                      data-custom="true"
+                    >
+                      <option value="">Seleziona...</option>
+                      <option value="56">56 - Riabilitazione Generale</option>
+                      <option value="60">
+                        60 - Riabilitazione Specialistica
+                      </option>
+                    </select>
+                  </div>
+                </div>
+              </div>
             </div>
+          </div>
+
+          <!-- Eventi Clinici Tab -->
+          <div
+            class="tab-pane fade"
+            id="eventi-clinici"
+            role="tabpanel"
+            aria-labelledby="eventi-clinici-tab"
+          >
+            <div class="row g-3">
+              <!-- Lista Eventi Esistenti -->
+              <div class="col-12">
+                <div
+                  class="d-flex justify-content-between align-items-center mb-3"
+                >
+                  <h5 class="mb-0">
+                    <span
+                      class="material-icons me-2"
+                      style="vertical-align: text-bottom"
+                      >timeline</span
+                    >
+                    Eventi Clinici
+                  </h5>
+                  <button
+                    type="button"
+                    class="btn btn-outline-primary btn-sm"
+                    id="add-evento-btn"
+                  >
+                    <span
+                      class="material-icons me-1"
+                      style="vertical-align: text-bottom"
+                      >add</span
+                    >
+                    Aggiungi Evento
+                  </button>
+                </div>
+
+                <!-- Conteggio Giorni Post-Operatori -->
+                <div id="post-op-info" class="alert alert-info d-none">
+                  <div class="d-flex align-items-center">
+                    <span class="material-icons me-2">schedule</span>
+                    <span id="post-op-text"></span>
+                  </div>
+                </div>
+
+                <!-- Lista Eventi -->
+                <div id="eventi-list" class="eventi-list">
+                  <div
+                    class="text-center text-muted py-4"
+                    id="no-eventi-message"
+                  >
+                    <span
+                      class="material-icons mb-2"
+                      style="font-size: 3rem; opacity: 0.5"
+                      >event_note</span
+                    >
+                    <p>Nessun evento clinico registrato</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Form Nuovo Evento (nascosto di default) -->
+              <div class="col-12" id="nuovo-evento-form" style="display: none">
+                <div class="card border-primary">
+                  <div class="card-header bg-primary text-white">
+                    <div
+                      class="d-flex justify-content-between align-items-center"
+                    >
+                      <h6 class="mb-0">
+                        <span
+                          class="material-icons me-2"
+                          style="vertical-align: text-bottom"
+                          >add_circle</span
+                        >
+                        Nuovo Evento Clinico
+                      </h6>
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-outline-light"
+                        id="cancel-evento-btn"
+                      >
+                        <span class="material-icons" style="font-size: 16px"
+                          >close</span
+                        >
+                      </button>
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <div class="row g-3">
+                      <input type="hidden" id="evento-id" />
+
+                      <div class="col-md-4">
+                        <label for="evento-tipo" class="form-label"
+                          >Tipo Evento</label
+                        >
+                        <select
+                          class="form-select"
+                          id="evento-tipo"
+                          required
+                          data-custom="true"
+                        >
+                          <option value="">Seleziona...</option>
+                          <option value="intervento">
+                            Intervento Chirurgico
+                          </option>
+                          <option value="infezione">Infezione</option>
+                        </select>
+                      </div>
+
+                      <div class="col-md-4">
+                        <label for="evento-data" class="form-label"
+                          >Data Evento</label
+                        >
+                        <div class="input-group-icon">
+                          <input
+                            type="text"
+                            class="form-control"
+                            id="evento-data"
+                            data-datepicker
+                            placeholder="gg/mm/aaaa"
+                            required
+                          />
+                          <span class="material-icons input-icon"
+                            >calendar_today</span
+                          >
+                        </div>
+                      </div>
+
+                      <div
+                        class="col-md-4"
+                        id="tipo-intervento-container"
+                        style="display: none"
+                      >
+                        <label for="evento-tipo-intervento" class="form-label"
+                          >Tipo Intervento</label
+                        >
+                        <select
+                          class="form-select"
+                          id="evento-tipo-intervento"
+                          data-custom="true"
+                        >
+                          <option value="">Seleziona...</option>
+                          <option value="Chirurgia Ortopedica">
+                            Chirurgia Ortopedica
+                          </option>
+                          <option value="Chirurgia Plastica">
+                            Chirurgia Plastica
+                          </option>
+                          <option value="Chirurgia Vascolare">
+                            Chirurgia Vascolare
+                          </option>
+                          <option value="Chirurgia Generale">
+                            Chirurgia Generale
+                          </option>
+                          <option value="Altro">Altro</option>
+                        </select>
+                      </div>
+
+                      <div
+                        class="col-md-4"
+                        id="agente-patogeno-container"
+                        style="display: none"
+                      >
+                        <label for="evento-agente-patogeno" class="form-label"
+                          >Agente Patogeno</label
+                        >
+                        <input
+                          type="text"
+                          class="form-control"
+                          id="evento-agente-patogeno"
+                          placeholder="Es. Staphylococcus aureus"
+                        />
+                      </div>
+
+                      <div class="col-12">
+                        <label for="evento-descrizione" class="form-label"
+                          >Descrizione</label
+                        >
+                        <textarea
+                          class="form-control"
+                          id="evento-descrizione"
+                          rows="3"
+                          placeholder="Descrizione dettagliata dell'evento..."
+                        ></textarea>
+                      </div>
+
+                      <div class="col-12 text-end">
+                        <button
+                          type="button"
+                          class="btn btn-secondary me-2"
+                          id="cancel-evento-btn-2"
+                        >
+                          Annulla
+                        </button>
+                        <button
+                          type="button"
+                          class="btn btn-primary"
+                          id="save-evento-btn"
+                        >
+                          <span
+                            class="material-icons me-1"
+                            style="vertical-align: text-bottom"
+                            >save</span
+                          >
+                          Salva Evento
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+
+        <!-- Pulsante Salva Paziente (fuori dai tab) -->
+        <div class="row mt-4">
+          <div class="col-12 text-center">
+            <button
+              type="submit"
+              id="save-patient-btn"
+              class="btn btn-primary btn-lg"
+            >
+              <span class="material-icons me-1" style="vertical-align: middle"
+                >save</span
+              >
+              Salva Paziente
+            </button>
+          </div>
+          <!-- Zona cuscinetto per risolvere bug di scroll su mobile -->
+          <div class="col-12" style="height: 100px"></div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

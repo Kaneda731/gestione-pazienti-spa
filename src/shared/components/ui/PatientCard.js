@@ -118,7 +118,11 @@ export class PatientCard {
             <div class="card ${cardClass} status-${statusClass}">
                 <div class="card-body">
                     <div class="card-info">
-                        <div class="card-title">${this.patient.cognome} ${this.patient.nome}${postOpBadge}${infectionBadge}</div>
+                        <div class="card-title d-flex align-items-center gap-2">
+                            <span class="material-icons text-primary" style="font-size:1.4em;">person</span>
+                            <span class="fw-bold">${this.patient.cognome} ${this.patient.nome}</span>
+                            ${postOpBadge}${infectionBadge}
+                        </div>
                         <div class="card-meta mobile-text-sm">
                             ${this.patient.diagnosi} • ${this.patient.reparto_appartenenza}
                             ${additionalInfo.length > 0 ? ` • ${additionalInfo.join(' • ')}` : ''}
@@ -206,8 +210,11 @@ export class PatientCard {
 
         return `
             <div class="${cardClass}">
-                <div class="patient-card-header">
-                    <h6 class="patient-name">${this.patient.cognome} ${this.patient.nome}${postOpBadge}${infectionBadge}</h6>
+                <div class="patient-card-header d-flex align-items-center gap-2">
+                    <span class="material-icons text-primary" style="font-size:1.7em;">person</span>
+                    <h6 class="patient-name fw-bold mb-0">${this.patient.cognome} ${this.patient.nome}</h6>
+                    ${postOpBadge}${infectionBadge}
+                    <span class="flex-grow-1"></span>
                     ${statusBadge}
                 </div>
                 <div class="patient-details">

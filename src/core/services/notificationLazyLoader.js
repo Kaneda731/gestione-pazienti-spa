@@ -76,7 +76,34 @@ export class NotificationLazyLoader {
         const startTime = performance.now();
         
         try {
-            const module = await import(importPath);
+            // Usa import dinamici con path assoluti per compatibilità con Vite build
+            let module;
+            switch (moduleName) {
+                case 'NotificationAnimationManager':
+                    module = await import('./notificationAnimationManager.js');
+                    break;
+                case 'NotificationEventManager':
+                    module = await import('./notificationEventManager.js');
+                    break;
+                case 'NotificationSoundManager':
+                    module = await import('./notificationSoundManager.js');
+                    break;
+                case 'NotificationPersistence':
+                    module = await import('./notificationPersistence.js');
+                    break;
+                case 'NotificationVirtualScroller':
+                    module = await import('./notificationVirtualScroller.js');
+                    break;
+                case 'NotificationBatchRenderer':
+                    module = await import('./notificationBatchRenderer.js');
+                    break;
+                case 'NotificationRenderer':
+                    module = await import('./notificationRenderer.js');
+                    break;
+                default:
+                    // Fallback al metodo originale per moduli non mappati
+                    module = await import(importPath);
+            }
             
             const loadTime = performance.now() - startTime;
             

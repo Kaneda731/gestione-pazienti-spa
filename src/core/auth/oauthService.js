@@ -132,8 +132,8 @@ export class OAuthManager {
             this.authState = 'authenticating';
             
             // Usa l'URL di base corrente per il reindirizzamento.
-            // Funziona sia in locale (http://localhost:5173) che in produzione.
-            const redirectTo = window.location.origin;
+            // Redirect dinamico: include origin, pathname e hash per supportare preview, locale, ecc.
+            const redirectTo = window.location.origin + window.location.pathname + window.location.hash;
             
             logger.log('Iniziando login OAuth con redirect:', redirectTo);
             

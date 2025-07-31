@@ -58,6 +58,7 @@ Thumbs.db
 # Logs and temporary files
 *.log
 *.tmp
+config.json
 *.temp
 temp/
 

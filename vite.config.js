@@ -1,5 +1,7 @@
 import { defineConfig } from 'vite';
 import { visualizer } from 'rollup-plugin-visualizer';
+import { writeFileSync } from 'fs';
+import { join } from 'path';
 
 export default defineConfig({
   // Configurazione per il server di sviluppo
@@ -83,6 +85,24 @@ export default defineConfig({
   
   // Plugins per analisi e ottimizzazione
   plugins: [
+    // Plugin personalizzato per generare _redirects per Netlify
+    {
+      name: 'netlify-redirects',
+      writeBundle() {
+        const redirectsContent = `# JavaScript modules - serve directly if they exist
+/assets/*.js  /assets/:splat.js  200
+/*.js         /:splat.js         200
+
+# API routes (if any)
+/api/*        /api/:splat        200
+
+# SPA fallback - only for HTML routes
+/*            /index.html        200`;
+        
+        writeFileSync(join('dist', '_redirects'), redirectsContent);
+        console.log('✅ File _redirects generato per Netlify');
+      }
+    },
     // Bundle analyzer principale con visualizzazione treemap
     visualizer({
       filename: 'dist/bundle-analysis.html',

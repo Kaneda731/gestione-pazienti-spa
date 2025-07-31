@@ -158,8 +158,8 @@ function updatePatientTitle() {
         const patientName = `${nome} ${cognome}`.trim();
         
         const titleHTML = patientName 
-            ? `<span class="material-icons me-2">edit</span><span class="patient-name">${patientName}</span>`
-            : '<span class="material-icons me-2">edit</span>Modifica Paziente';
+            ? `<span class="material-icons text-primary me-2">person</span><span class="patient-name fw-bold">${patientName}</span>`
+            : '<span class="material-icons text-primary me-2">person</span>Nome Cognome';
         titleElement.innerHTML = sanitizeHtml(titleHTML);
     } else {
         // Modalità inserimento - titolo standard
@@ -400,8 +400,8 @@ export function populateForm(patient) {
     // Aggiorna il titolo e il pulsante per la modalità modifica
     const patientName = `${patient.nome || ''} ${patient.cognome || ''}`.trim();
     const titleHTML = patientName 
-        ? `<span class="material-icons me-2">edit</span><span class="patient-name">${patientName}</span>`
-        : '<span class="material-icons me-2">edit</span>Modifica Paziente';
+        ? `<span class="patient-name fw-bold">${patientName}</span>`
+        : '<span class="patient-name fw-bold">Nome Cognome</span>';
     document.getElementById('inserimento-title').innerHTML = sanitizeHtml(titleHTML);
     document.getElementById('save-patient-btn').innerHTML = sanitizeHtml('<span class="material-icons me-1" style="vertical-align: middle;">save</span>Aggiorna Paziente');
     

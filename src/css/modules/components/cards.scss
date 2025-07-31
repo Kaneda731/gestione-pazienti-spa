@@ -72,3 +72,72 @@
         padding: 2rem;
     }
 }
+
+/* ===================================
+   INFECTION STATUS STYLES
+   =================================== */
+
+/* Evidenziazione per pazienti infetti nelle card */
+.patient-card-infected {
+    border-left: 4px solid #ffc107 !important;
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.05) 0%, rgba(255, 193, 7, 0.02) 100%);
+}
+
+.patient-card-infected .patient-card-header {
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 193, 7, 0.05) 100%);
+    border-bottom: 1px solid rgba(255, 193, 7, 0.2);
+}
+
+/* Card mobile infette */
+.card.status-infected {
+    border-left: 4px solid #ffc107 !important;
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.05) 0%, rgba(255, 193, 7, 0.02) 100%);
+}
+
+.card.status-infected .card-body {
+    background: rgba(255, 193, 7, 0.02);
+}
+
+/* Badge di infezione nelle card */
+.badge.bg-warning.text-dark {
+    background-color: #ffc107 !important;
+    color: #212529 !important;
+    font-weight: 600;
+    border: 1px solid #ffca2c;
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.badge.bg-warning.text-dark .material-icons {
+    font-size: inherit;
+    line-height: 1;
+}
+
+/* Dark mode support per card */
+[data-bs-theme="dark"] {
+    .patient-card-infected {
+        background: linear-gradient(135deg, rgba(255, 202, 44, 0.08) 0%, rgba(255, 202, 44, 0.03) 100%);
+        border-left-color: #ffca2c !important;
+    }
+
+    .patient-card-infected .patient-card-header {
+        background: linear-gradient(135deg, rgba(255, 202, 44, 0.12) 0%, rgba(255, 202, 44, 0.06) 100%);
+        border-bottom-color: rgba(255, 202, 44, 0.25);
+    }
+
+    .card.status-infected {
+        background: linear-gradient(135deg, rgba(255, 202, 44, 0.08) 0%, rgba(255, 202, 44, 0.03) 100%);
+        border-left-color: #ffca2c !important;
+    }
+
+    .card.status-infected .card-body {
+        background: rgba(255, 202, 44, 0.03);
+    }
+
+    .badge.bg-warning.text-dark {
+        background-color: #ffca2c !important;
+        color: #000000 !important;
+        border: 1px solid #ffd43b;
+    }
+}

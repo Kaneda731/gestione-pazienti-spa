@@ -3,113 +3,196 @@
    =================================== */
 
 .table {
-    background: var(--card-bg);
-    border-radius: var(--border-radius);
-    overflow: hidden;
-    box-shadow: var(--shadow-sm);
+  background: var(--card-bg);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
 }
 
 .table thead th {
-    background: linear-gradient(135deg, var(--primary-color), #4dabf7);
-    color: white;
-    border: none;
-    font-weight: 700;
-    padding: 1.1rem 1rem;
-    letter-spacing: 0.01em;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.08);
+  background: linear-gradient(135deg, var(--primary-color), #4dabf7);
+  color: white;
+  border: none;
+  font-weight: 700;
+  padding: 1.1rem 1rem;
+  letter-spacing: 0.01em;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
 }
 
 .table tbody td {
-    padding: 1rem 0.75rem;
-    border-color: var(--border-color-light);
-    vertical-align: middle;
-    font-size: 1rem;
-    color: var(--text-primary);
-    white-space: nowrap; /* Previeni il wrapping del testo */
-    overflow: hidden;
-    text-overflow: ellipsis;
+  padding: 1rem 0.75rem;
+  border-color: var(--border-color-light);
+  vertical-align: middle;
+  font-size: 1rem;
+  color: var(--text-primary);
+  white-space: nowrap; /* Previeni il wrapping del testo */
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Permetti il wrapping solo per le colonne che potrebbero avere testo lungo */
 .table tbody td:nth-child(5), /* Diagnosi */
 .table tbody td:nth-child(9), /* Trasferimento */
 .table tbody td:nth-child(10) /* Azioni */ {
-    white-space: normal;
+  white-space: normal;
 }
 
 .table-hover tbody tr:hover {
-    background-color: rgba(37,99,235,0.07);
-    transition: background 0.2s;
+  background-color: rgba(37, 99, 235, 0.07);
+  transition: background 0.2s;
 }
 
 /* Fix azioni tabella - evita accavallamento icone */
 .table td:last-child {
-    white-space: nowrap;
-    width: 1%;
+  white-space: nowrap;
+  width: 1%;
 }
 
 .table td:last-child .btn {
-    margin: 0 0.15rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.4rem 0.6rem;
-    min-width: 2.2rem;
-    height: 2.2rem;
-    border-radius: 6px;
-    vertical-align: middle;
+  margin: 0 0.15rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem 0.6rem;
+  min-width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 6px;
+  vertical-align: middle;
 }
 
 .table td:last-child .btn .material-icons {
-    font-size: 1.1em;
-    line-height: 1;
-    margin: 0;
+  font-size: 1.1em;
+  line-height: 1;
+  margin: 0;
 }
 
 /* Responsive table */
 .table-responsive {
-    max-width: 100% !important;
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch; /* Smooth scrolling su iOS */
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling su iOS */
 }
 
 /* Migliora la visualizzazione della tabella su schermi grandi */
 @media (min-width: 1200px) {
-    .table-responsive {
-        overflow-x: visible; /* Rimuovi scroll orizzontale su schermi grandi */
-    }
-    
-    .table {
-        width: 100%;
-        min-width: auto;
-    }
+  .table-responsive {
+    overflow-x: visible; /* Rimuovi scroll orizzontale su schermi grandi */
+  }
+
+  .table {
+    width: 100%;
+    min-width: auto;
+  }
 }
 
 /* Ottimizzazione larghezza colonne per evitare scroll */
 @media (min-width: 1200px) {
-    .table th:nth-child(1), .table td:nth-child(1) { width: 12%; } /* Cognome */
-    .table th:nth-child(2), .table td:nth-child(2) { width: 12%; } /* Nome */
-    .table th:nth-child(3), .table td:nth-child(3) { width: 10%; } /* Data Nascita */
-    .table th:nth-child(4), .table td:nth-child(4) { width: 10%; } /* Data Ricovero */
-    .table th:nth-child(5), .table td:nth-child(5) { width: 15%; } /* Diagnosi */
-    .table th:nth-child(6), .table td:nth-child(6) { width: 12%; } /* Reparto */
-    .table th:nth-child(7), .table td:nth-child(7) { width: 8%; }  /* Post-Op */
-    .table th:nth-child(8), .table td:nth-child(8) { width: 8%; }  /* Stato */
-    .table th:nth-child(9), .table td:nth-child(9) { width: 10%; } /* Trasferimento */
-    .table th:nth-child(10), .table td:nth-child(10) { width: 13%; } /* Azioni */
+  .table th:nth-child(1),
+  .table td:nth-child(1) {
+    width: 12%;
+  } /* Cognome */
+  .table th:nth-child(2),
+  .table td:nth-child(2) {
+    width: 12%;
+  } /* Nome */
+  .table th:nth-child(3),
+  .table td:nth-child(3) {
+    width: 10%;
+  } /* Data Nascita */
+  .table th:nth-child(4),
+  .table td:nth-child(4) {
+    width: 10%;
+  } /* Data Ricovero */
+  .table th:nth-child(5),
+  .table td:nth-child(5) {
+    width: 15%;
+  } /* Diagnosi */
+  .table th:nth-child(6),
+  .table td:nth-child(6) {
+    width: 12%;
+  } /* Reparto */
+  .table th:nth-child(7),
+  .table td:nth-child(7) {
+    width: 8%;
+  } /* Post-Op */
+  .table th:nth-child(8),
+  .table td:nth-child(8) {
+    width: 8%;
+  } /* Stato */
+  .table th:nth-child(9),
+  .table td:nth-child(9) {
+    width: 10%;
+  } /* Trasferimento */
+  .table th:nth-child(10),
+  .table td:nth-child(10) {
+    width: 13%;
+  } /* Azioni */
 }
 
 @media (max-width: 991.98px) {
-    .table td:last-child {
-        display: flex;
-        gap: 0.3rem;
-        justify-content: flex-start;
-        align-items: center;
-        flex-wrap: wrap;
-    }
-    
-    .table td:last-child .btn {
-        margin: 0.1rem;
-        flex: 0 0 auto;
-    }
+  .table td:last-child {
+    display: flex;
+    gap: 0.3rem;
+    justify-content: flex-start;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .table td:last-child .btn {
+    margin: 0.1rem;
+    flex: 0 0 auto;
+  }
+}
+
+/* ===================================
+   INFECTION STATUS STYLES
+   =================================== */
+
+/* Evidenziazione per pazienti infetti nella tabella */
+.table tbody tr.table-warning {
+  background-color: rgba(255, 193, 7, 0.1) !important;
+  border-left: 4px solid #ffc107;
+}
+
+.table tbody tr.table-warning:hover {
+  background-color: rgba(255, 193, 7, 0.15) !important;
+}
+
+/* Badge di infezione */
+.badge.bg-warning.text-dark {
+  background-color: #ffc107 !important;
+  color: #212529 !important;
+  font-weight: 600;
+  border: 1px solid #ffca2c;
+}
+
+.badge.bg-warning.text-dark .material-icons {
+  vertical-align: middle;
+  margin-right: 2px;
+}
+
+/* Dark mode support per tabelle */
+[data-bs-theme="dark"] {
+  .table tbody tr.table-warning {
+    background-color: rgba(255, 193, 7, 0.15) !important;
+    border-left-color: #ffca2c;
+  }
+
+  .table tbody tr.table-warning td {
+    color: #000000 !important; /* Testo nero per le celle delle righe infette in dark mode */
+  }
+
+  .table tbody tr.table-warning:hover {
+    background-color: rgba(255, 193, 7, 0.2) !important;
+  }
+
+  .table tbody tr.table-warning:hover td {
+    color: #000000 !important; /* Testo nero anche in hover */
+  }
+
+  .badge.bg-warning.text-dark {
+    background-color: #ffca2c !important;
+    color: #000000 !important;
+    border: 1px solid #ffd43b;
+  }
 }

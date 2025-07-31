@@ -91,6 +91,13 @@ export class PatientCard {
         // Check if patient is infected
         const isInfected = this.isPatientInfected();
 
+        // Add infection badge to title if infected
+        const infectionBadge = isInfected 
+            ? `<span class="badge bg-warning text-dark ms-1" style="font-size: 0.7em;">
+                 <span class="material-icons" style="font-size: 0.6em;">warning</span> Infetto
+               </span>`
+            : '';
+
         // Build additional info array
         const additionalInfo = [];
         if (postOpInfo && postOpInfo.hasStatus) {
@@ -99,19 +106,19 @@ export class PatientCard {
         if (lastInterventionDate) {
             additionalInfo.push(`Intervento: ${lastInterventionDate}`);
         }
-        if (isInfected) {
-            additionalInfo.push(`<span class="text-warning fw-bold">⚠️ Infetto</span>`);
-        }
 
         const quickActionsSection = this.options.showClinicalEvents && canEdit
             ? this.renderMobileQuickActions()
             : '';
 
+        // Add infection class to card if patient is infected
+        const cardClass = isInfected ? 'card-list-compact status-infected' : 'card-list-compact';
+
         return `
-            <div class="card card-list-compact status-${statusClass}">
+            <div class="card ${cardClass} status-${statusClass}">
                 <div class="card-body">
                     <div class="card-info">
-                        <div class="card-title">${this.patient.cognome} ${this.patient.nome}${postOpBadge}</div>
+                        <div class="card-title">${this.patient.cognome} ${this.patient.nome}${postOpBadge}${infectionBadge}</div>
                         <div class="card-meta mobile-text-sm">
                             ${this.patient.diagnosi} • ${this.patient.reparto_appartenenza}
                             ${additionalInfo.length > 0 ? ` • ${additionalInfo.join(' • ')}` : ''}
@@ -178,6 +185,14 @@ export class PatientCard {
             ? `<span class="badge bg-${postOpInfo.statusClass} ms-2" title="${postOpInfo.statusText}">${postOpInfo.badgeText}</span>`
             : '';
 
+        // Check if patient is infected
+        const isInfected = this.isPatientInfected();
+        const infectionBadge = isInfected 
+            ? `<span class="badge bg-warning text-dark ms-2" title="Paziente infetto">
+                 <span class="material-icons" style="font-size: 0.8em;">warning</span> Infetto
+               </span>`
+            : '';
+
         const clinicalEventsSection = this.options.showClinicalEvents && this.patient.eventi_clinici
             ? this.renderClinicalEventsTimeline()
             : '';
@@ -186,10 +201,13 @@ export class PatientCard {
             ? this.renderQuickActions()
             : '';
 
+        // Add infection class to card if patient is infected
+        const cardClass = isInfected ? 'patient-card patient-card-infected' : 'patient-card';
+
         return `
-            <div class="patient-card">
+            <div class="${cardClass}">
                 <div class="patient-card-header">
-                    <h6 class="patient-name">${this.patient.cognome} ${this.patient.nome}${postOpBadge}</h6>
+                    <h6 class="patient-name">${this.patient.cognome} ${this.patient.nome}${postOpBadge}${infectionBadge}</h6>
                     ${statusBadge}
                 </div>
                 <div class="patient-details">
@@ -209,6 +227,15 @@ export class PatientCard {
                         <span class="patient-detail-label">Livello</span>
                         <span class="patient-detail-value">${this.patient.livello_assistenza}</span>
                     </div>
+                    ${isInfected ? `
+                    <div class="patient-detail">
+                        <span class="patient-detail-label">Stato Infezione</span>
+                        <span class="patient-detail-value text-warning fw-bold">
+                            <span class="material-icons" style="font-size: 1em; vertical-align: middle;">warning</span>
+                            Paziente Infetto
+                        </span>
+                    </div>
+                    ` : ''}
                     ${postOpInfo && postOpInfo.hasStatus ? `
                     <div class="patient-detail">
                         <span class="patient-detail-label">Post-Operatorio</span>
@@ -285,8 +312,19 @@ export class PatientCard {
         // Get transfer info for transfer column
         const transferInfo = this.getTransferInfo();
 
+        // Check if patient is infected and add visual indicator
+        const isInfected = this.isPatientInfected();
+        const infectionIndicator = isInfected 
+            ? `<span class="badge bg-warning text-dark ms-1" title="Paziente infetto">
+                 <span class="material-icons" style="font-size: 0.8em;">warning</span> Infetto
+               </span>`
+            : '';
+
+        // Add infection class to row if patient is infected
+        const rowClass = isInfected ? 'table-warning' : '';
+
         return `
-            <tr>
+            <tr class="${rowClass}">
                 <td data-label="Cognome">${this.patient.cognome}</td>
                 <td data-label="Nome">${this.patient.nome}</td>
                 <td data-label="Data Nascita">${this.patient.data_nascita ? new Date(this.patient.data_nascita).toLocaleDateString() : '-'}</td>
@@ -294,7 +332,7 @@ export class PatientCard {
                 <td data-label="Diagnosi">${this.patient.diagnosi}</td>
                 <td data-label="Reparto">${this.patient.reparto_appartenenza}</td>
                 <td data-label="Post-Op">${postOpCell}</td>
-                <td data-label="Stato">${statusBadge}</td>
+                <td data-label="Stato">${statusBadge}${infectionIndicator}</td>
                 <td data-label="Trasferimento">${transferInfo}</td>
                 <td class="text-nowrap">
                     ${actionButtons}

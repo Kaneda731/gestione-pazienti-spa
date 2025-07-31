@@ -84,4 +84,55 @@
     .card.status-success {
         border-left-color: var(--bs-success);
     }
+
+    /* Stili per le card con pazienti infetti */
+    .card.status-infected {
+        border-left-color: #ffc107 !important;
+        background: linear-gradient(135deg, rgba(255, 193, 7, 0.05) 0%, rgba(255, 193, 7, 0.02) 100%);
+    }
+
+    .card.status-infected .card-body {
+        background: rgba(255, 193, 7, 0.02);
+    }
+
+    .card.status-infected .card-title {
+        color: var(--text-primary);
+    }
+
+    /* Badge di infezione mobile */
+    .badge.bg-warning.text-dark {
+        background-color: #ffc107 !important;
+        color: #212529 !important;
+        font-weight: 600;
+        border: 1px solid #ffca2c;
+        font-size: 0.7em;
+        display: inline-flex;
+        align-items: center;
+        gap: 2px;
+    }
+
+    .badge.bg-warning.text-dark .material-icons {
+        font-size: 0.8em;
+        line-height: 1;
+    }
+}
+
+/* Dark mode support per mobile */
+[data-bs-theme="dark"] {
+    @media (max-width: 767px) {
+        .card.status-infected {
+            background: linear-gradient(135deg, rgba(255, 202, 44, 0.08) 0%, rgba(255, 202, 44, 0.03) 100%);
+            border-left-color: #ffca2c !important;
+        }
+
+        .card.status-infected .card-body {
+            background: rgba(255, 202, 44, 0.03);
+        }
+
+        .badge.bg-warning.text-dark {
+            background-color: #1a1a1a !important;
+            color: #ffca2c !important;
+            border: 1px solid #ffca2c;
+        }
+    }
 }

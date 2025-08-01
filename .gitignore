@@ -36,6 +36,12 @@ manual-coverage-report*/
 !package-lock.json
 !*.config.json
 
+# Temporary CSS fixes and debug files
+fix-*.css
+test-*.css
+debug-*.css
+temp-*.css
+
 # Environment variables
 .env*
 !.env.example

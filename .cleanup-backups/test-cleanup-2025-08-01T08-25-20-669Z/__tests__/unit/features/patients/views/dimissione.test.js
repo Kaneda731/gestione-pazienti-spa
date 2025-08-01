@@ -1,0 +1,376 @@
+// __tests__/unit/features/patients/views/dimissione.test.js
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { JSDOM } from 'jsdom';
+
+// Mock dependencies
+vi.mock('../../../../../src/app/router.js', () => ({
+    navigateTo: vi.fn()
+}));
+
+vi.mock('../../../../../src/features/patients/views/dimissione-api.js', () => ({
+    searchActivePatients: vi.fn(),
+    dischargePatientWithTransfer: vi.fn()
+}));
+
+vi.mock('../../../../../src/features/patients/views/dimissione-ui.js', () => ({
+    dom: {
+        searchInput: null,
+        dischargeForm: null,
+        dataDimissioneInput: null,
+        tipoDimissioneSelect: null,
+        repartoDestinazioneInput: null,
+        clinicaDestinazioneInput: null
+    },
+    initializeUI: vi.fn(),
+    cleanupUI: vi.fn(),
+    renderSearchResults: vi.fn(),
+    displayDischargeForm: vi.fn(),
+    setLoading: vi.fn(),
+    resetView: vi.fn(),
+    showFeedback: vi.fn(),
+    validateDischargeForm: vi.fn(),
+    getDischargeFormData: vi.fn()
+}));
+
+describe('Enhanced Dimissione Controller', () => {
+    let mockDOM;
+    let mockDocument;
+    let initDimissioneView;
+    let navigateTo;
+    let searchActivePatients;
+    let dischargePatientWithTransfer;
+    let dimissioneUI;
+
+    beforeEach(async () => {
+        // Create a mock DOM environment
+        mockDOM = new JSDOM(`
+            <!DOCTYPE html>
+            <html>
+            <body>
+                <input id="search-paziente" />
+                <form id="form-dimissione" class="d-none">
+                    <input id="data_dimissione" />
+                    <select id="tipo_dimissione">
+                        <option value="dimissione">Dimissione</option>
+                        <option value="trasferimento_interno">Trasferimento Interno</option>
+                        <option value="trasferimento_esterno">Trasferimento Esterno</option>
+                    </select>
+                    <input id="reparto_destinazione" />
+                    <input id="clinica_destinazione" />
+                </form>
+            </body>
+            </html>
+        `);
+        
+        mockDocument = mockDOM.window.document;
+        global.document = mockDocument;
+        global.window = mockDOM.window;
+        global.setTimeout = vi.fn((fn) => fn());
+
+        // Import modules after setting up mocks
+        const routerModule = await import('../../../../../src/app/router.js');
+        const apiModule = await import('../../../../../src/features/patients/views/dimissione-api.js');
+        const uiModule = await import('../../../../../src/features/patients/views/dimissione-ui.js');
+        const controllerModule = await import('../../../../../src/features/patients/views/dimissione.js');
+
+        navigateTo = routerModule.navigateTo;
+        searchActivePatients = apiModule.searchActivePatients;
+        dischargePatientWithTransfer = apiModule.dischargePatientWithTransfer;
+        dimissioneUI = uiModule;
+        initDimissioneView = controllerModule.initDimissioneView;
+
+        // Update DOM references in the UI mock
+        dimissioneUI.dom.searchInput = mockDocument.getElementById('search-paziente');
+        dimissioneUI.dom.dischargeForm = mockDocument.getElementById('form-dimissione');
+        dimissioneUI.dom.dataDimissioneInput = mockDocument.getElementById('data_dimissione');
+        dimissioneUI.dom.tipoDimissioneSelect = mockDocument.getElementById('tipo_dimissione');
+        dimissioneUI.dom.repartoDestinazioneInput = mockDocument.getElementById('reparto_destinazione');
+        dimissioneUI.dom.clinicaDestinazioneInput = mockDocument.getElementById('clinica_destinazione');
+    });
+
+    afterEach(() => {
+        vi.clearAllMocks();
+    });
+
+    describe('initDimissioneView', () => {
+        it('should initialize the view correctly', () => {
+            const cleanup = initDimissioneView();
+            
+            expect(dimissioneUI.initializeUI).toHaveBeenCalled();
+            expect(typeof cleanup).toBe('function');
+        });
+
+        it('should focus on search input if available', () => {
+            const focusSpy = vi.spyOn(dimissioneUI.dom.searchInput, 'focus');
+            
+            initDimissioneView();
+            
+            expect(focusSpy).toHaveBeenCalled();
+        });
+    });
+
+    describe('form submission', () => {
+        let cleanup;
+
+        beforeEach(() => {
+            cleanup = initDimissioneView();
+            
+            // Mock successful validation and form data
+            dimissioneUI.validateDischargeForm.mockReturnValue({
+                isValid: true,
+                errors: []
+            });
+            
+            dimissioneUI.getDischargeFormData.mockReturnValue({
+                data_dimissione: '01/01/2025',
+                tipo_dimissione: 'dimissione',
+                codice_dimissione: '3'
+            });
+        });
+
+        afterEach(() => {
+            if (cleanup) cleanup();
+        });
+
+        it('should handle successful basic discharge', async () => {
+            // Set up a selected patient
+            const mockPatient = { id: 'patient-123', nome: 'Mario', cognome: 'Rossi' };
+            
+            // Simulate patient selection by triggering the search callback
+            const searchCallback = dimissioneUI.initializeUI.mock.calls[0][0];
+            dimissioneUI.renderSearchResults.mockImplementation((patients, onSelect) => {
+                onSelect(mockPatient);
+            });
+            
+            await searchCallback('Mario');
+            
+            // Mock successful discharge
+            dischargePatientWithTransfer.mockResolvedValue({});
+            
+            // Trigger form submission
+            const submitEvent = new mockDOM.window.Event('submit');
+            submitEvent.preventDefault = vi.fn();
+            
+            dimissioneUI.dom.dischargeForm.dispatchEvent(submitEvent);
+            
+            // Wait for async operations
+            await new Promise(resolve => setTimeout(resolve, 0));
+            
+            expect(dischargePatientWithTransfer).toHaveBeenCalledWith('patient-123', {
+                data_dimissione: '01/01/2025',
+                tipo_dimissione: 'dimissione',
+                codice_dimissione: '3'
+            });
+            
+            expect(dimissioneUI.showFeedback).toHaveBeenCalledWith(
+                'Paziente dimesso con successo!',
+                'success'
+            );
+            
+            expect(dimissioneUI.resetView).toHaveBeenCalled();
+            expect(navigateTo).toHaveBeenCalledWith('home');
+        });
+
+        it('should handle successful internal transfer', async () => {
+            const mockPatient = { id: 'patient-123', nome: 'Mario', cognome: 'Rossi' };
+            
+            // Simulate patient selection
+            const searchCallback = dimissioneUI.initializeUI.mock.calls[0][0];
+            dimissioneUI.renderSearchResults.mockImplementation((patients, onSelect) => {
+                onSelect(mockPatient);
+            });
+            
+            await searchCallback('Mario');
+            
+            // Mock internal transfer data
+            dimissioneUI.getDischargeFormData.mockReturnValue({
+                data_dimissione: '01/01/2025',
+                tipo_dimissione: 'trasferimento_interno',
+                codice_dimissione: '6',
+                reparto_destinazione: 'Cardiologia'
+            });
+            
+            dischargePatientWithTransfer.mockResolvedValue({});
+            
+            // Trigger form submission
+            const submitEvent = new mockDOM.window.Event('submit');
+            submitEvent.preventDefault = vi.fn();
+            
+            dimissioneUI.dom.dischargeForm.dispatchEvent(submitEvent);
+            
+            await new Promise(resolve => setTimeout(resolve, 0));
+            
+            expect(dimissioneUI.showFeedback).toHaveBeenCalledWith(
+                'Paziente trasferito con successo al reparto Cardiologia!',
+                'success'
+            );
+        });
+
+        it('should handle successful external transfer', async () => {
+            const mockPatient = { id: 'patient-123', nome: 'Mario', cognome: 'Rossi' };
+            
+            // Simulate patient selection
+            const searchCallback = dimissioneUI.initializeUI.mock.calls[0][0];
+            dimissioneUI.renderSearchResults.mockImplementation((patients, onSelect) => {
+                onSelect(mockPatient);
+            });
+            
+            await searchCallback('Mario');
+            
+            // Mock external transfer data
+            dimissioneUI.getDischargeFormData.mockReturnValue({
+                data_dimissione: '01/01/2025',
+                tipo_dimissione: 'trasferimento_esterno',
+                codice_dimissione: '6',
+                clinica_destinazione: 'Clinica San Giuseppe',
+                codice_clinica: '56'
+            });
+            
+            dischargePatientWithTransfer.mockResolvedValue({});
+            
+            // Trigger form submission
+            const submitEvent = new mockDOM.window.Event('submit');
+            submitEvent.preventDefault = vi.fn();
+            
+            dimissioneUI.dom.dischargeForm.dispatchEvent(submitEvent);
+            
+            await new Promise(resolve => setTimeout(resolve, 0));
+            
+            expect(dimissioneUI.showFeedback).toHaveBeenCalledWith(
+                'Paziente trasferito con successo alla clinica Clinica San Giuseppe!',
+                'success'
+            );
+        });
+
+        it('should handle validation errors', async () => {
+            const mockPatient = { id: 'patient-123', nome: 'Mario', cognome: 'Rossi' };
+            
+            // Simulate patient selection
+            const searchCallback = dimissioneUI.initializeUI.mock.calls[0][0];
+            dimissioneUI.renderSearchResults.mockImplementation((patients, onSelect) => {
+                onSelect(mockPatient);
+            });
+            
+            await searchCallback('Mario');
+            
+            // Mock validation failure
+            dimissioneUI.validateDischargeForm.mockReturnValue({
+                isValid: false,
+                errors: ['La data di dimissione è obbligatoria', 'Il tipo di dimissione è obbligatorio']
+            });
+            
+            // Trigger form submission
+            const submitEvent = new mockDOM.window.Event('submit');
+            submitEvent.preventDefault = vi.fn();
+            
+            dimissioneUI.dom.dischargeForm.dispatchEvent(submitEvent);
+            
+            await new Promise(resolve => setTimeout(resolve, 0));
+            
+            expect(dimissioneUI.showFeedback).toHaveBeenCalledWith(
+                'Errori di validazione: La data di dimissione è obbligatoria, Il tipo di dimissione è obbligatorio',
+                'error'
+            );
+            
+            expect(dischargePatientWithTransfer).not.toHaveBeenCalled();
+        });
+
+        it('should handle no selected patient', async () => {
+            // Don't select any patient
+            
+            // Trigger form submission
+            const submitEvent = new mockDOM.window.Event('submit');
+            submitEvent.preventDefault = vi.fn();
+            
+            dimissioneUI.dom.dischargeForm.dispatchEvent(submitEvent);
+            
+            await new Promise(resolve => setTimeout(resolve, 0));
+            
+            expect(dimissioneUI.showFeedback).toHaveBeenCalledWith(
+                'Seleziona un paziente prima di procedere.',
+                'warning'
+            );
+            
+            expect(dischargePatientWithTransfer).not.toHaveBeenCalled();
+        });
+
+        it('should handle API errors', async () => {
+            const mockPatient = { id: 'patient-123', nome: 'Mario', cognome: 'Rossi' };
+            
+            // Simulate patient selection
+            const searchCallback = dimissioneUI.initializeUI.mock.calls[0][0];
+            dimissioneUI.renderSearchResults.mockImplementation((patients, onSelect) => {
+                onSelect(mockPatient);
+            });
+            
+            await searchCallback('Mario');
+            
+            // Mock API error
+            dischargePatientWithTransfer.mockRejectedValue(new Error('Database connection failed'));
+            
+            // Trigger form submission
+            const submitEvent = new mockDOM.window.Event('submit');
+            submitEvent.preventDefault = vi.fn();
+            
+            dimissioneUI.dom.dischargeForm.dispatchEvent(submitEvent);
+            
+            await new Promise(resolve => setTimeout(resolve, 0));
+            
+            expect(dimissioneUI.showFeedback).toHaveBeenCalledWith(
+                'Database connection failed',
+                'error'
+            );
+            
+            expect(dimissioneUI.resetView).not.toHaveBeenCalled();
+            expect(navigateTo).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('search functionality', () => {
+        let cleanup;
+
+        beforeEach(() => {
+            cleanup = initDimissioneView();
+        });
+
+        afterEach(() => {
+            if (cleanup) cleanup();
+        });
+
+        it('should handle search with results', async () => {
+            const mockPatients = [
+                { id: '1', nome: 'Mario', cognome: 'Rossi', data_ricovero: '2024-12-01' },
+                { id: '2', nome: 'Luigi', cognome: 'Verdi', data_ricovero: '2024-12-02' }
+            ];
+            
+            searchActivePatients.mockResolvedValue(mockPatients);
+            
+            const searchCallback = dimissioneUI.initializeUI.mock.calls[0][0];
+            await searchCallback('Mario');
+            
+            expect(searchActivePatients).toHaveBeenCalledWith('Mario');
+            expect(dimissioneUI.renderSearchResults).toHaveBeenCalledWith(
+                mockPatients,
+                expect.any(Function)
+            );
+        });
+
+        it('should handle search errors', async () => {
+            searchActivePatients.mockRejectedValue(new Error('Search failed'));
+            
+            const searchCallback = dimissioneUI.initializeUI.mock.calls[0][0];
+            await searchCallback('Mario');
+            
+            expect(dimissioneUI.showFeedback).toHaveBeenCalledWith('Search failed', 'error');
+            expect(dimissioneUI.setLoading).toHaveBeenCalledWith(false);
+        });
+
+        it('should not search for short queries', async () => {
+            const searchCallback = dimissioneUI.initializeUI.mock.calls[0][0];
+            await searchCallback('M');
+            
+            expect(searchActivePatients).not.toHaveBeenCalled();
+            expect(dimissioneUI.renderSearchResults).toHaveBeenCalledWith([], expect.any(Function));
+        });
+    });
+});

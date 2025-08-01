@@ -1,3 +1,8 @@
+# ===================================
+# GESTIONE PAZIENTI SPA - .gitignore
+# Solo file necessari per build app
+# ===================================
+
 # Dependency directories
 node_modules/
 
@@ -6,109 +11,103 @@ dist/
 build/
 out/
 
-# Coverage, test, report, benchmark, script, backup, analysis
-coverage*/
-manual-coverage-report*/
-.nyc_output/
-.kiro/
-.claude/
-.claude-terminal-setup
-
-# Include source code only (no tests)
-!src/**
-!*.config.js
-!*.config.ts
-!package.json
-!package-lock.json
-!netlify.toml
-!index.html
-!.env.example
-!README.md
-!vite.config.js
-
-# Exclude all tests
-__tests__/
-**/*.test.js
-**/*.test.ts
-**/*.spec.js
-**/*.spec.ts
-
-# Exclude specific non-code files
-/scripts/
-*.md
-!README.md
-*.json
-!package.json
-!package-lock.json
-!*.config.json
-
-# Temporary CSS fixes and debug files
-fix-*.css
-test-*.css
-debug-*.css
-temp-*.css
-
-# Environment variables
+# Environment variables (except example)
 .env*
 !.env.example
-
-# IDE files
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
 
 # OS generated files
 .DS_Store
 Thumbs.db
+*.swp
+*.swo
+*~
 
-# Folders to ignore for deployment
-/backup/
-/archive/
-/docs/
-/.netlify/
+# IDE files
+.vscode/
+.idea/
 
-# GitHub Actions (disabled)
+# ===================================
+# INCLUDE ONLY BUILD ESSENTIALS
+# ===================================
+
+# Core app files
+!src/**
+!index.html
+!package.json
+!package-lock.json
+!vite.config.js
+!netlify.toml
+!README.md
+
+# ===================================
+# EXCLUDE EVERYTHING ELSE
+# ===================================
+
+# All documentation and markdown (except README)
+*.md
+!README.md
+
+# All JSON files (except package files)
+*.json
+!package.json
+!package-lock.json
+
+# All JavaScript files not in src/
+*.js
+!vite.config.js
+
+# All configuration files
+*.config.*
+!vite.config.js
+!package.json
+
+# All test files and directories
+__tests__/
+test*/
+tests*/
+**/*.test.*
+**/*.spec.*
+*.test.*
+*.spec.*
+
+# All coverage and reports
+coverage*/
+reports/
+playwright-report/
+test-results/
+
+# All scripts and tools
+scripts/
+tools/
+
+# All backup and temporary directories
+backup*/
+backups/
+.cleanup*/
+temp/
+tmp/
+
+# All AI and debug files
+.claude*
+.kiro/
+debug-*
+fix-*
+test-*
+
+# GitHub Actions
 .github/workflows/
 
-# Root-level test and report files
-/archive-test.js
-/archive-test.sh
-/REPORT.md
-/test-*.html
+# Build analysis and performance files
+.bundle-*
+.performance-*
+bundle-analysis*
 
-# Logs and temporary files
+# Lock files (except npm)
+yarn.lock
+pnpm-lock.yaml
+
+# Any other temporary or generated files
 *.log
 *.tmp
-config.json
 *.temp
-temp/
-
-# Test coverage reports
-coverage/
-
-# Test artifacts and reports
-test-results/
-playwright-report/
-playwright/.cache/
-coverage/
-
-# Performance and bundle analysis files
-.bundle-*.json
-.performance-*.json
-
-# Kiro settings and specs
-.kiro/
-
-# Scripts directory (build/deployment scripts, not source code)
-/scripts/
-
-# Test artifacts at root (not test source code)
-/tests/
-
-# Dependency lock files
-# package-lock.json
-yarn.lock
-tests-backup-20250721-112036/
-ref-tools-mcp/
+config.json

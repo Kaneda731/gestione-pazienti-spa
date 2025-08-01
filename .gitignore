@@ -63,6 +63,9 @@ Thumbs.db
 /docs/
 /.netlify/
 
+# GitHub Actions (disabled)
+.github/workflows/
+
 # Root-level test and report files
 /archive-test.js
 /archive-test.sh

@@ -15,6 +15,7 @@ scripts/
 .nyc_output/
 .kiro/
 .claude/
+.claude-terminal-setup
 *.md
 *.json
 *.js

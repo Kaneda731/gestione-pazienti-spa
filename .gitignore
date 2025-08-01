@@ -9,25 +9,32 @@ out/
 # Coverage, test, report, benchmark, script, backup, analysis
 coverage*/
 manual-coverage-report*/
-tests*/
-test*/
-scripts/
 .nyc_output/
 .kiro/
 .claude/
 .claude-terminal-setup
-*.md
-*.json
-*.js
-!vite.config.js
+
+# Include source code and tests
+!src/**
+!__tests__/**
+!*.config.js
+!*.config.ts
 !package.json
 !package-lock.json
 !netlify.toml
 !index.html
-!src/**
-!dist/**
 !.env.example
 !README.md
+!vite.config.js
+
+# Exclude specific non-code files
+/scripts/
+*.md
+!README.md
+*.json
+!package.json
+!package-lock.json
+!*.config.json
 
 # Environment variables
 .env*
@@ -66,11 +73,18 @@ temp/
 # Test coverage reports
 coverage/
 
-# Playwright
+# Playwright test artifacts (not source code)
 test-results/
 playwright-report/
 playwright/.cache/
-__tests__/e2e/
+
+# Keep test source code but exclude artifacts
+!__tests__/**/*.js
+!__tests__/**/*.ts
+!**/*.test.js
+!**/*.test.ts
+!**/*.spec.js
+!**/*.spec.ts
 
 # Performance and bundle analysis files
 .bundle-*.json
@@ -79,11 +93,11 @@ __tests__/e2e/
 # Kiro settings and specs
 .kiro/
 
-# Scripts directory
-scripts/
+# Scripts directory (build/deployment scripts, not source code)
+/scripts/
 
-# Test files at root
-tests/
+# Test artifacts at root (not test source code)
+/tests/
 
 # Dependency lock files
 # package-lock.json

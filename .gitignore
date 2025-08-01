@@ -88,3 +88,4 @@ tests/
 # package-lock.json
 yarn.lock
 tests-backup-20250721-112036/
+ref-tools-mcp/

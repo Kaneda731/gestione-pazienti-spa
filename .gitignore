@@ -14,9 +14,8 @@ manual-coverage-report*/
 .claude/
 .claude-terminal-setup
 
-# Include source code and tests
+# Include source code only (no tests)
 !src/**
-!__tests__/**
 !*.config.js
 !*.config.ts
 !package.json
@@ -26,6 +25,13 @@ manual-coverage-report*/
 !.env.example
 !README.md
 !vite.config.js
+
+# Exclude all tests
+__tests__/
+**/*.test.js
+**/*.test.ts
+**/*.spec.js
+**/*.spec.ts
 
 # Exclude specific non-code files
 /scripts/
@@ -82,18 +88,11 @@ temp/
 # Test coverage reports
 coverage/
 
-# Playwright test artifacts (not source code)
+# Test artifacts and reports
 test-results/
 playwright-report/
 playwright/.cache/
-
-# Keep test source code but exclude artifacts
-!__tests__/**/*.js
-!__tests__/**/*.ts
-!**/*.test.js
-!**/*.test.ts
-!**/*.spec.js
-!**/*.spec.ts
+coverage/
 
 # Performance and bundle analysis files
 .bundle-*.json

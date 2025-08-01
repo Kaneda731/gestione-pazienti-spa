@@ -10,11 +10,13 @@ import { isDevelopment, isTest } from '../../app/config/environment.js';
  */
 class LoggerService {
     /**
-     * Log di debug - sempre attivo per compatibilità
+     * Log di debug - attivo solo in sviluppo e test
      * @param {...any} args - Argomenti da loggare
      */
     log(...args) {
-        console.log(...args);
+        if (isDevelopment || isTest) {
+            console.log(...args);
+        }
     }
 
     /**

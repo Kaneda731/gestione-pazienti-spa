@@ -238,6 +238,12 @@
         white-space: normal;
     }
 
+    /* Allinea Stato e Azioni */
+    thead th:nth-child(7),
+    tbody td:nth-child(7) {
+        text-align: center;
+    }
+
     /* Larghezze colonne su desktop (>=1024px) */
     @media (min-width: 1024px) {
         th:nth-child(1), td:nth-child(1) { width: 12%; } /* Data Evento */
@@ -245,8 +251,9 @@
         th:nth-child(3), td:nth-child(3) { width: 18%; } /* Paziente */
         th:nth-child(4), td:nth-child(4) { width: 12%; } /* Reparto */
         th:nth-child(5), td:nth-child(5) { width: 14%; } /* Dettagli */
-        th:nth-child(6), td:nth-child(6) { width: 24%; } /* Descrizione */
-        th:nth-child(7), td:nth-child(7) { width: 10%; } /* Azioni */
+        th:nth-child(6), td:nth-child(6) { width: 18%; } /* Descrizione */
+        th:nth-child(7), td:nth-child(7) { width: 6%; }  /* Stato */
+        th:nth-child(8), td:nth-child(8) { width: 10%; } /* Azioni */
     }
 
     /* Azioni sempre compattate */

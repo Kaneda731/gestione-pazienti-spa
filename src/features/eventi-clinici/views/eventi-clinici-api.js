@@ -283,6 +283,11 @@ function transformEventoForUI(evento) {
     ...evento,
     // Formattazione data per display
     dataEventoFormatted: formatDate(evento.data_evento),
+  // Formattazione data fine (se presente)
+  dataFineEventoFormatted: evento.data_fine_evento ? formatDate(evento.data_fine_evento) : null,
+  // Flag utili
+  isInfezione: evento.tipo_evento === 'infezione',
+  isRisolta: evento.tipo_evento === 'infezione' && !!evento.data_fine_evento,
     // Icona basata sul tipo evento
     tipoEventoIcon: getTipoEventoIcon(evento.tipo_evento),
     // Colore per UI
@@ -922,13 +927,17 @@ function generateCSV(eventi) {
     'Reparto',
     'Descrizione',
     'Tipo Intervento',
-    'Agente Patogeno',
-    'Data Creazione'
+  'Agente Patogeno',
+  'Data Fine Evento',
+  'Stato',
+  'Data Creazione'
   ];
 
   const csvRows = [headers.join(',')];
 
   eventi.forEach(evento => {
+    const isInfezione = evento.tipo_evento === 'infezione';
+    const stato = isInfezione ? (evento.data_fine_evento ? 'Risolta' : 'Attiva') : '';
     const row = [
       evento.id || '',
       evento.tipo_evento || '',
@@ -938,6 +947,8 @@ function generateCSV(eventi) {
       evento.descrizione ? `"${evento.descrizione.replace(/"/g, '""')}"` : '',
       evento.tipo_intervento || '',
       evento.agente_patogeno || '',
+      evento.data_fine_evento || '',
+      stato,
       evento.created_at || ''
     ];
     csvRows.push(row.join(','));
@@ -1000,6 +1011,22 @@ export function resetCurrentFiltersToDefaults() {
     sortDirection: 'desc'
   };
   logger.log('🔧 Filtri in memoria reimpostati ai default');
+}
+
+/**
+ * Risolve una infezione impostando la data di fine
+ */
+export async function resolveInfezioneEvento(eventoId, dataFine) {
+  try {
+    logger.log('🩺 Risoluzione infezione:', { eventoId, dataFine });
+    await eventiCliniciService.resolveInfezione(eventoId, dataFine);
+    logger.log('✅ Infezione risolta:', eventoId);
+    return true;
+  } catch (error) {
+    logger.error('❌ Errore risoluzione infezione:', error);
+    handleApiError(error, 'Errore nella risoluzione dell\'infezione');
+    throw error;
+  }
 }
 
 /**

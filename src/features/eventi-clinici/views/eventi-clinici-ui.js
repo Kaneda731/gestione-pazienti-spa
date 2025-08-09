@@ -174,7 +174,7 @@ export function renderEventsTable(eventsData) {
     if (!eventsData.eventi || eventsData.eventi.length === 0) {
       const row = document.createElement('tr');
       const td = document.createElement('td');
-      td.colSpan = 7;
+      td.colSpan = 8;
       td.className = 'text-center text-muted';
       td.textContent = 'Nessun evento trovato';
       row.appendChild(td);
@@ -188,6 +188,11 @@ export function renderEventsTable(eventsData) {
       const dettagli = ev.tipo_evento === 'intervento'
         ? (ev.tipo_intervento || '-')
         : (ev.agente_patogeno || '-');
+      const statoBadge = ev.tipo_evento === 'infezione'
+        ? (ev.data_fine_evento
+            ? `<span class="badge bg-success" title="Risolta il ${ev.dataFineEventoFormatted}">Risolta</span>`
+            : `<span class="badge bg-danger" title="Infezione attiva">Attiva</span>`)
+        : '';
 
       return `
         <tr data-evento-id="${ev.id}">
@@ -202,6 +207,7 @@ export function renderEventsTable(eventsData) {
           <td>${patient ? sanitizeHtml(patient.reparto) : '-'}</td>
           <td>${sanitizeHtml(dettagli)}</td>
           <td>${ev.descrizione ? sanitizeHtml(ev.descrizione) : '-'}</td>
+          <td>${statoBadge}</td>
           <td>
             <div class="btn-group btn-group-sm" role="group">
               <button class="btn btn-outline-primary event-detail-btn" data-evento-id="${ev.id}" title="Dettagli">
@@ -210,6 +216,11 @@ export function renderEventsTable(eventsData) {
               <button class="btn btn-outline-secondary event-edit-btn" data-evento-id="${ev.id}" title="Modifica">
                 <span class="material-icons">edit</span>
               </button>
+              ${ev.tipo_evento === 'infezione' && !ev.data_fine_evento ? `
+              <button class="btn btn-outline-success event-resolve-btn" data-evento-id="${ev.id}" title="Risolvi">
+                <span class="material-icons">check_circle</span>
+              </button>
+              ` : ''}
               <button class="btn btn-outline-danger event-delete-btn" data-evento-id="${ev.id}" title="Elimina">
                 <span class="material-icons">delete</span>
               </button>
@@ -301,6 +312,9 @@ function createEventCard(evento) {
       <div class="event-type-indicator">
         <span class="material-icons text-${evento.tipoEventoColor} me-1">${evento.tipoEventoIcon || (evento.tipo_evento === 'intervento' ? 'medical_services' : 'pest_control')}</span>
         <span class="event-type-label">${evento.tipoEventoLabel}</span>
+        ${evento.tipo_evento === 'infezione' ? `
+          ${evento.data_fine_evento ? `<span class="badge bg-success ms-2">Risolta</span>` : `<span class="badge bg-danger ms-2">Attiva</span>`}
+        ` : ''}
       </div>
       <div class="event-actions">
         <button class="btn btn-sm btn-outline-primary event-detail-btn" data-evento-id="${
@@ -313,6 +327,13 @@ function createEventCard(evento) {
         }">
           <span class="material-icons">edit</span>
         </button>
+        ${evento.tipo_evento === 'infezione' && !evento.data_fine_evento ? `
+        <button class="btn btn-sm btn-outline-success event-resolve-btn" data-evento-id="${
+          evento.id
+        }">
+          <span class="material-icons">check_circle</span>
+        </button>
+        ` : ''}
         <button class="btn btn-sm btn-outline-danger event-delete-btn" data-evento-id="${
           evento.id
         }">
@@ -456,7 +477,7 @@ export function showLoading() {
   if (domElements.tableBody) {
     domElements.tableBody.innerHTML = sanitizeHtml(`
       <tr>
-        <td colspan="7" class="text-center">
+  <td colspan="8" class="text-center">
           <div class="spinner-border text-primary" role="status">
             <span class="visually-hidden">Caricamento...</span>
           </div>
@@ -489,7 +510,7 @@ export function showError(message = "Errore nel caricamento dei dati") {
   if (domElements.tableBody) {
     domElements.tableBody.innerHTML = sanitizeHtml(`
       <tr>
-        <td colspan="7" class="text-center text-danger">
+  <td colspan="8" class="text-center text-danger">
           <strong>${sanitizeHtml(message)}</strong>
         </td>
       </tr>
@@ -759,9 +780,7 @@ export function renderEventDetails(evento) {
         <div class="col-md-6">
           <strong>Tipo Evento:</strong>
           <div class="d-flex align-items-center mt-1">
-            <i class="${evento.tipoEventoIcon} text-${
-    evento.tipoEventoColor
-  } me-2"></i>
+            <span class="material-icons text-${evento.tipoEventoColor} me-2">${evento.tipoEventoIcon}</span>
             ${evento.tipoEventoLabel}
           </div>
         </div>
@@ -769,6 +788,14 @@ export function renderEventDetails(evento) {
           <strong>Data Evento:</strong>
           <div class="mt-1">${evento.dataEventoFormatted}</div>
         </div>
+        ${evento.tipo_evento === 'infezione' ? `
+        <div class="col-md-6">
+          <strong>Stato:</strong>
+          <div class="mt-1">
+            ${evento.data_fine_evento ? `<span class="badge bg-success">Risolta il ${formatDate(evento.data_fine_evento)}</span>` : `<span class="badge bg-danger">Attiva</span>`}
+          </div>
+        </div>
+        ` : ''}
         
         ${
           evento.pazienteInfo

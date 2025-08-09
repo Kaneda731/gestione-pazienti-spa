@@ -22,6 +22,7 @@ import { EventiCliniciDataManager } from './EventiCliniciDataManager.js';
 import { EventiCliniciFilterManager } from './EventiCliniciFilterManager.js';
 import { EventiCliniciModalManager } from './EventiCliniciModalManager.js';
 import { EventiCliniciEventHandlers } from './EventiCliniciEventHandlers.js';
+import { resolveInfezioneEvento } from './eventi-clinici-api.js';
 
 /**
  * Controller principale per la gestione degli eventi clinici
@@ -139,6 +140,26 @@ async function initializeManagers() {
           e.stopPropagation();
           const eventId = btn.dataset.eventoId;
           modalManager.confirmDeleteEvent(eventId);
+        };
+        btn.addEventListener('click', handler);
+      });
+
+      // Resolve infection buttons
+      document.querySelectorAll('.event-resolve-btn').forEach(btn => {
+        const handler = async (e) => {
+          e.stopPropagation();
+          const eventId = btn.dataset.eventoId;
+          try {
+            const { ResolveInfectionModal } = await import('../components/ResolveInfectionModal.js');
+            const resolver = new ResolveInfectionModal({ eventoId: eventId });
+            const dataFine = await resolver.show();
+            if (dataFine) {
+              await resolveInfezioneEvento(eventId, dataFine);
+              await dataManager.loadEventsData();
+            }
+          } catch (err) {
+            logger.error('Errore nella risoluzione infezione:', err);
+          }
         };
         btn.addEventListener('click', handler);
       });

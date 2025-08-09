@@ -1,5 +1,4 @@
 import { supabase } from '../services/supabaseClient.js';
-import { updateAuthUI } from '../../shared/components/ui/AuthUI.js';
 import { oauthManager } from './oauthService.js';
 import { logger } from '../services/loggerService.js';
 
@@ -36,9 +35,14 @@ async function updateUserState(session) {
         currentUser.session = null;
         currentUser.profile = null;
     }
-    
-    updateAuthUI(session);
-    
+
+    // Notifica il resto dell'app senza importare direttamente la UI per evitare cicli
+    try {
+        window.dispatchEvent(new CustomEvent('auth:session-changed', { detail: { session } }));
+    } catch (_) {
+        // no-op in ambienti non browser
+    }
+
     // Annuncia a tutta l'app che il profilo è stato caricato (o è nullo)
     window.dispatchEvent(new CustomEvent('auth-profile-loaded'));
 }

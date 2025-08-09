@@ -95,4 +95,9 @@ export function initMobileUI() {
     
     // Sincronizzazione iniziale per sicurezza
     setTimeout(syncMobileAuth, 150);
+
+    // Reagisci direttamente ai cambiamenti di sessione
+    window.addEventListener('auth:session-changed', () => {
+        syncMobileAuth();
+    });
 }

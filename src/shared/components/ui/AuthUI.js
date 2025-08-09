@@ -43,6 +43,16 @@ export function updateAuthUI(session) {
 }
 
 function initAuthEventListeners() {
+    // Ascolta i cambiamenti di sessione emessi da authService (decoupled per evitare import circolari)
+    window.addEventListener('auth:session-changed', (event) => {
+        updateAuthUI(event.detail?.session || null);
+    });
+
+    // Inizializza subito la UI se lo stato è già noto
+    if (typeof currentUser !== 'undefined') {
+        updateAuthUI(currentUser.session || null);
+    }
+
     // Usa la delegazione di eventi sul body per gestire i click
     document.body.addEventListener('click', async (event) => {
         if (event.target.closest('#logout-button')) {

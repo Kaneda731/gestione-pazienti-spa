@@ -9,7 +9,7 @@ import {
 } from './eventi-clinici-api.js';
 
 import {
-  renderEventsTimeline,
+  renderEventsResponsive,
   showLoading,
   showError,
   updateSearchResultsCount,
@@ -45,7 +45,7 @@ export class EventiCliniciDataManager {
 
       const result = await fetchEventiClinici(this.state.filters, this.state.currentPage);
 
-      renderEventsTimeline(result);
+  renderEventsResponsive(result);
       this.setupEventCardListeners();
       
       // Update UI indicators

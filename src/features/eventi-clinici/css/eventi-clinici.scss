@@ -201,3 +201,57 @@
         opacity: 0.5;
     }
 }
+
+/* ==========================
+   Eventi Clinici - Tabella
+   ========================== */
+.eventi-table {
+    table-layout: fixed; /* assicura colonne stabili */
+    width: 100%;
+
+    thead th {
+        text-align: left;
+        vertical-align: middle;
+    }
+
+    tbody td {
+        vertical-align: middle;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Allinea al centro la colonna Tipo e a destra le Azioni */
+    thead th:nth-child(2),
+    tbody td:nth-child(2) {
+        text-align: center;
+    }
+
+    thead th:last-child,
+    tbody td:last-child {
+        text-align: right;
+    }
+
+    /* Consenti wrapping per descrizione e dettagli */
+    tbody td:nth-child(5), /* Dettagli */
+    tbody td:nth-child(6)  /* Descrizione */ {
+        white-space: normal;
+    }
+
+    /* Larghezze colonne su desktop (>=1024px) */
+    @media (min-width: 1024px) {
+        th:nth-child(1), td:nth-child(1) { width: 12%; } /* Data Evento */
+        th:nth-child(2), td:nth-child(2) { width: 10%; } /* Tipo */
+        th:nth-child(3), td:nth-child(3) { width: 18%; } /* Paziente */
+        th:nth-child(4), td:nth-child(4) { width: 12%; } /* Reparto */
+        th:nth-child(5), td:nth-child(5) { width: 14%; } /* Dettagli */
+        th:nth-child(6), td:nth-child(6) { width: 24%; } /* Descrizione */
+        th:nth-child(7), td:nth-child(7) { width: 10%; } /* Azioni */
+    }
+
+    /* Azioni sempre compattate */
+    td:last-child {
+        white-space: nowrap;
+        width: 1%;
+    }
+}

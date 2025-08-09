@@ -139,7 +139,36 @@
 
 
 
-            <!-- Events Timeline Container -->
+            <!-- Vista Tabella (stile elenco pazienti) -->
+            <div id="eventi-table-container" class="table-responsive" style="display: none;">
+                <table class="table table-striped eventi-table">
+                    <colgroup>
+                        <col style="width:12%">
+                        <col style="width:10%">
+                        <col style="width:18%">
+                        <col style="width:12%">
+                        <col style="width:14%">
+                        <col style="width:24%">
+                        <col style="width:10%">
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th>Data Evento</th>
+                            <th>Tipo</th>
+                            <th>Paziente</th>
+                            <th>Reparto</th>
+                            <th>Dettagli</th>
+                            <th>Descrizione</th>
+                            <th>Azioni</th>
+                        </tr>
+                    </thead>
+                    <tbody id="eventi-table-body">
+                        <!-- Le righe verranno popolate dinamicamente -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Events Timeline Container (mobile/tablet) -->
             <div id="eventi-timeline-container">
                 <!-- Timeline events will be populated here -->
             </div>

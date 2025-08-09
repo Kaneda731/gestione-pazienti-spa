@@ -18,7 +18,9 @@ let domElements = {};
 export function initializeDOMElements() {
   domElements = {
     // Main containers
-    timelineContainer: document.getElementById("eventi-timeline-container"),
+  timelineContainer: document.getElementById("eventi-timeline-container"),
+  tableContainer: document.getElementById("eventi-table-container"),
+  tableBody: document.getElementById("eventi-table-body"),
 
     // Search and filters
     searchPatientInput: document.getElementById("eventi-search-patient"),
@@ -97,7 +99,7 @@ export function renderEventsTimeline(eventsData) {
   try {
     logger.log("🎨 Rendering timeline eventi:", eventsData);
 
-    if (!domElements.timelineContainer) {
+  if (!domElements.timelineContainer) {
       logger.error("❌ Container timeline non trovato");
       return;
     }
@@ -133,6 +135,96 @@ export function renderEventsTimeline(eventsData) {
   } catch (error) {
     logger.error("❌ Errore rendering timeline:", error);
     showError("Errore nel rendering della timeline");
+  }
+}
+
+/**
+ * Rendering responsive: tabella su desktop, timeline su mobile/tablet
+ */
+export function renderEventsResponsive(eventsData) {
+  const isMobile = window.innerWidth < 768;
+  const isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
+  const useTable = !(isMobile || isTablet);
+
+  if (domElements.tableContainer) {
+    domElements.tableContainer.style.display = useTable ? 'block' : 'none';
+  }
+  if (domElements.timelineContainer) {
+    domElements.timelineContainer.style.display = useTable ? 'none' : 'block';
+  }
+
+  if (useTable) {
+    renderEventsTable(eventsData);
+  } else {
+    renderEventsTimeline(eventsData);
+  }
+}
+
+/**
+ * Renderizza la tabella eventi (vista desktop)
+ */
+export function renderEventsTable(eventsData) {
+  try {
+    logger.log("🎨 Rendering tabella eventi:", eventsData);
+
+    if (!domElements.tableBody) return;
+
+    domElements.tableBody.innerHTML = sanitizeHtml('');
+
+    if (!eventsData.eventi || eventsData.eventi.length === 0) {
+      const row = document.createElement('tr');
+      const td = document.createElement('td');
+      td.colSpan = 7;
+      td.className = 'text-center text-muted';
+      td.textContent = 'Nessun evento trovato';
+      row.appendChild(td);
+      domElements.tableBody.appendChild(row);
+      updatePaginationControls(eventsData);
+      return;
+    }
+
+    const rowsHtml = eventsData.eventi.map(ev => {
+      const patient = ev.pazienteInfo;
+      const dettagli = ev.tipo_evento === 'intervento'
+        ? (ev.tipo_intervento || '-')
+        : (ev.agente_patogeno || '-');
+
+      return `
+        <tr data-evento-id="${ev.id}">
+          <td>${ev.dataEventoFormatted || formatDate(ev.data_evento)}</td>
+          <td>
+            <span class="badge bg-${ev.tipoEventoColor || (ev.tipo_evento === 'intervento' ? 'primary' : 'warning')}">
+              <i class="${ev.tipoEventoIcon || (ev.tipo_evento === 'intervento' ? 'fas fa-user-md' : 'fas fa-virus')} me-1"></i>
+              ${ev.tipoEventoLabel || (ev.tipo_evento === 'intervento' ? 'Intervento' : 'Infezione')}
+            </span>
+          </td>
+          <td>${patient ? sanitizeHtml(patient.nomeCompleto) : '-'}</td>
+          <td>${patient ? sanitizeHtml(patient.reparto) : '-'}</td>
+          <td>${sanitizeHtml(dettagli)}</td>
+          <td>${ev.descrizione ? sanitizeHtml(ev.descrizione) : '-'}</td>
+          <td>
+            <div class="btn-group btn-group-sm" role="group">
+              <button class="btn btn-outline-primary event-detail-btn" data-evento-id="${ev.id}" title="Dettagli">
+                <i class="fas fa-eye"></i>
+              </button>
+              <button class="btn btn-outline-secondary event-edit-btn" data-evento-id="${ev.id}" title="Modifica">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="btn btn-outline-danger event-delete-btn" data-evento-id="${ev.id}" title="Elimina">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+  // Inseriamo direttamente le righe HTML: i singoli valori dinamici sono già sanitizzati
+  domElements.tableBody.innerHTML = rowsHtml;
+    updatePaginationControls(eventsData);
+  } catch (error) {
+    logger.error('❌ Errore rendering tabella eventi:', error);
+    showError('Errore nel rendering della tabella');
   }
 }
 
@@ -350,9 +442,8 @@ function renderEmptyState() {
  * Mostra stato di caricamento
  */
 export function showLoading() {
-  if (!domElements.timelineContainer) return;
-
-  domElements.timelineContainer.innerHTML = sanitizeHtml(`
+  if (domElements.timelineContainer) {
+    domElements.timelineContainer.innerHTML = sanitizeHtml(`
     <div class="loading-state text-center py-5">
       <div class="spinner-border text-primary mb-3" role="status">
         <span class="visually-hidden">Caricamento...</span>
@@ -360,15 +451,27 @@ export function showLoading() {
       <p class="text-muted">Caricamento eventi clinici...</p>
     </div>
   `);
+  }
+
+  if (domElements.tableBody) {
+    domElements.tableBody.innerHTML = sanitizeHtml(`
+      <tr>
+        <td colspan="7" class="text-center">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Caricamento...</span>
+          </div>
+        </td>
+      </tr>
+    `);
+  }
 }
 
 /**
  * Mostra errore
  */
 export function showError(message = "Errore nel caricamento dei dati") {
-  if (!domElements.timelineContainer) return;
-
-  domElements.timelineContainer.innerHTML = sanitizeHtml(`
+  if (domElements.timelineContainer) {
+    domElements.timelineContainer.innerHTML = sanitizeHtml(`
     <div class="error-state text-center py-5">
       <div class="error-state-icon mb-3">
         <i class="fas fa-exclamation-triangle fa-3x text-danger"></i>
@@ -381,6 +484,17 @@ export function showError(message = "Errore nel caricamento dei dati") {
       </button>
     </div>
   `);
+  }
+
+  if (domElements.tableBody) {
+    domElements.tableBody.innerHTML = sanitizeHtml(`
+      <tr>
+        <td colspan="7" class="text-center text-danger">
+          <strong>${sanitizeHtml(message)}</strong>
+        </td>
+      </tr>
+    `);
+  }
 }
 
 /**
@@ -733,7 +847,14 @@ export function applyResponsiveDesign() {
   const isMobile = window.innerWidth < 768;
   const isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
 
+  // Switch tra Timeline (mobile/tablet) e Tabella (desktop >= 1024px)
+  const useTable = !isMobile && !isTablet; // desktop
+
+  if (domElements.tableContainer) {
+    domElements.tableContainer.style.display = useTable ? 'block' : 'none';
+  }
   if (domElements.timelineContainer) {
+    domElements.timelineContainer.style.display = useTable ? 'none' : 'block';
     domElements.timelineContainer.classList.toggle("mobile-layout", isMobile);
     domElements.timelineContainer.classList.toggle("tablet-layout", isTablet);
   }

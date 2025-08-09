@@ -14,7 +14,7 @@ import {
 } from './eventi-clinici-api.js';
 
 import {
-  renderEventsTimeline,
+  renderEventsResponsive,
   renderPatientSearchResults,
   resetFiltersUI,
   applyFiltersToUI,
@@ -47,7 +47,7 @@ export class EventiCliniciFilterManager {
       showSearchingState();
       
       const result = await applyPatientSearch(searchTerm);
-      renderEventsTimeline(result);
+  renderEventsResponsive(result);
       this.setupEventCardListenersCallback();
       
       // Update UI indicators
@@ -71,8 +71,8 @@ export class EventiCliniciFilterManager {
       const dataDa = domElements.filterDateFrom?.value || '';
       const dataA = domElements.filterDateTo?.value || '';
       
-      const result = await applyDateRangeFilter(dataDa, dataA);
-      renderEventsTimeline(result);
+  const result = await applyDateRangeFilter(dataDa, dataA);
+  renderEventsResponsive(result);
       this.setupEventCardListenersCallback();
       
       // Update UI indicators
@@ -96,8 +96,8 @@ export class EventiCliniciFilterManager {
     try {
       showSearchingState();
       
-      const result = await applyEventTypeFilter(eventType);
-      renderEventsTimeline(result);
+  const result = await applyEventTypeFilter(eventType);
+  renderEventsResponsive(result);
       this.setupEventCardListenersCallback();
       updateSearchResultsCount(result.eventi.length, result.totalCount, getCurrentFilters());
       showActiveFiltersIndicator(getCurrentFilters());
@@ -120,14 +120,14 @@ export class EventiCliniciFilterManager {
       const uiFilters = getFiltersFromUI();
       
       // Apply combined filters
-      const result = await applyCombinedFilters(uiFilters);
+  const result = await applyCombinedFilters(uiFilters);
       
       // Update local state
       this.state.filters = { ...this.state.filters, ...uiFilters };
       this.state.currentPage = 0;
 
       // Render results
-      renderEventsTimeline(result);
+  renderEventsResponsive(result);
       this.setupEventCardListenersCallback();
 
       // Update UI indicators
@@ -156,14 +156,14 @@ export class EventiCliniciFilterManager {
       const sortColumn = domElements.filterSortColumn?.value || 'data_evento';
       const sortDirection = domElements.filterSortDirection?.value || 'desc';
 
-      const result = await applySorting(sortColumn, sortDirection);
+  const result = await applySorting(sortColumn, sortDirection);
 
       // Update local state
       this.state.filters.sortColumn = sortColumn;
       this.state.filters.sortDirection = sortDirection;
 
       // Render results
-      renderEventsTimeline(result);
+  renderEventsResponsive(result);
       this.setupEventCardListenersCallback();
 
       // Update UI indicators
@@ -207,7 +207,7 @@ export class EventiCliniciFilterManager {
       showSearchingState();
 
       // Reset using API function that also clears persistent state
-      const result = await resetFiltersAndState();
+  const result = await resetFiltersAndState();
 
       // Reset UI
       resetFiltersUI();
@@ -231,7 +231,7 @@ export class EventiCliniciFilterManager {
       hideAllSearchResults();
 
       // Render results
-      renderEventsTimeline(result);
+  renderEventsResponsive(result);
       this.setupEventCardListenersCallback();
 
       // Update UI indicators

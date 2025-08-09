@@ -367,10 +367,10 @@ function handleApiError(error, defaultMessage) {
 
 function getTipoEventoIcon(tipo) {
   const icons = {
-    'intervento': 'fas fa-scalpel',
-    'infezione': 'fas fa-virus'
+    'intervento': 'medical_services',
+    'infezione': 'pest_control'
   };
-  return icons[tipo] || 'fas fa-calendar-alt';
+  return icons[tipo] || 'event'
 }
 
 function getTipoEventoColor(tipo) {

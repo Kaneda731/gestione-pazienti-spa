@@ -194,7 +194,7 @@ export function renderEventsTable(eventsData) {
           <td>${ev.dataEventoFormatted || formatDate(ev.data_evento)}</td>
           <td>
             <span class="badge bg-${ev.tipoEventoColor || (ev.tipo_evento === 'intervento' ? 'primary' : 'warning')}">
-              <i class="${ev.tipoEventoIcon || (ev.tipo_evento === 'intervento' ? 'fas fa-user-md' : 'fas fa-virus')} me-1"></i>
+              <span class="material-icons me-1">${ev.tipoEventoIcon || (ev.tipo_evento === 'intervento' ? 'medical_services' : 'pest_control')}</span>
               ${ev.tipoEventoLabel || (ev.tipo_evento === 'intervento' ? 'Intervento' : 'Infezione')}
             </span>
           </td>
@@ -205,13 +205,13 @@ export function renderEventsTable(eventsData) {
           <td>
             <div class="btn-group btn-group-sm" role="group">
               <button class="btn btn-outline-primary event-detail-btn" data-evento-id="${ev.id}" title="Dettagli">
-                <i class="fas fa-eye"></i>
+                <span class="material-icons">visibility</span>
               </button>
               <button class="btn btn-outline-secondary event-edit-btn" data-evento-id="${ev.id}" title="Modifica">
-                <i class="fas fa-edit"></i>
+                <span class="material-icons">edit</span>
               </button>
               <button class="btn btn-outline-danger event-delete-btn" data-evento-id="${ev.id}" title="Elimina">
-                <i class="fas fa-trash"></i>
+                <span class="material-icons">delete</span>
               </button>
             </div>
           </td>
@@ -299,24 +299,24 @@ function createEventCard(evento) {
   const cardContent = `
     <div class="event-card-header">
       <div class="event-type-indicator">
-        <i class="${evento.tipoEventoIcon} text-${evento.tipoEventoColor}"></i>
+        <span class="material-icons text-${evento.tipoEventoColor} me-1">${evento.tipoEventoIcon || (evento.tipo_evento === 'intervento' ? 'medical_services' : 'pest_control')}</span>
         <span class="event-type-label">${evento.tipoEventoLabel}</span>
       </div>
       <div class="event-actions">
         <button class="btn btn-sm btn-outline-primary event-detail-btn" data-evento-id="${
           evento.id
         }">
-          <i class="fas fa-eye"></i>
+          <span class="material-icons">visibility</span>
         </button>
         <button class="btn btn-sm btn-outline-secondary event-edit-btn" data-evento-id="${
           evento.id
         }">
-          <i class="fas fa-edit"></i>
+          <span class="material-icons">edit</span>
         </button>
         <button class="btn btn-sm btn-outline-danger event-delete-btn" data-evento-id="${
           evento.id
         }">
-          <i class="fas fa-trash"></i>
+          <span class="material-icons">delete</span>
         </button>
       </div>
     </div>
@@ -330,7 +330,7 @@ function createEventCard(evento) {
         ? `
       <div class="event-card-footer">
         <div class="patient-info">
-          <i class="fas fa-user-injured me-1"></i>
+          <span class="material-icons me-1">person</span>
           <span class="patient-name">${evento.pazienteInfo.nomeCompleto}</span>
           <span class="patient-department badge bg-secondary ms-2">${evento.pazienteInfo.reparto}</span>
         </div>
@@ -409,7 +409,7 @@ function renderEmptyState() {
 
   const iconDiv = document.createElement('div');
   iconDiv.className = 'empty-state-icon mb-3';
-  iconDiv.innerHTML = sanitizeHtml('<i class="fas fa-calendar-times fa-3x text-muted"></i>');
+  iconDiv.innerHTML = sanitizeHtml('<span class="material-icons text-muted" style="font-size:48px;">event_busy</span>');
   emptyDiv.appendChild(iconDiv);
 
   const h4 = document.createElement('h4');
@@ -425,7 +425,7 @@ function renderEmptyState() {
   const btn = document.createElement('button');
   btn.className = 'btn btn-primary';
   btn.id = 'add-first-event-btn';
-  btn.innerHTML = sanitizeHtml('<i class="fas fa-plus me-1"></i> Aggiungi primo evento');
+  btn.innerHTML = sanitizeHtml('<span class="material-icons me-1">add</span> Aggiungi primo evento');
   emptyDiv.appendChild(btn);
 
   domElements.timelineContainer.appendChild(emptyDiv);
@@ -474,12 +474,12 @@ export function showError(message = "Errore nel caricamento dei dati") {
     domElements.timelineContainer.innerHTML = sanitizeHtml(`
     <div class="error-state text-center py-5">
       <div class="error-state-icon mb-3">
-        <i class="fas fa-exclamation-triangle fa-3x text-danger"></i>
+  <span class="material-icons text-danger" style="font-size:48px;">warning</span>
       </div>
       <h4 class="text-danger">Errore</h4>
       <p class="text-muted">${sanitizeHtml(message)}</p>
       <button class="btn btn-outline-primary" onclick="location.reload()">
-        <i class="fas fa-refresh me-1"></i>
+  <span class="material-icons me-1">refresh</span>
         Riprova
       </button>
     </div>
@@ -562,7 +562,7 @@ export function renderPatientSearchResults(patients, containerId) {
             }
           </small>
         </div>
-        <i class="fas fa-chevron-right text-muted"></i>
+  <span class="material-icons text-muted">chevron_right</span>
       </div>
     </div>
   `
@@ -776,7 +776,7 @@ export function renderEventDetails(evento) {
           <div class="col-12">
             <strong>Paziente:</strong>
             <div class="mt-1">
-              <i class="fas fa-user-injured me-1"></i>
+              <span class="material-icons me-1">person</span>
               ${evento.pazienteInfo.nomeCompleto}
               <span class="badge bg-secondary ms-2">${evento.pazienteInfo.reparto}</span>
             </div>
@@ -1092,7 +1092,7 @@ export function showFilterStats(stats) {
     statsContainer.innerHTML = sanitizeHtml(`
       <div class="d-flex justify-content-between align-items-center">
         <div>
-          <i class="fas fa-chart-bar me-2"></i>
+          <span class="material-icons me-2">bar_chart</span>
           <strong>${stats.filteredEvents}</strong> di <strong>${stats.totalEvents}</strong> eventi
           ${stats.filterEfficiency > 0 ? `(${stats.filterEfficiency}% filtrati)` : ''}
         </div>
@@ -1145,7 +1145,7 @@ export function showExportSuccess(result) {
   toast.innerHTML = sanitizeHtml(`
     <div class="d-flex">
       <div class="toast-body">
-        <i class="fas fa-download me-2"></i>
+  <span class="material-icons me-2">download</span>
         Esportati ${result.count} eventi in ${sanitizeHtml(result.filename)}
       </div>
       <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
@@ -1257,7 +1257,7 @@ export function updateSearchResultsCount(count, totalCount, filters) {
 
   if (hasActiveFilters) {
     resultsInfo.innerHTML = sanitizeHtml(`
-      <i class="fas fa-filter me-1"></i>
+  <span class="material-icons me-1">filter_list</span>
       Trovati <strong>${count}</strong> eventi su ${totalCount} totali
       ${filters.paziente_search ? `per "${sanitizeHtml(filters.paziente_search)}"` : ''}
     `);

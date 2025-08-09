@@ -28,7 +28,7 @@ function handleNavbarVisibility() {
     // La modalità è cambiata, aggiorna lo stato e invia l'evento
     isCurrentlyMobile = isMobile;
 
-    logger.log(`Mode changed to: ${isMobile ? 'mobile' : 'desktop'}`); // Per debug
+    logger.log(`Mode changed to: ${isMobile ? 'mobile' : 'desktop'}`);
 
     const event = new CustomEvent('mode:change', {
         detail: { isMobile }

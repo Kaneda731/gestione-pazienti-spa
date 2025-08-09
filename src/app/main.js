@@ -32,9 +32,7 @@ import '../core/services/uiStateService.js';
 // Emergency commands (sempre disponibili per sicurezza)
 import '../core/services/emergencyCommands.js';
 
-// Debug utils removed for production readiness
-
-// Debug: esponi il notificationService globalmente per testing
+// Expose notificationService globally for development testing
 if (isDevelopment) {
     window.notificationService = notificationService;
 }
@@ -51,7 +49,7 @@ import { initializeAuthEventListeners } from '../shared/components/ui/AuthUI.js'
 import { renderView } from './router.js';
 import { initBackToMenuButtons } from '../core/services/navigationService.js';
 
-// OAuth debug tools removed for production readiness
+
 
 /**
  * Inizializza l'applicazione
@@ -87,7 +85,6 @@ async function initializeApp() {
     } catch (error) {
         console.error('❌ Errore durante l\'inizializzazione dell\'applicazione:', error);
         
-        // Messaggio di debug per loop infiniti
         if (isDevelopment) {
             console.log('🚨 If you see infinite error loops, run: window.notificationEmergencyReset()');
         }

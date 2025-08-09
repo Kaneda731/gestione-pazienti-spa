@@ -3,10 +3,10 @@
  * Gestisce interventi chirurgici e infezioni con calcolo giorni post-operatori
  */
 
-import { supabase } from "/src/core/services/supabaseClient.js";
-import { stateService } from "/src/core/services/stateService.js";
-import { notificationService } from "/src/core/services/notificationService.js";
-import { logger } from "/src/core/services/loggerService.js";
+import { supabase } from "../../../core/services/supabaseClient.js";
+import { stateService } from "../../../core/services/stateService.js";
+import { notificationService } from "../../../core/services/notificationService.js";
+import { logger } from "../../../core/services/loggerService.js";
 
 class EventiCliniciService {
   constructor() {

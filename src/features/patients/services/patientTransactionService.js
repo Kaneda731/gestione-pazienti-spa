@@ -4,11 +4,11 @@
  * Implementa pattern Saga per gestire rollback e recovery.
  */
 
-import { logger } from "/src/core/services/loggerService.js";
-import { notificationService } from "/src/core/services/notificationService.js";
-import { stateService } from "/src/core/services/stateService.js";
+import { logger } from "../../../core/services/loggerService.js";
+import { notificationService } from "../../../core/services/notificationService.js";
+import { stateService } from "../../../core/services/stateService.js";
 import { patientApi } from "./patientApi.js";
-import { eventiCliniciService } from "/src/features/eventi-clinici/services/eventiCliniciService.js";
+import { eventiCliniciService } from "../../eventi-clinici/services/eventiCliniciService.js";
 
 class PatientTransactionService {
   constructor() {

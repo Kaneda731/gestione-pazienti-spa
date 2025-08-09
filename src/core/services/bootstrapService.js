@@ -5,9 +5,9 @@
  * Importa solo i componenti effettivamente utilizzati per ottimizzare il bundle
  */
 
-// Importa solo i componenti Bootstrap effettivamente utilizzati nell'app
-// Modal: utilizzato in ConfirmModal, AuthUI, modalService
-// Collapse: utilizzato in ErrorMessage per mostrare/nascondere dettagli errore
+// Import only Bootstrap components actually used in the app
+// Modal: used in ConfirmModal, AuthUI, modalService
+// Collapse: used in ErrorMessage to show/hide error details
 import { Modal, Collapse } from 'bootstrap';
 
 // Esporta i componenti per uso in altri moduli

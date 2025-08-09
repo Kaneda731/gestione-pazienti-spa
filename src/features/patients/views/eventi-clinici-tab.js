@@ -5,7 +5,7 @@ import { initCustomSelects, updateCustomSelect, CustomSelect } from '../../../sh
 import CustomDatepicker from '../../../shared/components/forms/CustomDatepicker.js';
 import { notificationService } from '../../../core/services/notificationService.js';
 import { logger } from '../../../core/services/loggerService.js';
-import { sanitizeHtml } from '../../../shared/utils/domSecurity.js';
+import { sanitizeHtml } from '../../../shared/utils/sanitizeHtml.js';
 import { ResolveInfectionModal } from '../../eventi-clinici/components/ResolveInfectionModal.js';
 
 let eventiDatepicker = null;
@@ -242,8 +242,7 @@ async function handleSaveEvento() {
         
         // La notifica di successo è già gestita da eventiCliniciService
     } catch (error) {
-        // La notifica di errore è già gestita da eventiCliniciService.
-        // Logghiamo l'errore qui per debug, ma non mostriamo una seconda notifica.
+        // Error notification is already handled by eventiCliniciService.
         logger.error('Errore catturato in handleSaveEvento:', error.message);
     }
 }
@@ -403,8 +402,7 @@ export async function loadEventiForCurrentPatient() {
         updatePostOperativeInfo(eventi);
         syncInfectionStatusWithForm(); // Sincronizza lo stato con il form principale
     } catch (error) {
-        // La notifica di errore è già gestita da eventiCliniciService.
-        // Logghiamo l'errore per debug, ma non mostriamo una notifica duplicata.
+        // Error notification is already handled by eventiCliniciService.
         logger.error('Errore nel caricamento eventi clinici per il paziente:', error);
     }
 }

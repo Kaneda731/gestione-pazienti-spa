@@ -7,7 +7,8 @@ import {
   getDOMElements,
   populateDepartmentFilter,
   populateAdvancedFilters,
-  applyResponsiveDesign
+  applyResponsiveDesign,
+  showError
 } from './eventi-clinici-ui.js';
 
 import { logger } from '../../../core/services/loggerService.js';

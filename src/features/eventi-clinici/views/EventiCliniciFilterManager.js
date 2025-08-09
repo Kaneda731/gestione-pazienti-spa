@@ -82,8 +82,7 @@ export class EventiCliniciFilterManager {
     } catch (error) {
       logger.error('❌ Errore filtro range date:', error);
       if (error.message.includes('data di inizio')) {
-        // Temporarily commented out to prevent notification flood
-        // notificationService.error(error.message);
+        notificationService.error(error.message);
       }
     } finally {
       hideSearchingState();
@@ -141,8 +140,7 @@ export class EventiCliniciFilterManager {
 
     } catch (error) {
       logger.error('❌ Errore applicazione filtri combinati:', error);
-      // La notifica di errore è già gestita a livello API/Service.
-      // Logghiamo qui per debug.
+      // Error notification is already handled at API/Service level.
     } finally {
       hideSearchingState();
     }
@@ -177,8 +175,7 @@ export class EventiCliniciFilterManager {
 
     } catch (error) {
       logger.error('❌ Errore applicazione ordinamento:', error);
-      // La notifica di errore è già gestita a livello API/Service.
-      // Logghiamo qui per debug.
+      // Error notification is already handled at API/Service level.
     } finally {
       hideSearchingState();
     }

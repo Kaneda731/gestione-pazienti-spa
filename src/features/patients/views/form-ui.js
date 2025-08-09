@@ -3,7 +3,7 @@ import { initCustomSelects, updateCustomSelect } from '../../../shared/component
 import CustomDatepicker from '../../../shared/components/forms/CustomDatepicker.js';
 import { notificationService } from '../../../core/services/notificationService.js';
 import { initEventiCliniciTab, setCurrentPatient, cleanupEventiCliniciTab, isPatientCurrentlyInfected } from './eventi-clinici-tab.js';
-import { sanitizeHtml } from '../../../shared/utils/domSecurity.js';
+import { sanitizeHtml } from '../../../shared/utils/sanitizeHtml.js';
 import { InfectionEventModal } from '../../eventi-clinici/components/InfectionEventModal.js';
 import infectionDataManager from '../services/infectionDataManager.js';
 
@@ -122,7 +122,7 @@ function updateInfectionStatusFromEvents() {
         infettoHelper.textContent = 'Stato gestito dagli eventi di infezione attivi.';
         infettoHelper.style.display = 'block';
         
-        // Pulisci i dati temporanei se ci sono eventi attivi
+        // Clear temporary data if there are active events
         if (hasNewInfectionData) {
             infectionDataManager.clearInfectionData();
             updateInfectionIndicator();
@@ -185,7 +185,7 @@ export function setupInfectionFlagHandler() {
             const infectionData = await showInfectionModal();
             
             if (infectionData) {
-                // Salva i dati temporaneamente
+                // Save data temporarily
                 infectionDataManager.setInfectionData(infectionData);
                 updateInfectionIndicator();
             } else {
@@ -328,7 +328,7 @@ export function cleanupFormComponents() {
         datepickerInstance = null;
     }
     
-    // Cleanup dei dati temporanei di infezione
+    // Cleanup temporary infection data
     infectionDataManager.clearInfectionData();
     
     // Cleanup del tab eventi clinici
@@ -390,7 +390,7 @@ export function populateForm(patient) {
     // Mostra/nascondi campi condizionali basati sul tipo dimissione e stato infetto
     handleTipoDimissioneChange(patient.tipo_dimissione || '');
     
-    // Pulisci i dati temporanei di infezione quando si carica un paziente esistente
+    // Clear temporary infection data when loading existing patient
     infectionDataManager.clearInfectionData();
     updateInfectionIndicator();
     

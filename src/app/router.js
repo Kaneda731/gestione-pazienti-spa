@@ -197,7 +197,9 @@ export async function renderView() {
         // Attiva la vista per le animazioni CSS
         const newView = viewContainer.querySelector('.view');
         if (newView) {
-            setTimeout(() => newView.classList.add('active'), 10);
+            // Forza il reflow prima di aggiungere la classe active
+            newView.offsetHeight;
+            newView.classList.add('active');
         }
 
         // Carica e inizializza il modulo JS corrispondente, se esiste

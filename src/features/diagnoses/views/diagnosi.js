@@ -78,10 +78,8 @@ export async function initDiagnosiView() {
     // Carica i dati iniziali
     await loadAndRenderDiagnosi();
 
-    // Funzione di cleanup
+    // Cleanup function
     return () => {
-        // Rimuovi gli event listener se necessario, anche se la vista viene distrutta
-        // dom.form.removeEventListener('submit', handleSave);
-        // dom.tableBody.removeEventListener('click', handleTableClick);
+        // Event listeners are automatically removed when the view is destroyed
     };
 }

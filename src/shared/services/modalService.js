@@ -90,7 +90,7 @@ export function showDeleteConfirmModal(onConfirm) {
  */
 export function showConfirmModal(title, message, confirmText = 'Conferma', cancelText = 'Annulla') {
     return new Promise((resolve) => {
-        // Crea modal temporaneo
+        // Create temporary modal
         const modalHtml = `
             <div class="modal fade" id="temp-confirm-modal" tabindex="-1">
                 <div class="modal-dialog">

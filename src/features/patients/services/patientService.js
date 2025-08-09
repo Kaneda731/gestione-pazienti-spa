@@ -6,14 +6,14 @@
  * con il layer di accesso ai dati.
  */
 
-import { supabase } from "/src/core/services/supabaseClient.js";
-import { stateService } from "/src/core/services/stateService.js";
-import { notificationService } from "/src/core/services/notificationService.js";
-import { logger } from "/src/core/services/loggerService.js";
+import { supabase } from "../../../core/services/supabaseClient.js";
+import { stateService } from "../../../core/services/stateService.js";
+import { notificationService } from "../../../core/services/notificationService.js";
+import { logger } from "../../../core/services/loggerService.js";
 import { patientApi } from "./patientApi.js";
-import { eventiCliniciService } from "/src/features/eventi-clinici/services/eventiCliniciService.js";
+import { eventiCliniciService } from "../../eventi-clinici/services/eventiCliniciService.js";
 import { validatePatientData, validateDischargeData } from "./patientValidation.js";
-import { generateCSV, downloadCSV } from "/src/shared/utils/csvUtils.js";
+import { generateCSV, downloadCSV } from "../../../shared/utils/csvUtils.js";
 import { patientTransactionService } from "./patientTransactionService.js";
 import infectionDataManager from "./infectionDataManager.js";
 
@@ -343,7 +343,7 @@ class PatientService {
         infectionData
       );
 
-      // Pulisci i dati temporanei dopo il successo
+      // Clear temporary data after success
       infectionDataManager.clearInfectionData();
       
       // Invalida la cache per forzare il refresh dei dati
@@ -436,10 +436,10 @@ class PatientService {
 
       const infectionEvent = await eventiCliniciService.createEvento(eventoData);
 
-      // Pulisci i dati temporanei
+      // Clear temporary data
       infectionDataManager.clearInfectionData();
       
-      // Invalida la cache del paziente
+      // Invalidate patient cache
       this.cache.delete(`patient_${patientId}`);
 
       logger.log(`Evento infezione creato con successo: ID ${infectionEvent.id}`);
@@ -540,10 +540,10 @@ class PatientService {
 
       const infectionEvent = await eventiCliniciService.createEvento(eventoData);
 
-      // Pulisci i dati temporanei
+      // Clear temporary data
       infectionDataManager.clearInfectionData();
       
-      // Invalida la cache del paziente
+      // Invalidate patient cache
       this.cache.delete(`patient_${patientId}`);
 
       notificationService.success("Nuovo evento infezione creato con successo!");

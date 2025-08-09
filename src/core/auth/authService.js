@@ -9,9 +9,7 @@ export let currentUser = {
     profile: null
 };
 
-// ===================================
-// GESTIONE PROFILO UTENTE
-// ===================================
+// User Profile Management
 
 async function fetchUserProfile(user) {
     if (!user) return null;
@@ -45,9 +43,7 @@ async function updateUserState(session) {
     window.dispatchEvent(new CustomEvent('auth-profile-loaded'));
 }
 
-// ===================================
-// AUTENTICAZIONE
-// ===================================
+// Authentication
 
 export async function signInWithGoogle() {
     return await oauthManager.signInWithGoogle();
@@ -64,9 +60,7 @@ export async function signOut() {
     }
 }
 
-// ===================================
-// INIZIALIZZAZIONE
-// ===================================
+// Initialization
 
 export async function initAuth(authCallback) {
     oauthManager.init();

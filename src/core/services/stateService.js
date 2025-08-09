@@ -820,7 +820,7 @@ class StateService {
 // Esporta istanza singleton
 export const stateService = new StateService();
 
-// Per debugging in sviluppo
+// Expose for development debugging
 if (import.meta.env.DEV) {
   window.stateService = stateService;
 }

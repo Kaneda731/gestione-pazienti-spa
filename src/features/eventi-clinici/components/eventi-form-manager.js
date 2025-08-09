@@ -591,7 +591,7 @@ export class EventiFormManager {
             this.datepickers.destroy();
         }
 
-        // Remove event listeners (they will be removed when the form is removed from DOM)
+        // Event listeners are automatically removed when form is removed from DOM
         window.appLogger?.debug('EventiFormManager destroyed');
     }
 }

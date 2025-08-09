@@ -1,4 +1,3 @@
-import { sanitizeHtml } from '../../../shared/utils/sanitizeHtml.js';
 // src/js/services/chartService.js
 
 /**

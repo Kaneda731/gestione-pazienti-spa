@@ -106,8 +106,7 @@ export class EventiCliniciModalManager {
 
     } catch (error) {
       logger.error('❌ Errore apertura modal evento:', error);
-      // Temporarily commented out to prevent notification flood
-      // notificationService.error('Errore nell'apertura del form');
+      notificationService.error('Errore nell\'apertura del form');
     }
   }
 
@@ -151,8 +150,7 @@ export class EventiCliniciModalManager {
       }
 
       const action = this.state.editingEventId ? 'aggiornato' : 'creato';
-      // Temporarily commented out to prevent notification flood
-      // notificationService.success(`Evento clinico ${action} con successo`);
+      notificationService.success(`Evento clinico ${action} con successo`);
 
     } catch (error) {
       logger.error('❌ Errore salvataggio evento:', error);

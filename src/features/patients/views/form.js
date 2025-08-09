@@ -20,7 +20,7 @@ async function handleFormSubmit(event, state) {
   try {
     showFeedbackMessage("Salvataggio in corso...", "info");
     
-    // Separa i dati del paziente dai dati temporanei di infezione
+    // Separate patient data from temporary infection data
     const patientData = {};
     const tempData = {};
     
@@ -35,7 +35,7 @@ async function handleFormSubmit(event, state) {
     let result;
     
     if (state.mode === "edit") {
-      // Modalità modifica - usa il metodo esistente
+      // Edit mode - use existing method
       result = await savePatient(patientData, state.patientId);
       
       // Se ci sono dati di infezione, gestiscili separatamente
@@ -46,7 +46,7 @@ async function handleFormSubmit(event, state) {
     } else {
       // Modalità inserimento
       if (tempData._hasInfectionData && tempData._infectionData) {
-        // Usa il nuovo metodo per creazione coordinata
+        // Use coordinated creation method
         const { patientService } = await import('../services/patientService.js');
         const transactionResult = await patientService.createPatientWithInfection(
           patientData, 

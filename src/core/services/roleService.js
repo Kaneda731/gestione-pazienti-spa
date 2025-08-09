@@ -5,8 +5,8 @@
  * Gestisce viewer, editor, admin permissions
  */
 
-import { supabase } from '/src/core/services/supabaseClient.js';
-import { logger } from '/src/core/services/loggerService.js';
+import { supabase } from './supabaseClient.js';
+import { logger } from './loggerService.js';
 
 class RoleService {
   constructor() {

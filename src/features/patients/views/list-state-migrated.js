@@ -45,7 +45,7 @@ export function cacheDOMElements(viewContainer) {
     domElements.backButton = viewContainer.querySelector('button[data-view="home"]');
     domElements.exportButton = document.getElementById('export-csv-btn');
     
-    // Debug: verifica se gli elementi critici esistono
+    // Verify critical DOM elements exist
     logger.log('🗂️ DOM elements cached:', {
         tableBody: !!domElements.tableBody,
         cardsContainer: !!domElements.cardsContainer,
@@ -225,8 +225,7 @@ export function subscribeToFilters(callback) {
 
 
 
-// Esporta stato legacy per compatibilità con codice esistente
-// TODO: Rimuovere quando tutta la migrazione è completa
+// Legacy state export for compatibility with existing code
 export const state = {
     get currentPage() { return getCurrentPage(); },
     set currentPage(value) { setCurrentPage(value); },

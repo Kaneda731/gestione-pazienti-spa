@@ -4,7 +4,7 @@ import { state, domElements, getCurrentFilters } from './list-state-migrated.js'
 import { convertToCSV } from '../../../shared/utils/index.js';
 import { patientService } from '../services/patientService.js';
 import { logger } from '../../../core/services/loggerService.js';
-import { sanitizeHtml } from '../../../shared/utils/domSecurity.js';
+import { sanitizeHtml } from '../../../shared/utils/sanitizeHtml.js';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -80,7 +80,7 @@ export async function fetchPazienti() {
         dataLength: data?.length,
         count,
         hasError: !!error,
-        sampleData: data?.slice(0, 2) // Mostra i primi 2 record per debug
+        sampleData: data?.slice(0, 2)
     });
     
     if (error) {
@@ -131,9 +131,9 @@ export async function fetchPazienti() {
         }
     }
     
-    // Debug: verifica se i dati hanno user_id (indicatore che sono reali)
+    // Verify data integrity
     if (data && data.length > 0) {
-        logger.log('🔍 Debug dati - Primo record:', {
+        logger.log('🔍 Data verification - First record:', {
             hasUserId: !!data[0].user_id,
             hasCreatedAt: !!data[0].created_at,
             hasEventiClinici: !!data[0].eventi_clinici,
@@ -159,7 +159,7 @@ export async function exportPazientiToCSV() {
         const filters = getCurrentFilters();
         await patientService.exportPatients(filters);
     } catch (error) {
-        // L'errore è già notificato dal service, lo logghiamo per debug
+        // Error is already notified by service, log for monitoring
         logger.error("Errore catturato in list-api durante l'esportazione CSV:", error);
     } finally {
         domElements.exportButton.disabled = false;

@@ -19,7 +19,7 @@ class ChartExportService {
           throw new Error('Grafico non valido per l\'esportazione');
         }
         
-        // Crea un canvas temporaneo per l'esportazione
+        // Create temporary canvas for export
         const exportCanvas = document.createElement('canvas');
         const ctx = exportCanvas.getContext('2d');
         

@@ -101,7 +101,7 @@ export class NotificationLazyLoader {
                     module = await import('./notificationRenderer.js');
                     break;
                 default:
-                    // Fallback al metodo originale per moduli non mappati
+                    // Fallback to original method for unmapped modules
                     module = await import(importPath);
             }
             

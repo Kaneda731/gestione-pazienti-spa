@@ -141,7 +141,7 @@ export class OAuthManager {
                 provider: 'google',
                 options: {
                     redirectTo,
-                    // In sviluppo, potremmo forzare un nuovo consent per debug
+                    // In development, force new consent for testing
                     queryParams: import.meta.env.DEV ? {
                         access_type: 'offline',
                         prompt: 'consent',

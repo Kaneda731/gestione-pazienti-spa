@@ -25,7 +25,7 @@ const supabaseOptions = {
     storage: window.localStorage,
     // Configurazione per prevenire problemi di CORS
     storageKey: 'supabase.auth.token',
-    // Debug mode per individuare problemi
+    // Debug mode for troubleshooting
     debug: import.meta.env.VITE_OAUTH_DEBUG === 'true'
   },
   // Configurazione per migliorare la gestione delle richieste

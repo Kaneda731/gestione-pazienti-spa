@@ -442,7 +442,7 @@ export class NotificationStorage {
         // Implementazione semplificata - in produzione usare libreria dedicata
         try {
             const jsonString = JSON.stringify(data);
-            return btoa(jsonString); // Base64 encoding come placeholder
+            return btoa(jsonString); // Base64 encoding as placeholder
         } catch (error) {
             console.warn('Errore compressione:', error);
             return data;
@@ -460,13 +460,13 @@ export class NotificationStorage {
     }
     
     async encryptData(data) {
-        // Implementazione placeholder - in produzione usare Web Crypto API
+        // Placeholder implementation - use Web Crypto API in production
         console.warn('Crittografia non implementata in questa versione');
         return data;
     }
     
     async decryptData(encryptedData) {
-        // Implementazione placeholder
+        // Placeholder implementation
         console.warn('Decrittografia non implementata in questa versione');
         return encryptedData;
     }
@@ -593,7 +593,7 @@ export class NotificationStorage {
             if (this.activeEngine.type === 'memory') {
                 return Array.from(this.activeEngine.engine.keys());
             } else if (this.activeEngine.type === 'indexedDB') {
-                // Implementazione per IndexedDB
+                // IndexedDB implementation
                 return []; // Placeholder
             } else {
                 return Object.keys(this.activeEngine.engine);

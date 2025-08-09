@@ -383,7 +383,7 @@ export class NotificationVirtualContainer {
           isPaused = false;
         }
 
-        // Riavvia timer con tempo rimanente (semplificato - riavvia da capo)
+        // Restart timer with remaining time (simplified - restart from beginning)
         if (
           !notificationOrElement.classList.contains("notification--persistent")
         ) {

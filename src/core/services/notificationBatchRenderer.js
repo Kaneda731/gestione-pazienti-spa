@@ -420,7 +420,7 @@ export class NotificationBatchRenderer {
         const element = document.querySelector(`[data-notification-id="${notificationId}"]`);
         if (element && element.getAttribute('data-timer-paused') === 'true') {
             element.removeAttribute('data-timer-paused');
-            // Riavvia timer con tempo rimanente (semplificato)
+            // Restart timer with remaining time (simplified)
             const notification = this.getNotificationById(notificationId);
             if (notification) {
                 this.startAutoCloseTimer(notification, element);

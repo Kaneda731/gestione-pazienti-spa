@@ -2,7 +2,7 @@
 
 import { Modal } from '../../../core/services/bootstrapService.js';
 import CustomDatepicker from '../../../shared/components/forms/CustomDatepicker.js';
-import { sanitizeHtml } from '../../../shared/utils/domSecurity.js';
+import { sanitizeHtml } from '../../../shared/utils/sanitizeHtml.js';
 
 /**
  * Componente per un modal dedicato alla risoluzione di un evento di infezione.

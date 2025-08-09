@@ -259,12 +259,12 @@ export class NotificationSoundManager {
         return this.options.volume;
     }
     
-    // Metodo per testare i suoni
+    // Method to test sounds
     async testSound(type = 'info') {
         await this.playSound(type, { volume: 0.5 });
     }
     
-    // Metodo per testare tutti i suoni
+    // Method to test all sounds
     async testAllSounds() {
         const types = ['success', 'info', 'warning', 'error'];
         for (let i = 0; i < types.length; i++) {

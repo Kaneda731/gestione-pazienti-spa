@@ -54,7 +54,7 @@ export class CustomSelect {
         if (this.selectElement.value) {
             this.setValue(this.selectElement.value, true); // silent = true
         } else {
-            // Altrimenti, resetta al placeholder
+            // Otherwise, reset to placeholder
             const label = this.wrapper.querySelector('.custom-select-label');
             if (label) {
                 label.textContent = this.options.placeholder;
@@ -108,11 +108,11 @@ export class CustomSelect {
                 // Crea elementi DOM sicuri invece di usare innerHTML
                 let iconHtml = option.getAttribute('data-icon');
                 
-                // Crea un container temporaneo per parsare l'HTML sanitizzato
+                // Create temporary container to parse sanitized HTML
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = sanitizeHtml(iconHtml);
                 
-                // Aggiungi tutti i nodi icona
+                // Add all icon nodes
                 while (tempDiv.firstChild) {
                     optionElement.appendChild(tempDiv.firstChild);
                 }
@@ -259,11 +259,11 @@ export class CustomSelect {
                 
                 label.innerHTML = '';
                 
-                // Crea un container temporaneo per parsare l'HTML sanitizzato
+                // Create temporary container to parse sanitized HTML
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = sanitizeHtml(iconHtml);
                 
-                // Aggiungi tutti i nodi icona
+                // Add all icon nodes
                 while (tempDiv.firstChild) {
                     label.appendChild(tempDiv.firstChild);
                 }

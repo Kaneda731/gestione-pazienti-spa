@@ -165,10 +165,9 @@ class NotificationService {
 
             this.initialized = true;
             
-            // Esponi metodo di emergenza globalmente per debug
+            // Expose emergency reset method globally for development
             if (typeof window !== 'undefined') {
                 window.notificationEmergencyReset = () => this.emergencyReset();
-                // Messaggio immediato per l'utente
                 console.log('🚨 EMERGENCY: If you see error loops, run: window.notificationEmergencyReset()');
             }
             
@@ -444,7 +443,7 @@ class NotificationService {
                 this.notificationContainer.clearAllNotifications();
             }
 
-            // Usa il metodo del StateService per cleanup completo
+            // Use StateService method for complete cleanup
             stateService.clearAllNotifications();
         } catch (error) {
             NotificationErrorHandler.handleServiceError(error, 'clear');
@@ -466,7 +465,7 @@ class NotificationService {
             }
         });
 
-        // Usa il metodo del StateService
+        // Use StateService method
         stateService.clearNotificationsByType(type);
     }
 

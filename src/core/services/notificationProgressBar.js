@@ -45,16 +45,16 @@ export class NotificationProgressBar {
   init() {
     if (this.isDestroyed) return;
 
-    // Cerca il placeholder esistente
+    // Find existing placeholder
     const placeholder = this.element.querySelector(
       ".notification__progress--js-placeholder"
     );
 
     if (placeholder) {
-      // Sostituisci il placeholder con la progress bar JavaScript
+      // Replace placeholder with JavaScript progress bar
       this.replaceProgressBarPlaceholder(placeholder);
     } else {
-      // Crea la progress bar se non esiste
+      // Create progress bar if it doesn't exist
       if (!this.element.querySelector(".notification__progress")) {
         this.createProgressBar();
       }
@@ -79,7 +79,7 @@ export class NotificationProgressBar {
       info: "var(--notification-info-bg)",
     };
 
-    // Rimuovi le classi placeholder e aggiungi quelle JavaScript
+    // Remove placeholder classes and add JavaScript classes
     placeholder.classList.remove("notification__progress--js-placeholder");
     placeholder.classList.add("notification__progress--js-controlled");
 
@@ -134,7 +134,7 @@ export class NotificationProgressBar {
             box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
         `;
 
-    // Pulisci il placeholder e aggiungi il fill
+    // Clear placeholder and add fill
     placeholder.innerHTML = "";
     placeholder.appendChild(progressFill);
   }
@@ -237,7 +237,7 @@ export class NotificationProgressBar {
         return;
       }
 
-      // Calcola frazione di tempo trascorso (0 a 1)
+      // Calculate elapsed time fraction (0 to 1)
       let timeFraction = (time - start - this.pausedTime) / duration;
       if (timeFraction > 1) timeFraction = 1;
       if (timeFraction < 0) timeFraction = 0;
@@ -272,7 +272,7 @@ export class NotificationProgressBar {
     // Inverti il progresso per countdown (da 1 a 0)
     const countdownProgress = 1 - progress;
 
-    // Debug: log del progresso ogni 10%
+
 
 
     // Applica transform con GPU acceleration
@@ -300,7 +300,7 @@ export class NotificationProgressBar {
     if (this.isPaused && !this.isDestroyed) {
       this.isPaused = false;
 
-      // Accumula tempo di pausa
+      // Accumulate pause time
       if (this.pauseStartTime) {
         this.pausedTime += performance.now() - this.pauseStartTime;
         this.pauseStartTime = null;

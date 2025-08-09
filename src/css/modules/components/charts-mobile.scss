@@ -1,0 +1,32 @@
+/* ===================================
+   CHARTS MOBILE STYLES
+   =================================== */
+
+@media (max-width: 767px) {
+    #chart-container {
+        min-height: 350px;
+        width: 100%;
+        padding: 0.5rem;
+        margin: 0.5rem 0;
+    }
+    
+    /* Responsive chart adjustments */
+    .chart-responsive {
+        position: relative;
+        height: 300px;
+        width: 100%;
+    }
+    
+    /* Chart controls mobile */
+    .chart-controls {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .chart-type-selector {
+        width: 100%;
+        margin-bottom: 0.75rem;
+    }
+}

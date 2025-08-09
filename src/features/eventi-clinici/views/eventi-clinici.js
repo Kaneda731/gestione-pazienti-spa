@@ -1,6 +1,7 @@
 // src/features/eventi-clinici/views/eventi-clinici.js
 
 import { getSuggestedFilters, getDepartmentsList } from './eventi-clinici-api.js';
+import { resetCurrentFiltersToDefaults } from './eventi-clinici-api.js';
 
 import {
   initializeDOMElements,
@@ -8,6 +9,7 @@ import {
   populateDepartmentFilter,
   populateAdvancedFilters,
   applyResponsiveDesign,
+  resetFiltersUI,
   showError
 } from './eventi-clinici-ui.js';
 
@@ -81,8 +83,10 @@ export async function initEventiCliniciView(urlParams) {
     // Load filter suggestions and departments
     await loadFilterSuggestions();
 
-    // Load saved filters from state
-    await filterManager.loadSavedFilters();
+  // Forza reset filtri all'avvio: niente filtri attivi di default
+  resetCurrentFiltersToDefaults();
+  // Resetta i controlli UI dei filtri
+  resetFiltersUI();
 
     // Load initial data
     await dataManager.loadEventsData();

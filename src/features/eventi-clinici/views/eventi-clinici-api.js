@@ -984,6 +984,25 @@ export async function loadFiltersFromState() {
 }
 
 /**
+ * Reimposta i filtri correnti ai valori di default senza effettuare fetch
+ * Utile all'inizializzazione della vista per partire senza filtri attivi
+ */
+export function resetCurrentFiltersToDefaults() {
+  currentFilters = {
+    paziente_search: '',
+    tipo_evento: '',
+    data_da: '',
+    data_a: '',
+    reparto: '',
+    agente_patogeno: '',
+    tipo_intervento: '',
+    sortColumn: 'data_evento',
+    sortDirection: 'desc'
+  };
+  logger.log('🔧 Filtri in memoria reimpostati ai default');
+}
+
+/**
  * Resetta filtri e rimuove dallo stato persistente
  */
 export async function resetFiltersAndState() {

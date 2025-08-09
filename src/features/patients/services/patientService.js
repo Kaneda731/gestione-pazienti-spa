@@ -574,45 +574,7 @@ class PatientService {
     return patientTransactionService.getTransactionLog(transactionId);
   }
 
-  /**
-   * Debug function per verificare la fonte dei dati
-   */
-  async debugDataSource() {
-    logger.log("🔍 DEBUG: Verifica fonte dati pazienti...");
-    try {
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      logger.log("👤 Utente autenticato:", user?.email || "Non autenticato");
-      if (authError) logger.error("❌ Errore autenticazione:", authError);
 
-      const { count, data: allPatients, error: dbError } = await supabase.from("pazienti").select("*", { count: "exact" });
-      logger.log("📊 Pazienti nel database:", count);
-      if (dbError) logger.error("❌ Errore DB:", dbError);
-
-      logger.log("💾 Cache locale:", {
-        cacheSize: this.cache.size,
-        cacheKeys: Array.from(this.cache.keys()),
-      });
-
-      const hasMockData = allPatients && allPatients.some(p => p.nome?.includes("Test") || p.cognome?.includes("Test"));
-      logger.log("🧪 Dati mock rilevati:", hasMockData);
-
-      // Aggiungi statistiche transazioni
-      const transactionStats = this.getTransactionStats();
-      logger.log("📊 Statistiche transazioni:", transactionStats);
-
-      return {
-        user: user?.email,
-        dbCount: count,
-        hasDbError: !!dbError,
-        cacheSize: this.cache.size,
-        hasMockData,
-        transactionStats
-      };
-    } catch (error) {
-      logger.error("❌ Errore durante debug:", error);
-      return { error: error.message };
-    }
-  }
 }
 
 export const patientService = new PatientService();

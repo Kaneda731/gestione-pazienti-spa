@@ -223,16 +223,7 @@ export function subscribeToFilters(callback) {
     });
 }
 
-/**
- * Utility per debug dello stato
- */
-export function getStateDebugInfo() {
-    return {
-        filters: stateService.getFilters(),
-        domElements: Object.keys(domElements),
-        stateService: stateService.getState()
-    };
-}
+
 
 // Esporta stato legacy per compatibilità con codice esistente
 // TODO: Rimuovere quando tutta la migrazione è completa

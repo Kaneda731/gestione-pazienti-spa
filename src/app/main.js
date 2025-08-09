@@ -32,11 +32,7 @@ import '../core/services/uiStateService.js';
 // Emergency commands (sempre disponibili per sicurezza)
 import '../core/services/emergencyCommands.js';
 
-// Debug utils (solo in development)
-if (isDevelopment) {
-    import('../core/services/notificationDebugUtils.js');
-    import('../core/services/notificationServiceSimple.js');
-}
+// Debug utils removed for production readiness
 
 // Debug: esponi il notificationService globalmente per testing
 if (isDevelopment) {
@@ -55,11 +51,7 @@ import { initializeAuthEventListeners } from '../shared/components/ui/AuthUI.js'
 import { renderView } from './router.js';
 import { initBackToMenuButtons } from '../core/services/navigationService.js';
 
-// Debug tools (solo in development)
-if (isDevelopment && environment.OAUTH_DEBUG) {
-    import('../core/utils/oauthDebug.js');
-    import('../core/utils/oauthTest.js');
-}
+// OAuth debug tools removed for production readiness
 
 /**
  * Inizializza l'applicazione

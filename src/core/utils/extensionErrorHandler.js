@@ -34,8 +34,6 @@ class ExtensionErrorHandler {
         
         // Intercetta e gestisce i message listeners delle estensioni
         this.interceptExtensionListeners();
-        
-        console.log('ExtensionErrorHandler inizializzato');
     }
     
     /**

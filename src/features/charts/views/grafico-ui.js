@@ -462,11 +462,9 @@ export async function drawChart(data) {
                     'top',
                 onHover: function(event, legendItem, legend) {
                     // Implementa l'interazione hover qui
-                    // console.log('Hover su legenda:', legendItem);
                 },
                 onClick: function(event, legendItem, legend) {
                     // Implementa l'interazione click qui
-                    // console.log('Click su legenda:', legendItem);
                 }
             }
         },
@@ -575,7 +573,6 @@ export async function drawChartWithCurrentData(filters) {
         
         // In caso di errore, mostra dati di fallback per permettere lo sviluppo
         try {
-            console.warn('Utilizzo dati di fallback per lo sviluppo');
             
             const fallbackData = [
                 { diagnosi: 'Influenza' },

@@ -47,8 +47,6 @@ export class NotificationContainer {
         if (id) {
             this.notifications.set(id, element);
         }
-        
-        console.log(`✅ Notification added to container: ${id}`);
     }
     
     removeNotification(id) {
@@ -56,7 +54,6 @@ export class NotificationContainer {
         if (element && element.parentNode) {
             element.parentNode.removeChild(element);
             this.notifications.delete(id);
-            console.log(`🗑️ Notification removed from container: ${id}`);
         }
     }
     
@@ -67,7 +64,6 @@ export class NotificationContainer {
             }
         });
         this.notifications.clear();
-        console.log('🧹 All notifications cleared from container');
     }
     
     updateSettings(newSettings) {

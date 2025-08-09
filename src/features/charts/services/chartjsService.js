@@ -81,8 +81,6 @@ class ChartLoaderService {
     this.prefetchLink.href = this.chartJsCdn;
     this.prefetchLink.as = "script";
     document.head.appendChild(this.prefetchLink);
-
-    console.log("Chart.js prefetch iniziato");
   }
 
   /**
@@ -127,9 +125,8 @@ class ChartLoaderService {
           return;
         }
 
-        // Calcola e registra il tempo di caricamento
+        // Calcola il tempo di caricamento
         const loadTime = performance.now() - this.loadStartTime;
-        console.log(`Chart.js caricato in ${loadTime.toFixed(2)}ms`);
 
         // Resetta i contatori di tentativi
         this.loadAttempts = 0;
@@ -150,7 +147,6 @@ class ChartLoaderService {
         if (this.loadAttempts < this.maxRetries) {
           const retryDelay =
             this.retryDelay * Math.pow(2, this.loadAttempts - 1);
-          console.log(`Tentativo di ricaricamento tra ${retryDelay}ms...`);
 
           setTimeout(() => {
             // Resetta la promise per permettere un nuovo tentativo
@@ -329,10 +325,6 @@ class ChartCacheService {
           this.cache.delete(key);
         }
       }
-
-      console.log(
-        `Pulizia cache completata. Elementi rimanenti: ${this.cache.size}`
-      );
     }
   }
 
@@ -529,7 +521,7 @@ export async function createChart(
     // Controlla se i dati sono in cache
     const cachedData = chartCache.get(cacheKey);
     if (cachedData) {
-      console.log("Utilizzo dati dalla cache per il grafico");
+      // Utilizzo dati dalla cache per il grafico
     }
 
     // Inizializza i componenti

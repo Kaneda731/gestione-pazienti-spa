@@ -250,8 +250,6 @@ export class NotificationVirtualContainer {
           if (notificationId && window.notificationService) {
             window.notificationService.removeNotification(notificationId);
           }
-
-          console.log("✅ Notification closed manually");
         });
       }
 
@@ -418,10 +416,6 @@ export class NotificationVirtualContainer {
           notificationOrElement.setAttribute("data-timer-id", newTimer);
         }
       });
-
-      console.log(
-        "✅ DOM element added to virtual container with event listeners and auto-close timer"
-      );
       return;
     }
 

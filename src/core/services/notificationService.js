@@ -1305,4 +1305,3 @@ class NotificationService {
 // Esporta istanza singleton
 var notificationService = new NotificationService();
 export { notificationService };
-export default notificationService;

@@ -249,9 +249,9 @@ class ExtensionErrorHandler {
     }
 }
 
-// Crea un'istanza globale
+// Crea un'istanza globale (side-effect)
 const extensionErrorHandler = new ExtensionErrorHandler();
-
-// Esporta per uso in altri moduli
-export default extensionErrorHandler;
-export { ExtensionErrorHandler };
+// opzionale: esponi per debug
+if (typeof window !== 'undefined') {
+    window.extensionErrorHandler = extensionErrorHandler;
+}

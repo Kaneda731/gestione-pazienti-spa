@@ -20,7 +20,7 @@ import { sanitizeHtml } from '../utils/sanitizeHtml.js';
  * @param {Function} onConfirm - Callback da eseguire quando l'utente conferma
  * @returns {Promise} Promise che si risolve quando il modal viene gestito
  */
-export function showDeleteConfirmModal(onConfirm) {
+function showDeleteConfirmModal(onConfirm) {
     return new Promise((resolve) => {
         const modalElement = document.getElementById('delete-confirm-modal');
         const confirmBtn = document.getElementById('confirm-delete-btn');
@@ -88,7 +88,7 @@ export function showDeleteConfirmModal(onConfirm) {
  * @param {string} cancelText - Testo del pulsante di annulla
  * @returns {Promise<boolean>} Promise che si risolve con true se confermato
  */
-export function showConfirmModal(title, message, confirmText = 'Conferma', cancelText = 'Annulla') {
+function showConfirmModal(title, message, confirmText = 'Conferma', cancelText = 'Annulla') {
     return new Promise((resolve) => {
         // Create temporary modal
         const modalHtml = `

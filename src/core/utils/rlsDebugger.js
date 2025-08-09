@@ -367,9 +367,11 @@ class RLSDebugger {
   }
 }
 
-// Esporta istanza singleton
-export const rlsDebugger = new RLSDebugger();
-
-// Funzione di utilità per uso rapido nella console
-window.checkRLS = () => rlsDebugger.quickTest();
-window.fullRLSCheck = () => rlsDebugger.checkRLSStatus();
+// Istanza singleton disponibile globalmente per debug/manuale
+const rlsDebugger = new RLSDebugger();
+if (typeof window !== 'undefined') {
+  window.rlsDebugger = rlsDebugger;
+  // Funzioni rapide in console
+  window.checkRLS = () => rlsDebugger.quickTest();
+  window.fullRLSCheck = () => rlsDebugger.checkRLSStatus();
+}

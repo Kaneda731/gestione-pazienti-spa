@@ -104,6 +104,4 @@ class LoggerService {
 
 // Esporta un'istanza singleton del logger
 export const logger = new LoggerService();
-
-// Esporta anche la classe per eventuali test
-export { LoggerService };
+// Nota: non esportiamo la classe per evitare warning di unused export; se serve nei test, importare dal file direttamente con path.

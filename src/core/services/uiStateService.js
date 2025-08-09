@@ -293,5 +293,9 @@ class UIStateService {
     }
 }
 
-// Esporta istanza singleton
-export const uiStateService = new UIStateService();
+// Istanza singleton (side-effect module)
+const uiStateService = new UIStateService();
+// opzionale: esponi sul window per debug manuale
+if (typeof window !== 'undefined') {
+    window.uiStateService = uiStateService;
+}

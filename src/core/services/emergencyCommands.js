@@ -48,7 +48,4 @@ if (typeof window !== 'undefined') {
     console.log('%c3. Or run: location.reload()', 'color: yellow; font-size: 14px;');
 }
 
-export default {
-    EMERGENCY_STOP: window.EMERGENCY_STOP,
-    EMERGENCY_RELOAD: window.EMERGENCY_RELOAD
-};
+// Nessun export: il file è importato per side-effects dall'app

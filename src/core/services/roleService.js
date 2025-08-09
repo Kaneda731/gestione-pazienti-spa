@@ -312,12 +312,8 @@ class RoleService {
   }
 }
 
-// Esporta istanza singleton
-export const roleService = new RoleService();
-
-// Funzioni di utilità per uso rapido
-export const canRead = () => roleService.canRead();
-export const canWrite = () => roleService.canWrite();
-export const canDelete = () => roleService.canDelete();
-export const isAdmin = () => roleService.isAdmin();
-export const getCurrentRole = () => roleService.getCurrentUserRole();
+// Istanza singleton (side-effect); esponi globalmente per debug se serve
+const roleService = new RoleService();
+if (typeof window !== 'undefined') {
+  window.roleService = roleService;
+}

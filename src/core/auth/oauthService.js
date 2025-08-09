@@ -6,7 +6,7 @@ import { logger } from '../services/loggerService.js';
 /**
  * Gestisce i problemi comuni con OAuth in ambiente Vite
  */
-export class OAuthManager {
+class OAuthManager {
     constructor() {
         this.isInitialized = false;
         this.authState = 'idle'; // idle, authenticating, authenticated, error

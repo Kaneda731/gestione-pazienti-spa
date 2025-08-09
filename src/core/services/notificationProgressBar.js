@@ -4,7 +4,7 @@
  * Basato su: https://javascript.info/js-animation
  */
 
-export class NotificationProgressBar {
+class NotificationProgressBar {
   constructor(element, duration = 4000, type = "success") {
     this.element = element;
     this.duration = duration;
@@ -353,4 +353,3 @@ export function createProgressBar(notificationElement, duration, type) {
   return new NotificationProgressBar(notificationElement, duration, type);
 }
 
-export default NotificationProgressBar;

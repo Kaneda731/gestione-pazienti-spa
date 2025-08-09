@@ -5,7 +5,7 @@
  * Ottimizza il caricamento iniziale e riduce bundle size
  */
 
-export class NotificationLazyLoader {
+class NotificationLazyLoader {
     constructor() {
         this.loadedModules = new Map();
         this.loadingPromises = new Map();

@@ -662,4 +662,3 @@ if (typeof window !== 'undefined') {
 }
 
 export { NotificationErrorHandler };
-export default NotificationErrorHandler;

@@ -3,7 +3,7 @@
  * Gestisce storage multi-livello con fallback e sincronizzazione
  */
 
-export class NotificationStorage {
+class NotificationStorage {
     constructor(options = {}) {
         this.options = {
             primaryStorage: 'localStorage',
@@ -621,11 +621,9 @@ export class NotificationStorage {
 // Istanza singleton
 let storageInstance = null;
 
-export const getStorageManager = () => {
+const getStorageManager = () => {
     if (!storageInstance) {
         storageInstance = new NotificationStorage();
     }
     return storageInstance;
 };
-
-export default NotificationStorage;

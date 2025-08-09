@@ -11,7 +11,7 @@
 import { Modal, Collapse } from 'bootstrap';
 
 // Esporta i componenti per uso in altri moduli
-export { Modal, Collapse };
+export { Modal };
 
 // Rende Bootstrap disponibile globalmente se necessario
 if (typeof window !== 'undefined') {

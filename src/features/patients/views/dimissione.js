@@ -1,5 +1,4 @@
 // src/features/patients/views/dimissione.js
-import { navigateTo } from '../../../app/router.js';
 import { searchActivePatients, dischargePatientWithTransfer } from './dimissione-api.js';
 import { 
     dom,
@@ -72,7 +71,8 @@ async function handleDischargeSubmit(event) {
         showFeedback(successMessage, 'success');
         selectedPatient = null;
         resetView();
-        setTimeout(() => navigateTo('home'), 1500);
+    // Evita import circolare con il router: usa direttamente l'hash
+    setTimeout(() => { window.location.hash = 'home'; }, 1500);
     } catch (error) {
         showFeedback(error.message, 'error');
     }

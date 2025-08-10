@@ -36,6 +36,13 @@ Thumbs.db
 !package.json
 !package-lock.json
 !vite.config.js
+!vitest.config.js
+!playwright.config.js
+!playwright-performance.config.js
+!eslint.config.js
+!.eslintrc.json
+!shared.config.js
+!knip.json
 !netlify.toml
 !README.md
 
@@ -56,13 +63,19 @@ Thumbs.db
 *.js
 !vite.config.js
 
-# All configuration files
+# All configuration files (except essential ones)
 *.config.*
 !vite.config.js
+!vitest.config.js
+!playwright.config.js
+!playwright-performance.config.js
+!eslint.config.js
+!shared.config.js
 !package.json
 
-# All test files and directories
-__tests__/
+# All test files and directories (except debug utilities)
+__tests__/*
+!__tests__/debug/
 test*/
 tests*/
 **/*.test.*
@@ -70,14 +83,19 @@ tests*/
 *.test.*
 *.spec.*
 
-# All coverage and reports
+# All coverage and reports (except essential summaries)
 coverage*/
-reports/
+reports/*
+!reports/code_summary.json
 playwright-report/
 test-results/
 
-# All scripts and tools
-scripts/
+# All scripts and tools (except essential cleanup scripts)
+scripts/*
+!scripts/verify-dependencies.js
+!scripts/cleanup/
+scripts/cleanup/*
+!scripts/cleanup/safe-cleanup-phase*.js
 tools/
 
 # All backup and temporary directories

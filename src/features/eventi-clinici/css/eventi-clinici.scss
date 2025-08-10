@@ -22,12 +22,7 @@
     margin-bottom: 1.5rem;
     padding-left: 70px;
     cursor: pointer;
-    transition: all 0.3s ease;
-    
-    &:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
+    /* animazioni disabilitate: nessun effetto hover di movimento */
     
     .event-icon {
         position: absolute;
@@ -52,7 +47,7 @@
         border: 1px solid #dee2e6;
         border-radius: 8px;
         padding: 1rem;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         
         .event-header {
             display: flex;
@@ -216,9 +211,14 @@
 
     tbody td {
         vertical-align: middle;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    }
+
+    /* Le celle di Dettagli e Descrizione devono poter espandere il contenuto al hover */
+    tbody td:nth-child(5), /* Dettagli */
+    tbody td:nth-child(6)  /* Descrizione */ {
+        overflow: visible;
     }
 
     /* Allinea al centro la colonna Tipo e a destra le Azioni */
@@ -232,11 +232,28 @@
         text-align: right;
     }
 
-    /* Consenti wrapping per descrizione e dettagli */
-    tbody td:nth-child(5), /* Dettagli */
-    tbody td:nth-child(6)  /* Descrizione */ {
+    /* Wrapper testuale con clamp a 3 righe per contenuti lunghi */
+    .clamp-3 {
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 3;
+        line-clamp: 3; /* standard */
+        overflow: hidden;
+        text-overflow: ellipsis;
         white-space: normal;
+        word-break: normal;
+        overflow-wrap: break-word;
+        hyphens: auto;
+        font-size: 0.98em;
+        line-height: 1.3;
     }
+    .clamp-3:hover {
+    -webkit-line-clamp: unset;
+    line-clamp: unset;
+    overflow: visible;
+    transition: none;
+    }
+    
 
     /* Allinea Stato e Azioni */
     thead th:nth-child(7),
@@ -246,19 +263,35 @@
 
     /* Larghezze colonne su desktop (>=1024px) */
     @media (min-width: 1024px) {
-        th:nth-child(1), td:nth-child(1) { width: 12%; } /* Data Evento */
-        th:nth-child(2), td:nth-child(2) { width: 10%; } /* Tipo */
-        th:nth-child(3), td:nth-child(3) { width: 18%; } /* Paziente */
-        th:nth-child(4), td:nth-child(4) { width: 12%; } /* Reparto */
-        th:nth-child(5), td:nth-child(5) { width: 14%; } /* Dettagli */
-        th:nth-child(6), td:nth-child(6) { width: 18%; } /* Descrizione */
-        th:nth-child(7), td:nth-child(7) { width: 6%; }  /* Stato */
-        th:nth-child(8), td:nth-child(8) { width: 10%; } /* Azioni */
+    th:nth-child(1), td:nth-child(1) { width: 12%; } /* Data Evento */
+    th:nth-child(2), td:nth-child(2) { width: 9%; }  /* Tipo */
+    th:nth-child(3), td:nth-child(3) { width: 19%; } /* Paziente */
+    th:nth-child(4), td:nth-child(4) { width: 10%; } /* Reparto */
+    th:nth-child(5), td:nth-child(5) { width: 18%; } /* Dettagli */
+    th:nth-child(6), td:nth-child(6) { width: 14%; } /* Descrizione */
+    th:nth-child(7), td:nth-child(7) { width: 5%; }  /* Stato */
+    th:nth-child(8), td:nth-child(8) { width: 13%; } /* Azioni */
     }
 
     /* Azioni sempre compattate */
     td:last-child {
         white-space: nowrap;
         width: 1%;
+        min-width: 220px; /* garantisce spazio per 3-4 bottoni */
+    }
+
+    /* Tooltip cursor */
+    tbody td[data-bs-toggle="tooltip"] { cursor: help; }
+
+    /* Evita wrap dei bottoni azione e compatta lo spacing */
+    td:last-child .btn-group {
+        display: inline-flex;
+        flex-wrap: nowrap;
+        gap: 4px;
+    transition: none;
+    }
+    td:last-child .btn-group .btn {
+        flex: 0 0 auto;
+    transition: none;
     }
 }

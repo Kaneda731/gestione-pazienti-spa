@@ -826,8 +826,14 @@
 /* Layout responsive per i pulsanti del modal */
 @media (max-width: 576px) {
   #evento-form-modal .modal-footer {
-    flex-direction: column !important;
-    gap: 0.75rem !important;
+  flex-direction: column !important;
+  gap: 0.75rem !important;
+  padding-top: 0.75rem !important;
+  position: sticky !important;
+  bottom: 0 !important;
+  z-index: 5 !important;
+  background: var(--card-bg) !important;
+  border-top: 1px solid var(--border-color) !important;
   }
 
   #evento-form-modal .modal-footer .btn {

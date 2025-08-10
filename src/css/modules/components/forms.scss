@@ -392,9 +392,7 @@ label[for="data_infezione"] {
     width: 100%;
     margin-bottom: 0;
 }
-.search-results-list .list-group-item {
-  /* ...stili desktop già presenti... */
-}
+
 
 @media (max-width: 768px) {
   .search-results-list .list-group-item {
@@ -635,9 +633,18 @@ select.custom-select-original {
 
 /* Regole specifiche per la modal degli eventi clinici */
 #evento-form-modal .modal-body {
-  overflow: visible !important;
-  /* Aggiungi padding extra in basso per fare spazio ai dropdown */
-  padding-bottom: 2rem;
+    /* Consenti scroll verticale per evitare che il footer copra i campi; mantieni visibilità orizzontale per dropdown personalizzati */
+    overflow-y: auto !important;
+    overflow-x: visible !important;
+    /* Spazio extra per i pulsanti nel footer */
+    padding-bottom: 9rem; /* fallback */
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 144px);
+}
+
+/* Evita che il footer copra il campo descrizione quando è in fondo */
+#evento-form-modal #evento-descrizione {
+    margin-bottom: 1rem;
+    scroll-margin-bottom: 160px;
 }
 
 #evento-form-modal .custom-select-wrapper.open {

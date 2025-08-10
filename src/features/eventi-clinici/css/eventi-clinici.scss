@@ -44,16 +44,65 @@
 .timeline-event-card {
     position: relative;
     margin-left: 32px; /* distacco dalla linea */
+    /* Evita tagli del menu Azioni o di tooltip rispetto ai bordi arrotondati */
+    overflow: visible;
 }
 
 .timeline-event-card .event-card-body {
-    max-height: 60px;
-    overflow: hidden;
-    transition: max-height 0.25s ease;
+    max-height: none;
+    overflow: visible;
+    transition: none;
 }
 
-.timeline-event-card.expanded .event-card-body {
-    max-height: 1000px; /* espansione */
+/* Nessuna espansione: il contenuto è sempre visibile */
+
+/* Modal Azioni - ottimizzazioni mobile */
+.modal#eventi-azioni-modal {
+    .modal-dialog { max-width: 420px; margin: 0.5rem auto; }
+    .modal-content { border-radius: 14px; overflow: hidden; }
+    .modal-header { padding: 0.85rem 1rem; background:
+        linear-gradient(135deg, var(--bs-primary) 0%, var(--bs-primary-border-subtle, #4da3ff) 100%);
+        color: #fff; }
+    .modal-header .btn-close { filter: invert(1) grayscale(1) brightness(200%); opacity: 0.8; }
+    .modal-body { padding: 0; }
+
+    /* Nuovi pulsanti azione stile tile */
+    #azioni-modal-body {
+        .azioni-actions { display: flex; flex-direction: column; }
+        .azione-btn {
+            --tile-bg: var(--card-bg, var(--bs-body-bg));
+            --tile-border: var(--border-color, var(--bs-border-color));
+            --tile-hover: rgba(0,0,0,0.04);
+            width: 100%;
+            background: var(--tile-bg);
+            border: none;
+            border-bottom: 1px solid var(--tile-border);
+            padding: 0.9rem 1rem;
+            display: grid;
+            grid-template-columns: 32px 1fr 24px;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1rem;
+            text-align: left;
+            transition: background-color .15s ease, transform .06s ease;
+        }
+        .azione-btn:last-child { border-bottom: none; }
+        .azione-btn:active { transform: translateY(0.5px); }
+        .azione-btn:hover { background: var(--tile-hover); }
+        .azione-btn:focus { outline: 2px solid var(--bs-primary); outline-offset: -2px; }
+
+        .azione-icon { width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; }
+        .azione-icon .material-icons { font-size: 20px; }
+        .azione-label { font-weight: 600; }
+        .azione-chevron { color: var(--text-secondary, #6c757d); }
+
+        /* Varianti colore */
+        .is-detail .azione-icon { background: rgba(var(--primary-rgb, 13,110,253), .12); color: var(--bs-primary); }
+        .is-edit .azione-icon { background: rgba(108,117,125, .12); color: var(--bs-secondary); }
+        .is-resolve .azione-icon { background: rgba(25,135,84, .12); color: var(--bs-success); }
+        .is-delete .azione-icon { background: rgba(220,53,69, .12); color: var(--bs-danger); }
+        .is-delete .azione-label { color: var(--bs-danger); }
+    }
 }
 
 @media (max-width: 767px) {
@@ -64,6 +113,13 @@
 [data-bs-theme="dark"] {
     .timeline-date-header { color: var(--text-secondary); }
     .timeline-date-marker { box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.25); }
+    .modal#eventi-azioni-modal {
+        .modal-header { background: linear-gradient(135deg, #0b5ed7 0%, #1768dd 100%); }
+        #azioni-modal-body .azione-btn { 
+            --tile-hover: rgba(255,255,255,0.05);
+        }
+        #azioni-modal-body .azione-chevron { color: #9aa4af; }
+    }
 }
 
 .timeline {

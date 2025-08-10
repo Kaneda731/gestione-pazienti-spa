@@ -57,6 +57,7 @@ let dataManager = null;
 let filterManager = null;
 let modalManager = null;
 let eventHandlers = null;
+let delegatedHandlersBound = false;
 
 /**
  * Inizializza la vista eventi clinici
@@ -189,6 +190,82 @@ async function initializeManagers() {
     );
 
     logger.log('✅ Manager inizializzati');
+
+    // Delega globale: abilita click su pulsanti dinamici (es. dentro la modal Azioni)
+    if (!delegatedHandlersBound) {
+      const closeActionsModalIfOpen = async () => {
+        const modalEl = document.getElementById('eventi-azioni-modal');
+        if (!modalEl) return;
+        try {
+          const { Modal } = await import('bootstrap');
+          const inst = Modal.getOrCreateInstance(modalEl);
+          inst.hide();
+        } catch (_) {
+          // Fallback: rimuovi classi/backdrop
+          modalEl.classList.remove('show');
+          modalEl.style.display = 'none';
+          const backdrop = document.querySelector('.modal-backdrop');
+          if (backdrop) backdrop.remove();
+          document.body.classList.remove('modal-open');
+          document.body.style.removeProperty('padding-right');
+        }
+      };
+
+      document.addEventListener('click', async (e) => {
+        // Gestisci solo i click all'interno della modal Azioni
+        const withinActionsModal = e.target.closest('#eventi-azioni-modal');
+        if (!withinActionsModal) return;
+        const detailBtn = e.target.closest('.event-detail-btn');
+        if (detailBtn) {
+          e.preventDefault();
+          e.stopPropagation();
+          await closeActionsModalIfOpen();
+          const eventId = detailBtn.dataset.eventoId;
+          modalManager.showEventDetail(eventId);
+          return;
+        }
+
+        const editBtn = e.target.closest('.event-edit-btn');
+        if (editBtn) {
+          e.preventDefault();
+          e.stopPropagation();
+          await closeActionsModalIfOpen();
+          const eventId = editBtn.dataset.eventoId;
+          modalManager.editEvent(eventId);
+          return;
+        }
+
+        const deleteBtn = e.target.closest('.event-delete-btn');
+        if (deleteBtn) {
+          e.preventDefault();
+          e.stopPropagation();
+          await closeActionsModalIfOpen();
+          const eventId = deleteBtn.dataset.eventoId;
+          modalManager.confirmDeleteEvent(eventId);
+          return;
+        }
+
+        const resolveBtn = e.target.closest('.event-resolve-btn');
+        if (resolveBtn) {
+          e.preventDefault();
+          e.stopPropagation();
+          await closeActionsModalIfOpen();
+          const eventId = resolveBtn.dataset.eventoId;
+          try {
+            const { ResolveInfectionModal } = await import('../components/ResolveInfectionModal.js');
+            const resolver = new ResolveInfectionModal({ eventoId: eventId });
+            const dataFine = await resolver.show();
+            if (dataFine) {
+              await resolveInfezioneEvento(eventId, dataFine);
+              await dataManager.loadEventsData();
+            }
+          } catch (err) {
+            logger.error('Errore nella risoluzione infezione (delegato):', err);
+          }
+        }
+      });
+      delegatedHandlersBound = true;
+    }
   } catch (error) {
     logger.error('❌ Errore inizializzazione manager:', error);
   }

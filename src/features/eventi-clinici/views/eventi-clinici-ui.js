@@ -360,34 +360,34 @@ function createEventCard(evento) {
         <div class="event-card-body mt-2 mobile-text-sm text-muted">
           ${detailsSection}
         </div>
-        <div class="mobile-actions-container mt-2">
-          <div class="btn-group btn-group-sm" role="group">
-            <button class="btn btn-outline-primary event-detail-btn" data-evento-id="${evento.id}" title="Dettagli">
-              <span class="material-icons">visibility</span>
-            </button>
-            <button class="btn btn-outline-secondary event-edit-btn" data-evento-id="${evento.id}" title="Modifica">
-              <span class="material-icons">edit</span>
-            </button>
-            ${isAttiva ? `
-            <button class="btn btn-outline-success event-resolve-btn" data-evento-id="${evento.id}" title="Risolvi">
-              <span class="material-icons">check_circle</span>
-            </button>` : ''}
-            <button class="btn btn-outline-danger event-delete-btn" data-evento-id="${evento.id}" title="Elimina">
-              <span class="material-icons">delete</span>
-            </button>
-          </div>
+        <div class="mt-2 text-end">
+          <button class="btn btn-outline-secondary btn-sm open-actions-modal">
+            <span class="material-icons align-middle me-1" style="font-size:1.05em;">more_horiz</span>
+            Azioni
+          </button>
         </div>
       </div>
   `;
 
   card.innerHTML = sanitizeHtml(cardContent);
 
-  // Add click handler for card expansion
-  card.addEventListener("click", (e) => {
-    if (!e.target.closest(".event-actions")) {
-      toggleEventCardExpansion(card);
-    }
-  });
+  // Apertura modal azioni: al click sulla card o sul bottone dedicato
+  const openModal = (e) => {
+    // Evita doppi trigger da elementi interattivi interni
+    if (e && (e.target.closest('button') || e.target.closest('a'))) return;
+    showActionsModal(evento);
+  };
+
+  // Click sull'intera card apre le azioni
+  card.addEventListener('click', openModal);
+  // Click sul bottone "Azioni" esplicito
+  const explicitBtn = card.querySelector('.open-actions-modal');
+  if (explicitBtn) {
+    explicitBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      showActionsModal(evento);
+    });
+  }
 
   return card;
 }
@@ -424,18 +424,89 @@ function renderEventCardDetails(evento) {
   return details || '<p class="text-muted">Nessun dettaglio aggiuntivo</p>';
 }
 
-/**
- * Toggle espansione card evento
- */
-function toggleEventCardExpansion(card) {
-  card.classList.toggle("expanded");
+// Espansione card rimossa: le informazioni sono sempre visibili
 
-  const body = card.querySelector(".event-card-body");
-  if (card.classList.contains("expanded")) {
-    body.style.maxHeight = body.scrollHeight + "px";
-  } else {
-    body.style.maxHeight = "60px";
-  }
+/**
+ * Crea la modal Azioni (se non esiste) e la restituisce
+ */
+function ensureActionsModal() {
+  let modal = document.getElementById('eventi-azioni-modal');
+  if (modal) return modal;
+
+  modal = document.createElement('div');
+  modal.id = 'eventi-azioni-modal';
+  modal.className = 'modal fade';
+  modal.setAttribute('tabindex', '-1');
+  modal.setAttribute('aria-hidden', 'true');
+  modal.innerHTML = sanitizeHtml(`
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <span class="material-icons align-middle me-1">more_horiz</span>
+            Azioni evento
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+        </div>
+        <div class="modal-body">
+          <div id="azioni-modal-body"></div>
+        </div>
+      </div>
+    </div>
+  `);
+
+  document.body.appendChild(modal);
+  return modal;
+}
+
+/**
+ * Mostra la modal con le azioni per uno specifico evento
+ */
+function showActionsModal(evento) {
+  const modalEl = ensureActionsModal();
+  const body = modalEl.querySelector('#azioni-modal-body');
+  if (!body) return;
+
+  const isInfezione = evento.tipo_evento === 'infezione';
+  const isAttiva = isInfezione && !evento.data_fine_evento;
+
+  const actionsHTML = `
+    <div class="azioni-actions">
+      <button type="button" class="azione-btn is-detail event-detail-btn" data-evento-id="${evento.id}" aria-label="Apri dettagli evento">
+        <span class="azione-icon" aria-hidden="true"><span class="material-icons">visibility</span></span>
+        <span class="azione-label">Dettagli</span>
+        <span class="material-icons azione-chevron" aria-hidden="true">chevron_right</span>
+      </button>
+      <button type="button" class="azione-btn is-edit event-edit-btn" data-evento-id="${evento.id}" aria-label="Modifica evento">
+        <span class="azione-icon" aria-hidden="true"><span class="material-icons">edit</span></span>
+        <span class="azione-label">Modifica</span>
+        <span class="material-icons azione-chevron" aria-hidden="true">chevron_right</span>
+      </button>
+      ${isAttiva ? `
+      <button type="button" class="azione-btn is-resolve event-resolve-btn" data-evento-id="${evento.id}" aria-label="Risolvi infezione">
+        <span class="azione-icon" aria-hidden="true"><span class="material-icons">check_circle</span></span>
+        <span class="azione-label">Risolvi</span>
+        <span class="material-icons azione-chevron" aria-hidden="true">chevron_right</span>
+      </button>` : ''}
+      <button type="button" class="azione-btn is-delete event-delete-btn" data-evento-id="${evento.id}" aria-label="Elimina evento">
+        <span class="azione-icon" aria-hidden="true"><span class="material-icons">delete</span></span>
+        <span class="azione-label">Elimina</span>
+        <span class="material-icons azione-chevron" aria-hidden="true">chevron_right</span>
+      </button>
+    </div>
+  `;
+
+  body.innerHTML = sanitizeHtml(actionsHTML);
+
+  // Apri la modal con Bootstrap
+  import('bootstrap').then(({ Modal }) => {
+    const modal = Modal.getOrCreateInstance(modalEl, { backdrop: true, focus: true });
+    modal.show();
+  }).catch(() => {
+    // Fallback: mostra/occulta la modal via classi base
+    modalEl.classList.add('show');
+    modalEl.style.display = 'block';
+  });
 }
 
 /**

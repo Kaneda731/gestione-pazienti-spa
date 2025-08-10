@@ -207,6 +207,38 @@
   }
 }
 
+/* ----- Filtri grafico: layout mobile a colonna (senza cambiare HTML) ----- */
+@media (max-width: 767px) {
+  /* La riga pulsanti dentro il fieldset dei filtri */
+  .filters-fieldset .row.mt-3 > .col-12.d-flex {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    gap: 0.6rem !important;
+  }
+
+  /* Pulsanti a larghezza piena */
+  .filters-fieldset .row.mt-3 > .col-12.d-flex > #apply-filters-btn,
+  .filters-fieldset .row.mt-3 > .col-12.d-flex > #reset-filters-btn {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  /* Selettore tipo grafico (container creato da JS) a larghezza piena */
+  .filters-fieldset .row.mt-3 > .col-12.d-flex > .chart-type-selector-container {
+    width: 100% !important;
+    margin-left: 0 !important;
+    margin-top: 0.25rem !important;
+  }
+
+  /* Assicura che il CustomSelect riempia la larghezza */
+  .filters-fieldset .chart-type-selector-container .custom-select-wrapper,
+  .filters-fieldset .chart-type-selector-container .custom-select-trigger,
+  .filters-fieldset .chart-type-selector-container select {
+    width: 100% !important;
+  }
+}
+
 // Mobile-optimized container class
 .chart-mobile-optimized {
   position: relative;

@@ -210,8 +210,8 @@ export function renderEventsTable(eventsData) {
           </td>
           <td>${patient ? sanitizeHtml(patient.nomeCompleto) : '-'}</td>
           <td>${patient ? sanitizeHtml(patient.reparto) : '-'}</td>
-      <td ${dettagliTooltip ? `data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="${dettagliTooltip}" data-bs-trigger="hover focus" data-bs-custom-class="eventi-tooltip"` : ''}><span class="clamp-3">${sanitizeHtml(dettagli)}</span></td>
-      <td ${descrTooltip ? `data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="${descrTooltip}" data-bs-trigger="hover focus" data-bs-custom-class="eventi-tooltip"` : ''}><span class="clamp-3">${ev.descrizione ? sanitizeHtml(ev.descrizione) : '-'}</span></td>
+  <td><span class="clamp-3">${sanitizeHtml(dettagli)}</span></td>
+  <td><span class="clamp-3">${ev.descrizione ? sanitizeHtml(ev.descrizione) : '-'}</span></td>
           <td>${statoBadge}</td>
           <td>
             <div class="btn-group btn-group-sm" role="group">
@@ -237,22 +237,7 @@ export function renderEventsTable(eventsData) {
 
   // Inseriamo direttamente le righe HTML: i singoli valori dinamici sono già sanitizzati
   domElements.tableBody.innerHTML = rowsHtml;
-    // Inizializza tooltip Bootstrap per celle con contenuto lungo
-    try {
-      const tooltipCells = domElements.tableBody.querySelectorAll('td[data-bs-toggle="tooltip"]');
-      if (tooltipCells.length) {
-        import('bootstrap').then(({ Tooltip }) => {
-          tooltipCells.forEach(el => {
-            // distruggi eventuali istanze precedenti legate al nodo (se presenti)
-            const existing = Tooltip.getInstance(el);
-            if (existing) existing.dispose();
-            new Tooltip(el, { container: 'body', html: false });
-          });
-        });
-      }
-    } catch (e) {
-      logger.warn('Tooltip init non riuscita:', e);
-    }
+  // Tooltip disabilitati su Dettagli/Descrizione: nessun effetto hover JS
     updatePaginationControls(eventsData);
   } catch (error) {
     logger.error('❌ Errore rendering tabella eventi:', error);

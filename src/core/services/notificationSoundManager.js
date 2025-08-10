@@ -97,12 +97,14 @@ export class NotificationSoundManager {
         }
         
         try {
-            const soundConfig = this.sounds.get(type);
-            if (!soundConfig) {
-                return;
-            }
-            
             if (this.audioContext) {
+                // Usa configurazione caricata o fallback di base
+                const soundConfig = this.sounds.get(type) || {
+                    frequency: 500,
+                    duration: 0.2,
+                    type: 'sine',
+                    volume: 0.3
+                };
                 await this.playWebAudioSound(soundConfig, options);
             } else {
                 await this.playHTMLAudioSound(type, options);
@@ -190,8 +192,20 @@ export class NotificationSoundManager {
     }
     
     shouldPlaySound(type) {
-        if (!this.options.enabled || !this.isInitialized) {
+        // Se i suoni sono disabilitati a livello utente
+        if (!this.options.enabled) {
             return false;
+        }
+
+        // Consenti il fallback HTML Audio anche se l'inizializzazione WebAudio non è completa
+        if (!this.isInitialized) {
+            const hasHtmlAudioFallback =
+                (typeof window !== 'undefined' && typeof window.Audio === 'function') ||
+                (typeof globalThis !== 'undefined' && typeof globalThis.Audio === 'function');
+            // Se non inizializzato ma disponibile HTML Audio, permetti comunque la riproduzione
+            if (!hasHtmlAudioFallback) {
+                return false;
+            }
         }
         
         // Rispetta le preferenze di sistema per riduzione movimento/suoni

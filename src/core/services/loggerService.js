@@ -1,14 +1,7 @@
 import { isDevelopment, isTest } from '../../app/config/environment.js';
 
-/**
- * Servizio di logging intelligente che rimuove automaticamente i log in produzione
- * 
- * Comportamento:
- * - In sviluppo: tutti i log sono attivi
- * - In test: tutti i log sono attivi
- * - In produzione: solo gli error log sono attivi
- */
-class LoggerService {
+// Esporta sia la classe che l'istanza singleton
+export class LoggerService {
     /**
      * Log di debug - attivo solo in sviluppo e test
      * @param {...any} args - Argomenti da loggare
@@ -39,7 +32,6 @@ class LoggerService {
 
     /**
      * Log informativo - solo in sviluppo e test
-     * @param {...any} args - Argomenti da loggare
      */
     info(...args) {
         if (isDevelopment || isTest) {
@@ -48,32 +40,7 @@ class LoggerService {
     }
 
     /**
-     * Log di debug con prefisso - solo in sviluppo e test
-     * @param {string} prefix - Prefisso per identificare il modulo
-     * @param {...any} args - Argomenti da loggare
-     */
-    debug(prefix, ...args) {
-        if (isDevelopment || isTest) {
-            console.log('[' + String(prefix) + ']', ...args);
-        }
-    }
-
-    /**
-     * Log di gruppo - solo in sviluppo e test
-     * @param {string} label - Etichetta del gruppo
-     * @param {Function} callback - Funzione che contiene i log del gruppo
-     */
-    group(label, callback) {
-        if (isDevelopment || isTest) {
-            console.group(label);
-            callback();
-            console.groupEnd();
-        }
-    }
-
-    /**
-     * Log di tabella - solo in sviluppo e test
-     * @param {any} data - Dati da visualizzare in tabella
+     * Log tabellare - solo in sviluppo e test
      */
     table(data) {
         if (isDevelopment || isTest) {
@@ -83,7 +50,6 @@ class LoggerService {
 
     /**
      * Log di tempo - solo in sviluppo e test
-     * @param {string} label - Etichetta del timer
      */
     time(label) {
         if (isDevelopment || isTest) {
@@ -93,7 +59,6 @@ class LoggerService {
 
     /**
      * Fine log di tempo - solo in sviluppo e test
-     * @param {string} label - Etichetta del timer
      */
     timeEnd(label) {
         if (isDevelopment || isTest) {
@@ -102,6 +67,4 @@ class LoggerService {
     }
 }
 
-// Esporta un'istanza singleton del logger
 export const logger = new LoggerService();
-// Nota: non esportiamo la classe per evitare warning di unused export; se serve nei test, importare dal file direttamente con path.

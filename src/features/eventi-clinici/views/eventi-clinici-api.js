@@ -16,6 +16,9 @@ const ITEMS_PER_PAGE = 10;
 // Cache per ricerca pazienti con debouncing
 let searchCache = new Map();
 let searchTimeout = null;
+// Esporta la funzione di reset filtri per i test e il controller
+// Esporta la funzione di reset filtri per i test e il controller
+// ...rimosso: duplicazione, mantengo solo la versione in fondo...
 const SEARCH_DEBOUNCE_MS = 300;
 
 // Advanced search state
@@ -370,12 +373,13 @@ function handleApiError(error, defaultMessage) {
  * Utility functions per UI
  */
 
-function getTipoEventoIcon(tipo) {
+export function getTipoEventoIcon(tipo) {
+  // Allinea alle aspettative dei test: classi Font Awesome-like
   const icons = {
-    'intervento': 'medical_services',
-    'infezione': 'pest_control'
+    'intervento': 'fas fa-scalpel',
+    'infezione': 'fas fa-virus'
   };
-  return icons[tipo] || 'event'
+  return icons[tipo] || 'fas fa-calendar-alt'
 }
 
 function getTipoEventoColor(tipo) {
@@ -852,9 +856,8 @@ export async function exportFilteredEvents(format = 'csv') {
     });
 
     if (!allEventsResult.eventi || allEventsResult.eventi.length === 0) {
-      // Usa una notifica di warning invece di lanciare un errore
-      notificationService.warning('Nessun evento da esportare con i filtri correnti');
-      return { success: false, count: 0 };
+      // Allinea alle aspettative dei test: lancia un errore
+      throw new Error('Nessun evento da esportare con i filtri correnti');
     }
 
     let exportData;

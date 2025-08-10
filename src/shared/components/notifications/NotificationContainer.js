@@ -2,35 +2,95 @@
 
 export class NotificationContainer {
     constructor(options = {}) {
-        this.options = options;
+        this.options = {
+            position: 'top-right',
+            maxVisible: 5,
+            ...options,
+        };
+        // Alias compatibile con alcuni test/consumatori
+        this.settings = this.options;
         this.container = this.createContainer();
         this.notifications = new Map();
     }
     
     createContainer() {
-        let container = document.querySelector('.notification-container');
-        
-        if (!container) {
-            container = document.createElement('div');
-            container.className = 'notification-container';
-            container.setAttribute('data-position', this.options.position || 'top-right');
-            
-            container.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                z-index: 1050;
-                display: flex;
-                flex-direction: column;
-                gap: 10px;
-                max-width: 400px;
-                pointer-events: none;
-            `;
-            
+        // SSR guard: se non c'è window o document, ritorna null
+        if (typeof window === 'undefined' || typeof document === 'undefined') {
+            return null;
+        }
+
+        // Rimuovi eventuale container precedente duplicato
+        const existing = document.getElementById('notification-container');
+        if (existing && existing.parentNode) {
+            existing.parentNode.removeChild(existing);
+        }
+
+        const container = document.createElement('div');
+        container.id = 'notification-container';
+        const position = this.options.position || 'top-right';
+        container.className = `notification-container notification-container--${position}`;
+        container.setAttribute('role', 'region');
+        container.setAttribute('aria-label', 'Notifiche di sistema');
+        container.setAttribute('aria-live', 'polite');
+        container.setAttribute('data-position', position);
+        container.style.cssText = `
+            position: fixed;
+            z-index: 1050;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 400px;
+            pointer-events: auto;
+        `;
+
+        // Posizionamento di default basato sulla posizione
+        this.applyPositionStyles(container, position);
+
+        if (document.body) {
             document.body.appendChild(container);
         }
-        
         return container;
+    }
+
+    applyPositionStyles(container, position) {
+        if (!container) return;
+        // Reset
+        container.style.top = '';
+        container.style.right = '';
+        container.style.bottom = '';
+        container.style.left = '';
+        container.style.transform = '';
+
+        const padding = '20px';
+        switch (position) {
+            case 'top-left':
+                container.style.top = padding;
+                container.style.left = padding;
+                break;
+            case 'top-center':
+                container.style.top = padding;
+                container.style.left = '50%';
+                container.style.transform = 'translateX(-50%)';
+                break;
+            case 'bottom-right':
+                container.style.bottom = padding;
+                container.style.right = padding;
+                break;
+            case 'bottom-left':
+                container.style.bottom = padding;
+                container.style.left = padding;
+                break;
+            case 'bottom-center':
+                container.style.bottom = padding;
+                container.style.left = '50%';
+                container.style.transform = 'translateX(-50%)';
+                break;
+            case 'top-right':
+            default:
+                container.style.top = padding;
+                container.style.right = padding;
+                break;
+        }
     }
     
     addNotification(element) {
@@ -66,11 +126,21 @@ export class NotificationContainer {
         this.notifications.clear();
     }
     
+    // Alias richiesto da alcune API/test
+    clear() {
+        this.clearAllNotifications();
+    }
+    
     updateSettings(newSettings) {
         this.options = { ...this.options, ...newSettings };
+        this.settings = this.options;
         
         if (newSettings.position) {
-            this.container.setAttribute('data-position', newSettings.position);
+            const pos = newSettings.position;
+            this.container.setAttribute('data-position', pos);
+            // aggiorna classi modifier
+            this.container.className = `notification-container notification-container--${pos}`;
+            this.applyPositionStyles(this.container, pos);
         }
     }
 
@@ -105,6 +175,11 @@ export class NotificationContainer {
     updateMaxVisible(maxVisible) {
         this.options.maxVisible = maxVisible;
         this.enforceMaxVisible();
+    }
+
+    // Per parità API con il container virtuale
+    handleResize() {
+        // opzionale nei test, no-op qui
     }
 
     // Rimuove container dal DOM e pulisce riferimenti

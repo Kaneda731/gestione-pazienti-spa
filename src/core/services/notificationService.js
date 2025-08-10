@@ -1088,11 +1088,13 @@ class NotificationService {
         }, 300000);
         
         // Cleanup su page visibility change
-        document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'hidden') {
-                this.performAutomaticCleanup();
-            }
-        });
+        if (typeof document !== 'undefined' && document.addEventListener) {
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'hidden') {
+                    this.performAutomaticCleanup();
+                }
+            });
+        }
     }
 
     /**

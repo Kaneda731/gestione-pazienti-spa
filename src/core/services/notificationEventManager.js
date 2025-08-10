@@ -17,6 +17,11 @@ export class NotificationEventManager {
     }
     
     setupGlobalCleanup() {
+        // SSR/test guard
+        if (typeof window === 'undefined' || typeof document === 'undefined') {
+            return;
+        }
+
         const cleanup = () => this.cleanupAll();
         
         // Cleanup su page unload
@@ -279,7 +284,7 @@ export class NotificationEventManager {
      * Ottimizzazione: usa event delegation per eventi comuni
      */
     setupEventDelegation(container) {
-        if (!container) return;
+    if (!container || typeof window === 'undefined') return;
         
         // Delega eventi di click per pulsanti chiusura
         this.addEventListener(container, 'click', (event) => {

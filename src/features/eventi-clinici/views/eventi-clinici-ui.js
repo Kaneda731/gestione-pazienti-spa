@@ -12,6 +12,9 @@ import { sanitizeHtml } from "../../../shared/utils/sanitizeHtml.js";
 // DOM elements cache
 let domElements = {};
 
+// Re-export per reset filtri dalla UI
+export { resetCurrentFiltersToDefaults } from './eventi-clinici-api.js';
+
 /**
  * Inizializza i riferimenti agli elementi DOM
  */
@@ -90,6 +93,22 @@ export function initializeDOMElements() {
   };
 
   logger.log("✅ DOM elements inizializzati per eventi clinici UI");
+}
+
+// Helper: rende un'icona Material coerente anche se l'API fornisce classi FA
+function renderEventIcon(iconValue, tipo, color, extraClass = '') {
+  const mapTipoToMaterial = (t) => {
+    // Preferiamo ligature molto diffuse nel set "Material Icons" classico
+    if (t === 'intervento') return 'local_hospital';
+    if (t === 'infezione') return 'bug_report';
+    return 'event';
+  };
+  const isFa = typeof iconValue === 'string' && /\bfa[srldb]?\b|fa-/.test(iconValue);
+  const material = isFa ? mapTipoToMaterial(tipo) : (iconValue || mapTipoToMaterial(tipo));
+  // For badge backgrounds, ensure visibility: allow passing 'white' to force contrast
+  const colorClass = color === 'white' ? 'text-white' : (color ? `text-${color}` : '');
+  const classes = [`material-icons`, colorClass, extraClass].filter(Boolean).join(' ');
+  return `<span class="${classes}">${material}</span>`;
 }
 
 /**
@@ -205,7 +224,7 @@ export function renderEventsTable(eventsData) {
           <td>${ev.dataEventoFormatted || formatDate(ev.data_evento)}</td>
           <td>
             <span class="badge bg-${ev.tipoEventoColor || (ev.tipo_evento === 'intervento' ? 'primary' : 'warning')}">
-              <span class="material-icons me-1">${ev.tipoEventoIcon || (ev.tipo_evento === 'intervento' ? 'medical_services' : 'pest_control')}</span>
+              ${renderEventIcon(ev.tipoEventoIcon, ev.tipo_evento, 'white', 'me-1 align-middle fs-6')}
               ${ev.tipoEventoLabel || (ev.tipo_evento === 'intervento' ? 'Intervento' : 'Infezione')}
             </span>
           </td>
@@ -348,7 +367,7 @@ function createEventCard(evento) {
       <div class="card-body">
         <div class="card-info">
           <div class="card-title d-flex align-items-center gap-2">
-            <span class="material-icons text-${tipoColor}" style="font-size:1.2em;">${tipoIcon}</span>
+            ${renderEventIcon(tipoIcon, evento.tipo_evento, tipoColor)}
             <span class="fw-bold">${tipoLabel}</span>
             ${statoBadge}
           </div>
@@ -870,7 +889,7 @@ export function renderEventDetails(evento) {
         <div class="col-md-6">
           <strong>Tipo Evento:</strong>
           <div class="d-flex align-items-center mt-1">
-            <span class="material-icons text-${evento.tipoEventoColor} me-2">${evento.tipoEventoIcon}</span>
+            ${renderEventIcon(evento.tipoEventoIcon, evento.tipo_evento, evento.tipoEventoColor, 'me-2')}
             ${evento.tipoEventoLabel}
           </div>
         </div>

@@ -10,6 +10,7 @@ class NotificationLazyLoader {
         this.loadedModules = new Map();
         this.loadingPromises = new Map();
         this.preloadQueue = [];
+        this.lazyElements = new Set();
         this.criticalComponents = new Set([
             'NotificationService',
             'NotificationRenderer'
@@ -20,7 +21,7 @@ class NotificationLazyLoader {
             preloadDelay: 2000, // Preload dopo 2 secondi
             intersectionThreshold: 0.1,
             enablePreloading: true,
-            enableIntersectionObserver: 'IntersectionObserver' in window
+            enableIntersectionObserver: (typeof window !== 'undefined') && ('IntersectionObserver' in window)
         };
         
         this.init();
@@ -37,6 +38,15 @@ class NotificationLazyLoader {
         // Setup intersection observer per lazy loading visuale
         if (this.config.enableIntersectionObserver) {
             this.setupIntersectionObserver();
+        } else {
+            // Fallback: nessun IntersectionObserver, usa listener scroll/resize
+            if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+                this._fallbackScanHandler = this.scanLazyElements.bind(this);
+                window.addEventListener('scroll', this._fallbackScanHandler, { passive: true });
+                window.addEventListener('resize', this._fallbackScanHandler);
+                // Primo scan dopo init
+                setTimeout(() => this.scanLazyElements(), 0);
+            }
         }
     }
     
@@ -388,10 +398,18 @@ class NotificationLazyLoader {
      * Osserva elemento per lazy loading
      */
     observeElement(element, componentName) {
-        if (!this.intersectionObserver || !element) return;
-        
+        if (!element) return;
+
         element.dataset.lazyComponent = componentName;
-        this.intersectionObserver.observe(element);
+
+        if (this.intersectionObserver) {
+            this.intersectionObserver.observe(element);
+        } else {
+            // Fallback path: mantieni traccia e tenta scan
+            this.lazyElements.add(element);
+            // Trigger scan immediato
+            this.scanLazyElements();
+        }
     }
     
     /**
@@ -400,6 +418,35 @@ class NotificationLazyLoader {
     unobserveElement(element) {
         if (this.intersectionObserver && element) {
             this.intersectionObserver.unobserve(element);
+        } else if (element) {
+            // Fallback: rimuovi da set
+            this.lazyElements.delete(element);
+        }
+    }
+
+    /**
+     * Fallback scan: controlla gli elementi registrati e carica quelli visibili
+     */
+    scanLazyElements() {
+        if (this.lazyElements.size === 0) return;
+        const viewportHeight = (typeof window !== 'undefined') ? window.innerHeight : 0;
+        const threshold = Math.max(0, Math.min(1, this.config.intersectionThreshold || 0)) * viewportHeight;
+        for (const el of Array.from(this.lazyElements)) {
+            if (!el || !el.isConnected) {
+                this.lazyElements.delete(el);
+                continue;
+            }
+            try {
+                const rect = el.getBoundingClientRect();
+                const isVisible = rect.top < (viewportHeight + 50) && (rect.bottom) > -50;
+                if (isVisible) {
+                    this.handleElementVisible(el);
+                    this.lazyElements.delete(el);
+                }
+            } catch (e) {
+                // Se getBoundingClientRect fallisce, rimuovi per evitare loop
+                this.lazyElements.delete(el);
+            }
         }
     }
     
@@ -479,6 +526,11 @@ class NotificationLazyLoader {
     destroy() {
         if (this.intersectionObserver) {
             this.intersectionObserver.disconnect();
+        }
+        if (typeof window !== 'undefined' && this._fallbackScanHandler) {
+            window.removeEventListener('scroll', this._fallbackScanHandler);
+            window.removeEventListener('resize', this._fallbackScanHandler);
+            this._fallbackScanHandler = null;
         }
         
         // Cancella preload in corso

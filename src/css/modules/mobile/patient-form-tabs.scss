@@ -54,7 +54,7 @@
   /* Stato hover */
   #patient-form-tabs .nav-link:hover {
     border-color: var(--primary-color) !important;
-    background: rgba(var(--primary-rgb), 0.05) !important;
+  background: rgba(var(--primary-rgb, 13,110,253), 0.05) !important;
     color: var(--primary-color) !important;
     transform: translateY(-2px) !important;
     box-shadow: var(--shadow-md) !important;
@@ -67,10 +67,12 @@
   /* Stato attivo */
   #patient-form-tabs .nav-link.active {
     border-color: var(--primary-color) !important;
-    background: linear-gradient(
+    /* Fallback robusto per tema chiaro: colore pieno + gradient affidabile */
+    background-color: var(--primary-color, #0d6efd) !important;
+    background-image: linear-gradient(
       135deg,
-      var(--primary-color),
-      rgba(var(--primary-rgb), 0.8)
+      rgba(var(--primary-rgb, 13,110,253), 0.95),
+      rgba(var(--primary-rgb, 13,110,253), 0.85)
     ) !important;
     color: white !important;
     font-weight: 600 !important;
@@ -79,8 +81,11 @@
   }
 
   #patient-form-tabs .nav-link.active .material-icons {
-    color: white !important;
-    transform: scale(1.05) !important;
+  color: #ffffff !important;
+  transform: scale(1.05) !important;
+  /* Aumenta contrasto in tema chiaro con ombra sul glifo */
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 0 1px rgba(0, 0, 0, 0.25) !important;
+  -webkit-text-stroke: 0.25px rgba(0, 0, 0, 0.25) !important;
   }
 
   /* Indicatore visivo per tab attiva */
@@ -158,9 +163,7 @@
 
 /* Desktop - Mantieni stile Bootstrap standard */
 @media (min-width: 992px) {
-  #patient-form-tabs {
-    /* Usa gli stili Bootstrap di default */
-  }
+  /* Intenzionalmente vuoto: usa gli stili Bootstrap di default */
 }
 
 /* Tema scuro */

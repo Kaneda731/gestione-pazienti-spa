@@ -684,10 +684,12 @@
   transition: all 0.3s ease !important;
   letter-spacing: 0.3px !important;
   box-shadow: var(--shadow-sm) !important;
-  background: linear-gradient(
+  /* Fallback robusto per tema chiaro: colore pieno + gradient affidabile */
+  background-color: var(--primary-color, #0d6efd) !important;
+  background-image: linear-gradient(
     135deg,
-    var(--primary-color),
-    rgba(var(--primary-rgb), 0.8)
+    rgba(var(--primary-rgb, 13,110,253), 0.95),
+    rgba(var(--primary-rgb, 13,110,253), 0.85)
   ) !important;
   border: 2px solid var(--primary-color) !important;
   color: white !important;
@@ -696,10 +698,11 @@
 }
 
 #eventi-add-btn:hover {
-  background: linear-gradient(
+  background-color: var(--primary-color, #0b5ed7) !important;
+  background-image: linear-gradient(
     135deg,
-    rgba(var(--primary-rgb), 0.9),
-    rgba(var(--primary-rgb), 0.7)
+    rgba(var(--primary-rgb, 13,110,253), 0.90),
+    rgba(var(--primary-rgb, 13,110,253), 0.80)
   ) !important;
   transform: translateY(-2px) !important;
   box-shadow: var(--shadow-lg) !important;

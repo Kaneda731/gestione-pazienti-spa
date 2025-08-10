@@ -304,6 +304,11 @@
         max-height: 70vh;
         overflow-y: auto;
     }
+    /* Tema chiaro: assicura contrasto del titolo nella header */
+    .modal-header .modal-title,
+    .modal-header #evento-modal-title {
+        color: var(--text-on-primary, #0b2239); /* colore scuro leggibile su sfondo chiaro */
+    }
 }
 
 // Loading and empty states

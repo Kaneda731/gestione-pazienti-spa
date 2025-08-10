@@ -24,10 +24,16 @@ export function resumeAutoCloseTimer(timers, notificationId) {
     console.log(`▶️ Timer resumed for notification: ${notificationId}`);
 }
 
-export function stopAutoCloseTimer(timers, notificationId) {
+export function stopAutoCloseTimer(timers, notificationId, onStop) {
     if (timers.has(notificationId)) {
         clearTimeout(timers.get(notificationId));
         timers.delete(notificationId);
+        try {
+            if (typeof onStop === 'function') onStop(notificationId);
+        } catch (e) {
+            // best-effort cleanup, non bloccare
+            console.warn('Timer onStop callback error:', e);
+        }
         console.log(`⏹️ Timer stopped for notification: ${notificationId}`);
     }
 }

@@ -335,7 +335,7 @@ class NotificationService {
                 console.log('🔧 removeNotification called for id:', id);
             }
             // Pulisci timer e progress bar
-            stopAutoCloseTimer(this.timers, id);
+            stopAutoCloseTimer(this.timers, id, (nid) => this.stopProgressBarAnimation(nid));
             
             // Cleanup progress bar JavaScript se presente
             if (this.notificationContainer) {
@@ -424,6 +424,37 @@ class NotificationService {
             NotificationErrorHandler.handleServiceError(error, 'remove', id);
             // Tenta recovery
             NotificationErrorHandler.recoverFromRemoveError(id);
+        }
+    }
+
+    /**
+     * Ferma e rimuove la progress bar JS associata a una notifica
+     */
+    stopProgressBarAnimation(id) {
+        try {
+            const element = this.notificationContainer?.container?.querySelector(`[data-id="${id}"]`);
+            if (element && element._progressBarInstance) {
+                element._progressBarInstance.destroy();
+                element._progressBarInstance = null;
+            }
+        } catch (e) {
+            // non critico
+        }
+    }
+
+    /**
+     * Gestisce un'azione di una notifica (delegata da NotificationEventManager)
+     */
+    handleAction(notificationId, actionIndex) {
+        try {
+            const notifications = stateService.getState('notifications') || [];
+            const notif = notifications.find(n => n.id === notificationId);
+            const action = notif?.options?.actions?.[actionIndex];
+            if (action && typeof action.onClick === 'function') {
+                action.onClick({ id: notificationId, index: actionIndex, notification: notif });
+            }
+        } catch (e) {
+            console.warn('Notification action handler error:', e);
         }
     }
 

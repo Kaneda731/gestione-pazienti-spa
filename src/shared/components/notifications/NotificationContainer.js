@@ -73,4 +73,50 @@ export class NotificationContainer {
             this.container.setAttribute('data-position', newSettings.position);
         }
     }
+
+    // Compatibilità: aggiorna solo la posizione (alias di updateSettings)
+    updatePosition(position) {
+        this.updateSettings({ position });
+    }
+
+    // Compatibilità: restituisce lista notifiche correnti (elementi DOM)
+    getNotifications() {
+        return Array.from(this.notifications.values());
+    }
+
+    // Compatibilità: per container non virtuale coincide con getNotifications
+    getVisibleNotifications() {
+        return this.getNotifications();
+    }
+
+    // Impone un limite massimo di notifiche visibili rimuovendo le più vecchie
+    enforceMaxVisible() {
+        const max = this.options.maxVisible;
+        if (!max || max <= 0) return;
+
+        while (this.notifications.size > max) {
+            // rimuovi la prima inserita (FIFO)
+            const firstId = this.notifications.keys().next().value;
+            this.removeNotification(firstId);
+        }
+    }
+
+    // Aggiorna maxVisible e applica subito il trimming
+    updateMaxVisible(maxVisible) {
+        this.options.maxVisible = maxVisible;
+        this.enforceMaxVisible();
+    }
+
+    // Rimuove container dal DOM e pulisce riferimenti
+    destroy() {
+        try {
+            this.clearAllNotifications();
+            if (this.container && this.container.parentNode) {
+                this.container.parentNode.removeChild(this.container);
+            }
+        } finally {
+            this.notifications.clear();
+            this.container = null;
+        }
+    }
 }

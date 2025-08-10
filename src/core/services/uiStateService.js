@@ -7,7 +7,7 @@
 
 import { sanitizeHtml } from '../../shared/utils/sanitizeHtml.js';
 
-class UIStateService {
+export class UIStateService {
     constructor() {
         this.loadingInstances = new Map();
     }
@@ -294,8 +294,10 @@ class UIStateService {
 }
 
 // Istanza singleton (side-effect module)
-const uiStateService = new UIStateService();
+export const uiStateService = new UIStateService();
 // opzionale: esponi sul window per debug manuale
 if (typeof window !== 'undefined') {
     window.uiStateService = uiStateService;
 }
+
+export default uiStateService;

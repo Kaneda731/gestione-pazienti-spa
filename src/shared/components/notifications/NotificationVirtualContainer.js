@@ -18,7 +18,12 @@ export class NotificationVirtualContainer {
     this.scrollTop = 0;
     this.containerHeight = 0;
 
-    this.init();
+  // Pre-bind handlers for add/remove consistency
+  this._boundHandleScroll = this.handleScroll.bind(this);
+  this._boundHandleResize = this.handleResize.bind(this);
+  this._boundHandleKeydown = this.handleKeydown.bind(this);
+
+  this.init();
   }
 
   init() {
@@ -158,13 +163,13 @@ export class NotificationVirtualContainer {
 
   setupEventListeners() {
     // Gestione scroll per virtual scrolling
-    this.viewport.addEventListener("scroll", this.handleScroll.bind(this));
+  this.viewport.addEventListener("scroll", this._boundHandleScroll);
 
     // Gestione resize per responsive
-    window.addEventListener("resize", this.handleResize.bind(this));
+  window.addEventListener("resize", this._boundHandleResize);
 
     // Gestione keyboard per accessibilità
-    this.container.addEventListener("keydown", this.handleKeydown.bind(this));
+  this.container.addEventListener("keydown", this._boundHandleKeydown);
   }
 
   handleScroll(event) {
@@ -603,12 +608,13 @@ export class NotificationVirtualContainer {
 
   destroy() {
     // Rimuovi event listeners
-    this.viewport.removeEventListener("scroll", this.handleScroll.bind(this));
-    window.removeEventListener("resize", this.handleResize.bind(this));
-    this.container.removeEventListener(
-      "keydown",
-      this.handleKeydown.bind(this)
-    );
+    if (this.viewport) {
+      this.viewport.removeEventListener("scroll", this._boundHandleScroll);
+    }
+    window.removeEventListener("resize", this._boundHandleResize);
+    if (this.container) {
+      this.container.removeEventListener("keydown", this._boundHandleKeydown);
+    }
 
     // Rimuovi dal DOM
     if (this.container.parentNode) {
@@ -621,6 +627,39 @@ export class NotificationVirtualContainer {
     this.viewport = null;
     this.virtualContent = null;
     this.visibleContainer = null;
+  }
+
+  // API parity con container semplice
+  updateSettings(newSettings) {
+    this.options = { ...this.options, ...newSettings };
+    if (newSettings.position) {
+      this.container?.setAttribute("data-position", newSettings.position);
+      this.applyPositionStyles();
+    }
+    if (typeof newSettings.maxVisible === "number") {
+      this.enforceMaxVisible();
+    }
+  }
+
+  updatePosition(position) {
+    this.updateSettings({ position });
+  }
+
+  enforceMaxVisible() {
+    const max = this.options.maxVisible;
+    if (!max || max <= 0) return;
+    // Mantieni solo le prime N notifiche (visivamente gestite dal virtual scroller)
+    if (this.notifications.length > max) {
+      this.notifications = this.notifications.slice(0, max);
+      this.updateVirtualHeight();
+      this.updateVisibleRange();
+      this.renderVisibleNotifications();
+    }
+  }
+
+  updateMaxVisible(maxVisible) {
+    this.options.maxVisible = maxVisible;
+    this.enforceMaxVisible();
   }
 }
 

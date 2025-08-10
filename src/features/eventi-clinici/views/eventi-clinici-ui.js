@@ -143,8 +143,9 @@ export function renderEventsTimeline(eventsData) {
  */
 export function renderEventsResponsive(eventsData) {
   const isMobile = window.innerWidth < 768;
-  const isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
-  const useTable = !(isMobile || isTablet);
+  const isTablet = window.innerWidth >= 768 && window.innerWidth < 1200;
+  // Allinea con vista "list": tabella solo da >= 1200px
+  const useTable = window.innerWidth >= 1200;
 
   if (domElements.tableContainer) {
     domElements.tableContainer.style.display = useTable ? 'block' : 'none';
@@ -310,61 +311,73 @@ function createDateGroup(date, eventi) {
  */
 function createEventCard(evento) {
   const card = document.createElement("div");
-  card.className = `timeline-event-card evento-${evento.tipo_evento}`;
+  // Mappa stati evento su classi card mobile riusate dalla lista pazienti
+  const isInfezione = evento.tipo_evento === 'infezione';
+  const isAttiva = isInfezione && !evento.data_fine_evento;
+  const statusClass = isInfezione
+    ? (isAttiva ? 'status-infected' : 'status-error')
+    : 'status-success';
+  // Usa la stessa struttura card mobile per uniformità con la vista "list"
+  card.className = `card card-list-compact timeline-event-card ${statusClass} evento-${evento.tipo_evento}`;
   card.dataset.eventoId = evento.id;
 
+  const tipoIcon = evento.tipoEventoIcon || (evento.tipo_evento === 'intervento' ? 'medical_services' : 'warning');
+  const tipoColor = evento.tipoEventoColor || (evento.tipo_evento === 'intervento' ? 'primary' : 'warning');
+  const tipoLabel = evento.tipoEventoLabel || (evento.tipo_evento === 'intervento' ? 'Intervento' : 'Infezione');
+  const statoBadge = isInfezione
+    ? (evento.data_fine_evento
+        ? '<span class="badge bg-success ms-1" style="font-size:0.7em;">Risolta</span>'
+        : '<span class="badge bg-warning text-dark ms-1" style="font-size:0.7em;"><span class="material-icons" style="font-size:0.8em;vertical-align:middle;">warning</span> Attiva</span>')
+    : '';
+
+  const dettagliBrevi = evento.tipo_evento === 'intervento'
+    ? (evento.tipo_intervento || '-')
+    : (evento.agente_patogeno || (evento.data_fine_evento ? 'Infezione risolta' : 'Infezione attiva'));
+
+  const pazienteInfo = evento.pazienteInfo
+    ? `
+        <div class="card-meta mobile-text-sm mt-1">
+          <span class="material-icons me-1" style="font-size:1em;vertical-align:middle;">person</span>
+          ${sanitizeHtml(evento.pazienteInfo.nomeCompleto)} • <span class="badge bg-secondary">${sanitizeHtml(evento.pazienteInfo.reparto)}</span>
+        </div>
+      `
+    : '';
+
+  const detailsSection = renderEventCardDetails(evento);
   const cardContent = `
-    <div class="event-card-header">
-      <div class="event-type-indicator">
-        <span class="material-icons text-${evento.tipoEventoColor} me-1">${evento.tipoEventoIcon || (evento.tipo_evento === 'intervento' ? 'medical_services' : 'pest_control')}</span>
-        <span class="event-type-label">${evento.tipoEventoLabel}</span>
-        ${evento.tipo_evento === 'infezione' ? `
-          ${evento.data_fine_evento ? `<span class="badge bg-success ms-2">Risolta</span>` : `<span class="badge bg-danger ms-2">Attiva</span>`}
-        ` : ''}
-      </div>
-      <div class="event-actions">
-        <button class="btn btn-sm btn-outline-primary event-detail-btn" data-evento-id="${
-          evento.id
-        }">
-          <span class="material-icons">visibility</span>
-        </button>
-        <button class="btn btn-sm btn-outline-secondary event-edit-btn" data-evento-id="${
-          evento.id
-        }">
-          <span class="material-icons">edit</span>
-        </button>
-        ${evento.tipo_evento === 'infezione' && !evento.data_fine_evento ? `
-        <button class="btn btn-sm btn-outline-success event-resolve-btn" data-evento-id="${
-          evento.id
-        }">
-          <span class="material-icons">check_circle</span>
-        </button>
-        ` : ''}
-        <button class="btn btn-sm btn-outline-danger event-delete-btn" data-evento-id="${
-          evento.id
-        }">
-          <span class="material-icons">delete</span>
-        </button>
-      </div>
-    </div>
-    
-    <div class="event-card-body">
-      ${renderEventCardDetails(evento)}
-    </div>
-    
-    ${
-      evento.pazienteInfo
-        ? `
-      <div class="event-card-footer">
-        <div class="patient-info">
-          <span class="material-icons me-1">person</span>
-          <span class="patient-name">${evento.pazienteInfo.nomeCompleto}</span>
-          <span class="patient-department badge bg-secondary ms-2">${evento.pazienteInfo.reparto}</span>
+      <div class="card-body">
+        <div class="card-info">
+          <div class="card-title d-flex align-items-center gap-2">
+            <span class="material-icons text-${tipoColor}" style="font-size:1.2em;">${tipoIcon}</span>
+            <span class="fw-bold">${tipoLabel}</span>
+            ${statoBadge}
+          </div>
+          <div class="card-meta mobile-text-sm">
+            ${formatDate(evento.data_evento)} • ${sanitizeHtml(dettagliBrevi)}
+          </div>
+          ${pazienteInfo}
+        </div>
+        <div class="event-card-body mt-2 mobile-text-sm text-muted">
+          ${detailsSection}
+        </div>
+        <div class="mobile-actions-container mt-2">
+          <div class="btn-group btn-group-sm" role="group">
+            <button class="btn btn-outline-primary event-detail-btn" data-evento-id="${evento.id}" title="Dettagli">
+              <span class="material-icons">visibility</span>
+            </button>
+            <button class="btn btn-outline-secondary event-edit-btn" data-evento-id="${evento.id}" title="Modifica">
+              <span class="material-icons">edit</span>
+            </button>
+            ${isAttiva ? `
+            <button class="btn btn-outline-success event-resolve-btn" data-evento-id="${evento.id}" title="Risolvi">
+              <span class="material-icons">check_circle</span>
+            </button>` : ''}
+            <button class="btn btn-outline-danger event-delete-btn" data-evento-id="${evento.id}" title="Elimina">
+              <span class="material-icons">delete</span>
+            </button>
+          </div>
         </div>
       </div>
-    `
-        : ""
-    }
   `;
 
   card.innerHTML = sanitizeHtml(cardContent);
@@ -878,10 +891,10 @@ export function renderEventDetails(evento) {
  */
 export function applyResponsiveDesign() {
   const isMobile = window.innerWidth < 768;
-  const isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
+  const isTablet = window.innerWidth >= 768 && window.innerWidth < 1200;
 
   // Switch tra Timeline (mobile/tablet) e Tabella (desktop >= 1024px)
-  const useTable = !isMobile && !isTablet; // desktop
+  const useTable = window.innerWidth >= 1200; // desktop allineato a pazienti
 
   if (domElements.tableContainer) {
     domElements.tableContainer.style.display = useTable ? 'block' : 'none';

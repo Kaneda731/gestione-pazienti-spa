@@ -1,5 +1,71 @@
 // src/features/eventi-clinici/css/eventi-clinici.scss
 
+.eventi-timeline {
+    position: relative;
+    .timeline-line {
+        content: '';
+        position: absolute;
+        left: 16px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: var(--border-color);
+        z-index: 0;
+    }
+}
+
+.timeline-date-group {
+    position: relative;
+    margin-bottom: 0.75rem;
+}
+
+.timeline-date-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-secondary);
+    margin: 0.75rem 0;
+}
+
+.timeline-date-marker {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.15);
+    margin-left: 11px; /* allineata alla timeline-line */
+}
+
+.timeline-date-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.timeline-event-card {
+    position: relative;
+    margin-left: 32px; /* distacco dalla linea */
+}
+
+.timeline-event-card .event-card-body {
+    max-height: 60px;
+    overflow: hidden;
+    transition: max-height 0.25s ease;
+}
+
+.timeline-event-card.expanded .event-card-body {
+    max-height: 1000px; /* espansione */
+}
+
+@media (max-width: 767px) {
+    .eventi-timeline .timeline-line { left: 12px; }
+    .timeline-event-card { margin-left: 28px; }
+}
+
+[data-bs-theme="dark"] {
+    .timeline-date-header { color: var(--text-secondary); }
+    .timeline-date-marker { box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.25); }
+}
+
 .timeline {
     position: relative;
     padding: 0;

@@ -40,6 +40,33 @@ export class LoggerService {
     }
 
     /**
+     * Log di debug - solo in sviluppo e test
+     */
+    debug(...args) {
+        if (isDevelopment || isTest) {
+            console.debug(...args);
+        }
+    }
+
+    /**
+     * Gruppo di log - solo in sviluppo e test
+     */
+    group(label) {
+        if (isDevelopment || isTest) {
+            console.group(label);
+        }
+    }
+
+    /**
+     * Fine gruppo di log - solo in sviluppo e test
+     */
+    groupEnd() {
+        if (isDevelopment || isTest) {
+            console.groupEnd();
+        }
+    }
+
+    /**
      * Log tabellare - solo in sviluppo e test
      */
     table(data) {

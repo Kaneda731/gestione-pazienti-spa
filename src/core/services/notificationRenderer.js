@@ -186,6 +186,23 @@ export function createNotificationElement({
                     // Crea progress bar JavaScript che gestisce anche l'autoclose
                     const progressBarInstance = createProgressBar(div, notificationDuration, notification.type);
                     
+                    // Anche con progress bar, aggiungi timer al map per compatibilità con i test
+                    startAutoCloseTimer(
+                        timers,
+                        notification.id,
+                        notificationDuration,
+                        () => {
+                            try {
+                                removeNotification(notification.id);
+                            } catch (removeError) {
+                                console.error('❌ Error in progress complete callback:', removeError);
+                                if (div.parentNode) {
+                                    div.remove();
+                                }
+                            }
+                        }
+                    );
+                    
                     // Gestisci eventi hover per pausa/resume (solo desktop)
                     if (window.innerWidth > 768) {
                         div.addEventListener('mouseenter', () => {

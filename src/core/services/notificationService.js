@@ -500,6 +500,43 @@ class NotificationService {
         stateService.clearNotificationsByType(type);
     }
 
+    /**
+     * Timer management methods
+     */
+    startAutoCloseTimer(notificationId, duration) {
+        try {
+            startAutoCloseTimer(this.timers, notificationId, duration, (id) => {
+                this.removeNotification(id);
+            });
+        } catch (error) {
+            console.warn('Failed to start auto-close timer:', error);
+        }
+    }
+
+    pauseAutoCloseTimer(notificationId) {
+        try {
+            pauseAutoCloseTimer(this.timers, notificationId);
+        } catch (error) {
+            console.warn('Failed to pause auto-close timer:', error);
+        }
+    }
+
+    resumeAutoCloseTimer(notificationId) {
+        try {
+            resumeAutoCloseTimer(this.timers, notificationId);
+        } catch (error) {
+            console.warn('Failed to resume auto-close timer:', error);
+        }
+    }
+
+    stopAutoCloseTimer(notificationId) {
+        try {
+            stopAutoCloseTimer(this.timers, notificationId, (id) => this.stopProgressBarAnimation(id));
+        } catch (error) {
+            console.warn('Failed to stop auto-close timer:', error);
+        }
+    }
+
     // Metodi di convenienza con supporto per opzioni avanzate
 
     success(message, options = {}) {

@@ -3,8 +3,17 @@ import { sharedResolve } from './shared.config.js';
 
 export default defineConfig({
   test: {
-    // Ambiente di test
+    // Ambiente di test - verify existing JSDOM configuration handles all test requirements
     environment: 'jsdom',
+    
+    // Enhanced JSDOM configuration for better test environment consistency
+    environmentOptions: {
+      jsdom: {
+        url: 'http://localhost:5173',
+        pretendToBeVisual: true,
+        resources: 'usable'
+      }
+    },
     
     // Setup files
     setupFiles: ['__tests__/setup/__setup__/vitest.setup.js'],

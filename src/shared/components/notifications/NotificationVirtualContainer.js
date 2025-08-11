@@ -617,7 +617,7 @@ export class NotificationVirtualContainer {
     }
 
     // Rimuovi dal DOM
-    if (this.container.parentNode) {
+    if (this.container && this.container.parentNode) {
       this.container.parentNode.removeChild(this.container);
     }
 

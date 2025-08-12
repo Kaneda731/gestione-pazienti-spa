@@ -44,8 +44,10 @@ export class EventiCliniciDataManager {
       logger.log('📊 Caricamento eventi con filtri:', this.state.filters);
 
       const result = await fetchEventiClinici(this.state.filters, this.state.currentPage);
+      logger.log('🔍 Risultato fetchEventiClinici:', result);
 
-  renderEventsResponsive(result);
+      renderEventsResponsive(result);
+      logger.log('🎨 renderEventsResponsive completato');
       this.setupEventCardListeners();
       
       // Update UI indicators

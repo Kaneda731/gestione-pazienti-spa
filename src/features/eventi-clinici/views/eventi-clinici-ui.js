@@ -148,18 +148,49 @@ function groupEventsByDate(eventi) {
  * Utility per popolare opzioni di select
  */
 function populateSelectOptions(selectElement, options) {
-  const firstOption = selectElement.querySelector('option[value=""]');
-  selectElement.innerHTML = sanitizeHtml('');
-  if (firstOption) {
-    selectElement.appendChild(firstOption);
-  }
+  try {
+    // Check if it's a CustomSelect (correct property name)
+    const customSelectInstance = selectElement.customSelectInstance;
+    
+    if (customSelectInstance) {
+      // Use CustomSelect API
+      logger.log('🔧 Popolamento CustomSelect con', options.length, 'opzioni');
+      
+      // Clear existing options except the first one
+      const firstOption = selectElement.querySelector('option[value=""]');
+      selectElement.innerHTML = '';
+      if (firstOption) {
+        selectElement.appendChild(firstOption);
+      }
 
-  options.forEach(option => {
-    const optionElement = document.createElement('option');
-    optionElement.value = option;
-    optionElement.textContent = option;
-    selectElement.appendChild(optionElement);
-  });
+      // Add new options
+      options.forEach(option => {
+        const optionElement = document.createElement('option');
+        optionElement.value = option;
+        optionElement.textContent = option;
+        selectElement.appendChild(optionElement);
+      });
+
+      // Refresh the CustomSelect to show new options
+      customSelectInstance.refresh();
+    } else {
+      // Fallback to standard select
+      const firstOption = selectElement.querySelector('option[value=""]');
+      selectElement.innerHTML = '';
+      if (firstOption) {
+        selectElement.appendChild(firstOption);
+      }
+
+      options.forEach(option => {
+        const optionElement = document.createElement('option');
+        optionElement.value = option;
+        optionElement.textContent = option;
+        selectElement.appendChild(optionElement);
+      });
+    }
+  } catch (error) {
+    logger.error('❌ Errore popolamento select:', error);
+  }
 }
 
 // ============================================================================
@@ -170,18 +201,33 @@ function populateSelectOptions(selectElement, options) {
  * Rendering responsive: tabella su desktop, timeline su mobile/tablet
  */
 export function renderEventsResponsive(eventsData) {
+  logger.log('🎨 renderEventsResponsive chiamata con:', eventsData);
+  
+  if (!domElements || Object.keys(domElements).length === 0) {
+    logger.error('❌ domElements non inizializzati in renderEventsResponsive');
+    return;
+  }
+  
   const useTable = window.innerWidth >= 1200;
+  logger.log('📱 useTable:', useTable, 'window.innerWidth:', window.innerWidth);
 
   if (domElements.tableContainer) {
     domElements.tableContainer.style.display = useTable ? 'block' : 'none';
+  } else {
+    logger.warn('⚠️ tableContainer non trovato');
   }
+  
   if (domElements.timelineContainer) {
     domElements.timelineContainer.style.display = useTable ? 'none' : 'block';
+  } else {
+    logger.warn('⚠️ timelineContainer non trovato');
   }
 
   if (useTable) {
+    logger.log('🔧 Rendering tabella');
     renderEventsTable(eventsData);
   } else {
+    logger.log('🔧 Rendering timeline');
     renderEventsTimeline(eventsData);
   }
 }
@@ -1093,22 +1139,64 @@ export function applyResponsiveDesign() {
  * Popola il filtro reparti con le opzioni disponibili
  */
 export async function populateDepartmentFilter(reparti) {
-  if (!domElements.filterReparto) return;
-
-  const firstOption = domElements.filterReparto.querySelector('option[value=""]');
-  domElements.filterReparto.innerHTML = sanitizeHtml('');
-  if (firstOption) {
-    domElements.filterReparto.appendChild(firstOption);
+  if (!domElements.filterReparto) {
+    logger.warn('⚠️ Elemento filterReparto non trovato');
+    return;
   }
 
-  reparti.forEach(reparto => {
-    const option = document.createElement('option');
-    option.value = reparto;
-    option.textContent = reparto;
-    domElements.filterReparto.appendChild(option);
-  });
+  try {
+    // Check if it's a CustomSelect (correct property name)
+    const customSelectInstance = domElements.filterReparto.customSelectInstance;
+    
+    if (customSelectInstance) {
+      // Use CustomSelect API
+      logger.log('🔧 Popolamento CustomSelect reparto con', reparti.length, 'opzioni');
+      
+      // Clear existing options except the first one
+      const firstOption = domElements.filterReparto.querySelector('option[value=""]');
+      domElements.filterReparto.innerHTML = '';
+      if (firstOption) {
+        domElements.filterReparto.appendChild(firstOption);
+      }
 
-  logger.log('✅ Filtro reparti popolato con', reparti.length, 'opzioni');
+      // Add new options
+      reparti.forEach(reparto => {
+        const option = document.createElement('option');
+        option.value = reparto;
+        option.textContent = reparto;
+        domElements.filterReparto.appendChild(option);
+      });
+
+      // Use updateOptions method to refresh the CustomSelect
+      if (typeof customSelectInstance.updateOptions === 'function') {
+        customSelectInstance.updateOptions();
+        logger.log('🔧 CustomSelect options updated');
+      } else if (typeof customSelectInstance.refresh === 'function') {
+        customSelectInstance.refresh();
+        logger.log('🔧 CustomSelect refreshed');
+      }
+    } else {
+      // Fallback to standard select
+      logger.log('🔧 Popolamento select standard reparto con', reparti.length, 'opzioni');
+      
+      const firstOption = domElements.filterReparto.querySelector('option[value=""]');
+      domElements.filterReparto.innerHTML = '';
+      if (firstOption) {
+        domElements.filterReparto.appendChild(firstOption);
+      }
+
+      reparti.forEach(reparto => {
+        const option = document.createElement('option');
+        option.value = reparto;
+        option.textContent = reparto;
+        domElements.filterReparto.appendChild(option);
+      });
+    }
+
+    logger.log('✅ Filtro reparti popolato con', reparti.length, 'opzioni');
+  } catch (error) {
+    logger.error('❌ Errore popolamento filtro reparti:', error);
+  }
 }
 
 /**

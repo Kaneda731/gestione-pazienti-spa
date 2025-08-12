@@ -1,7 +1,10 @@
 // src/features/eventi-clinici/views/eventi-clinici.js
 
-import { getSuggestedFilters, getDepartmentsList } from './eventi-clinici-api.js';
-import { resetCurrentFiltersToDefaults } from './eventi-clinici-api.js';
+import {
+  getSuggestedFilters,
+  getDepartmentsList,
+} from "./eventi-clinici-api.js";
+import { resetCurrentFiltersToDefaults } from "./eventi-clinici-api.js";
 
 import {
   initializeDOMElements,
@@ -10,43 +13,43 @@ import {
   populateAdvancedFilters,
   applyResponsiveDesign,
   resetFiltersUI,
-  showError
-} from './eventi-clinici-ui.js';
+  showError,
+} from "./eventi-clinici-ui.js";
 
-import { logger } from '../../../core/services/loggerService.js';
-import { initCustomSelects } from '../../../shared/components/forms/CustomSelect.js';
-import { initCustomDatepickers } from '../../../shared/components/forms/CustomDatepicker.js';
+import { logger } from "../../../core/services/loggerService.js";
+import { initCustomSelects } from "../../../shared/components/forms/CustomSelect.js";
+import { initCustomDatepickers } from "../../../shared/components/forms/CustomDatepicker.js";
 
 // Import new modules
-import { EventiCliniciDataManager } from './EventiCliniciDataManager.js';
-import { EventiCliniciFilterManager } from './EventiCliniciFilterManager.js';
-import { EventiCliniciModalManager } from './EventiCliniciModalManager.js';
-import { EventiCliniciEventHandlers } from './EventiCliniciEventHandlers.js';
-import { resolveInfezioneEvento } from './eventi-clinici-api.js';
+import { EventiCliniciDataManager } from "./EventiCliniciDataManager.js";
+import { EventiCliniciFilterManager } from "./EventiCliniciFilterManager.js";
+import { EventiCliniciModalManager } from "./EventiCliniciModalManager.js";
+import { EventiCliniciEventHandlers } from "./EventiCliniciEventHandlers.js";
+import { resolveInfezioneEvento } from "./eventi-clinici-api.js";
 
 /**
  * Controller principale per la gestione degli eventi clinici
- * Coordina API, UI e gestisce la logica di business
+ * Versione semplificata che si concentra sulle funzionalità essenziali
  */
 
 // State management
 let currentState = {
   currentPage: 0,
   filters: {
-    paziente_search: '',
-    tipo_evento: '',
-    data_da: '',
-    data_a: '',
-    reparto: '',
-    agente_patogeno: '',
-    tipo_intervento: '',
-    sortColumn: 'data_evento',
-    sortDirection: 'desc'
+    paziente_search: "",
+    tipo_evento: "",
+    data_da: "",
+    data_a: "",
+    reparto: "",
+    agente_patogeno: "",
+    tipo_intervento: "",
+    sortColumn: "data_evento",
+    sortDirection: "desc",
   },
   selectedPatientId: null,
   editingEventId: null,
   isLoading: false,
-  filterStats: null
+  filterStats: null,
 };
 
 // DOM elements
@@ -57,53 +60,142 @@ let dataManager = null;
 let filterManager = null;
 let modalManager = null;
 let eventHandlers = null;
-let delegatedHandlersBound = false;
+
+/**
+ * Inizializza gli elementi DOM con retry semplice
+ */
+async function initializeDOMElementsWithRetry(maxRetries = 5, delay = 100) {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      // Verifica che gli elementi critici siano presenti nel DOM
+      const criticalElements = [
+        "eventi-table-container",
+        "eventi-timeline-container",
+        "eventi-add-btn",
+        "eventi-reset-filters-btn",
+      ];
+
+      const missingElements = criticalElements.filter(
+        (id) => !document.getElementById(id)
+      );
+
+      if (missingElements.length === 0) {
+        logger.log(
+          `✅ Tutti gli elementi DOM critici trovati al tentativo ${i + 1}`
+        );
+        initializeDOMElements();
+        return;
+      }
+
+      logger.log(
+        `⚠️ Tentativo ${i + 1}: elementi DOM mancanti:`,
+        missingElements
+      );
+
+      if (i < maxRetries - 1) {
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    } catch (error) {
+      logger.error(`❌ Errore tentativo ${i + 1} inizializzazione DOM:`, error);
+      if (i < maxRetries - 1) {
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
+  }
+
+  logger.error(
+    "❌ Impossibile trovare tutti gli elementi DOM critici dopo",
+    maxRetries,
+    "tentativi"
+  );
+  throw new Error("Template DOM non completamente caricato");
+}
 
 /**
  * Inizializza la vista eventi clinici
  */
 export async function initEventiCliniciView(urlParams) {
   try {
-    logger.log('🚀 Inizializzazione vista eventi clinici');
+    logger.log("🚀 Inizializzazione vista eventi clinici - START");
 
     // Initialize DOM elements
-    initializeDOMElements();
+    logger.log("📝 Step 1: Inizializzazione DOM elements");
+    await initializeDOMElementsWithRetry();
     domElements = getDOMElements();
+    logger.log("✅ DOM elements inizializzati");
 
     // Initialize managers
+    logger.log("📝 Step 2: Inizializzazione managers");
     await initializeManagers();
+    logger.log("✅ Managers inizializzati");
 
     // Initialize form components
+    logger.log("� Stepi 3: Inizializzazione form components");
     initializeFormComponents();
+    logger.log("✅ Form components inizializzati");
 
     // Setup event handlers
+    logger.log("📝 Step 4: Setup event handlers");
     await setupEventHandlers();
-
-    // Apply responsive design
-    applyResponsiveDesign();
+    logger.log("✅ Event handlers configurati");
 
     // Load filter suggestions and departments
+    logger.log("📝 Step 5: Caricamento filtri suggeriti");
     await loadFilterSuggestions();
+    logger.log("✅ Filtri suggeriti caricati");
 
-  // Forza reset filtri all'avvio: niente filtri attivi di default
-  resetCurrentFiltersToDefaults();
-  // Resetta i controlli UI dei filtri
-  resetFiltersUI();
+    // Reset filtri all'avvio
+    logger.log("📝 Step 6: Reset filtri");
+    resetCurrentFiltersToDefaults();
+    resetFiltersUI();
+    logger.log("✅ Filtri resettati");
 
     // Load initial data
-    await dataManager.loadEventsData();
+    logger.log("📝 Step 7: Caricamento dati iniziali");
+    try {
+      // Test diretto senza manager
+      logger.log("🧪 Test caricamento diretto...");
+      const { fetchEventiClinici } = await import("./eventi-clinici-api.js");
+      const testResult = await fetchEventiClinici({}, 0);
+      logger.log("🧪 Test result:", testResult);
+
+      const result = await dataManager.loadEventsData();
+      logger.log("✅ Dati iniziali caricati:", result);
+    } catch (error) {
+      logger.error("❌ ERRORE caricamento dati iniziali:", error);
+      throw error;
+    }
+
+    // Apply responsive design
+    logger.log("📝 Step 8: Applicazione responsive design");
+    applyResponsiveDesign();
+    logger.log("✅ Responsive design applicato");
 
     // Handle URL parameters
+    logger.log("📝 Step 9: Gestione parametri URL");
     handleUrlParameters(urlParams);
+    logger.log("✅ Parametri URL gestiti");
 
-    logger.log('✅ Vista eventi clinici inizializzata con successo');
+    logger.log("🎉 Vista eventi clinici inizializzata con successo");
 
     // Return cleanup function
     return cleanup;
-
   } catch (error) {
-    logger.error('❌ Errore inizializzazione vista eventi clinici:', error);
-    showError('Errore nel caricamento della vista eventi clinici');
+    logger.error(
+      "💥 ERRORE CRITICO inizializzazione vista eventi clinici:",
+      error
+    );
+
+    // Mostra messaggio di errore
+    try {
+      showError(
+        "Errore nel caricamento della vista eventi clinici. Ricaricare la pagina."
+      );
+    } catch (uiError) {
+      console.error("❌ Impossibile mostrare errore UI:", uiError);
+      alert("Errore critico nel caricamento. Ricaricare la pagina.");
+    }
+
     throw error;
   }
 }
@@ -116,42 +208,44 @@ async function initializeManagers() {
     // Setup event card listeners function
     const setupEventCardListeners = () => {
       // Event detail buttons
-      document.querySelectorAll('.event-detail-btn').forEach(btn => {
+      document.querySelectorAll(".event-detail-btn").forEach((btn) => {
         const handler = (e) => {
           e.stopPropagation();
           const eventId = btn.dataset.eventoId;
           modalManager.showEventDetail(eventId);
         };
-        btn.addEventListener('click', handler);
+        btn.addEventListener("click", handler);
       });
 
       // Event edit buttons
-      document.querySelectorAll('.event-edit-btn').forEach(btn => {
+      document.querySelectorAll(".event-edit-btn").forEach((btn) => {
         const handler = (e) => {
           e.stopPropagation();
           const eventId = btn.dataset.eventoId;
           modalManager.editEvent(eventId);
         };
-        btn.addEventListener('click', handler);
+        btn.addEventListener("click", handler);
       });
 
       // Event delete buttons
-      document.querySelectorAll('.event-delete-btn').forEach(btn => {
+      document.querySelectorAll(".event-delete-btn").forEach((btn) => {
         const handler = (e) => {
           e.stopPropagation();
           const eventId = btn.dataset.eventoId;
           modalManager.confirmDeleteEvent(eventId);
         };
-        btn.addEventListener('click', handler);
+        btn.addEventListener("click", handler);
       });
 
       // Resolve infection buttons
-      document.querySelectorAll('.event-resolve-btn').forEach(btn => {
+      document.querySelectorAll(".event-resolve-btn").forEach((btn) => {
         const handler = async (e) => {
           e.stopPropagation();
           const eventId = btn.dataset.eventoId;
           try {
-            const { ResolveInfectionModal } = await import('../components/ResolveInfectionModal.js');
+            const { ResolveInfectionModal } = await import(
+              "../components/ResolveInfectionModal.js"
+            );
             const resolver = new ResolveInfectionModal({ eventoId: eventId });
             const dataFine = await resolver.show();
             if (dataFine) {
@@ -159,20 +253,23 @@ async function initializeManagers() {
               await dataManager.loadEventsData();
             }
           } catch (err) {
-            logger.error('Errore nella risoluzione infezione:', err);
+            logger.error("Errore nella risoluzione infezione:", err);
           }
         };
-        btn.addEventListener('click', handler);
+        btn.addEventListener("click", handler);
       });
     };
 
     // Initialize data manager
-    dataManager = new EventiCliniciDataManager(currentState, setupEventCardListeners);
+    dataManager = new EventiCliniciDataManager(
+      currentState,
+      setupEventCardListeners
+    );
 
-    // Initialize filter manager with updateFilterStats
+    // Initialize filter manager
     filterManager = new EventiCliniciFilterManager(
-      currentState, 
-      setupEventCardListeners, 
+      currentState,
+      setupEventCardListeners,
       () => dataManager.updateFilterStats()
     );
 
@@ -182,92 +279,16 @@ async function initializeManagers() {
 
     // Initialize event handlers
     eventHandlers = new EventiCliniciEventHandlers(
-      currentState, 
-      domElements, 
-      filterManager, 
-      modalManager, 
+      currentState,
+      domElements,
+      filterManager,
+      modalManager,
       dataManager
     );
 
-    logger.log('✅ Manager inizializzati');
-
-    // Delega globale: abilita click su pulsanti dinamici (es. dentro la modal Azioni)
-    if (!delegatedHandlersBound) {
-      const closeActionsModalIfOpen = async () => {
-        const modalEl = document.getElementById('eventi-azioni-modal');
-        if (!modalEl) return;
-        try {
-          const { Modal } = await import('bootstrap');
-          const inst = Modal.getOrCreateInstance(modalEl);
-          inst.hide();
-        } catch (_) {
-          // Fallback: rimuovi classi/backdrop
-          modalEl.classList.remove('show');
-          modalEl.style.display = 'none';
-          const backdrop = document.querySelector('.modal-backdrop');
-          if (backdrop) backdrop.remove();
-          document.body.classList.remove('modal-open');
-          document.body.style.removeProperty('padding-right');
-        }
-      };
-
-      document.addEventListener('click', async (e) => {
-        // Gestisci solo i click all'interno della modal Azioni
-        const withinActionsModal = e.target.closest('#eventi-azioni-modal');
-        if (!withinActionsModal) return;
-        const detailBtn = e.target.closest('.event-detail-btn');
-        if (detailBtn) {
-          e.preventDefault();
-          e.stopPropagation();
-          await closeActionsModalIfOpen();
-          const eventId = detailBtn.dataset.eventoId;
-          modalManager.showEventDetail(eventId);
-          return;
-        }
-
-        const editBtn = e.target.closest('.event-edit-btn');
-        if (editBtn) {
-          e.preventDefault();
-          e.stopPropagation();
-          await closeActionsModalIfOpen();
-          const eventId = editBtn.dataset.eventoId;
-          modalManager.editEvent(eventId);
-          return;
-        }
-
-        const deleteBtn = e.target.closest('.event-delete-btn');
-        if (deleteBtn) {
-          e.preventDefault();
-          e.stopPropagation();
-          await closeActionsModalIfOpen();
-          const eventId = deleteBtn.dataset.eventoId;
-          modalManager.confirmDeleteEvent(eventId);
-          return;
-        }
-
-        const resolveBtn = e.target.closest('.event-resolve-btn');
-        if (resolveBtn) {
-          e.preventDefault();
-          e.stopPropagation();
-          await closeActionsModalIfOpen();
-          const eventId = resolveBtn.dataset.eventoId;
-          try {
-            const { ResolveInfectionModal } = await import('../components/ResolveInfectionModal.js');
-            const resolver = new ResolveInfectionModal({ eventoId: eventId });
-            const dataFine = await resolver.show();
-            if (dataFine) {
-              await resolveInfezioneEvento(eventId, dataFine);
-              await dataManager.loadEventsData();
-            }
-          } catch (err) {
-            logger.error('Errore nella risoluzione infezione (delegato):', err);
-          }
-        }
-      });
-      delegatedHandlersBound = true;
-    }
+    logger.log("✅ Manager inizializzati");
   } catch (error) {
-    logger.error('❌ Errore inizializzazione manager:', error);
+    logger.error("❌ Errore inizializzazione manager:", error);
   }
 }
 
@@ -279,12 +300,12 @@ function initializeFormComponents() {
     // Initialize custom selects
     initCustomSelects();
 
-    // Initialize date pickers with correct selector
-    initCustomDatepickers('[data-datepicker]');
+    // Initialize date pickers
+    initCustomDatepickers("[data-datepicker]");
 
-    logger.log('✅ Componenti form inizializzati');
+    logger.log("✅ Componenti form inizializzati");
   } catch (error) {
-    logger.error('❌ Errore inizializzazione componenti form:', error);
+    logger.error("❌ Errore inizializzazione componenti form:", error);
   }
 }
 
@@ -292,13 +313,17 @@ function initializeFormComponents() {
  * Configura gli event handlers
  */
 async function setupEventHandlers() {
-  // Setup event listeners through the event handlers manager
-  await eventHandlers.setupEventListeners();
+  try {
+    // Setup event listeners through the event handlers manager
+    await eventHandlers.setupEventListeners();
 
-  // Initialize advanced filters state
-  eventHandlers.initializeAdvancedFiltersState();
+    // Initialize advanced filters state
+    eventHandlers.initializeAdvancedFiltersState();
 
-  logger.log('✅ Event handlers configurati');
+    logger.log("✅ Event handlers configurati");
+  } catch (error) {
+    logger.error("❌ Errore setup event handlers:", error);
+  }
 }
 
 /**
@@ -306,17 +331,59 @@ async function setupEventHandlers() {
  */
 async function loadFilterSuggestions() {
   try {
+    // Wait a bit to ensure CustomSelects are fully initialized
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
     const [suggestions, reparti] = await Promise.all([
       getSuggestedFilters(),
-      getDepartmentsList()
+      getDepartmentsList(),
     ]);
+
+    logger.log("🔧 Popolamento filtri con:", {
+      reparti: reparti.length,
+      tipiIntervento: suggestions.tipiIntervento?.length || 0,
+      agentiPatogeni: suggestions.agentiPatogeni?.length || 0,
+    });
 
     await populateDepartmentFilter(reparti);
     await populateAdvancedFilters(suggestions);
 
-    logger.log('✅ Suggerimenti filtri caricati:', { suggestions, reparti: reparti.length });
+    // Force refresh of all CustomSelects after population
+    setTimeout(() => {
+      document
+        .querySelectorAll('select[data-custom="true"]')
+        .forEach((select) => {
+          logger.log(
+            "🔧 Checking CustomSelect:",
+            select.id,
+            "has instance?",
+            !!select._customSelect
+          );
+          if (
+            select._customSelect &&
+            typeof select._customSelect.refresh === "function"
+          ) {
+            logger.log("🔧 Refreshing CustomSelect:", select.id);
+            select._customSelect.refresh();
+          }
+        });
+    }, 50);
+
+    // Additional refresh after more time
+    setTimeout(() => {
+      const repartoSelect = document.getElementById("eventi-filter-reparto");
+      if (repartoSelect && repartoSelect._customSelect) {
+        logger.log("🔧 Final refresh of reparto CustomSelect");
+        repartoSelect._customSelect.refresh();
+      }
+    }, 500);
+
+    logger.log("✅ Suggerimenti filtri caricati:", {
+      suggestions,
+      reparti: reparti.length,
+    });
   } catch (error) {
-    logger.error('❌ Errore caricamento suggerimenti filtri:', error);
+    logger.error("❌ Errore caricamento suggerimenti filtri:", error);
   }
 }
 
@@ -327,14 +394,14 @@ function handleUrlParameters(urlParams) {
   if (!urlParams) return;
 
   // Handle patient ID parameter
-  const patientId = urlParams.get('patient');
+  const patientId = urlParams.get("patient");
   if (patientId) {
     currentState.selectedPatientId = patientId;
     currentState.filters.paziente_search = patientId;
   }
 
   // Handle event type parameter
-  const eventType = urlParams.get('type');
+  const eventType = urlParams.get("type");
   if (eventType && domElements.filterType) {
     domElements.filterType.value = eventType;
     currentState.filters.tipo_evento = eventType;
@@ -345,18 +412,18 @@ function handleUrlParameters(urlParams) {
  * Funzione di cleanup
  */
 function cleanup() {
-  logger.log('🧹 Cleanup vista eventi clinici');
+  logger.log("🧹 Cleanup vista eventi clinici");
 
   // Cleanup managers
-  if (eventHandlers) {
+  if (eventHandlers && typeof eventHandlers.cleanup === "function") {
     eventHandlers.cleanup();
   }
 
-  if (modalManager) {
+  if (modalManager && typeof modalManager.cleanup === "function") {
     modalManager.cleanup();
   }
 
-  if (dataManager) {
+  if (dataManager && typeof dataManager.clearCache === "function") {
     dataManager.clearCache();
   }
 
@@ -364,20 +431,20 @@ function cleanup() {
   currentState = {
     currentPage: 0,
     filters: {
-      paziente_search: '',
-      tipo_evento: '',
-      data_da: '',
-      data_a: '',
-      reparto: '',
-      agente_patogeno: '',
-      tipo_intervento: '',
-      sortColumn: 'data_evento',
-      sortDirection: 'desc'
+      paziente_search: "",
+      tipo_evento: "",
+      data_da: "",
+      data_a: "",
+      reparto: "",
+      agente_patogeno: "",
+      tipo_intervento: "",
+      sortColumn: "data_evento",
+      sortDirection: "desc",
     },
     selectedPatientId: null,
     editingEventId: null,
     isLoading: false,
-    filterStats: null
+    filterStats: null,
   };
 
   // Reset manager instances
@@ -386,6 +453,5 @@ function cleanup() {
   modalManager = null;
   eventHandlers = null;
 
-  logger.log('✅ Cleanup completato');
+  logger.log("✅ Cleanup completato");
 }
-

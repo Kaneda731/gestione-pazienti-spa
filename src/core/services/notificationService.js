@@ -5,19 +5,6 @@ import { NotificationErrorHandler } from './notificationErrorHandler.js';
 import { notificationEventManager } from './notificationEventManager.js';
 import { notificationAnimationManager } from './notificationAnimationManager.js';
 import { notificationLazyLoader } from './notificationLazyLoader.js';
-/**
- * Servizio avanzato per la gestione delle notifiche UI
- * Supporta notifiche responsive, accessibili e personalizzabili
- * Si integra con stateService per gestire notifiche in modo centralizzato
- * 
- * PERFORMANCE OPTIMIZATIONS:
- * - Virtual scrolling per molte notifiche simultanee
- * - Event listener cleanup automatico
- * - GPU-accelerated animations (60fps)
- * - Lazy loading per componenti non critici
- */
-
-
 import { NOTIFICATION_TYPES, RESPONSIVE_CONFIG, getDurationForType } from './notificationConfig.js';
 import { createLiveRegion, announceNotification, handleExcessNotifications, attachNotificationEvents, attachTouchEvents } from './notificationDomUtils.js';
 import {
@@ -43,72 +30,35 @@ import {
     enableSounds as enableSoundsUtil
 } from './notificationSettingsUtils.js';
 
+/**
+ * Servizio avanzato per la gestione delle notifiche UI
+ * Supporta notifiche responsive, accessibili e personalizzabili
+ * Si integra con stateService per gestire notifiche in modo centralizzato
+ * 
+ * PERFORMANCE OPTIMIZATIONS:
+ * - Virtual scrolling per molte notifiche simultanee
+ * - Event listener cleanup automatico
+ * - GPU-accelerated animations (60fps)
+ * - Lazy loading per componenti non critici
+ */
+
+// ============================================================================
+// NOTIFICATION SERVICE CLASS
+// ============================================================================
+
 class NotificationService {
-    // Metodi di configurazione delegati
-    setCustomDurations(durations) {
-        setCustomDurationsUtil(durations);
-    }
-
-    setPersistentTypes(types) {
-        setPersistentTypesUtil(types);
-    }
-
-    setAutoCleanupInterval(interval) {
-        setAutoCleanupIntervalUtil(interval);
-    }
-
-    updatePosition(position) {
-        updatePositionUtil(position);
-    }
-
-    setMaxVisible(max) {
-        setMaxVisibleUtil(max);
-        this.renderNotifications();
-    }
-
-    enableSounds(enabled = true) {
-        enableSoundsUtil(enabled);
-    }
-
-    /**
-     * Aggiunge una notifica con opzioni avanzate
-     */
-    show(type, message, options = {}) {
-        try {
-            const typeConfig = NOTIFICATION_TYPES[type.toUpperCase()] || NOTIFICATION_TYPES.INFO;
-            // Usa durata personalizzata da settings se non specificata
-            const customDuration = (this.settings.customDurations && this.settings.customDurations[type] !== undefined)
-                ? this.settings.customDurations[type]
-                : typeConfig.defaultDuration;
-            // Merge opzioni con defaults (lascia che StateService gestisca persistent)
-            const finalOptions = {
-                duration: options.duration !== undefined ? options.duration : customDuration,
-                closable: options.closable !== false,
-                position: options.position || this.settings.position,
-                priority: options.priority || 0,
-                title: options.title,
-                actions: options.actions,
-                ...options
-            };
-            // Non impostare persistent qui - lascia che StateService lo gestisca
-            // basandosi sui persistentTypes nelle impostazioni
-            return stateService.addNotification(type, message, finalOptions);
-        } catch (error) {
-            NotificationErrorHandler.handleServiceError(error, 'show', { type, message, options });
-            // Fallback: tenta di mostrare notifica semplice
-            return NotificationErrorHandler.recoverFromShowError({ type, message, options, id: Date.now().toString() });
-        }
-    }
-    // Memorizza gli id delle notifiche renderizzate per evitare rerender inutili
-    _lastRenderedNotificationIds = [];
-    // Abilita log dettagliati solo se necessario
+    // ========================================================================
+    // CONSTANTS & CONFIGURATION
+    // ========================================================================
+    
     static DEBUG = false;
 
     constructor() {
+        // Core properties
         this.notificationContainer = null;
-        this.timers = new Map(); // Gestione timer per auto-close
-        this.touchStartX = null; // Per gesture swipe su mobile
-        this.isRendering = false; // Protezione contro loop infiniti
+        this.timers = new Map();
+        this.touchStartX = null;
+        this.isRendering = false;
         this.initialized = false;
         this.settings = stateService.getNotificationSettings();
         
@@ -117,11 +67,12 @@ class NotificationService {
         this._renderCount = 0;
         this._totalRenderTime = 0;
         this._averageRenderTime = null;
+        this._lastRenderedNotificationIds = [];
         
         // Performance optimizations
         this.virtualScroller = null;
         this.useVirtualScrolling = false;
-        this.performanceMode = 'auto'; // 'auto', 'performance', 'quality'
+        this.performanceMode = 'auto';
         this.maxConcurrentNotifications = this.detectOptimalMaxNotifications();
         
         // Memory management
@@ -137,167 +88,286 @@ class NotificationService {
         this.setupPerformanceMonitoring();
     }
 
+    // ========================================================================
+    // INITIALIZATION METHODS
+    // ========================================================================
+
     async init() {
         if (this.initialized || typeof window === 'undefined') return;
 
         try {
-            // Determina se usare virtual scrolling
-            this.useVirtualScrolling = false; // Disabilita virtual scrolling per ora
-            
-            // Importa direttamente il NotificationContainer standard
-            const { NotificationContainer } = await import('../../shared/components/notifications/NotificationContainer.js');
-            
-            this.notificationContainer = new NotificationContainer({
-                position: this.settings.position,
-                maxVisible: this.settings.maxVisible,
-            });
-
-            // Setup event delegation per performance
-            notificationEventManager.setupEventDelegation(this.notificationContainer.container);
-
-            createLiveRegion();
-
-            // Subscribe con throttling per performance
-            stateService.subscribe('notifications', this.throttledRenderNotifications.bind(this));
-
-            // Setup cleanup automatico
+            await this.initializeContainer();
+            this.setupEventHandlers();
+            this.setupStateSubscription();
             this.setupAutomaticCleanup();
-
+            this.setupEmergencyReset();
+            
             this.initialized = true;
             
-            // Expose emergency reset method globally for development
-            if (typeof window !== 'undefined') {
-                window.notificationEmergencyReset = () => this.emergencyReset();
-                console.log('🚨 EMERGENCY: If you see error loops, run: window.notificationEmergencyReset()');
-            }
-            
             if (NotificationService.DEBUG) {
-                console.log('✅ NotificationService initialized with performance optimizations');
-                console.log('📊 Virtual scrolling:', this.useVirtualScrolling);
-                console.log('📊 Max concurrent notifications:', this.maxConcurrentNotifications);
-                console.log('🚨 Emergency reset available: window.notificationEmergencyReset()');
+                this.logInitializationSuccess();
             }
         } catch (error) {
             console.error('❌ Failed to initialize NotificationService:', error);
             NotificationErrorHandler.handleServiceError(error, 'init');
-            
-            // Fallback initialization
             await this.initializeFallback();
         }
     }
 
+    async initializeContainer() {
+        this.useVirtualScrolling = false; // Disabilita virtual scrolling per ora
+        
+        const { NotificationContainer } = await import('../../shared/components/notifications/NotificationContainer.js');
+        
+        this.notificationContainer = new NotificationContainer({
+            position: this.settings.position,
+            maxVisible: this.settings.maxVisible,
+        });
+    }
+
+    setupEventHandlers() {
+        notificationEventManager.setupEventDelegation(this.notificationContainer.container);
+        createLiveRegion();
+    }
+
+    setupStateSubscription() {
+        stateService.subscribe('notifications', this.throttledRenderNotifications.bind(this));
+    }
+
+    setupEmergencyReset() {
+        if (typeof window !== 'undefined') {
+            window.notificationEmergencyReset = () => this.emergencyReset();
+            console.log('🚨 EMERGENCY: If you see error loops, run: window.notificationEmergencyReset()');
+        }
+    }
+
+    logInitializationSuccess() {
+        console.log('✅ NotificationService initialized with performance optimizations');
+        console.log('📊 Virtual scrolling:', this.useVirtualScrolling);
+        console.log('📊 Max concurrent notifications:', this.maxConcurrentNotifications);
+        console.log('🚨 Emergency reset available: window.notificationEmergencyReset()');
+    }
+
+    async initializeFallback() {
+        try {
+            const { NotificationContainer } = await import('../../shared/components/notifications/NotificationContainer.js');
+            
+            this.notificationContainer = new NotificationContainer({
+                position: this.settings.position,
+                maxVisible: Math.min(this.settings.maxVisible, 5),
+            });
+
+            createLiveRegion();
+            stateService.subscribe('notifications', this.throttledRenderNotifications.bind(this));
+
+            this.initialized = true;
+            console.warn('⚠️ NotificationService initialized in fallback mode');
+        } catch (error) {
+            console.error('❌ Fallback initialization failed:', error);
+            throw error;
+        }
+    }
+
+    // ========================================================================
+    // CORE NOTIFICATION METHODS
+    // ========================================================================
+
+    show(type, message, options = {}) {
+        try {
+            const typeConfig = NOTIFICATION_TYPES[type.toUpperCase()] || NOTIFICATION_TYPES.INFO;
+            const customDuration = this.getCustomDuration(type, typeConfig);
+            
+            const finalOptions = this.buildFinalOptions(options, customDuration);
+            
+            return stateService.addNotification(type, message, finalOptions);
+        } catch (error) {
+            NotificationErrorHandler.handleServiceError(error, 'show', { type, message, options });
+            return NotificationErrorHandler.recoverFromShowError({ type, message, options, id: Date.now().toString() });
+        }
+    }
+
+    getCustomDuration(type, typeConfig) {
+        return (this.settings.customDurations && this.settings.customDurations[type] !== undefined)
+            ? this.settings.customDurations[type]
+            : typeConfig.defaultDuration;
+    }
+
+    buildFinalOptions(options, customDuration) {
+        return {
+            duration: options.duration !== undefined ? options.duration : customDuration,
+            closable: options.closable !== false,
+            position: options.position || this.settings.position,
+            priority: options.priority || 0,
+            title: options.title,
+            actions: options.actions,
+            ...options
+        };
+    }
+
+    // Convenience methods
+    success(message, options = {}) {
+        if (typeof options === 'number') {
+            options = { duration: options };
+        }
+        return this.show('success', message, options);
+    }
+
+    info(message, options = {}) {
+        if (typeof options === 'number') {
+            options = { duration: options };
+        }
+        return this.show('info', message, options);
+    }
+
+    warning(message, options = {}) {
+        if (typeof options === 'number') {
+            options = { duration: options };
+        }
+        return this.show('warning', message, options);
+    }
+
+    error(message, options = {}) {
+        if (typeof options === 'number') {
+            options = { duration: options };
+        }
+        return this.show('error', message, options);
+    }
+
+    // ========================================================================
+    // RENDERING METHODS
+    // ========================================================================
+
     renderNotifications(notifications = []) {
-        // Emergency circuit breaker per prevenire loop infiniti
-        if (!this.notificationContainer || this.isRendering) {
-            // Se il container non esiste, prova a ricrearlo
-            if (!this.notificationContainer && this.initialized) {
-                console.warn('⚠️ Container missing, attempting to recreate...');
-                this.recreateContainer();
-            }
-            return;
-        }
-        
-        // Validazione input - CRITICO per prevenire errori
-        if (!Array.isArray(notifications)) {
-            console.warn('⚠️ renderNotifications called with non-array:', typeof notifications, notifications);
-            notifications = [];
-        }
-        
-        // Controlla se ci sono troppi errori consecutivi
-        if (this._consecutiveRenderErrors > 10) {
-            console.error('❌ Too many consecutive render errors, disabling notifications temporarily');
-            this._renderingDisabled = true;
-            setTimeout(() => {
-                this._renderingDisabled = false;
-                this._consecutiveRenderErrors = 0;
-            }, 5000);
-            return;
-        }
-        
-        if (this._renderingDisabled) return;
+        if (!this.canRender(notifications)) return;
         
         this.isRendering = true;
 
         try {
-            // Performance tracking
             const startTime = performance.now();
-
-            const currentIds = new Set(notifications.map(n => n.id));
-            const renderedIds = new Set(this._lastRenderedNotificationIds);
-
-            renderedIds.forEach(id => {
-                if (!currentIds.has(id)) {
-                    try {
-                        this.notificationContainer.removeNotification(id);
-                    } catch (error) {
-                        NotificationErrorHandler.handleDOMError(error, 'remove', null);
-                    }
-                }
-            });
-
-            notifications.forEach(notification => {
-                if (!renderedIds.has(notification.id)) {
-                    try {
-                        this.addNotificationToDOM(notification);
-                    } catch (error) {
-                        NotificationErrorHandler.handleRenderError(error, notification, (notif) => {
-                            // Fallback renderer semplice
-                            const fallbackElement = NotificationErrorHandler.createSimpleFallback(notif);
-                            if (fallbackElement && this.notificationContainer) {
-                                this.notificationContainer.addNotification(fallbackElement);
-                            }
-                            return fallbackElement;
-                        });
-                    }
-                }
-            });
-
-            handleExcessNotifications(notifications.slice(this.settings.maxVisible), (id) => this.removeNotification(id));
-
-            this._lastRenderedNotificationIds = notifications.map(n => n.id);
             
-            // Reset error counter on successful render
-            this._consecutiveRenderErrors = 0;
-            
-            // Update performance metrics
-            const endTime = performance.now();
-            this._lastRenderTime = endTime - startTime;
-            this._renderCount++;
-            this._totalRenderTime += this._lastRenderTime;
-            this._averageRenderTime = this._totalRenderTime / this._renderCount;
+            this.updateNotifications(notifications);
+            this.trackPerformance(startTime);
+            this.resetErrorCounter();
             
         } catch (error) {
-            // Incrementa contatore errori consecutivi
-            this._consecutiveRenderErrors = (this._consecutiveRenderErrors || 0) + 1;
-            
-            console.error(`❌ NotificationService render error (${this._consecutiveRenderErrors}/10):`, error);
-            
-            // Solo gestisci l'errore se non siamo in un loop
-            if (this._consecutiveRenderErrors <= 5) {
-                NotificationErrorHandler.handleServiceError(error, 'render', notifications);
-            }
+            this.handleRenderError(error, notifications);
         } finally {
             this.isRendering = false;
         }
     }
 
+    canRender(notifications) {
+        // Emergency circuit breaker
+        if (!this.notificationContainer || this.isRendering) {
+            if (!this.notificationContainer && this.initialized) {
+                console.warn('⚠️ Container missing, attempting to recreate...');
+                this.recreateContainer();
+            }
+            return false;
+        }
+        
+        // Validate input
+        if (!Array.isArray(notifications)) {
+            console.warn('⚠️ renderNotifications called with non-array:', typeof notifications, notifications);
+            return false;
+        }
+        
+        // Check error threshold
+        if (this._consecutiveRenderErrors > 10) {
+            this.disableRenderingTemporarily();
+            return false;
+        }
+        
+        return !this._renderingDisabled;
+    }
+
+    updateNotifications(notifications) {
+        const currentIds = new Set(notifications.map(n => n.id));
+        const renderedIds = new Set(this._lastRenderedNotificationIds);
+
+        // Remove notifications that are no longer present
+        this.removeObsoleteNotifications(renderedIds, currentIds);
+        
+        // Add new notifications
+        this.addNewNotifications(notifications, renderedIds);
+        
+        // Handle excess notifications
+        handleExcessNotifications(
+            notifications.slice(this.settings.maxVisible), 
+            (id) => this.removeNotification(id)
+        );
+
+        this._lastRenderedNotificationIds = notifications.map(n => n.id);
+    }
+
+    removeObsoleteNotifications(renderedIds, currentIds) {
+        renderedIds.forEach(id => {
+            if (!currentIds.has(id)) {
+                try {
+                    this.notificationContainer.removeNotification(id);
+                } catch (error) {
+                    NotificationErrorHandler.handleDOMError(error, 'remove', null);
+                }
+            }
+        });
+    }
+
+    addNewNotifications(notifications, renderedIds) {
+        notifications.forEach(notification => {
+            if (!renderedIds.has(notification.id)) {
+                try {
+                    this.addNotificationToDOM(notification);
+                } catch (error) {
+                    this.handleNotificationRenderError(error, notification);
+                }
+            }
+        });
+    }
+
+    handleNotificationRenderError(error, notification) {
+        NotificationErrorHandler.handleRenderError(error, notification, (notif) => {
+            const fallbackElement = NotificationErrorHandler.createSimpleFallback(notif);
+            if (fallbackElement && this.notificationContainer) {
+                this.notificationContainer.addNotification(fallbackElement);
+            }
+            return fallbackElement;
+        });
+    }
+
+    trackPerformance(startTime) {
+        const endTime = performance.now();
+        this._lastRenderTime = endTime - startTime;
+        this._renderCount++;
+        this._totalRenderTime += this._lastRenderTime;
+        this._averageRenderTime = this._totalRenderTime / this._renderCount;
+    }
+
+    resetErrorCounter() {
+        this._consecutiveRenderErrors = 0;
+    }
+
+    handleRenderError(error, notifications) {
+        this._consecutiveRenderErrors = (this._consecutiveRenderErrors || 0) + 1;
+        
+        console.error(`❌ NotificationService render error (${this._consecutiveRenderErrors}/10):`, error);
+        
+        if (this._consecutiveRenderErrors <= 5) {
+            NotificationErrorHandler.handleServiceError(error, 'render', notifications);
+        }
+    }
+
+    disableRenderingTemporarily() {
+        console.error('❌ Too many consecutive render errors, disabling notifications temporarily');
+        this._renderingDisabled = true;
+        setTimeout(() => {
+            this._renderingDisabled = false;
+            this._consecutiveRenderErrors = 0;
+        }, 5000);
+    }
+
     addNotificationToDOM(notification) {
-        // Usa la queue se DOM non è ready
         const renderFunction = (notif) => {
-            const rendererPayload = {
-                notification: notif,
-                settings: this.settings,
-                timers: this.timers,
-                removeNotification: (id) => this.removeNotification(id),
-                startAutoCloseTimer: startAutoCloseTimer,
-                pauseAutoCloseTimer: pauseAutoCloseTimer,
-                resumeAutoCloseTimer: resumeAutoCloseTimer,
-                announceNotification: announceNotification,
-                attachNotificationEvents: attachNotificationEvents,
-                attachTouchEvents: attachTouchEvents,
-                notificationContainer: this.notificationContainer,
-                errorHandler: NotificationErrorHandler
-            };
+            const rendererPayload = this.buildRendererPayload(notif);
             
             try {
                 const element = createNotificationElement(rendererPayload);
@@ -305,131 +375,186 @@ class NotificationService {
                     throw new Error('createNotificationElement returned null');
                 }
                 
-                // Controlla supporto animazioni
-                if (NotificationErrorHandler.shouldDisableAnimations()) {
-                    element.classList.add('notification--no-animations');
-                }
-                
+                this.applyAnimationSettings(element);
                 this.notificationContainer.addNotification(element);
                 return element;
             } catch (error) {
-                return NotificationErrorHandler.handleRenderError(error, notif, (fallbackNotif) => {
-                    const fallbackElement = NotificationErrorHandler.createSimpleFallback(fallbackNotif);
-                    if (fallbackElement && this.notificationContainer) {
-                        this.notificationContainer.addNotification(fallbackElement);
-                    }
-                    return fallbackElement;
-                });
+                return this.handleElementCreationError(error, notif);
             }
         };
         
         return NotificationErrorHandler.queueNotification(renderFunction, notification);
     }
 
-    /**
-     * Rimuove una notifica con animazione e cleanup completo
-     */
+    buildRendererPayload(notification) {
+        return {
+            notification,
+            settings: this.settings,
+            timers: this.timers,
+            removeNotification: (id) => this.removeNotification(id),
+            startAutoCloseTimer,
+            pauseAutoCloseTimer,
+            resumeAutoCloseTimer,
+            announceNotification,
+            attachNotificationEvents,
+            attachTouchEvents,
+            notificationContainer: this.notificationContainer,
+            errorHandler: NotificationErrorHandler
+        };
+    }
+
+    applyAnimationSettings(element) {
+        if (NotificationErrorHandler.shouldDisableAnimations()) {
+            element.classList.add('notification--no-animations');
+        }
+    }
+
+    handleElementCreationError(error, notification) {
+        return NotificationErrorHandler.handleRenderError(error, notification, (fallbackNotif) => {
+            const fallbackElement = NotificationErrorHandler.createSimpleFallback(fallbackNotif);
+            if (fallbackElement && this.notificationContainer) {
+                this.notificationContainer.addNotification(fallbackElement);
+            }
+            return fallbackElement;
+        });
+    }
+
+    throttledRenderNotifications = this.throttle((newState, oldState, changedKeys) => {
+        let notifications = [];
+        
+        if (Array.isArray(newState)) {
+            notifications = newState;
+        } else if (newState && typeof newState === 'object') {
+            notifications = newState.notifications || [];
+        }
+        
+        if (NotificationService.DEBUG) {
+            console.log('🔄 Rendering notifications:', notifications.length, 'items');
+        }
+        
+        this.renderNotifications(notifications);
+    }, 16); // ~60fps
+
+    // ========================================================================
+    // NOTIFICATION REMOVAL METHODS
+    // ========================================================================
+
     removeNotification(id) {
         try {
             if (NotificationService.DEBUG) {
                 console.log('🔧 removeNotification called for id:', id);
             }
-            // Pulisci timer e progress bar
-            stopAutoCloseTimer(this.timers, id, (nid) => this.stopProgressBarAnimation(nid));
             
-            // Cleanup progress bar JavaScript se presente
-            if (this.notificationContainer) {
-                const element = this.notificationContainer.container?.querySelector(`[data-id="${id}"]`);
-                if (element && element._progressBarInstance) {
-                    try {
-                        element._progressBarInstance.destroy();
-                        element._progressBarInstance = null;
-                        console.log('🧹 Progress bar instance cleaned up for notification:', id);
-                    } catch (cleanupError) {
-                        console.warn('⚠️ Error cleaning up progress bar:', cleanupError);
-                    }
-                }
-            }
-
-            if (this.notificationContainer) {
-                const element = this.notificationContainer.container?.querySelector(`[data-id="${id}"]`);
-                if (NotificationService.DEBUG) {
-                    console.log('🔧 Found element:', element);
-                }
-                const checkRemoved = () => {
-                    const stillPresent = (stateService.getState('notifications') || []).find(n => n.id === id);
-                    if (stillPresent) {
-                        console.error('[NotificationService] ERRORE: la notifica', id, 'è ancora nello stato dopo removeNotification!');
-                    }
-                };
-                
-                if (element && this.settings.enableAnimations && !NotificationErrorHandler.shouldDisableAnimations()) {
-                    if (NotificationService.DEBUG) {
-                        console.log('🔧 Starting exit animation');
-                    }
-                    
-                    try {
-                        element.classList.remove('notification--entering');
-                        element.classList.add('notification--exiting');
-                        // Ferma progress bar durante animazione di uscita
-                        const progressBar = element.querySelector('.notification__progress');
-                        if (progressBar) {
-                            progressBar.classList.remove(
-                                'notification__progress--active',
-                                'notification__progress--paused',
-                                'notification__progress--resumed'
-                            );
-                        }
-                        setTimeout(() => {
-                            if (NotificationService.DEBUG) {
-                                console.log('🔧 Removing notification from container and state');
-                            }
-                            try {
-                                this.notificationContainer.removeNotification(id);
-                                stateService.removeNotification(id);
-                                checkRemoved();
-                            } catch (error) {
-                                NotificationErrorHandler.handleServiceError(error, 'remove', id);
-                                NotificationErrorHandler.recoverFromRemoveError(id);
-                            }
-                        }, 300);
-                    } catch (animationError) {
-                        NotificationErrorHandler.handleAnimationError(animationError, element, 'exit');
-                        // Fallback: rimuovi immediatamente
-                        this.notificationContainer.removeNotification(id);
-                        stateService.removeNotification(id);
-                        checkRemoved();
-                    }
-                } else {
-                    // Rimuovi immediatamente
-                    if (NotificationService.DEBUG) {
-                        console.log('🔧 Removing notification immediately');
-                    }
-                    this.notificationContainer.removeNotification(id);
-                    stateService.removeNotification(id);
-                    checkRemoved();
-                }
-            } else {
-                // Fallback se container non disponibile
-                if (NotificationService.DEBUG) {
-                    console.log('🔧 Container not available, removing from state only');
-                }
-                stateService.removeNotification(id);
-                const stillPresent = (stateService.getState('notifications') || []).find(n => n.id === id);
-                if (stillPresent) {
-                    console.error('[NotificationService] ERRORE: la notifica', id, 'è ancora nello stato dopo removeNotification!');
-                }
-            }
+            this.cleanupNotificationResources(id);
+            this.removeNotificationFromDOM(id);
+            
         } catch (error) {
             NotificationErrorHandler.handleServiceError(error, 'remove', id);
-            // Tenta recovery
             NotificationErrorHandler.recoverFromRemoveError(id);
         }
     }
 
-    /**
-     * Ferma e rimuove la progress bar JS associata a una notifica
-     */
+    cleanupNotificationResources(id) {
+        // Clean up timers and progress bar
+        stopAutoCloseTimer(this.timers, id, (nid) => this.stopProgressBarAnimation(nid));
+        
+        // Cleanup progress bar JavaScript if present
+        if (this.notificationContainer) {
+            const element = this.notificationContainer.container?.querySelector(`[data-id="${id}"]`);
+            if (element && element._progressBarInstance) {
+                try {
+                    element._progressBarInstance.destroy();
+                    element._progressBarInstance = null;
+                    console.log('🧹 Progress bar instance cleaned up for notification:', id);
+                } catch (cleanupError) {
+                    console.warn('⚠️ Error cleaning up progress bar:', cleanupError);
+                }
+            }
+        }
+    }
+
+    removeNotificationFromDOM(id) {
+        if (!this.notificationContainer) {
+            this.removeFromStateOnly(id);
+            return;
+        }
+
+        const element = this.notificationContainer.container?.querySelector(`[data-id="${id}"]`);
+        
+        if (element && this.settings.enableAnimations && !NotificationErrorHandler.shouldDisableAnimations()) {
+            this.removeWithAnimation(element, id);
+        } else {
+            this.removeImmediately(id);
+        }
+    }
+
+    removeWithAnimation(element, id) {
+        if (NotificationService.DEBUG) {
+            console.log('🔧 Starting exit animation');
+        }
+        
+        try {
+            element.classList.remove('notification--entering');
+            element.classList.add('notification--exiting');
+            
+            this.stopProgressBarDuringExit(element);
+            
+            setTimeout(() => {
+                this.finalizeRemoval(id);
+            }, 300);
+        } catch (animationError) {
+            NotificationErrorHandler.handleAnimationError(animationError, element, 'exit');
+            this.removeImmediately(id);
+        }
+    }
+
+    stopProgressBarDuringExit(element) {
+        const progressBar = element.querySelector('.notification__progress');
+        if (progressBar) {
+            progressBar.classList.remove(
+                'notification__progress--active',
+                'notification__progress--paused',
+                'notification__progress--resumed'
+            );
+        }
+    }
+
+    removeImmediately(id) {
+        if (NotificationService.DEBUG) {
+            console.log('🔧 Removing notification immediately');
+        }
+        this.finalizeRemoval(id);
+    }
+
+    removeFromStateOnly(id) {
+        if (NotificationService.DEBUG) {
+            console.log('🔧 Container not available, removing from state only');
+        }
+        stateService.removeNotification(id);
+        this.validateRemoval(id);
+    }
+
+    finalizeRemoval(id) {
+        if (NotificationService.DEBUG) {
+            console.log('🔧 Removing notification from container and state');
+        }
+        try {
+            this.notificationContainer.removeNotification(id);
+            stateService.removeNotification(id);
+            this.validateRemoval(id);
+        } catch (error) {
+            NotificationErrorHandler.handleServiceError(error, 'remove', id);
+            NotificationErrorHandler.recoverFromRemoveError(id);
+        }
+    }
+
+    validateRemoval(id) {
+        const stillPresent = (stateService.getState('notifications') || []).find(n => n.id === id);
+        if (stillPresent) {
+            console.error('[NotificationService] ERRORE: la notifica', id, 'è ancora nello stato dopo removeNotification!');
+        }
+    }
+
     stopProgressBarAnimation(id) {
         try {
             const element = this.notificationContainer?.container?.querySelector(`[data-id="${id}"]`);
@@ -442,67 +567,51 @@ class NotificationService {
         }
     }
 
-    /**
-     * Gestisce un'azione di una notifica (delegata da NotificationEventManager)
-     */
-    handleAction(notificationId, actionIndex) {
-        try {
-            const notifications = stateService.getState('notifications') || [];
-            const notif = notifications.find(n => n.id === notificationId);
-            const action = notif?.options?.actions?.[actionIndex];
-            if (action && typeof action.onClick === 'function') {
-                action.onClick({ id: notificationId, index: actionIndex, notification: notif });
-            }
-        } catch (e) {
-            console.warn('Notification action handler error:', e);
-        }
-    }
+    // ========================================================================
+    // BULK OPERATIONS
+    // ========================================================================
 
-    /**
-     * Rimuove tutte le notifiche con cleanup completo
-     */
     clear() {
         try {
-            // Pulisci tutti i timer e progress bar
-            this.timers.forEach((timer, notificationId) => {
-                stopAutoCloseTimer(this.timers, notificationId, (id) => this.stopProgressBarAnimation(id));
-            });
-            this.timers.clear();
-
-            // Pulisci container
-            if (this.notificationContainer) {
-                this.notificationContainer.clearAllNotifications();
-            }
-
-            // Use StateService method for complete cleanup
+            this.clearAllTimers();
+            this.clearContainer();
             stateService.clearAllNotifications();
         } catch (error) {
             NotificationErrorHandler.handleServiceError(error, 'clear');
-            // Tenta recovery
             NotificationErrorHandler.recoverFromClearError();
         }
     }
 
-    /**
-     * Rimuove notifiche per tipo
-     */
+    clearAllTimers() {
+        this.timers.forEach((timer, notificationId) => {
+            stopAutoCloseTimer(this.timers, notificationId, (id) => this.stopProgressBarAnimation(id));
+        });
+        this.timers.clear();
+    }
+
+    clearContainer() {
+        if (this.notificationContainer) {
+            this.notificationContainer.clearAllNotifications();
+        }
+    }
+
     clearByType(type) {
         const notifications = stateService.getState('notifications') || [];
         
-        // Pulisci timer delle notifiche rimosse
+        // Clean up timers for removed notifications
         notifications.forEach(n => {
             if (n.type === type && this.timers.has(n.id)) {
                 stopAutoCloseTimer(this.timers, n.id, (id) => this.stopProgressBarAnimation(id));
             }
         });
 
-        // Use StateService method
         stateService.clearNotificationsByType(type);
     }
 
-    /**
-     * Timer management methods
-     */
+    // ========================================================================
+    // TIMER MANAGEMENT METHODS
+    // ========================================================================
+
     startAutoCloseTimer(notificationId, duration) {
         try {
             startAutoCloseTimer(this.timers, notificationId, duration, (id) => {
@@ -537,62 +646,61 @@ class NotificationService {
         }
     }
 
-    // Metodi di convenienza con supporto per opzioni avanzate
+    // ========================================================================
+    // ACTION HANDLING
+    // ========================================================================
 
-    success(message, options = {}) {
-        if (typeof options === 'number') {
-            // Backward compatibility: se options è un numero, trattalo come duration
-            options = { duration: options };
+    handleAction(notificationId, actionIndex) {
+        try {
+            const notifications = stateService.getState('notifications') || [];
+            const notif = notifications.find(n => n.id === notificationId);
+            const action = notif?.options?.actions?.[actionIndex];
+            if (action && typeof action.onClick === 'function') {
+                action.onClick({ id: notificationId, index: actionIndex, notification: notif });
+            }
+        } catch (e) {
+            console.warn('Notification action handler error:', e);
         }
-        return this.show('success', message, options);
     }
 
-    info(message, options = {}) {
-        if (typeof options === 'number') {
-            options = { duration: options };
-        }
-        return this.show('info', message, options);
+    // ========================================================================
+    // SETTINGS MANAGEMENT
+    // ========================================================================
+
+    // Delegated configuration methods
+    setCustomDurations(durations) {
+        setCustomDurationsUtil(durations);
     }
 
-    warning(message, options = {}) {
-        if (typeof options === 'number') {
-            options = { duration: options };
-        }
-        return this.show('warning', message, options);
+    setPersistentTypes(types) {
+        setPersistentTypesUtil(types);
     }
 
-    error(message, options = {}) {
-        if (typeof options === 'number') {
-            options = { duration: options };
-        }
-        return this.show('error', message, options);
+    setAutoCleanupInterval(interval) {
+        setAutoCleanupIntervalUtil(interval);
     }
 
-    // === METODI MANCANTI PER COMPLETARE L'INTEGRAZIONE ===
+    updatePosition(position) {
+        updatePositionUtil(position);
+    }
 
-    /**
-     * Aggiorna le impostazioni delle notifiche
-     * @param {object} newSettings - Nuove impostazioni da applicare
-     * @returns {boolean} True se l'aggiornamento è riuscito
-     */
+    setMaxVisible(max) {
+        setMaxVisibleUtil(max);
+        this.renderNotifications();
+    }
+
+    enableSounds(enabled = true) {
+        enableSoundsUtil(enabled);
+    }
+
     updateSettings(newSettings) {
         try {
-            // Valida le impostazioni prima di applicarle
             const validatedSettings = this._validateSettings(newSettings);
             
-            // Aggiorna tramite StateService per sincronizzazione
             stateService.updateNotificationSettings(validatedSettings);
-            
-            // Aggiorna le impostazioni locali
             this.settings = stateService.getNotificationSettings();
             
-            // Aggiorna il container se necessario
-            if (this.notificationContainer && (newSettings.position || newSettings.maxVisible)) {
-                this.notificationContainer.updateSettings({
-                    position: this.settings.position,
-                    maxVisible: this.settings.maxVisible
-                });
-            }
+            this.updateContainerSettings(newSettings);
             
             if (NotificationService.DEBUG) {
                 console.log('✅ Settings updated successfully:', this.settings);
@@ -605,200 +713,19 @@ class NotificationService {
         }
     }
 
-    /**
-     * Ottiene statistiche dettagliate sulle notifiche
-     * @returns {object} Oggetto con statistiche complete
-     */
-    getStats() {
-        try {
-            const baseStats = stateService.getNotificationStats();
-            
-            // Aggiungi statistiche specifiche del servizio
-            const enhancedStats = {
-                ...baseStats,
-                activeTimers: this.timers.size,
-                containerInitialized: !!this.notificationContainer,
-                serviceInitialized: this.initialized,
-                settings: { ...this.settings },
-                performance: {
-                    lastRenderTime: this._lastRenderTime || null,
-                    renderCount: this._renderCount || 0,
-                    averageRenderTime: this._averageRenderTime || null
-                }
-            };
-            
-            return enhancedStats;
-        } catch (error) {
-            console.error('❌ Failed to get notification stats:', error);
-            return {
-                total: 0,
-                visible: 0,
-                byType: { success: 0, error: 0, warning: 0, info: 0 },
-                persistent: 0,
-                error: error.message
-            };
+    updateContainerSettings(newSettings) {
+        if (this.notificationContainer && (newSettings.position || newSettings.maxVisible)) {
+            this.notificationContainer.updateSettings({
+                position: this.settings.position,
+                maxVisible: this.settings.maxVisible
+            });
         }
     }
 
-    /**
-     * Esporta le impostazioni delle notifiche per backup
-     * @returns {object|null} Oggetto con le impostazioni esportate o null in caso di errore
-     */
-    exportSettings() {
-        try {
-            const exportData = stateService.exportNotificationSettings();
-            
-            // Aggiungi metadati del servizio
-            exportData.serviceMetadata = {
-                version: '2.0',
-                exportedBy: 'NotificationService',
-                containerType: this.notificationContainer?.constructor.name || 'unknown',
-                activeNotifications: stateService.getState('notifications').length
-            };
-            
-            if (NotificationService.DEBUG) {
-                console.log('✅ Settings exported successfully:', exportData);
-            }
-            
-            return exportData;
-        } catch (error) {
-            console.error('❌ Failed to export notification settings:', error);
-            return null;
-        }
-    }
-
-    /**
-     * Importa le impostazioni delle notifiche da backup
-     * @param {object} backupData - Dati di backup da importare
-     * @returns {boolean} True se l'importazione è riuscita
-     */
-    importSettings(backupData) {
-        try {
-            // Valida il formato del backup
-            if (!backupData || typeof backupData !== 'object') {
-                throw new Error('Formato backup non valido');
-            }
-            
-            if (!backupData.settings) {
-                throw new Error('Impostazioni mancanti nel backup');
-            }
-            
-            // Verifica compatibilità versione
-            const supportedVersions = ['1.0', '2.0'];
-            if (!supportedVersions.includes(backupData.version)) {
-                console.warn(`⚠️ Versione backup non supportata: ${backupData.version}. Tentativo di importazione comunque.`);
-            }
-            
-            // Importa tramite StateService
-            const success = stateService.importNotificationSettings(backupData);
-            
-            if (success) {
-                // Aggiorna le impostazioni locali
-                this.settings = stateService.getNotificationSettings();
-                
-                // Aggiorna il container se necessario
-                if (this.notificationContainer) {
-                    this.notificationContainer.updateSettings({
-                        position: this.settings.position,
-                        maxVisible: this.settings.maxVisible
-                    });
-                }
-                
-                if (NotificationService.DEBUG) {
-                    console.log('✅ Settings imported successfully:', this.settings);
-                }
-            }
-            
-            return success;
-        } catch (error) {
-            console.error('❌ Failed to import notification settings:', error);
-            return false;
-        }
-    }
-
-    /**
-     * Pulisce le notifiche vecchie
-     * @param {number} [maxAge=300000] - Età massima in millisecondi (default: 5 minuti)
-     * @returns {number} Numero di notifiche rimosse
-     */
-    cleanupOldNotifications(maxAge = 300000) {
-        try {
-            const removedCount = stateService.clearOldNotifications(maxAge);
-            
-            // Pulisci anche i timer associati alle notifiche rimosse
-            const currentNotifications = stateService.getState('notifications');
-            const currentIds = new Set(currentNotifications.map(n => n.id));
-            
-            // Rimuovi timer per notifiche che non esistono più
-            for (const [timerId] of this.timers) {
-                if (!currentIds.has(timerId)) {
-                    stopAutoCloseTimer(this.timers, timerId);
-                }
-            }
-            
-            if (NotificationService.DEBUG && removedCount > 0) {
-                console.log(`🧹 Cleaned up ${removedCount} old notifications`);
-            }
-            
-            return removedCount;
-        } catch (error) {
-            console.error('❌ Failed to cleanup old notifications:', error);
-            return 0;
-        }
-    }
-
-    /**
-     * Ottiene notifiche per tipo
-     * @param {string} type - Tipo di notifica ('success', 'error', 'warning', 'info')
-     * @returns {array} Array di notifiche del tipo specificato
-     */
-    getNotificationsByType(type) {
-        try {
-            return stateService.getNotificationsByType(type);
-        } catch (error) {
-            console.error('❌ Failed to get notifications by type:', error);
-            return [];
-        }
-    }
-
-    /**
-     * Ottiene le notifiche attualmente visibili
-     * @returns {array} Array di notifiche visibili
-     */
-    getVisibleNotifications() {
-        try {
-            return stateService.getVisibleNotifications();
-        } catch (error) {
-            console.error('❌ Failed to get visible notifications:', error);
-            return [];
-        }
-    }
-
-    /**
-     * Verifica se ci sono notifiche di errore attive
-     * @returns {boolean} True se ci sono errori attivi
-     */
-    hasErrors() {
-        try {
-            return stateService.hasErrorNotifications();
-        } catch (error) {
-            console.error('❌ Failed to check for error notifications:', error);
-            return false;
-        }
-    }
-
-    // === METODI PRIVATI DI SUPPORTO ===
-
-    /**
-     * Valida le impostazioni prima di applicarle
-     * @param {object} settings - Impostazioni da validare
-     * @returns {object} Impostazioni validate
-     * @private
-     */
     _validateSettings(settings) {
         const validated = {};
         
-        // Valida maxVisible
+        // Validate maxVisible
         if (settings.maxVisible !== undefined) {
             const max = parseInt(settings.maxVisible);
             if (isNaN(max) || max < 1 || max > 20) {
@@ -807,7 +734,7 @@ class NotificationService {
             validated.maxVisible = max;
         }
         
-        // Valida defaultDuration
+        // Validate defaultDuration
         if (settings.defaultDuration !== undefined) {
             const duration = parseInt(settings.defaultDuration);
             if (isNaN(duration) || duration < 0) {
@@ -816,7 +743,7 @@ class NotificationService {
             validated.defaultDuration = duration;
         }
         
-        // Valida position
+        // Validate position
         if (settings.position !== undefined) {
             const validPositions = ['top-right', 'top-left', 'bottom-right', 'bottom-left', 'top-center', 'bottom-center'];
             if (!validPositions.includes(settings.position)) {
@@ -825,26 +752,23 @@ class NotificationService {
             validated.position = settings.position;
         }
         
-        // Valida enableSounds
-        if (settings.enableSounds !== undefined) {
-            validated.enableSounds = Boolean(settings.enableSounds);
-        }
+        // Validate boolean settings
+        ['enableSounds', 'enableAnimations'].forEach(key => {
+            if (settings[key] !== undefined) {
+                validated[key] = Boolean(settings[key]);
+            }
+        });
         
-        // Valida enableAnimations
-        if (settings.enableAnimations !== undefined) {
-            validated.enableAnimations = Boolean(settings.enableAnimations);
-        }
-        
-        // Valida autoCleanupInterval
+        // Validate intervals
         if (settings.autoCleanupInterval !== undefined) {
             const interval = parseInt(settings.autoCleanupInterval);
-            if (isNaN(interval) || interval < 60000) { // Minimo 1 minuto
+            if (isNaN(interval) || interval < 60000) {
                 throw new Error('autoCleanupInterval deve essere >= 60000ms (1 minuto)');
             }
             validated.autoCleanupInterval = interval;
         }
         
-        // Valida maxStoredNotifications
+        // Validate maxStoredNotifications
         if (settings.maxStoredNotifications !== undefined) {
             const max = parseInt(settings.maxStoredNotifications);
             if (isNaN(max) || max < 10 || max > 1000) {
@@ -853,7 +777,7 @@ class NotificationService {
             validated.maxStoredNotifications = max;
         }
         
-        // Valida persistentTypes
+        // Validate persistentTypes
         if (settings.persistentTypes !== undefined) {
             if (!Array.isArray(settings.persistentTypes)) {
                 throw new Error('persistentTypes deve essere un array');
@@ -866,7 +790,7 @@ class NotificationService {
             validated.persistentTypes = [...settings.persistentTypes];
         }
         
-        // Valida soundVolume
+        // Validate soundVolume
         if (settings.soundVolume !== undefined) {
             const volume = parseFloat(settings.soundVolume);
             if (isNaN(volume) || volume < 0 || volume > 1) {
@@ -875,7 +799,7 @@ class NotificationService {
             validated.soundVolume = volume;
         }
         
-        // Valida customDurations
+        // Validate customDurations
         if (settings.customDurations !== undefined) {
             if (typeof settings.customDurations !== 'object' || settings.customDurations === null) {
                 throw new Error('customDurations deve essere un oggetto');
@@ -897,35 +821,183 @@ class NotificationService {
         return validated;
     }
 
-    // === PERFORMANCE OPTIMIZATION METHODS ===
+    // ========================================================================
+    // STATISTICS AND EXPORT/IMPORT
+    // ========================================================================
 
-    /**
-     * Determina se usare virtual scrolling
-     */
-    shouldUseVirtualScrolling() {
-        // Usa virtual scrolling se dispositivo con poca memoria
-        if (navigator.deviceMemory && navigator.deviceMemory < 4) {
-            return true;
+    getStats() {
+        try {
+            const baseStats = stateService.getNotificationStats();
+            
+            return {
+                ...baseStats,
+                activeTimers: this.timers.size,
+                containerInitialized: !!this.notificationContainer,
+                serviceInitialized: this.initialized,
+                settings: { ...this.settings },
+                performance: {
+                    lastRenderTime: this._lastRenderTime || null,
+                    renderCount: this._renderCount || 0,
+                    averageRenderTime: this._averageRenderTime || null
+                }
+            };
+        } catch (error) {
+            console.error('❌ Failed to get notification stats:', error);
+            return {
+                total: 0,
+                visible: 0,
+                byType: { success: 0, error: 0, warning: 0, info: 0 },
+                persistent: 0,
+                error: error.message
+            };
         }
-        
-        // Usa virtual scrolling se molte notifiche previste
-        if (this.maxConcurrentNotifications > 10) {
-            return true;
-        }
-        
-        // Usa virtual scrolling su mobile per performance
-        if (window.innerWidth <= 767) {
-            return true;
-        }
-        
-        return false;
     }
 
-    /**
-     * Rileva numero ottimale di notifiche simultanee
-     */
+    exportSettings() {
+        try {
+            const exportData = stateService.exportNotificationSettings();
+            
+            exportData.serviceMetadata = {
+                version: '2.0',
+                exportedBy: 'NotificationService',
+                containerType: this.notificationContainer?.constructor.name || 'unknown',
+                activeNotifications: stateService.getState('notifications').length
+            };
+            
+            if (NotificationService.DEBUG) {
+                console.log('✅ Settings exported successfully:', exportData);
+            }
+            
+            return exportData;
+        } catch (error) {
+            console.error('❌ Failed to export notification settings:', error);
+            return null;
+        }
+    }
+
+    importSettings(backupData) {
+        try {
+            this.validateBackupData(backupData);
+            
+            const success = stateService.importNotificationSettings(backupData);
+            
+            if (success) {
+                this.applyImportedSettings();
+                
+                if (NotificationService.DEBUG) {
+                    console.log('✅ Settings imported successfully:', this.settings);
+                }
+            }
+            
+            return success;
+        } catch (error) {
+            console.error('❌ Failed to import notification settings:', error);
+            return false;
+        }
+    }
+
+    validateBackupData(backupData) {
+        if (!backupData || typeof backupData !== 'object') {
+            throw new Error('Formato backup non valido');
+        }
+        
+        if (!backupData.settings) {
+            throw new Error('Impostazioni mancanti nel backup');
+        }
+        
+        const supportedVersions = ['1.0', '2.0'];
+        if (!supportedVersions.includes(backupData.version)) {
+            console.warn(`⚠️ Versione backup non supportata: ${backupData.version}. Tentativo di importazione comunque.`);
+        }
+    }
+
+    applyImportedSettings() {
+        this.settings = stateService.getNotificationSettings();
+        
+        if (this.notificationContainer) {
+            this.notificationContainer.updateSettings({
+                position: this.settings.position,
+                maxVisible: this.settings.maxVisible
+            });
+        }
+    }
+
+    // ========================================================================
+    // CLEANUP METHODS
+    // ========================================================================
+
+    cleanupOldNotifications(maxAge = 300000) {
+        try {
+            const removedCount = stateService.clearOldNotifications(maxAge);
+            
+            // Clean up timers for removed notifications
+            const currentNotifications = stateService.getState('notifications');
+            const currentIds = new Set(currentNotifications.map(n => n.id));
+            
+            for (const [timerId] of this.timers) {
+                if (!currentIds.has(timerId)) {
+                    stopAutoCloseTimer(this.timers, timerId);
+                }
+            }
+            
+            if (NotificationService.DEBUG && removedCount > 0) {
+                console.log(`🧹 Cleaned up ${removedCount} old notifications`);
+            }
+            
+            return removedCount;
+        } catch (error) {
+            console.error('❌ Failed to cleanup old notifications:', error);
+            return 0;
+        }
+    }
+
+    setupAutomaticCleanup() {
+        // Cleanup every 5 minutes
+        this.cleanupInterval = setInterval(() => {
+            this.performAutomaticCleanup();
+        }, 300000);
+        
+        // Cleanup on page visibility change
+        if (typeof document !== 'undefined' && document.addEventListener) {
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'hidden') {
+                    this.performAutomaticCleanup();
+                }
+            });
+        }
+    }
+
+    performAutomaticCleanup() {
+        const now = Date.now();
+        
+        this.cleanupOldNotifications();
+        
+        if (notificationEventManager) {
+            notificationEventManager.cleanupAll();
+        }
+        
+        if (notificationAnimationManager) {
+            notificationAnimationManager.disableAllAnimations();
+        }
+        
+        // Force garbage collection if available
+        if (window.gc && typeof window.gc === 'function') {
+            window.gc();
+        }
+        
+        this.lastCleanupTime = now;
+        
+        if (NotificationService.DEBUG) {
+            console.log('🧹 Automatic cleanup performed');
+        }
+    }
+
+    // ========================================================================
+    // PERFORMANCE OPTIMIZATION METHODS
+    // ========================================================================
+
     detectOptimalMaxNotifications() {
-        // Basa su memoria dispositivo
+        // Base on device memory
         if (navigator.deviceMemory) {
             if (navigator.deviceMemory >= 8) return 20;
             if (navigator.deviceMemory >= 4) return 15;
@@ -933,26 +1005,20 @@ class NotificationService {
             return 5;
         }
         
-        // Fallback basato su dimensione schermo
+        // Fallback based on screen size
         if (window.innerWidth >= 1920) return 15;
         if (window.innerWidth >= 1200) return 10;
         if (window.innerWidth >= 768) return 8;
         return 5;
     }
 
-    /**
-     * Setup monitoring delle performance
-     */
     setupPerformanceMonitoring() {
-        // Disabilita monitoring aggressivo per ora
         if (this.performanceMode === 'performance') {
-            // Monitora memoria ogni 60 secondi invece di 30
             setInterval(() => {
                 this.checkMemoryUsage();
             }, 60000);
         }
         
-        // Monitora performance rendering
         if ('PerformanceObserver' in window) {
             try {
                 this.renderPerformanceObserver = new PerformanceObserver((list) => {
@@ -964,14 +1030,11 @@ class NotificationService {
                 });
                 this.renderPerformanceObserver.observe({ entryTypes: ['measure'] });
             } catch (e) {
-                // PerformanceObserver non supportato
+                // PerformanceObserver not supported
             }
         }
     }
 
-    /**
-     * Controlla uso memoria e ottimizza se necessario
-     */
     checkMemoryUsage() {
         if ('memory' in performance) {
             const memInfo = performance.memory;
@@ -984,55 +1047,138 @@ class NotificationService {
         }
     }
 
-    /**
-     * Ottimizza per uso memoria elevato
-     */
     optimizeForMemory() {
-        // Riduci numero massimo notifiche
         this.maxConcurrentNotifications = Math.max(3, this.maxConcurrentNotifications - 2);
+        this.cleanupOldNotifications(60000); // 1 minute instead of 5
         
-        // Forza cleanup aggressivo
-        this.cleanupOldNotifications(60000); // 1 minuto invece di 5
-        
-        // Disabilita animazioni complesse
         if (notificationAnimationManager) {
             notificationAnimationManager.optimizeForLowPerformance();
         }
         
-        // Passa a modalità performance
         this.performanceMode = 'performance';
         
-        // Cleanup event listeners non utilizzati
         if (notificationEventManager) {
             notificationEventManager.cleanupAll();
         }
     }
 
-    /**
-     * Rendering con throttling per performance
-     */
-    throttledRenderNotifications = this.throttle((newState, oldState, changedKeys) => {
-        // Il subscriber passa l'intero stato, non solo le notifiche
-        let notifications = [];
+    trackRenderPerformance(entry) {
+        const renderTime = entry.duration;
         
-        if (Array.isArray(newState)) {
-            // Se è già un array, usalo direttamente
-            notifications = newState;
-        } else if (newState && typeof newState === 'object') {
-            // Se è un oggetto stato, estrai le notifiche
-            notifications = newState.notifications || [];
+        this._renderCount++;
+        this._totalRenderTime += renderTime;
+        this._averageRenderTime = this._totalRenderTime / this._renderCount;
+        
+        if (renderTime > 16) { // > 1 frame at 60fps
+            console.warn(`🐌 Slow render detected: ${renderTime.toFixed(2)}ms`);
+            
+            if (this._averageRenderTime > 10) {
+                this.optimizeForPerformance();
+            }
         }
-        
-        if (NotificationService.DEBUG) {
-            console.log('🔄 Rendering notifications:', notifications.length, 'items');
-        }
-        
-        this.renderNotifications(notifications);
-    }, 16); // ~60fps
+    }
 
-    /**
-     * Utility throttle
-     */
+    optimizeForPerformance() {
+        if (this.performanceMode === 'performance') return;
+        
+        console.log('🚀 Optimizing for performance');
+        
+        if (notificationAnimationManager) {
+            notificationAnimationManager.optimizeForLowPerformance();
+        }
+        
+        this.maxConcurrentNotifications = Math.max(3, this.maxConcurrentNotifications - 1);
+        
+        if (!this.useVirtualScrolling && this.notificationContainer) {
+            this.switchToVirtualScrolling();
+        }
+        
+        this.performanceMode = 'performance';
+    }
+
+    async switchToVirtualScrolling() {
+        try {
+            const { NotificationVirtualScroller } = await notificationLazyLoader.loadModule(
+                'NotificationVirtualScroller',
+                './notificationVirtualScroller.js'
+            );
+            
+            const oldContainer = this.notificationContainer;
+            const notifications = stateService.getState('notifications') || [];
+            
+            this.virtualScroller = new NotificationVirtualScroller(
+                oldContainer.container.parentNode,
+                {
+                    itemHeight: 72,
+                    visibleCount: this.maxConcurrentNotifications,
+                    createElement: (notification, index) => {
+                        return this.createOptimizedNotificationElement(notification, index);
+                    }
+                }
+            );
+            
+            this.virtualScroller.setNotifications(notifications);
+            
+            if (oldContainer.destroy) {
+                oldContainer.destroy();
+            }
+            
+            this.useVirtualScrolling = true;
+            console.log('✅ Switched to virtual scrolling for better performance');
+        } catch (error) {
+            console.error('❌ Failed to switch to virtual scrolling:', error);
+        }
+    }
+
+    createOptimizedNotificationElement(notification, index) {
+        const element = document.createElement('div');
+        element.className = `notification notification--${notification.type} notification--optimized`;
+        element.dataset.id = notification.id;
+        
+        element.innerHTML = `
+            <div class="notification__content">
+                <span class="notification__icon">${this.getIconForType(notification.type)}</span>
+                <div class="notification__message">${notification.message}</div>
+                <button class="notification__close" aria-label="Chiudi">×</button>
+            </div>
+        `;
+        
+        return element;
+    }
+
+    getIconForType(type) {
+        const icons = {
+            success: '✓',
+            error: '✗',
+            warning: '⚠',
+            info: 'ℹ'
+        };
+        return icons[type] || 'ℹ';
+    }
+
+    getPerformanceStats() {
+        const baseStats = this.getStats();
+        
+        return {
+            ...baseStats,
+            performance: {
+                ...baseStats.performance,
+                useVirtualScrolling: this.useVirtualScrolling,
+                performanceMode: this.performanceMode,
+                maxConcurrentNotifications: this.maxConcurrentNotifications,
+                lastCleanupTime: this.lastCleanupTime,
+                memoryThreshold: this.memoryThreshold,
+                eventManager: notificationEventManager ? notificationEventManager.getStats() : null,
+                animationManager: notificationAnimationManager ? notificationAnimationManager.getPerformanceStats() : null,
+                lazyLoader: notificationLazyLoader ? notificationLazyLoader.getStats() : null
+            }
+        };
+    }
+
+    // ========================================================================
+    // UTILITY METHODS
+    // ========================================================================
+
     throttle(func, limit) {
         let inThrottle;
         return function() {
@@ -1045,15 +1191,11 @@ class NotificationService {
             }
         }
     }
-    
-    /**
-     * Ricrea il container se mancante
-     */
+
     async recreateContainer() {
         try {
             console.log('🔄 Recreating notification container...');
             
-            // Carica container
             const containerModule = await notificationLazyLoader.loadNotificationContainer({
                 expectedNotifications: this.maxConcurrentNotifications,
                 useVirtualScrolling: this.useVirtualScrolling
@@ -1074,7 +1216,6 @@ class NotificationService {
             
             console.log('✅ Container recreated successfully');
             
-            // Verifica che sia nel DOM
             const domContainer = document.getElementById('notification-container');
             if (!domContainer) {
                 console.error('❌ Container still not in DOM after recreation');
@@ -1084,14 +1225,11 @@ class NotificationService {
             console.error('❌ Failed to recreate container:', error);
         }
     }
-    
-    /**
-     * Reset di emergenza per fermare loop infiniti
-     */
+
     emergencyReset() {
         console.warn('🚨 Emergency reset of NotificationService');
         
-        // Ferma tutti i timer
+        // Stop all timers
         this.timers.forEach(timer => clearTimeout(timer));
         this.timers.clear();
         
@@ -1100,7 +1238,7 @@ class NotificationService {
         this._renderingDisabled = false;
         this._consecutiveRenderErrors = 0;
         
-        // Pulisci container se esiste
+        // Clean container if exists
         if (this.notificationContainer) {
             try {
                 this.notificationContainer.clear();
@@ -1109,229 +1247,16 @@ class NotificationService {
             }
         }
         
-        // Pulisci stato
+        // Clean state
         stateService.setState('notifications', []);
         
         console.log('✅ Emergency reset completed');
     }
 
-    /**
-     * Setup cleanup automatico
-     */
-    setupAutomaticCleanup() {
-        // Cleanup ogni 5 minuti
-        this.cleanupInterval = setInterval(() => {
-            this.performAutomaticCleanup();
-        }, 300000);
-        
-        // Cleanup su page visibility change
-        if (typeof document !== 'undefined' && document.addEventListener) {
-            document.addEventListener('visibilitychange', () => {
-                if (document.visibilityState === 'hidden') {
-                    this.performAutomaticCleanup();
-                }
-            });
-        }
-    }
+    // ========================================================================
+    // DESTROY METHOD
+    // ========================================================================
 
-    /**
-     * Esegue cleanup automatico
-     */
-    performAutomaticCleanup() {
-        const now = Date.now();
-        
-        // Cleanup notifiche vecchie
-        this.cleanupOldNotifications();
-        
-        // Cleanup event listeners
-        if (notificationEventManager) {
-            notificationEventManager.cleanupAll();
-        }
-        
-        // Cleanup animazioni
-        if (notificationAnimationManager) {
-            notificationAnimationManager.disableAllAnimations();
-        }
-        
-        // Force garbage collection se disponibile
-        if (window.gc && typeof window.gc === 'function') {
-            window.gc();
-        }
-        
-        this.lastCleanupTime = now;
-        
-        if (NotificationService.DEBUG) {
-            console.log('🧹 Automatic cleanup performed');
-        }
-    }
-
-    /**
-     * Fallback initialization per errori
-     */
-    async initializeFallback() {
-        try {
-            // Carica container base senza ottimizzazioni
-            const { NotificationContainer } = await import('../../shared/components/notifications/NotificationContainer.js');
-            
-            this.notificationContainer = new NotificationContainer({
-                position: this.settings.position,
-                maxVisible: Math.min(this.settings.maxVisible, 5), // Limita per sicurezza
-            });
-
-            createLiveRegion();
-
-            stateService.subscribe('notifications', this.throttledRenderNotifications.bind(this));
-
-            this.initialized = true;
-            console.warn('⚠️ NotificationService initialized in fallback mode');
-        } catch (error) {
-            console.error('❌ Fallback initialization failed:', error);
-            throw error;
-        }
-    }
-
-    /**
-     * Traccia performance rendering
-     */
-    trackRenderPerformance(entry) {
-        const renderTime = entry.duration;
-        
-        this._renderCount++;
-        this._totalRenderTime += renderTime;
-        this._averageRenderTime = this._totalRenderTime / this._renderCount;
-        
-        // Ottimizza se performance scarse
-        if (renderTime > 16) { // > 1 frame a 60fps
-            console.warn(`🐌 Slow render detected: ${renderTime.toFixed(2)}ms`);
-            
-            if (this._averageRenderTime > 10) {
-                this.optimizeForPerformance();
-            }
-        }
-    }
-
-    /**
-     * Ottimizza per performance scarse
-     */
-    optimizeForPerformance() {
-        if (this.performanceMode === 'performance') return;
-        
-        console.log('🚀 Optimizing for performance');
-        
-        // Riduci animazioni
-        if (notificationAnimationManager) {
-            notificationAnimationManager.optimizeForLowPerformance();
-        }
-        
-        // Riduci numero massimo notifiche
-        this.maxConcurrentNotifications = Math.max(3, this.maxConcurrentNotifications - 1);
-        
-        // Passa a virtual scrolling se non già attivo
-        if (!this.useVirtualScrolling && this.notificationContainer) {
-            this.switchToVirtualScrolling();
-        }
-        
-        this.performanceMode = 'performance';
-    }
-
-    /**
-     * Passa a virtual scrolling runtime
-     */
-    async switchToVirtualScrolling() {
-        try {
-            const { NotificationVirtualScroller } = await notificationLazyLoader.loadModule(
-                'NotificationVirtualScroller',
-                './notificationVirtualScroller.js'
-            );
-            
-            // Sostituisci container esistente
-            const oldContainer = this.notificationContainer;
-            const notifications = stateService.getState('notifications') || [];
-            
-            this.virtualScroller = new NotificationVirtualScroller(
-                oldContainer.container.parentNode,
-                {
-                    itemHeight: 72,
-                    visibleCount: this.maxConcurrentNotifications,
-                    createElement: (notification, index) => {
-                        return this.createOptimizedNotificationElement(notification, index);
-                    }
-                }
-            );
-            
-            this.virtualScroller.setNotifications(notifications);
-            
-            // Cleanup vecchio container
-            if (oldContainer.destroy) {
-                oldContainer.destroy();
-            }
-            
-            this.useVirtualScrolling = true;
-            console.log('✅ Switched to virtual scrolling for better performance');
-        } catch (error) {
-            console.error('❌ Failed to switch to virtual scrolling:', error);
-        }
-    }
-
-    /**
-     * Crea elemento notifica ottimizzato
-     */
-    createOptimizedNotificationElement(notification, index) {
-        // Usa renderer ottimizzato per performance
-        const element = document.createElement('div');
-        element.className = `notification notification--${notification.type} notification--optimized`;
-        element.dataset.id = notification.id;
-        
-        // HTML minimo per performance
-        element.innerHTML = `
-            <div class="notification__content">
-                <span class="notification__icon">${this.getIconForType(notification.type)}</span>
-                <div class="notification__message">${notification.message}</div>
-                <button class="notification__close" aria-label="Chiudi">×</button>
-            </div>
-        `;
-        
-        return element;
-    }
-
-    /**
-     * Ottiene icona per tipo (fallback semplice)
-     */
-    getIconForType(type) {
-        const icons = {
-            success: '✓',
-            error: '✗',
-            warning: '⚠',
-            info: 'ℹ'
-        };
-        return icons[type] || 'ℹ';
-    }
-
-    /**
-     * Statistiche performance complete
-     */
-    getPerformanceStats() {
-        const baseStats = this.getStats();
-        
-        return {
-            ...baseStats,
-            performance: {
-                ...baseStats.performance,
-                useVirtualScrolling: this.useVirtualScrolling,
-                performanceMode: this.performanceMode,
-                maxConcurrentNotifications: this.maxConcurrentNotifications,
-                lastCleanupTime: this.lastCleanupTime,
-                memoryThreshold: this.memoryThreshold,
-                eventManager: notificationEventManager ? notificationEventManager.getStats() : null,
-                animationManager: notificationAnimationManager ? notificationAnimationManager.getPerformanceStats() : null,
-                lazyLoader: notificationLazyLoader ? notificationLazyLoader.getStats() : null
-            }
-        };
-    }
-
-    /**
-     * Cleanup completo con performance optimizations
-     */
     destroy() {
         // Cleanup performance monitoring
         if (this.renderPerformanceObserver) {
@@ -1372,6 +1297,9 @@ class NotificationService {
     }
 }
 
-// Esporta istanza singleton
-var notificationService = new NotificationService();
+// ============================================================================
+// EXPORT SINGLETON INSTANCE
+// ============================================================================
+
+const notificationService = new NotificationService();
 export { notificationService };

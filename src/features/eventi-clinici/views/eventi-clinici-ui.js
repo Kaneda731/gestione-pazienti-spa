@@ -9,11 +9,19 @@ import { sanitizeHtml } from "../../../shared/utils/sanitizeHtml.js";
  * Gestisce il rendering cronologico degli eventi e l'interfaccia responsive
  */
 
+// ============================================================================
+// CONSTANTS & STATE
+// ============================================================================
+
 // DOM elements cache
 let domElements = {};
 
 // Re-export per reset filtri dalla UI
 export { resetCurrentFiltersToDefaults } from './eventi-clinici-api.js';
+
+// ============================================================================
+// DOM INITIALIZATION
+// ============================================================================
 
 /**
  * Inizializza i riferimenti agli elementi DOM
@@ -21,9 +29,9 @@ export { resetCurrentFiltersToDefaults } from './eventi-clinici-api.js';
 export function initializeDOMElements() {
   domElements = {
     // Main containers
-  timelineContainer: document.getElementById("eventi-timeline-container"),
-  tableContainer: document.getElementById("eventi-table-container"),
-  tableBody: document.getElementById("eventi-table-body"),
+    timelineContainer: document.getElementById("eventi-timeline-container"),
+    tableContainer: document.getElementById("eventi-table-container"),
+    tableBody: document.getElementById("eventi-table-body"),
 
     // Search and filters
     searchPatientInput: document.getElementById("eventi-search-patient"),
@@ -65,9 +73,7 @@ export function initializeDOMElements() {
     eventId: document.getElementById("evento-id"),
     eventPatientInput: document.getElementById("evento-paziente"),
     eventPatientId: document.getElementById("evento-paziente-id"),
-    eventPatientSearchResults: document.getElementById(
-      "evento-patient-search-results"
-    ),
+    eventPatientSearchResults: document.getElementById("evento-patient-search-results"),
     eventType: document.getElementById("evento-tipo"),
     eventDate: document.getElementById("evento-data"),
     eventDescription: document.getElementById("evento-descrizione"),
@@ -95,75 +101,75 @@ export function initializeDOMElements() {
   logger.log("✅ DOM elements inizializzati per eventi clinici UI");
 }
 
-// Helper: rende un'icona Material coerente anche se l'API fornisce classi FA
+/**
+ * Ottiene i riferimenti DOM (per uso esterno)
+ */
+export function getDOMElements() {
+  return domElements;
+}
+
+// ============================================================================
+// UTILITY FUNCTIONS
+// ============================================================================
+
+/**
+ * Rende un'icona Material coerente anche se l'API fornisce classi FA
+ */
 function renderEventIcon(iconValue, tipo, color, extraClass = '') {
   const mapTipoToMaterial = (t) => {
-    // Preferiamo ligature molto diffuse nel set "Material Icons" classico
     if (t === 'intervento') return 'local_hospital';
     if (t === 'infezione') return 'bug_report';
     return 'event';
   };
+  
   const isFa = typeof iconValue === 'string' && /\bfa[srldb]?\b|fa-/.test(iconValue);
   const material = isFa ? mapTipoToMaterial(tipo) : (iconValue || mapTipoToMaterial(tipo));
-  // For badge backgrounds, ensure visibility: allow passing 'white' to force contrast
   const colorClass = color === 'white' ? 'text-white' : (color ? `text-${color}` : '');
   const classes = [`material-icons`, colorClass, extraClass].filter(Boolean).join(' ');
+  
   return `<span class="${classes}">${material}</span>`;
 }
 
 /**
- * Renderizza la timeline degli eventi clinici
+ * Raggruppa eventi per data
  */
-export function renderEventsTimeline(eventsData) {
-  try {
-    logger.log("🎨 Rendering timeline eventi:", eventsData);
-
-  if (!domElements.timelineContainer) {
-      logger.error("❌ Container timeline non trovato");
-      return;
+function groupEventsByDate(eventi) {
+  return eventi.reduce((groups, evento) => {
+    const date = evento.data_evento;
+    if (!groups[date]) {
+      groups[date] = [];
     }
-
-    // Clear existing content
-    domElements.timelineContainer.innerHTML = sanitizeHtml("");
-
-    if (!eventsData.eventi || eventsData.eventi.length === 0) {
-      renderEmptyState();
-      return;
-    }
-
-    // Create timeline structure
-    const timelineElement = createTimelineElement();
-
-    // Group events by date for better visualization
-    const eventsByDate = groupEventsByDate(eventsData.eventi);
-
-    // Render each date group
-    Object.keys(eventsByDate)
-      .sort((a, b) => new Date(b) - new Date(a)) // Most recent first
-      .forEach((date) => {
-        const dateGroup = createDateGroup(date, eventsByDate[date]);
-        timelineElement.appendChild(dateGroup);
-      });
-
-    domElements.timelineContainer.appendChild(timelineElement);
-
-    // Update pagination
-    updatePaginationControls(eventsData);
-
-    logger.log("✅ Timeline renderizzata con successo");
-  } catch (error) {
-    logger.error("❌ Errore rendering timeline:", error);
-    showError("Errore nel rendering della timeline");
-  }
+    groups[date].push(evento);
+    return groups;
+  }, {});
 }
+
+/**
+ * Utility per popolare opzioni di select
+ */
+function populateSelectOptions(selectElement, options) {
+  const firstOption = selectElement.querySelector('option[value=""]');
+  selectElement.innerHTML = sanitizeHtml('');
+  if (firstOption) {
+    selectElement.appendChild(firstOption);
+  }
+
+  options.forEach(option => {
+    const optionElement = document.createElement('option');
+    optionElement.value = option;
+    optionElement.textContent = option;
+    selectElement.appendChild(optionElement);
+  });
+}
+
+// ============================================================================
+// MAIN RENDERING FUNCTIONS
+// ============================================================================
 
 /**
  * Rendering responsive: tabella su desktop, timeline su mobile/tablet
  */
 export function renderEventsResponsive(eventsData) {
-  const isMobile = window.innerWidth < 768;
-  const isTablet = window.innerWidth >= 768 && window.innerWidth < 1200;
-  // Allinea con vista "list": tabella solo da >= 1200px
   const useTable = window.innerWidth >= 1200;
 
   if (domElements.tableContainer) {
@@ -177,6 +183,45 @@ export function renderEventsResponsive(eventsData) {
     renderEventsTable(eventsData);
   } else {
     renderEventsTimeline(eventsData);
+  }
+}
+
+/**
+ * Renderizza la timeline degli eventi clinici
+ */
+export function renderEventsTimeline(eventsData) {
+  try {
+    logger.log("🎨 Rendering timeline eventi:", eventsData);
+
+    if (!domElements.timelineContainer) {
+      logger.error("❌ Container timeline non trovato");
+      return;
+    }
+
+    domElements.timelineContainer.innerHTML = sanitizeHtml("");
+
+    if (!eventsData.eventi || eventsData.eventi.length === 0) {
+      renderEmptyState();
+      return;
+    }
+
+    const timelineElement = createTimelineElement();
+    const eventsByDate = groupEventsByDate(eventsData.eventi);
+
+    Object.keys(eventsByDate)
+      .sort((a, b) => new Date(b) - new Date(a))
+      .forEach((date) => {
+        const dateGroup = createDateGroup(date, eventsByDate[date]);
+        timelineElement.appendChild(dateGroup);
+      });
+
+    domElements.timelineContainer.appendChild(timelineElement);
+    updatePaginationControls(eventsData);
+
+    logger.log("✅ Timeline renderizzata con successo");
+  } catch (error) {
+    logger.error("❌ Errore rendering timeline:", error);
+    showError("Errore nel rendering della timeline");
   }
 }
 
@@ -203,61 +248,8 @@ export function renderEventsTable(eventsData) {
       return;
     }
 
-    const rowsHtml = eventsData.eventi.map(ev => {
-      const patient = ev.pazienteInfo;
-      const dettagli = ev.tipo_evento === 'intervento'
-        ? (ev.tipo_intervento || '-')
-        : (ev.agente_patogeno || '-');
-      const statoBadge = ev.tipo_evento === 'infezione'
-        ? (ev.data_fine_evento
-            ? `<span class="badge bg-success" title="Risolta il ${ev.dataFineEventoFormatted}">Risolta</span>`
-            : `<span class="badge bg-danger" title="Infezione attiva">Attiva</span>`)
-        : '';
-
-      // Tooltip-safe text (escape quotes) per celle Dettagli/Descrizione
-      const dettagliTooltip = (dettagli && dettagli !== '-') ? sanitizeHtml(dettagli).replace(/"/g, '&quot;') : '';
-      const descrRaw = ev.descrizione || '';
-      const descrTooltip = descrRaw ? sanitizeHtml(descrRaw).replace(/"/g, '&quot;') : '';
-
-    return `
-        <tr data-evento-id="${ev.id}">
-          <td>${ev.dataEventoFormatted || formatDate(ev.data_evento)}</td>
-          <td>
-            <span class="badge bg-${ev.tipoEventoColor || (ev.tipo_evento === 'intervento' ? 'primary' : 'warning')}">
-              ${renderEventIcon(ev.tipoEventoIcon, ev.tipo_evento, 'white', 'me-1 align-middle fs-6')}
-              ${ev.tipoEventoLabel || (ev.tipo_evento === 'intervento' ? 'Intervento' : 'Infezione')}
-            </span>
-          </td>
-          <td>${patient ? sanitizeHtml(patient.nomeCompleto) : '-'}</td>
-          <td>${patient ? sanitizeHtml(patient.reparto) : '-'}</td>
-  <td><span class="clamp-3">${sanitizeHtml(dettagli)}</span></td>
-  <td><span class="clamp-3">${ev.descrizione ? sanitizeHtml(ev.descrizione) : '-'}</span></td>
-          <td>${statoBadge}</td>
-          <td>
-            <div class="btn-group btn-group-sm" role="group">
-              <button class="btn btn-outline-primary event-detail-btn" data-evento-id="${ev.id}" title="Dettagli">
-                <span class="material-icons">visibility</span>
-              </button>
-              <button class="btn btn-outline-secondary event-edit-btn" data-evento-id="${ev.id}" title="Modifica">
-                <span class="material-icons">edit</span>
-              </button>
-              ${ev.tipo_evento === 'infezione' && !ev.data_fine_evento ? `
-              <button class="btn btn-outline-success event-resolve-btn" data-evento-id="${ev.id}" title="Risolvi">
-                <span class="material-icons">check_circle</span>
-              </button>
-              ` : ''}
-              <button class="btn btn-outline-danger event-delete-btn" data-evento-id="${ev.id}" title="Elimina">
-                <span class="material-icons">delete</span>
-              </button>
-            </div>
-          </td>
-        </tr>
-      `;
-    }).join('');
-
-  // Inseriamo direttamente le righe HTML: i singoli valori dinamici sono già sanitizzati
-  domElements.tableBody.innerHTML = rowsHtml;
-  // Tooltip disabilitati su Dettagli/Descrizione: nessun effetto hover JS
+    const rowsHtml = eventsData.eventi.map(ev => createTableRow(ev)).join('');
+    domElements.tableBody.innerHTML = rowsHtml;
     updatePaginationControls(eventsData);
   } catch (error) {
     logger.error('❌ Errore rendering tabella eventi:', error);
@@ -265,30 +257,18 @@ export function renderEventsTable(eventsData) {
   }
 }
 
+// ============================================================================
+// TIMELINE COMPONENTS
+// ============================================================================
+
 /**
  * Crea l'elemento timeline principale
  */
 function createTimelineElement() {
   const timeline = document.createElement("div");
   timeline.className = "eventi-timeline";
-  timeline.innerHTML = sanitizeHtml(`
-    <div class="timeline-line"></div>
-  `);
+  timeline.innerHTML = sanitizeHtml(`<div class="timeline-line"></div>`);
   return timeline;
-}
-
-/**
- * Raggruppa eventi per data
- */
-function groupEventsByDate(eventi) {
-  return eventi.reduce((groups, evento) => {
-    const date = evento.data_evento;
-    if (!groups[date]) {
-      groups[date] = [];
-    }
-    groups[date].push(evento);
-    return groups;
-  }, {});
 }
 
 /**
@@ -309,13 +289,9 @@ function createDateGroup(date, eventi) {
   
   dateHeader.appendChild(marker);
   dateHeader.appendChild(title);
-
   dateGroup.appendChild(dateHeader);
 
-  // Sort events by creation time for same-day events
-  eventi.sort(
-    (a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0)
-  );
+  eventi.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
 
   eventi.forEach((evento) => {
     const eventCard = createEventCard(evento);
@@ -330,19 +306,31 @@ function createDateGroup(date, eventi) {
  */
 function createEventCard(evento) {
   const card = document.createElement("div");
-  // Mappa stati evento su classi card mobile riusate dalla lista pazienti
   const isInfezione = evento.tipo_evento === 'infezione';
   const isAttiva = isInfezione && !evento.data_fine_evento;
   const statusClass = isInfezione
     ? (isAttiva ? 'status-infected' : 'status-error')
     : 'status-success';
-  // Usa la stessa struttura card mobile per uniformità con la vista "list"
+  
   card.className = `card card-list-compact timeline-event-card ${statusClass} evento-${evento.tipo_evento}`;
   card.dataset.eventoId = evento.id;
 
+  const cardContent = createEventCardContent(evento);
+  card.innerHTML = sanitizeHtml(cardContent);
+
+  setupEventCardHandlers(card, evento);
+  return card;
+}
+
+/**
+ * Crea il contenuto HTML per una card evento
+ */
+function createEventCardContent(evento) {
+  const isInfezione = evento.tipo_evento === 'infezione';
   const tipoIcon = evento.tipoEventoIcon || (evento.tipo_evento === 'intervento' ? 'medical_services' : 'warning');
   const tipoColor = evento.tipoEventoColor || (evento.tipo_evento === 'intervento' ? 'primary' : 'warning');
   const tipoLabel = evento.tipoEventoLabel || (evento.tipo_evento === 'intervento' ? 'Intervento' : 'Infezione');
+  
   const statoBadge = isInfezione
     ? (evento.data_fine_evento
         ? '<span class="badge bg-success ms-1" style="font-size:0.7em;">Risolta</span>'
@@ -354,52 +342,51 @@ function createEventCard(evento) {
     : (evento.agente_patogeno || (evento.data_fine_evento ? 'Infezione risolta' : 'Infezione attiva'));
 
   const pazienteInfo = evento.pazienteInfo
-    ? `
-        <div class="card-meta mobile-text-sm mt-1">
-          <span class="material-icons me-1" style="font-size:1em;vertical-align:middle;">person</span>
-          ${sanitizeHtml(evento.pazienteInfo.nomeCompleto)} • <span class="badge bg-secondary">${sanitizeHtml(evento.pazienteInfo.reparto)}</span>
-        </div>
-      `
+    ? `<div class="card-meta mobile-text-sm mt-1">
+         <span class="material-icons me-1" style="font-size:1em;vertical-align:middle;">person</span>
+         ${sanitizeHtml(evento.pazienteInfo.nomeCompleto)} • <span class="badge bg-secondary">${sanitizeHtml(evento.pazienteInfo.reparto)}</span>
+       </div>`
     : '';
 
   const detailsSection = renderEventCardDetails(evento);
-  const cardContent = `
-      <div class="card-body">
-        <div class="card-info">
-          <div class="card-title d-flex align-items-center gap-2">
-            ${renderEventIcon(tipoIcon, evento.tipo_evento, tipoColor)}
-            <span class="fw-bold">${tipoLabel}</span>
-            ${statoBadge}
-          </div>
-          <div class="card-meta mobile-text-sm">
-            ${formatDate(evento.data_evento)} • ${sanitizeHtml(dettagliBrevi)}
-          </div>
-          ${pazienteInfo}
+
+  return `
+    <div class="card-body">
+      <div class="card-info">
+        <div class="card-title d-flex align-items-center gap-2">
+          ${renderEventIcon(tipoIcon, evento.tipo_evento, tipoColor)}
+          <span class="fw-bold">${tipoLabel}</span>
+          ${statoBadge}
         </div>
-        <div class="event-card-body mt-2 mobile-text-sm text-muted">
-          ${detailsSection}
+        <div class="card-meta mobile-text-sm">
+          ${formatDate(evento.data_evento)} • ${sanitizeHtml(dettagliBrevi)}
         </div>
-        <div class="mt-2 text-end">
-          <button class="btn btn-outline-secondary btn-sm open-actions-modal">
-            <span class="material-icons align-middle me-1" style="font-size:1.05em;">more_horiz</span>
-            Azioni
-          </button>
-        </div>
+        ${pazienteInfo}
       </div>
+      <div class="event-card-body mt-2 mobile-text-sm text-muted">
+        ${detailsSection}
+      </div>
+      <div class="mt-2 text-end">
+        <button class="btn btn-outline-secondary btn-sm open-actions-modal">
+          <span class="material-icons align-middle me-1" style="font-size:1.05em;">more_horiz</span>
+          Azioni
+        </button>
+      </div>
+    </div>
   `;
+}
 
-  card.innerHTML = sanitizeHtml(cardContent);
-
-  // Apertura modal azioni: al click sulla card o sul bottone dedicato
+/**
+ * Configura gli event handlers per una card evento
+ */
+function setupEventCardHandlers(card, evento) {
   const openModal = (e) => {
-    // Evita doppi trigger da elementi interattivi interni
     if (e && (e.target.closest('button') || e.target.closest('a'))) return;
     showActionsModal(evento);
   };
 
-  // Click sull'intera card apre le azioni
   card.addEventListener('click', openModal);
-  // Click sul bottone "Azioni" esplicito
+  
   const explicitBtn = card.querySelector('.open-actions-modal');
   if (explicitBtn) {
     explicitBtn.addEventListener('click', (e) => {
@@ -407,8 +394,6 @@ function createEventCard(evento) {
       showActionsModal(evento);
     });
   }
-
-  return card;
 }
 
 /**
@@ -421,29 +406,92 @@ function renderEventCardDetails(evento) {
     details += `<p class="event-description">${sanitizeHtml(evento.descrizione)}</p>`;
   }
 
-  // Type-specific details
-  if (evento.tipo_evento === "intervento") {
-    if (evento.tipo_intervento) {
-      details += `
-        <div class="event-detail-item">
-          <strong>Tipo Intervento:</strong> ${sanitizeHtml(evento.tipo_intervento)}
-        </div>
-      `;
-    }
-  } else if (evento.tipo_evento === "infezione") {
-    if (evento.agente_patogeno) {
-      details += `
-        <div class="event-detail-item">
-          <strong>Agente Patogeno:</strong> ${sanitizeHtml(evento.agente_patogeno)}
-        </div>
-      `;
-    }
+  if (evento.tipo_evento === "intervento" && evento.tipo_intervento) {
+    details += `
+      <div class="event-detail-item">
+        <strong>Tipo Intervento:</strong> ${sanitizeHtml(evento.tipo_intervento)}
+      </div>
+    `;
+  } else if (evento.tipo_evento === "infezione" && evento.agente_patogeno) {
+    details += `
+      <div class="event-detail-item">
+        <strong>Agente Patogeno:</strong> ${sanitizeHtml(evento.agente_patogeno)}
+      </div>
+    `;
   }
 
   return details || '<p class="text-muted">Nessun dettaglio aggiuntivo</p>';
 }
 
-// Espansione card rimossa: le informazioni sono sempre visibili
+// ============================================================================
+// TABLE COMPONENTS
+// ============================================================================
+
+/**
+ * Crea una riga della tabella per un evento
+ */
+function createTableRow(ev) {
+  const patient = ev.pazienteInfo;
+  const dettagli = ev.tipo_evento === 'intervento'
+    ? (ev.tipo_intervento || '-')
+    : (ev.agente_patogeno || '-');
+  
+  const statoBadge = ev.tipo_evento === 'infezione'
+    ? (ev.data_fine_evento
+        ? `<span class="badge bg-success" title="Risolta il ${ev.dataFineEventoFormatted}">Risolta</span>`
+        : `<span class="badge bg-danger" title="Infezione attiva">Attiva</span>`)
+    : '';
+
+  const actionButtons = createActionButtons(ev);
+
+  return `
+    <tr data-evento-id="${ev.id}">
+      <td>${ev.dataEventoFormatted || formatDate(ev.data_evento)}</td>
+      <td>
+        <span class="badge bg-${ev.tipoEventoColor || (ev.tipo_evento === 'intervento' ? 'primary' : 'warning')}">
+          ${renderEventIcon(ev.tipoEventoIcon, ev.tipo_evento, 'white', 'me-1 align-middle fs-6')}
+          ${ev.tipoEventoLabel || (ev.tipo_evento === 'intervento' ? 'Intervento' : 'Infezione')}
+        </span>
+      </td>
+      <td>${patient ? sanitizeHtml(patient.nomeCompleto) : '-'}</td>
+      <td>${patient ? sanitizeHtml(patient.reparto) : '-'}</td>
+      <td><span class="clamp-3">${sanitizeHtml(dettagli)}</span></td>
+      <td><span class="clamp-3">${ev.descrizione ? sanitizeHtml(ev.descrizione) : '-'}</span></td>
+      <td>${statoBadge}</td>
+      <td>${actionButtons}</td>
+    </tr>
+  `;
+}
+
+/**
+ * Crea i pulsanti di azione per la tabella
+ */
+function createActionButtons(ev) {
+  const resolveButton = ev.tipo_evento === 'infezione' && !ev.data_fine_evento
+    ? `<button class="btn btn-outline-success event-resolve-btn" data-evento-id="${ev.id}" title="Risolvi">
+         <span class="material-icons">check_circle</span>
+       </button>`
+    : '';
+
+  return `
+    <div class="btn-group btn-group-sm" role="group">
+      <button class="btn btn-outline-primary event-detail-btn" data-evento-id="${ev.id}" title="Dettagli">
+        <span class="material-icons">visibility</span>
+      </button>
+      <button class="btn btn-outline-secondary event-edit-btn" data-evento-id="${ev.id}" title="Modifica">
+        <span class="material-icons">edit</span>
+      </button>
+      ${resolveButton}
+      <button class="btn btn-outline-danger event-delete-btn" data-evento-id="${ev.id}" title="Elimina">
+        <span class="material-icons">delete</span>
+      </button>
+    </div>
+  `;
+}
+
+// ============================================================================
+// MODAL FUNCTIONS
+// ============================================================================
 
 /**
  * Crea la modal Azioni (se non esiste) e la restituisce
@@ -489,7 +537,25 @@ function showActionsModal(evento) {
   const isInfezione = evento.tipo_evento === 'infezione';
   const isAttiva = isInfezione && !evento.data_fine_evento;
 
-  const actionsHTML = `
+  const actionsHTML = createActionsModalContent(evento, isAttiva);
+  body.innerHTML = sanitizeHtml(actionsHTML);
+
+  showModal(modalEl);
+}
+
+/**
+ * Crea il contenuto HTML per la modal delle azioni
+ */
+function createActionsModalContent(evento, isAttiva) {
+  const resolveAction = isAttiva
+    ? `<button type="button" class="azione-btn is-resolve event-resolve-btn" data-evento-id="${evento.id}" aria-label="Risolvi infezione">
+         <span class="azione-icon" aria-hidden="true"><span class="material-icons">check_circle</span></span>
+         <span class="azione-label">Risolvi</span>
+         <span class="material-icons azione-chevron" aria-hidden="true">chevron_right</span>
+       </button>`
+    : '';
+
+  return `
     <div class="azioni-actions">
       <button type="button" class="azione-btn is-detail event-detail-btn" data-evento-id="${evento.id}" aria-label="Apri dettagli evento">
         <span class="azione-icon" aria-hidden="true"><span class="material-icons">visibility</span></span>
@@ -501,12 +567,7 @@ function showActionsModal(evento) {
         <span class="azione-label">Modifica</span>
         <span class="material-icons azione-chevron" aria-hidden="true">chevron_right</span>
       </button>
-      ${isAttiva ? `
-      <button type="button" class="azione-btn is-resolve event-resolve-btn" data-evento-id="${evento.id}" aria-label="Risolvi infezione">
-        <span class="azione-icon" aria-hidden="true"><span class="material-icons">check_circle</span></span>
-        <span class="azione-label">Risolvi</span>
-        <span class="material-icons azione-chevron" aria-hidden="true">chevron_right</span>
-      </button>` : ''}
+      ${resolveAction}
       <button type="button" class="azione-btn is-delete event-delete-btn" data-evento-id="${evento.id}" aria-label="Elimina evento">
         <span class="azione-icon" aria-hidden="true"><span class="material-icons">delete</span></span>
         <span class="azione-label">Elimina</span>
@@ -514,25 +575,29 @@ function showActionsModal(evento) {
       </button>
     </div>
   `;
+}
 
-  body.innerHTML = sanitizeHtml(actionsHTML);
-
-  // Apri la modal con Bootstrap
+/**
+ * Mostra una modal usando Bootstrap o fallback
+ */
+function showModal(modalEl) {
   import('bootstrap').then(({ Modal }) => {
     const modal = Modal.getOrCreateInstance(modalEl, { backdrop: true, focus: true });
     modal.show();
   }).catch(() => {
-    // Fallback: mostra/occulta la modal via classi base
     modalEl.classList.add('show');
     modalEl.style.display = 'block';
   });
 }
 
+// ============================================================================
+// STATE RENDERING FUNCTIONS
+// ============================================================================
+
 /**
  * Renderizza lo stato vuoto
  */
 function renderEmptyState() {
-  // Creazione DOM sicura per empty state
   domElements.timelineContainer.innerHTML = sanitizeHtml('');
   const emptyDiv = document.createElement('div');
   emptyDiv.className = 'empty-state text-center py-5';
@@ -560,7 +625,6 @@ function renderEmptyState() {
 
   domElements.timelineContainer.appendChild(emptyDiv);
 
-  // Add event listener for the add button
   btn.addEventListener('click', () => {
     if (domElements.addEventBtn) {
       domElements.addEventBtn.click();
@@ -574,19 +638,19 @@ function renderEmptyState() {
 export function showLoading() {
   if (domElements.timelineContainer) {
     domElements.timelineContainer.innerHTML = sanitizeHtml(`
-    <div class="loading-state text-center py-5">
-      <div class="spinner-border text-primary mb-3" role="status">
-        <span class="visually-hidden">Caricamento...</span>
+      <div class="loading-state text-center py-5">
+        <div class="spinner-border text-primary mb-3" role="status">
+          <span class="visually-hidden">Caricamento...</span>
+        </div>
+        <p class="text-muted">Caricamento eventi clinici...</p>
       </div>
-      <p class="text-muted">Caricamento eventi clinici...</p>
-    </div>
-  `);
+    `);
   }
 
   if (domElements.tableBody) {
     domElements.tableBody.innerHTML = sanitizeHtml(`
       <tr>
-  <td colspan="8" class="text-center">
+        <td colspan="8" class="text-center">
           <div class="spinner-border text-primary" role="status">
             <span class="visually-hidden">Caricamento...</span>
           </div>
@@ -602,24 +666,24 @@ export function showLoading() {
 export function showError(message = "Errore nel caricamento dei dati") {
   if (domElements.timelineContainer) {
     domElements.timelineContainer.innerHTML = sanitizeHtml(`
-    <div class="error-state text-center py-5">
-      <div class="error-state-icon mb-3">
-  <span class="material-icons text-danger" style="font-size:48px;">warning</span>
+      <div class="error-state text-center py-5">
+        <div class="error-state-icon mb-3">
+          <span class="material-icons text-danger" style="font-size:48px;">warning</span>
+        </div>
+        <h4 class="text-danger">Errore</h4>
+        <p class="text-muted">${sanitizeHtml(message)}</p>
+        <button class="btn btn-outline-primary" onclick="location.reload()">
+          <span class="material-icons me-1">refresh</span>
+          Riprova
+        </button>
       </div>
-      <h4 class="text-danger">Errore</h4>
-      <p class="text-muted">${sanitizeHtml(message)}</p>
-      <button class="btn btn-outline-primary" onclick="location.reload()">
-  <span class="material-icons me-1">refresh</span>
-        Riprova
-      </button>
-    </div>
-  `);
+    `);
   }
 
   if (domElements.tableBody) {
     domElements.tableBody.innerHTML = sanitizeHtml(`
       <tr>
-  <td colspan="8" class="text-center text-danger">
+        <td colspan="8" class="text-center text-danger">
           <strong>${sanitizeHtml(message)}</strong>
         </td>
       </tr>
@@ -628,15 +692,46 @@ export function showError(message = "Errore nel caricamento dei dati") {
 }
 
 /**
+ * Mostra stato di ricerca in corso
+ */
+export function showSearchingState() {
+  if (!domElements.timelineContainer) return;
+
+  const searchingHTML = `
+    <div class="searching-state text-center py-4">
+      <div class="spinner-border spinner-border-sm text-primary me-2" role="status">
+        <span class="visually-hidden">Ricerca in corso...</span>
+      </div>
+      <span class="text-muted">Ricerca in corso...</span>
+    </div>
+  `;
+
+  const existingContent = domElements.timelineContainer.innerHTML;
+  domElements.timelineContainer.innerHTML = sanitizeHtml(searchingHTML) + existingContent;
+}
+
+/**
+ * Rimuove stato di ricerca in corso
+ */
+export function hideSearchingState() {
+  const searchingState = document.querySelector('.searching-state');
+  if (searchingState) {
+    searchingState.remove();
+  }
+}
+
+// ============================================================================
+// PAGINATION FUNCTIONS
+// ============================================================================
+
+/**
  * Aggiorna i controlli di paginazione
  */
 function updatePaginationControls(eventsData) {
   if (!domElements.paginationControls) return;
 
-  const { currentPage, totalPages, totalCount, hasNextPage, hasPrevPage } =
-    eventsData;
+  const { currentPage, totalPages, totalCount, hasNextPage, hasPrevPage } = eventsData;
 
-  // Update buttons state
   if (domElements.prevPageBtn) {
     domElements.prevPageBtn.disabled = !hasPrevPage;
   }
@@ -645,19 +740,18 @@ function updatePaginationControls(eventsData) {
     domElements.nextPageBtn.disabled = !hasNextPage;
   }
 
-  // Update page info
   if (domElements.pageInfo) {
     const startItem = currentPage * 10 + 1;
     const endItem = Math.min((currentPage + 1) * 10, totalCount);
-    domElements.pageInfo.textContent = `${startItem}-${endItem} di ${totalCount} eventi (Pagina ${
-      currentPage + 1
-    } di ${totalPages})`;
+    domElements.pageInfo.textContent = `${startItem}-${endItem} di ${totalCount} eventi (Pagina ${currentPage + 1} di ${totalPages})`;
   }
 
-  // Show/hide pagination if needed
-  domElements.paginationControls.style.display =
-    totalPages > 1 ? "flex" : "none";
+  domElements.paginationControls.style.display = totalPages > 1 ? "flex" : "none";
 }
+
+// ============================================================================
+// PATIENT SEARCH FUNCTIONS
+// ============================================================================
 
 /**
  * Renderizza i risultati di ricerca pazienti
@@ -671,38 +765,41 @@ export function renderPatientSearchResults(patients, containerId) {
     return;
   }
 
-  const resultsHTML = patients
-    .map(
-      (patient) => `
-    <div class="dropdown-item patient-search-result" data-patient-id="${
-      patient.id
-    }">
+  const resultsHTML = patients.map(patient => createPatientSearchResult(patient)).join("");
+  container.innerHTML = sanitizeHtml(resultsHTML);
+  container.style.display = "block";
+
+  setupPatientSearchHandlers(container, containerId);
+}
+
+/**
+ * Crea il risultato di ricerca per un paziente
+ */
+function createPatientSearchResult(patient) {
+  return `
+    <div class="dropdown-item patient-search-result" data-patient-id="${patient.id}">
       <div class="d-flex justify-content-between align-items-center">
         <div>
           <strong>${patient.nomeCompleto}</strong>
           <br>
           <small class="text-muted">
-            ${patient.reparto_appartenenza} • Ricovero: ${
-        patient.dataRicoveroFormatted
-      }
-            ${
-              patient.isActive
-                ? '<span class="badge bg-success ms-1">Attivo</span>'
-                : '<span class="badge bg-secondary ms-1">Dimesso</span>'
+            ${patient.reparto_appartenenza} • Ricovero: ${patient.dataRicoveroFormatted}
+            ${patient.isActive
+              ? '<span class="badge bg-success ms-1">Attivo</span>'
+              : '<span class="badge bg-secondary ms-1">Dimesso</span>'
             }
           </small>
         </div>
-  <span class="material-icons text-muted">chevron_right</span>
+        <span class="material-icons text-muted">chevron_right</span>
       </div>
     </div>
-  `
-    )
-    .join("");
+  `;
+}
 
-  container.innerHTML = sanitizeHtml(resultsHTML);
-  container.style.display = "block";
-
-  // Add click handlers
+/**
+ * Configura gli handler per i risultati di ricerca pazienti
+ */
+function setupPatientSearchHandlers(container, containerId) {
   container.querySelectorAll(".patient-search-result").forEach((item) => {
     item.addEventListener("click", () => {
       const patientId = item.dataset.patientId;
@@ -719,13 +816,11 @@ function selectPatient(patientId, patientName, containerId) {
   const container = document.getElementById(containerId);
 
   if (containerId === "patient-search-results") {
-    // Main search - trigger filter
     if (domElements.searchPatientInput) {
       domElements.searchPatientInput.value = patientName;
       domElements.searchPatientInput.dataset.patientId = patientId;
     }
   } else if (containerId === "evento-patient-search-results") {
-    // Form search - populate form
     if (domElements.eventPatientInput) {
       domElements.eventPatientInput.value = patientName;
     }
@@ -737,44 +832,27 @@ function selectPatient(patientId, patientName, containerId) {
   container.style.display = "none";
 }
 
+// ============================================================================
+// FORM FUNCTIONS
+// ============================================================================
+
 /**
  * Mostra/nasconde campi specifici per tipo evento
  */
 export function toggleEventTypeFields(eventType) {
   if (!domElements.interventionFields || !domElements.infectionFields) return;
 
-  if (eventType === "intervento") {
-    domElements.interventionFields.style.display = "block";
-    domElements.infectionFields.style.display = "none";
+  const isIntervention = eventType === "intervento";
+  const isInfection = eventType === "infezione";
 
-    // Make intervention type required
-    if (domElements.interventionType) {
-      domElements.interventionType.required = true;
-    }
-    if (domElements.infectionAgent) {
-      domElements.infectionAgent.required = false;
-    }
-  } else if (eventType === "infezione") {
-    domElements.interventionFields.style.display = "none";
-    domElements.infectionFields.style.display = "block";
+  domElements.interventionFields.style.display = isIntervention ? "block" : "none";
+  domElements.infectionFields.style.display = isInfection ? "block" : "none";
 
-    // Make infection agent recommended
-    if (domElements.interventionType) {
-      domElements.interventionType.required = false;
-    }
-    if (domElements.infectionAgent) {
-      domElements.infectionAgent.required = false;
-    }
-  } else {
-    domElements.interventionFields.style.display = "none";
-    domElements.infectionFields.style.display = "none";
-
-    if (domElements.interventionType) {
-      domElements.interventionType.required = false;
-    }
-    if (domElements.infectionAgent) {
-      domElements.infectionAgent.required = false;
-    }
+  if (domElements.interventionType) {
+    domElements.interventionType.required = isIntervention;
+  }
+  if (domElements.infectionAgent) {
+    domElements.infectionAgent.required = false; // Always optional
   }
 }
 
@@ -786,12 +864,9 @@ export function populateEventForm(evento) {
 
   // Basic fields
   if (domElements.eventId) domElements.eventId.value = evento.id || "";
-  if (domElements.eventType)
-    domElements.eventType.value = evento.tipo_evento || "";
-  if (domElements.eventDate)
-    domElements.eventDate.value = evento.dataEventoFormatted || "";
-  if (domElements.eventDescription)
-    domElements.eventDescription.value = evento.descrizione || "";
+  if (domElements.eventType) domElements.eventType.value = evento.tipo_evento || "";
+  if (domElements.eventDate) domElements.eventDate.value = evento.dataEventoFormatted || "";
+  if (domElements.eventDescription) domElements.eventDescription.value = evento.descrizione || "";
 
   // Patient info
   if (evento.pazienteInfo) {
@@ -804,17 +879,12 @@ export function populateEventForm(evento) {
   }
 
   // Type-specific fields
-  if (evento.tipo_evento === "intervento") {
-    if (domElements.interventionType) {
-      domElements.interventionType.value = evento.tipo_intervento || "";
-    }
-  } else if (evento.tipo_evento === "infezione") {
-    if (domElements.infectionAgent) {
-      domElements.infectionAgent.value = evento.agente_patogeno || "";
-    }
+  if (evento.tipo_evento === "intervento" && domElements.interventionType) {
+    domElements.interventionType.value = evento.tipo_intervento || "";
+  } else if (evento.tipo_evento === "infezione" && domElements.infectionAgent) {
+    domElements.infectionAgent.value = evento.agente_patogeno || "";
   }
 
-  // Show appropriate fields
   toggleEventTypeFields(evento.tipo_evento);
 }
 
@@ -826,19 +896,15 @@ export function resetEventForm() {
 
   domElements.eventForm.reset();
 
-  // Clear hidden fields
   if (domElements.eventId) domElements.eventId.value = "";
   if (domElements.eventPatientId) domElements.eventPatientId.value = "";
 
-  // Hide type-specific fields
   toggleEventTypeFields("");
 
-  // Clear search results
   if (domElements.eventPatientSearchResults) {
     domElements.eventPatientSearchResults.style.display = "none";
   }
 
-  // Clear messages
   clearFormMessages();
 }
 
@@ -883,7 +949,48 @@ export function updateModalTitle(title, icon = "add") {
 export function renderEventDetails(evento) {
   if (!domElements.detailContent) return;
 
-  const detailsHTML = `
+  const detailsHTML = createEventDetailsHTML(evento);
+  domElements.detailContent.innerHTML = sanitizeHtml(detailsHTML);
+}
+
+/**
+ * Crea l'HTML per i dettagli dell'evento
+ */
+function createEventDetailsHTML(evento) {
+  const statusSection = evento.tipo_evento === 'infezione'
+    ? `<div class="col-md-6">
+         <strong>Stato:</strong>
+         <div class="mt-1">
+           ${evento.data_fine_evento 
+             ? `<span class="badge bg-success">Risolta il ${formatDate(evento.data_fine_evento)}</span>` 
+             : `<span class="badge bg-danger">Attiva</span>`
+           }
+         </div>
+       </div>`
+    : '';
+
+  const patientSection = evento.pazienteInfo
+    ? `<div class="col-12">
+         <strong>Paziente:</strong>
+         <div class="mt-1">
+           <span class="material-icons me-1">person</span>
+           ${evento.pazienteInfo.nomeCompleto}
+           <span class="badge bg-secondary ms-2">${evento.pazienteInfo.reparto}</span>
+         </div>
+       </div>`
+    : "";
+
+  const descriptionSection = evento.descrizione
+    ? `<div class="col-12">
+         <strong>Descrizione:</strong>
+         <div class="mt-1">${evento.descrizione}</div>
+       </div>`
+    : "";
+
+  const typeSpecificSection = createTypeSpecificSection(evento);
+  const timestampSection = createTimestampSection(evento);
+
+  return `
     <div class="event-details">
       <div class="row g-3">
         <div class="col-md-6">
@@ -897,84 +1004,61 @@ export function renderEventDetails(evento) {
           <strong>Data Evento:</strong>
           <div class="mt-1">${evento.dataEventoFormatted}</div>
         </div>
-        ${evento.tipo_evento === 'infezione' ? `
-        <div class="col-md-6">
-          <strong>Stato:</strong>
-          <div class="mt-1">
-            ${evento.data_fine_evento ? `<span class="badge bg-success">Risolta il ${formatDate(evento.data_fine_evento)}</span>` : `<span class="badge bg-danger">Attiva</span>`}
-          </div>
-        </div>
-        ` : ''}
-        
-        ${
-          evento.pazienteInfo
-            ? `
-          <div class="col-12">
-            <strong>Paziente:</strong>
-            <div class="mt-1">
-              <span class="material-icons me-1">person</span>
-              ${evento.pazienteInfo.nomeCompleto}
-              <span class="badge bg-secondary ms-2">${evento.pazienteInfo.reparto}</span>
-            </div>
-          </div>
-        `
-            : ""
-        }
-        
-        ${
-          evento.descrizione
-            ? `
-          <div class="col-12">
-            <strong>Descrizione:</strong>
-            <div class="mt-1">${evento.descrizione}</div>
-          </div>
-        `
-            : ""
-        }
-        
-        ${
-          evento.tipo_evento === "intervento" && evento.tipo_intervento
-            ? `
-          <div class="col-12">
-            <strong>Tipo Intervento:</strong>
-            <div class="mt-1">${evento.tipo_intervento}</div>
-          </div>
-        `
-            : ""
-        }
-        
-        ${
-          evento.tipo_evento === "infezione" && evento.agente_patogeno
-            ? `
-          <div class="col-12">
-            <strong>Agente Patogeno:</strong>
-            <div class="mt-1">${evento.agente_patogeno}</div>
-          </div>
-        `
-            : ""
-        }
-        
-        <div class="col-md-6">
-          <strong>Creato il:</strong>
-          <div class="mt-1 text-muted">${formatDate(evento.created_at)}</div>
-        </div>
-        
-        ${
-          evento.updated_at && evento.updated_at !== evento.created_at
-            ? `
-          <div class="col-md-6">
-            <strong>Modificato il:</strong>
-            <div class="mt-1 text-muted">${formatDate(evento.updated_at)}</div>
-          </div>
-        `
-            : ""
-        }
+        ${statusSection}
+        ${patientSection}
+        ${descriptionSection}
+        ${typeSpecificSection}
+        ${timestampSection}
       </div>
     </div>
   `;
-
-  domElements.detailContent.innerHTML = sanitizeHtml(detailsHTML);
 }
+
+/**
+ * Crea la sezione specifica per tipo di evento
+ */
+function createTypeSpecificSection(evento) {
+  if (evento.tipo_evento === "intervento" && evento.tipo_intervento) {
+    return `
+      <div class="col-12">
+        <strong>Tipo Intervento:</strong>
+        <div class="mt-1">${evento.tipo_intervento}</div>
+      </div>
+    `;
+  } else if (evento.tipo_evento === "infezione" && evento.agente_patogeno) {
+    return `
+      <div class="col-12">
+        <strong>Agente Patogeno:</strong>
+        <div class="mt-1">${evento.agente_patogeno}</div>
+      </div>
+    `;
+  }
+  return "";
+}
+
+/**
+ * Crea la sezione timestamp
+ */
+function createTimestampSection(evento) {
+  const updatedSection = evento.updated_at && evento.updated_at !== evento.created_at
+    ? `<div class="col-md-6">
+         <strong>Modificato il:</strong>
+         <div class="mt-1 text-muted">${formatDate(evento.updated_at)}</div>
+       </div>`
+    : "";
+
+  return `
+    <div class="col-md-6">
+      <strong>Creato il:</strong>
+      <div class="mt-1 text-muted">${formatDate(evento.created_at)}</div>
+    </div>
+    ${updatedSection}
+  `;
+}
+
+// ============================================================================
+// RESPONSIVE DESIGN FUNCTIONS
+// ============================================================================
 
 /**
  * Applica responsive design basato sulla dimensione dello schermo
@@ -982,20 +1066,18 @@ export function renderEventDetails(evento) {
 export function applyResponsiveDesign() {
   const isMobile = window.innerWidth < 768;
   const isTablet = window.innerWidth >= 768 && window.innerWidth < 1200;
-
-  // Switch tra Timeline (mobile/tablet) e Tabella (desktop >= 1024px)
-  const useTable = window.innerWidth >= 1200; // desktop allineato a pazienti
+  const useTable = window.innerWidth >= 1200;
 
   if (domElements.tableContainer) {
     domElements.tableContainer.style.display = useTable ? 'block' : 'none';
   }
+  
   if (domElements.timelineContainer) {
     domElements.timelineContainer.style.display = useTable ? 'none' : 'block';
     domElements.timelineContainer.classList.toggle("mobile-layout", isMobile);
     domElements.timelineContainer.classList.toggle("tablet-layout", isTablet);
   }
 
-  // Adjust card layouts
   const eventCards = document.querySelectorAll(".timeline-event-card");
   eventCards.forEach((card) => {
     card.classList.toggle("mobile-card", isMobile);
@@ -1003,20 +1085,22 @@ export function applyResponsiveDesign() {
   });
 }
 
+// ============================================================================
+// FILTER FUNCTIONS
+// ============================================================================
+
 /**
  * Popola il filtro reparti con le opzioni disponibili
  */
 export async function populateDepartmentFilter(reparti) {
   if (!domElements.filterReparto) return;
 
-  // Clear existing options except the first one
   const firstOption = domElements.filterReparto.querySelector('option[value=""]');
   domElements.filterReparto.innerHTML = sanitizeHtml('');
   if (firstOption) {
     domElements.filterReparto.appendChild(firstOption);
   }
 
-  // Add department options
   reparti.forEach(reparto => {
     const option = document.createElement('option');
     option.value = reparto;
@@ -1032,12 +1116,10 @@ export async function populateDepartmentFilter(reparti) {
  */
 export async function populateAdvancedFilters(suggestions) {
   try {
-    // Populate intervention types filter
     if (domElements.filterTipoIntervento && suggestions.tipiIntervento) {
       populateSelectOptions(domElements.filterTipoIntervento, suggestions.tipiIntervento);
     }
 
-    // Populate pathogen agents filter
     if (domElements.filterAgentePatogeno && suggestions.agentiPatogeni) {
       populateSelectOptions(domElements.filterAgentePatogeno, suggestions.agentiPatogeni);
     }
@@ -1049,72 +1131,28 @@ export async function populateAdvancedFilters(suggestions) {
 }
 
 /**
- * Utility per popolare opzioni di select
- */
-function populateSelectOptions(selectElement, options) {
-  // Clear existing options except the first one
-  const firstOption = selectElement.querySelector('option[value=""]');
-  selectElement.innerHTML = sanitizeHtml('');
-  if (firstOption) {
-    selectElement.appendChild(firstOption);
-  }
-
-  // Add new options
-  options.forEach(option => {
-    const optionElement = document.createElement('option');
-    optionElement.value = option;
-    optionElement.textContent = option;
-    selectElement.appendChild(optionElement);
-  });
-}
-
-/**
  * Applica filtri attivi all'interfaccia
  */
 export function applyFiltersToUI(filters) {
   if (!filters) return;
 
-  // Patient search
-  if (domElements.searchPatientInput && filters.paziente_search) {
-    domElements.searchPatientInput.value = filters.paziente_search;
-  }
+  const filterMappings = [
+    { element: domElements.searchPatientInput, key: 'paziente_search' },
+    { element: domElements.filterType, key: 'tipo_evento' },
+    { element: domElements.filterDateFrom, key: 'data_da' },
+    { element: domElements.filterDateTo, key: 'data_a' },
+    { element: domElements.filterReparto, key: 'reparto' },
+    { element: domElements.filterAgentePatogeno, key: 'agente_patogeno' },
+    { element: domElements.filterTipoIntervento, key: 'tipo_intervento' },
+    { element: domElements.filterSortColumn, key: 'sortColumn' },
+    { element: domElements.filterSortDirection, key: 'sortDirection' }
+  ];
 
-  // Event type filter
-  if (domElements.filterType && filters.tipo_evento) {
-    domElements.filterType.value = filters.tipo_evento;
-  }
-
-  // Date filters
-  if (domElements.filterDateFrom && filters.data_da) {
-    domElements.filterDateFrom.value = filters.data_da;
-  }
-
-  if (domElements.filterDateTo && filters.data_a) {
-    domElements.filterDateTo.value = filters.data_a;
-  }
-
-  // Department filter
-  if (domElements.filterReparto && filters.reparto) {
-    domElements.filterReparto.value = filters.reparto;
-  }
-
-  // Advanced filters
-  if (domElements.filterAgentePatogeno && filters.agente_patogeno) {
-    domElements.filterAgentePatogeno.value = filters.agente_patogeno;
-  }
-
-  if (domElements.filterTipoIntervento && filters.tipo_intervento) {
-    domElements.filterTipoIntervento.value = filters.tipo_intervento;
-  }
-
-  // Sorting
-  if (domElements.filterSortColumn && filters.sortColumn) {
-    domElements.filterSortColumn.value = filters.sortColumn;
-  }
-
-  if (domElements.filterSortDirection && filters.sortDirection) {
-    domElements.filterSortDirection.value = filters.sortDirection;
-  }
+  filterMappings.forEach(({ element, key }) => {
+    if (element && filters[key]) {
+      element.value = filters[key];
+    }
+  });
 
   logger.log('✅ Filtri applicati all\'interfaccia:', filters);
 }
@@ -1123,46 +1161,28 @@ export function applyFiltersToUI(filters) {
  * Resetta tutti i filtri nell'interfaccia
  */
 export function resetFiltersUI() {
+  const resetMappings = [
+    { element: domElements.searchPatientInput, value: '' },
+    { element: domElements.filterType, value: '' },
+    { element: domElements.filterDateFrom, value: '' },
+    { element: domElements.filterDateTo, value: '' },
+    { element: domElements.filterReparto, value: '' },
+    { element: domElements.filterAgentePatogeno, value: '' },
+    { element: domElements.filterTipoIntervento, value: '' },
+    { element: domElements.filterSortColumn, value: 'data_evento' },
+    { element: domElements.filterSortDirection, value: 'desc' }
+  ];
+
+  resetMappings.forEach(({ element, value }) => {
+    if (element) {
+      element.value = value;
+    }
+  });
+
   if (domElements.searchPatientInput) {
-    domElements.searchPatientInput.value = '';
     domElements.searchPatientInput.removeAttribute('data-patient-id');
   }
 
-  if (domElements.filterType) {
-    domElements.filterType.value = '';
-  }
-
-  if (domElements.filterDateFrom) {
-    domElements.filterDateFrom.value = '';
-  }
-
-  if (domElements.filterDateTo) {
-    domElements.filterDateTo.value = '';
-  }
-
-  if (domElements.filterReparto) {
-    domElements.filterReparto.value = '';
-  }
-
-  // Advanced filters
-  if (domElements.filterAgentePatogeno) {
-    domElements.filterAgentePatogeno.value = '';
-  }
-
-  if (domElements.filterTipoIntervento) {
-    domElements.filterTipoIntervento.value = '';
-  }
-
-  // Sorting
-  if (domElements.filterSortColumn) {
-    domElements.filterSortColumn.value = 'data_evento';
-  }
-
-  if (domElements.filterSortDirection) {
-    domElements.filterSortDirection.value = 'desc';
-  }
-
-  // Hide patient search results
   if (domElements.patientSearchResults) {
     domElements.patientSearchResults.style.display = 'none';
   }
@@ -1171,10 +1191,26 @@ export function resetFiltersUI() {
 }
 
 /**
+ * Ottiene i filtri correnti dall'interfaccia
+ */
+export function getFiltersFromUI() {
+  return {
+    paziente_search: domElements.searchPatientInput?.value || '',
+    tipo_evento: domElements.filterType?.value || '',
+    data_da: domElements.filterDateFrom?.value || '',
+    data_a: domElements.filterDateTo?.value || '',
+    reparto: domElements.filterReparto?.value || '',
+    agente_patogeno: domElements.filterAgentePatogeno?.value || '',
+    tipo_intervento: domElements.filterTipoIntervento?.value || '',
+    sortColumn: domElements.filterSortColumn?.value || 'data_evento',
+    sortDirection: domElements.filterSortDirection?.value || 'desc'
+  };
+}
+
+/**
  * Mostra indicatori di filtri attivi
  */
 export function showActiveFiltersIndicator(filters) {
-  // Exclude sorting from active filters count
   const filterableKeys = Object.keys(filters).filter(key => 
     !['sortColumn', 'sortDirection'].includes(key)
   );
@@ -1184,7 +1220,6 @@ export function showActiveFiltersIndicator(filters) {
     return value && value.toString().trim() !== '';
   }).length;
 
-  // Find or create filter indicator
   let indicator = document.getElementById('active-filters-indicator');
   
   if (activeFiltersCount > 0) {
@@ -1217,7 +1252,6 @@ export function showFilterStats(stats) {
     statsContainer.id = 'filter-stats-container';
     statsContainer.className = 'filter-stats alert alert-info mt-2';
     
-    // Insert after filters section
     const filtersSection = document.querySelector('.eventi-filters-section');
     if (filtersSection) {
       filtersSection.appendChild(statsContainer);
@@ -1242,6 +1276,10 @@ export function showFilterStats(stats) {
     statsContainer.style.display = 'none';
   }
 }
+
+// ============================================================================
+// EXPORT FUNCTIONS
+// ============================================================================
 
 /**
  * Mostra stato di esportazione
@@ -1274,21 +1312,19 @@ export function showExportProgress(isExporting = false) {
  * Mostra toast di successo per esportazione
  */
 export function showExportSuccess(result) {
-  // Create toast element
   const toast = document.createElement('div');
   toast.className = 'toast align-items-center text-white bg-success border-0';
   toast.setAttribute('role', 'alert');
   toast.innerHTML = sanitizeHtml(`
     <div class="d-flex">
       <div class="toast-body">
-  <span class="material-icons me-2">download</span>
+        <span class="material-icons me-2">download</span>
         Esportati ${result.count} eventi in ${sanitizeHtml(result.filename)}
       </div>
       <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
     </div>
   `);
 
-  // Add to toast container or create one
   let toastContainer = document.getElementById('toast-container');
   if (!toastContainer) {
     toastContainer = document.createElement('div');
@@ -1299,64 +1335,19 @@ export function showExportSuccess(result) {
 
   toastContainer.appendChild(toast);
 
-  // Show toast using Bootstrap
   import('bootstrap').then(({ Toast }) => {
     const bsToast = new Toast(toast);
     bsToast.show();
     
-    // Remove after hiding
     toast.addEventListener('hidden.bs.toast', () => {
       toast.remove();
     });
   });
 }
 
-/**
- * Ottiene i filtri correnti dall'interfaccia
- */
-export function getFiltersFromUI() {
-  return {
-    paziente_search: domElements.searchPatientInput?.value || '',
-    tipo_evento: domElements.filterType?.value || '',
-    data_da: domElements.filterDateFrom?.value || '',
-    data_a: domElements.filterDateTo?.value || '',
-    reparto: domElements.filterReparto?.value || '',
-    agente_patogeno: domElements.filterAgentePatogeno?.value || '',
-    tipo_intervento: domElements.filterTipoIntervento?.value || '',
-    sortColumn: domElements.filterSortColumn?.value || 'data_evento',
-    sortDirection: domElements.filterSortDirection?.value || 'desc'
-  };
-}
-
-/**
- * Mostra stato di ricerca in corso
- */
-export function showSearchingState() {
-  if (!domElements.timelineContainer) return;
-
-  const searchingHTML = `
-    <div class="searching-state text-center py-4">
-      <div class="spinner-border spinner-border-sm text-primary me-2" role="status">
-        <span class="visually-hidden">Ricerca in corso...</span>
-      </div>
-      <span class="text-muted">Ricerca in corso...</span>
-    </div>
-  `;
-
-  // Add searching indicator to existing content
-  const existingContent = domElements.timelineContainer.innerHTML;
-  domElements.timelineContainer.innerHTML = sanitizeHtml(searchingHTML) + existingContent;
-}
-
-/**
- * Rimuove stato di ricerca in corso
- */
-export function hideSearchingState() {
-  const searchingState = document.querySelector('.searching-state');
-  if (searchingState) {
-    searchingState.remove();
-  }
-}
+// ============================================================================
+// SEARCH FUNCTIONS
+// ============================================================================
 
 /**
  * Evidenzia termini di ricerca nei risultati
@@ -1364,7 +1355,6 @@ export function hideSearchingState() {
 export function highlightSearchTerms(content, searchTerm) {
   if (!searchTerm || searchTerm.length < 2) return content;
 
-  // Escape special regex characters to prevent ReDoS attacks
   const escapedSearchTerm = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const regex = new RegExp(`(${escapedSearchTerm})`, 'gi');
   return content.replace(regex, '<mark>$1</mark>');
@@ -1393,7 +1383,7 @@ export function updateSearchResultsCount(count, totalCount, filters) {
 
   if (hasActiveFilters) {
     resultsInfo.innerHTML = sanitizeHtml(`
-  <span class="material-icons me-1">filter_list</span>
+      <span class="material-icons me-1">filter_list</span>
       Trovati <strong>${count}</strong> eventi su ${totalCount} totali
       ${filters.paziente_search ? `per "${sanitizeHtml(filters.paziente_search)}"` : ''}
     `);
@@ -1403,12 +1393,9 @@ export function updateSearchResultsCount(count, totalCount, filters) {
   }
 }
 
-/**
- * Ottiene i riferimenti DOM (per uso esterno)
- */
-export function getDOMElements() {
-  return domElements;
-}
+// ============================================================================
+// EVENT LISTENERS
+// ============================================================================
 
 // Initialize responsive design on window resize
 if (typeof window !== "undefined") {

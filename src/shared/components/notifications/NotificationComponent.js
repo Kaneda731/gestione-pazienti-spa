@@ -3,7 +3,10 @@
  * Gestisce rendering, interazioni, animazioni e supporto screen reader
  */
 
-// Configurazioni per tipi di notifica
+// ============================================================================
+// CONSTANTS & CONFIGURATION
+// ============================================================================
+
 const NOTIFICATION_TYPES = {
     SUCCESS: {
         type: 'success',
@@ -39,7 +42,6 @@ const NOTIFICATION_TYPES = {
     }
 };
 
-// Configurazione keyboard navigation
 const KEYBOARD_KEYS = {
     ESCAPE: 'Escape',
     ENTER: 'Enter',
@@ -53,14 +55,20 @@ const KEYBOARD_KEYS = {
     END: 'End'
 };
 
+// ============================================================================
+// NOTIFICATION COMPONENT CLASS
+// ============================================================================
+
 export class NotificationComponent {
     constructor(data, options = {}) {
+        // Core properties
         this.id = data.id || this.generateId();
         this.type = data.type || 'info';
         this.message = data.message || '';
         this.title = data.title || '';
         this.timestamp = data.timestamp || new Date();
         
+        // Options
         this.options = {
             duration: data.duration,
             persistent: data.persistent || false,
@@ -74,11 +82,13 @@ export class NotificationComponent {
             ...options
         };
 
-        // Stato interno
+        // DOM elements
         this.element = null;
         this.progressElement = null;
         this.closeButton = null;
         this.actionButtons = [];
+
+        // State
         this.timer = null;
         this.progressTimer = null;
         this.isVisible = false;
@@ -86,18 +96,6 @@ export class NotificationComponent {
         this.isPaused = false;
         this.focusableElements = [];
         this.currentFocusIndex = -1;
-
-        // Bind methods
-        this.handleKeyDown = this.handleKeyDown.bind(this);
-        this.handleFocusIn = this.handleFocusIn.bind(this);
-        this.handleFocusOut = this.handleFocusOut.bind(this);
-        this.handleMouseEnter = this.handleMouseEnter.bind(this);
-        this.handleMouseLeave = this.handleMouseLeave.bind(this);
-        this.handleTouchStart = this.handleTouchStart.bind(this);
-        this.handleTouchMove = this.handleTouchMove.bind(this);
-        this.handleTouchEnd = this.handleTouchEnd.bind(this);
-        this.handleTouchCancel = this.handleTouchCancel.bind(this);
-        this.close = this.close.bind(this);
 
         // Touch gesture state
         this.touchStartX = 0;
@@ -109,15 +107,19 @@ export class NotificationComponent {
         this.isLongPress = false;
         this.longPressTimer = null;
         this.touchFeedbackTimer = null;
-        this.swipeThreshold = 80; // Soglia per swipe in px
-        this.longPressDelay = 500; // Delay per long press in ms
+        this.swipeThreshold = 80;
+        this.longPressDelay = 500;
+
+        // Bind methods
+        this.bindEventHandlers();
 
         this.init();
     }
 
-    /**
-     * Inizializza il componente
-     */
+    // ========================================================================
+    // INITIALIZATION METHODS
+    // ========================================================================
+
     init() {
         this.createElement();
         this.setupAccessibility();
@@ -125,47 +127,47 @@ export class NotificationComponent {
         this.setupAutoClose();
         this.announceToScreenReader();
         
-        // Ottimizza touch targets dopo che l'elemento è stato creato
         setTimeout(() => {
             this.optimizeTouchTargets();
         }, 0);
     }
 
-    /**
-     * Genera ID univoco per la notifica
-     */
+    bindEventHandlers() {
+        this.handleKeyDown = this.handleKeyDown.bind(this);
+        this.handleFocusIn = this.handleFocusIn.bind(this);
+        this.handleFocusOut = this.handleFocusOut.bind(this);
+        this.handleMouseEnter = this.handleMouseEnter.bind(this);
+        this.handleMouseLeave = this.handleMouseLeave.bind(this);
+        this.handleTouchStart = this.handleTouchStart.bind(this);
+        this.handleTouchMove = this.handleTouchMove.bind(this);
+        this.handleTouchEnd = this.handleTouchEnd.bind(this);
+        this.handleTouchCancel = this.handleTouchCancel.bind(this);
+        this.close = this.close.bind(this);
+    }
+
     generateId() {
         return `notification-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     }
 
-    /**
-     * Crea l'elemento DOM della notifica
-     */
+    // ========================================================================
+    // DOM CREATION METHODS
+    // ========================================================================
+
     createElement() {
         const typeConfig = NOTIFICATION_TYPES[this.type.toUpperCase()] || NOTIFICATION_TYPES.INFO;
         
-        // Container principale
         this.element = document.createElement('div');
         this.element.className = `notification notification--${this.type}`;
         this.element.setAttribute('data-id', this.id);
         this.element.setAttribute('data-type', this.type);
         this.element.setAttribute('data-timestamp', this.timestamp.toISOString());
         
-        // Struttura HTML semantica
         this.element.innerHTML = this.createNotificationHTML(typeConfig);
         
-        // Riferimenti agli elementi
-        this.closeButton = this.element.querySelector('.notification__close');
-        this.progressElement = this.element.querySelector('.notification__progress');
-        this.actionButtons = Array.from(this.element.querySelectorAll('.notification__action-btn'));
-        
-        // Aggiorna elementi focusabili
+        this.cacheElementReferences();
         this.updateFocusableElements();
     }
 
-    /**
-     * Crea HTML della notifica
-     */
     createNotificationHTML(typeConfig) {
         const hasTitle = this.title && this.title.trim();
         const hasActions = this.options.actions && this.options.actions.length > 0;
@@ -190,9 +192,6 @@ export class NotificationComponent {
         `;
     }
 
-    /**
-     * Crea pulsanti azione personalizzati
-     */
     createActionButtons() {
         return this.options.actions.map((action, index) => {
             const style = action.style || 'secondary';
@@ -207,9 +206,6 @@ export class NotificationComponent {
         }).join('');
     }
 
-    /**
-     * Crea pulsante di chiusura
-     */
     createCloseButton() {
         return `
             <button class="notification__close" 
@@ -221,9 +217,6 @@ export class NotificationComponent {
         `;
     }
 
-    /**
-     * Crea testo per screen reader
-     */
     createScreenReaderText() {
         const typeConfig = NOTIFICATION_TYPES[this.type.toUpperCase()] || NOTIFICATION_TYPES.INFO;
         const typeLabel = {
@@ -240,210 +233,46 @@ export class NotificationComponent {
         return `${typeLabel}: ${titleText}${this.message}${actionText}`;
     }
 
-    /**
-     * Configura accessibilità
-     */
+    cacheElementReferences() {
+        this.closeButton = this.element.querySelector('.notification__close');
+        this.progressElement = this.element.querySelector('.notification__progress');
+        this.actionButtons = Array.from(this.element.querySelectorAll('.notification__action-btn'));
+    }
+
+    // ========================================================================
+    // ACCESSIBILITY METHODS
+    // ========================================================================
+
     setupAccessibility() {
         const typeConfig = NOTIFICATION_TYPES[this.type.toUpperCase()] || NOTIFICATION_TYPES.INFO;
         
-        // Attributi ARIA principali
+        // Main ARIA attributes
         this.element.setAttribute('role', typeConfig.ariaRole);
         this.element.setAttribute('aria-live', typeConfig.ariaLive);
         this.element.setAttribute('aria-atomic', 'true');
         this.element.setAttribute('aria-labelledby', `${this.id}-message`);
         
-        // Tabindex per navigazione keyboard
+        // Keyboard navigation
         if (this.options.enableKeyboardNavigation) {
             this.element.setAttribute('tabindex', '0');
         }
 
-        // ID per il messaggio
+        // Message ID
         const messageElement = this.element.querySelector('.notification__message');
         if (messageElement) {
             messageElement.id = `${this.id}-message`;
         }
 
-        // Attributi per progress bar
+        // Progress bar accessibility
         if (this.progressElement) {
             this.progressElement.setAttribute('role', 'progressbar');
             this.progressElement.setAttribute('aria-hidden', 'true');
         }
 
-        // Supporto high contrast
+        // High contrast support
         this.element.setAttribute('data-high-contrast', 'true');
     }
 
-    /**
-     * Configura event listeners
-     */
-    setupEventListeners() {
-        // Keyboard navigation
-        if (this.options.enableKeyboardNavigation) {
-            this.element.addEventListener('keydown', this.handleKeyDown);
-            this.element.addEventListener('focusin', this.handleFocusIn);
-            this.element.addEventListener('focusout', this.handleFocusOut);
-        }
-
-        // Mouse events per pausa timer
-        this.element.addEventListener('mouseenter', this.handleMouseEnter);
-        this.element.addEventListener('mouseleave', this.handleMouseLeave);
-
-        // Touch events per mobile gestures - sempre attivi per supporto dinamico
-        this.element.addEventListener('touchstart', this.handleTouchStart, { passive: false });
-        this.element.addEventListener('touchmove', this.handleTouchMove, { passive: false });
-        this.element.addEventListener('touchend', this.handleTouchEnd, { passive: false });
-        this.element.addEventListener('touchcancel', this.handleTouchCancel, { passive: false });
-
-        // Pulsante chiusura
-        if (this.closeButton) {
-            this.closeButton.addEventListener('click', this.close);
-        }
-
-        // Pulsanti azione
-        this.actionButtons.forEach((button, index) => {
-            button.addEventListener('click', (e) => {
-                e.preventDefault();
-                this.handleActionClick(index);
-            });
-        });
-
-        // Gestione animazioni
-        if (this.options.enableAnimations) {
-            this.element.addEventListener('animationend', (e) => {
-                this.handleAnimationEnd(e);
-            });
-        }
-    }
-
-    /**
-     * Configura auto-close timer
-     */
-    setupAutoClose() {
-        const duration = this.getDuration();
-        
-        if (duration > 0 && !this.options.persistent) {
-            this.startAutoCloseTimer(duration);
-            
-            if (this.options.enableProgressBar && this.progressElement) {
-                this.startProgressBar(duration);
-            }
-        }
-    }
-
-    /**
-     * Ottiene durata per auto-close
-     */
-    getDuration() {
-        if (this.options.duration !== undefined) {
-            return this.options.duration;
-        }
-        
-        const typeConfig = NOTIFICATION_TYPES[this.type.toUpperCase()] || NOTIFICATION_TYPES.INFO;
-        return typeConfig.defaultDuration;
-    }
-
-    /**
-     * Avvia timer per auto-close
-     */
-    startAutoCloseTimer(duration) {
-        this.clearAutoCloseTimer();
-        
-        this.timer = setTimeout(() => {
-            if (!this.isRemoving) {
-                this.close();
-            }
-        }, duration);
-    }
-
-    /**
-     * Ferma timer auto-close
-     */
-    clearAutoCloseTimer() {
-        if (this.timer) {
-            clearTimeout(this.timer);
-            this.timer = null;
-        }
-    }
-
-    /**
-     * Avvia progress bar animata
-     */
-    startProgressBar(duration) {
-        if (!this.progressElement) return;
-        
-        // Imposta durata dell'animazione
-        this.progressElement.style.setProperty('--progress-duration', `${duration}ms`);
-        
-        // Attiva progress bar con animazione
-        this.progressElement.classList.add('notification__progress--active');
-        
-        // Gestisce fine animazione progress bar
-        this.progressElement.addEventListener('animationend', (e) => {
-            if (e.animationName === 'progressCountdown') {
-                this.progressElement.classList.remove('notification__progress--active');
-            }
-        }, { once: true });
-    }
-
-    /**
-     * Pausa progress bar
-     */
-    pauseProgressBar() {
-        if (this.progressElement) {
-            this.progressElement.classList.add('notification__progress--paused');
-            this.progressElement.classList.remove('notification__progress--resumed');
-        }
-    }
-
-    /**
-     * Riprende progress bar
-     */
-    resumeProgressBar() {
-        if (this.progressElement) {
-            this.progressElement.classList.remove('notification__progress--paused');
-            this.progressElement.classList.add('notification__progress--resumed');
-        }
-    }
-
-    /**
-     * Ferma progress bar
-     */
-    stopProgressBar() {
-        if (this.progressElement) {
-            this.progressElement.classList.remove(
-                'notification__progress--active',
-                'notification__progress--paused',
-                'notification__progress--resumed'
-            );
-        }
-    }
-
-    /**
-     * Annuncia notifica a screen reader
-     */
-    announceToScreenReader() {
-        if (!this.options.enableScreenReader) return;
-
-        // Crea o usa live region esistente
-        let announcer = document.getElementById('notification-announcer');
-        if (!announcer) {
-            announcer = document.createElement('div');
-            announcer.id = 'notification-announcer';
-            announcer.className = 'notification__sr-only';
-            announcer.setAttribute('aria-live', 'polite');
-            announcer.setAttribute('aria-atomic', 'true');
-            document.body.appendChild(announcer);
-        }
-
-        // Annuncia con delay per permettere al DOM di aggiornarsi
-        setTimeout(() => {
-            announcer.textContent = this.createScreenReaderText();
-        }, 100);
-    }
-
-    /**
-     * Aggiorna elementi focusabili
-     */
     updateFocusableElements() {
         const focusableSelectors = [
             'button:not([disabled])',
@@ -458,15 +287,98 @@ export class NotificationComponent {
             this.element.querySelectorAll(focusableSelectors.join(', '))
         );
 
-        // Aggiungi l'elemento principale se ha tabindex
         if (this.element.hasAttribute('tabindex') && this.element.getAttribute('tabindex') !== '-1') {
             this.focusableElements.unshift(this.element);
         }
     }
 
-    /**
-     * Gestisce navigazione da tastiera
-     */
+    announceToScreenReader() {
+        if (!this.options.enableScreenReader) return;
+
+        let announcer = document.getElementById('notification-announcer');
+        if (!announcer) {
+            announcer = document.createElement('div');
+            announcer.id = 'notification-announcer';
+            announcer.className = 'notification__sr-only';
+            announcer.setAttribute('aria-live', 'polite');
+            announcer.setAttribute('aria-atomic', 'true');
+            document.body.appendChild(announcer);
+        }
+
+        setTimeout(() => {
+            announcer.textContent = this.createScreenReaderText();
+        }, 100);
+    }
+
+    optimizeTouchTargets() {
+        const buttons = this.element.querySelectorAll('button, [role="button"]');
+        
+        buttons.forEach(button => {
+            const rect = button.getBoundingClientRect();
+            
+            if (rect.width < 44 || rect.height < 44) {
+                button.classList.add('notification__touch-target--enhanced');
+            }
+        });
+    }
+
+    // ========================================================================
+    // EVENT LISTENER SETUP
+    // ========================================================================
+
+    setupEventListeners() {
+        this.setupKeyboardEvents();
+        this.setupMouseEvents();
+        this.setupTouchEvents();
+        this.setupButtonEvents();
+        this.setupAnimationEvents();
+    }
+
+    setupKeyboardEvents() {
+        if (this.options.enableKeyboardNavigation) {
+            this.element.addEventListener('keydown', this.handleKeyDown);
+            this.element.addEventListener('focusin', this.handleFocusIn);
+            this.element.addEventListener('focusout', this.handleFocusOut);
+        }
+    }
+
+    setupMouseEvents() {
+        this.element.addEventListener('mouseenter', this.handleMouseEnter);
+        this.element.addEventListener('mouseleave', this.handleMouseLeave);
+    }
+
+    setupTouchEvents() {
+        this.element.addEventListener('touchstart', this.handleTouchStart, { passive: false });
+        this.element.addEventListener('touchmove', this.handleTouchMove, { passive: false });
+        this.element.addEventListener('touchend', this.handleTouchEnd, { passive: false });
+        this.element.addEventListener('touchcancel', this.handleTouchCancel, { passive: false });
+    }
+
+    setupButtonEvents() {
+        if (this.closeButton) {
+            this.closeButton.addEventListener('click', this.close);
+        }
+
+        this.actionButtons.forEach((button, index) => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.handleActionClick(index);
+            });
+        });
+    }
+
+    setupAnimationEvents() {
+        if (this.options.enableAnimations) {
+            this.element.addEventListener('animationend', (e) => {
+                this.handleAnimationEnd(e);
+            });
+        }
+    }
+
+    // ========================================================================
+    // KEYBOARD NAVIGATION METHODS
+    // ========================================================================
+
     handleKeyDown(e) {
         switch (e.key) {
             case KEYBOARD_KEYS.ESCAPE:
@@ -512,22 +424,17 @@ export class NotificationComponent {
         }
     }
 
-    /**
-     * Gestisce navigazione con Tab
-     */
     handleTabNavigation(e) {
         if (this.focusableElements.length <= 1) return;
 
         const currentIndex = this.focusableElements.indexOf(e.target);
         
         if (e.shiftKey) {
-            // Shift+Tab - vai indietro
             if (currentIndex === 0) {
                 e.preventDefault();
                 this.focusElement(this.focusableElements.length - 1);
             }
         } else {
-            // Tab - vai avanti
             if (currentIndex === this.focusableElements.length - 1) {
                 e.preventDefault();
                 this.focusElement(0);
@@ -535,15 +442,11 @@ export class NotificationComponent {
         }
     }
 
-    /**
-     * Gestisce navigazione con frecce
-     */
     handleArrowNavigation(isDown) {
         const currentIndex = this.focusableElements.indexOf(document.activeElement);
         let nextIndex;
 
         if (currentIndex === -1) {
-            // Se nessun elemento è focusato, inizia dal primo
             nextIndex = 0;
         } else if (isDown) {
             nextIndex = currentIndex < this.focusableElements.length - 1 ? currentIndex + 1 : 0;
@@ -554,9 +457,6 @@ export class NotificationComponent {
         this.focusElement(nextIndex);
     }
 
-    /**
-     * Focalizza elemento per indice
-     */
     focusElement(index) {
         if (index >= 0 && index < this.focusableElements.length) {
             this.focusableElements[index].focus();
@@ -564,97 +464,40 @@ export class NotificationComponent {
         }
     }
 
-    /**
-     * Focalizza primo elemento focusabile
-     */
     focusFirstFocusableElement() {
         if (this.focusableElements.length > 0) {
             this.focusElement(0);
         }
     }
 
-    /**
-     * Gestisce focus in entrata
-     */
     handleFocusIn(e) {
         this.element.classList.add('notification--focused');
         this.pauseAutoClose();
     }
 
-    /**
-     * Gestisce focus in uscita
-     */
     handleFocusOut(e) {
-        // Verifica se il focus è ancora dentro la notifica
         if (!this.element.contains(e.relatedTarget)) {
             this.element.classList.remove('notification--focused');
             this.resumeAutoClose();
         }
     }
 
-    /**
-     * Gestisce mouse enter
-     */
+    // ========================================================================
+    // MOUSE EVENT METHODS
+    // ========================================================================
+
     handleMouseEnter() {
         this.pauseAutoClose();
     }
 
-    /**
-     * Gestisce mouse leave
-     */
     handleMouseLeave() {
         this.resumeAutoClose();
     }
 
-    /**
-     * Pausa auto-close
-     */
-    pauseAutoClose() {
-        if (this.isPaused) return;
-        
-        this.isPaused = true;
-        this.clearAutoCloseTimer();
-        this.pauseProgressBar();
-        
-        this.dispatchEvent('paused');
-    }
+    // ========================================================================
+    // TOUCH EVENT METHODS
+    // ========================================================================
 
-    /**
-     * Riprende auto-close
-     */
-    resumeAutoClose() {
-        if (!this.isPaused) return;
-        
-        this.isPaused = false;
-        
-        const duration = this.getDuration();
-        if (duration > 0 && !this.options.persistent && !this.isRemoving) {
-            // Calcola tempo rimanente basato su progress bar
-            const remainingTime = this.calculateRemainingTime(duration);
-            this.startAutoCloseTimer(remainingTime);
-        }
-        
-        this.resumeProgressBar();
-        this.dispatchEvent('resumed');
-    }
-
-    /**
-     * Calcola tempo rimanente per auto-close
-     */
-    calculateRemainingTime(originalDuration) {
-        if (!this.progressElement) return originalDuration;
-        
-        // Stima basata su CSS animation progress (approssimativa)
-        const computedStyle = window.getComputedStyle(this.progressElement, '::after');
-        const transform = computedStyle.transform;
-        
-        // Fallback al tempo originale se non riusciamo a calcolare
-        return originalDuration * 0.5; // Stima conservativa
-    }
-
-    /**
-     * Gestisce touch start per swipe gesture e feedback tattile
-     */
     handleTouchStart(e) {
         if (e.touches.length !== 1) return;
         
@@ -667,22 +510,12 @@ export class NotificationComponent {
         this.isSwiping = false;
         this.isLongPress = false;
         
-        // Pausa auto-close durante interazione touch
         this.pauseAutoClose();
-        
-        // Feedback visivo immediato per touch
         this.addTouchFeedback();
-        
-        // Avvia timer per long press
         this.startLongPressTimer();
-        
-        // Vibrazione tattile se supportata (solo su dispositivi mobili)
         this.provideTactileFeedback('light');
     }
 
-    /**
-     * Gestisce touch move per swipe gesture con feedback visivo migliorato
-     */
     handleTouchMove(e) {
         if (e.touches.length !== 1) return;
         
@@ -694,39 +527,35 @@ export class NotificationComponent {
         const deltaY = this.touchCurrentY - this.touchStartY;
         const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
         
-        // Cancella long press se c'è movimento significativo
         if (distance > 10) {
             this.cancelLongPress();
             this.removeTouchFeedback();
         }
         
-        // Determina se è uno swipe orizzontale
         if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 15) {
-            this.isSwiping = true;
-            e.preventDefault();
-            
-            // Calcola progress e feedback visivo migliorato
-            const progress = Math.min(Math.abs(deltaX) / this.swipeThreshold, 1);
-            const opacity = 1 - progress * 0.6;
-            const scale = 1 - progress * 0.05;
-            
-            // Applica trasformazione con easing
-            const easedDeltaX = deltaX * (1 - Math.pow(progress, 2) * 0.3);
-            this.element.style.transform = `translateX(${easedDeltaX}px) scale(${scale})`;
-            this.element.style.opacity = opacity;
-            
-            // Feedback tattile quando si raggiunge la soglia
-            if (progress >= 0.7 && !this.element.hasAttribute('data-swipe-threshold-reached')) {
-                this.element.setAttribute('data-swipe-threshold-reached', 'true');
-                this.provideTactileFeedback('medium');
-                this.element.classList.add('notification--swipe-threshold');
-            }
+            this.handleSwipeMove(deltaX, e);
         }
     }
 
-    /**
-     * Gestisce touch end per swipe gesture con animazioni fluide
-     */
+    handleSwipeMove(deltaX, e) {
+        this.isSwiping = true;
+        e.preventDefault();
+        
+        const progress = Math.min(Math.abs(deltaX) / this.swipeThreshold, 1);
+        const opacity = 1 - progress * 0.6;
+        const scale = 1 - progress * 0.05;
+        
+        const easedDeltaX = deltaX * (1 - Math.pow(progress, 2) * 0.3);
+        this.element.style.transform = `translateX(${easedDeltaX}px) scale(${scale})`;
+        this.element.style.opacity = opacity;
+        
+        if (progress >= 0.7 && !this.element.hasAttribute('data-swipe-threshold-reached')) {
+            this.element.setAttribute('data-swipe-threshold-reached', 'true');
+            this.provideTactileFeedback('medium');
+            this.element.classList.add('notification--swipe-threshold');
+        }
+    }
+
     handleTouchEnd(e) {
         this.cancelLongPress();
         this.removeTouchFeedback();
@@ -734,9 +563,8 @@ export class NotificationComponent {
         const deltaX = this.touchCurrentX - this.touchStartX;
         const deltaY = this.touchCurrentY - this.touchStartY;
         const touchDuration = Date.now() - this.touchStartTime;
-        const velocity = Math.abs(deltaX) / touchDuration; // px/ms
+        const velocity = Math.abs(deltaX) / touchDuration;
         
-        // Gestione tap semplice
         if (!this.isSwiping && Math.abs(deltaX) < 10 && Math.abs(deltaY) < 10 && touchDuration < 300) {
             this.handleTap(e);
             this.resumeAutoClose();
@@ -748,51 +576,50 @@ export class NotificationComponent {
             return;
         }
         
-        // Calcola se il swipe deve essere completato
         const shouldComplete = Math.abs(deltaX) > this.swipeThreshold || velocity > 0.5;
         
         if (shouldComplete) {
-            // Swipe completato - chiudi notifica con animazione
-            this.element.classList.add('notification--swipe-closing');
-            this.provideTactileFeedback('heavy');
-            
-            // Animazione di chiusura fluida
-            const direction = deltaX > 0 ? 1 : -1;
-            this.element.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.3s ease-out';
-            this.element.style.transform = `translateX(${direction * 100}%) scale(0.9)`;
-            this.element.style.opacity = '0';
-            
-            setTimeout(() => {
-                this.close();
-            }, 300);
+            this.completeSwipe(deltaX);
         } else {
-            // Swipe incompleto - ripristina posizione con animazione elastica
-            this.element.style.transition = 'transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55), opacity 0.3s ease-out';
-            this.element.style.transform = '';
-            this.element.style.opacity = '';
-            
-            // Rimuovi classe threshold dopo animazione
-            setTimeout(() => {
-                this.element.classList.remove('notification--swipe-threshold');
-                this.element.removeAttribute('data-swipe-threshold-reached');
-                this.element.style.transition = '';
-            }, 400);
-            
-            this.resumeAutoClose();
+            this.cancelSwipe();
         }
         
         this.isSwiping = false;
     }
 
-    /**
-     * Gestisce touch cancel (interruzione touch)
-     */
+    completeSwipe(deltaX) {
+        this.element.classList.add('notification--swipe-closing');
+        this.provideTactileFeedback('heavy');
+        
+        const direction = deltaX > 0 ? 1 : -1;
+        this.element.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.3s ease-out';
+        this.element.style.transform = `translateX(${direction * 100}%) scale(0.9)`;
+        this.element.style.opacity = '0';
+        
+        setTimeout(() => {
+            this.close();
+        }, 300);
+    }
+
+    cancelSwipe() {
+        this.element.style.transition = 'transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55), opacity 0.3s ease-out';
+        this.element.style.transform = '';
+        this.element.style.opacity = '';
+        
+        setTimeout(() => {
+            this.element.classList.remove('notification--swipe-threshold');
+            this.element.removeAttribute('data-swipe-threshold-reached');
+            this.element.style.transition = '';
+        }, 400);
+        
+        this.resumeAutoClose();
+    }
+
     handleTouchCancel(e) {
         this.cancelLongPress();
         this.removeTouchFeedback();
         
         if (this.isSwiping) {
-            // Ripristina posizione se touch viene cancellato durante swipe
             this.element.style.transition = 'transform 0.3s ease-out, opacity 0.3s ease-out';
             this.element.style.transform = '';
             this.element.style.opacity = '';
@@ -808,19 +635,13 @@ export class NotificationComponent {
         this.resumeAutoClose();
     }
 
-    /**
-     * Gestisce tap semplice su notifica
-     */
     handleTap(e) {
-        // Se il tap è su un elemento interattivo, non fare nulla
         if (e.target.closest('button, a, [role="button"]')) {
             return;
         }
         
-        // Feedback tattile per tap
         this.provideTactileFeedback('light');
         
-        // Focus sulla notifica per accessibilità
         if (this.options.enableKeyboardNavigation) {
             this.element.focus();
         }
@@ -828,9 +649,10 @@ export class NotificationComponent {
         this.dispatchEvent('tapped', { originalEvent: e });
     }
 
-    /**
-     * Avvia timer per long press
-     */
+    // ========================================================================
+    // LONG PRESS METHODS
+    // ========================================================================
+
     startLongPressTimer() {
         this.cancelLongPress();
         
@@ -841,9 +663,6 @@ export class NotificationComponent {
         }, this.longPressDelay);
     }
 
-    /**
-     * Cancella timer long press
-     */
     cancelLongPress() {
         if (this.longPressTimer) {
             clearTimeout(this.longPressTimer);
@@ -852,43 +671,29 @@ export class NotificationComponent {
         this.isLongPress = false;
     }
 
-    /**
-     * Gestisce long press
-     */
     handleLongPress() {
         this.isLongPress = true;
         this.provideTactileFeedback('heavy');
         
-        // Aggiungi classe per feedback visivo
         this.element.classList.add('notification--long-pressed');
         
-        // Mostra menu contestuale o azioni aggiuntive se disponibili
         if (this.options.actions && this.options.actions.length > 0) {
             this.showContextMenu();
         } else if (this.options.closable) {
-            // Se non ci sono azioni, offri chiusura rapida
             this.showQuickCloseHint();
         }
         
         this.dispatchEvent('longPressed');
     }
 
-    /**
-     * Mostra menu contestuale per azioni
-     */
     showContextMenu() {
-        // Implementazione base - può essere estesa
         this.element.classList.add('notification--context-menu-active');
         
-        // Rimuovi dopo 2 secondi se non c'è interazione
         setTimeout(() => {
             this.element.classList.remove('notification--context-menu-active');
         }, 2000);
     }
 
-    /**
-     * Mostra hint per chiusura rapida
-     */
     showQuickCloseHint() {
         this.element.classList.add('notification--quick-close-hint');
         
@@ -897,21 +702,18 @@ export class NotificationComponent {
         }, 1500);
     }
 
-    /**
-     * Aggiunge feedback visivo per touch
-     */
+    // ========================================================================
+    // TOUCH FEEDBACK METHODS
+    // ========================================================================
+
     addTouchFeedback() {
         this.element.classList.add('notification--touched');
         
-        // Rimuovi automaticamente dopo breve delay
         this.touchFeedbackTimer = setTimeout(() => {
             this.removeTouchFeedback();
         }, 150);
     }
 
-    /**
-     * Rimuove feedback visivo per touch
-     */
     removeTouchFeedback() {
         if (this.touchFeedbackTimer) {
             clearTimeout(this.touchFeedbackTimer);
@@ -921,16 +723,11 @@ export class NotificationComponent {
         this.element.classList.remove('notification--touched', 'notification--long-pressed');
     }
 
-    /**
-     * Fornisce feedback tattile se supportato
-     */
     provideTactileFeedback(intensity = 'light') {
-        // Verifica supporto vibrazione e che sia un dispositivo mobile
         if (!navigator.vibrate || !this.isMobileDevice()) {
             return;
         }
         
-        // Pattern di vibrazione basati sull'intensità
         const patterns = {
             light: [10],
             medium: [20],
@@ -944,48 +741,139 @@ export class NotificationComponent {
         try {
             navigator.vibrate(pattern);
         } catch (error) {
-            // Ignora errori di vibrazione
             console.debug('Vibrazione non disponibile:', error);
         }
     }
 
-    /**
-     * Verifica se è un dispositivo mobile
-     */
     isMobileDevice() {
-        // Verifica user agent per dispositivi mobili noti
         const mobileUserAgent = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        
-        // Verifica supporto touch
         const hasTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints && navigator.maxTouchPoints > 0);
-        
-        // Verifica dimensioni schermo (mobile tipicamente < 768px)
         const isMobileScreen = window.innerWidth <= 767;
         
-        // È mobile se ha user agent mobile O (ha touch E schermo piccolo)
         return mobileUserAgent || (hasTouch && isMobileScreen);
     }
 
-    /**
-     * Ottimizza touch targets per accessibilità
-     */
-    optimizeTouchTargets() {
-        // Assicura che tutti i pulsanti abbiano dimensioni minime adeguate
-        const buttons = this.element.querySelectorAll('button, [role="button"]');
+    // ========================================================================
+    // AUTO-CLOSE TIMER METHODS
+    // ========================================================================
+
+    setupAutoClose() {
+        const duration = this.getDuration();
         
-        buttons.forEach(button => {
-            const rect = button.getBoundingClientRect();
+        if (duration > 0 && !this.options.persistent) {
+            this.startAutoCloseTimer(duration);
             
-            // Se il target è troppo piccolo, aggiungi padding
-            if (rect.width < 44 || rect.height < 44) {
-                button.classList.add('notification__touch-target--enhanced');
+            if (this.options.enableProgressBar && this.progressElement) {
+                this.startProgressBar(duration);
             }
-        });
+        }
     }
 
-    /**
-     * Gestisce click su azione personalizzata
-     */
+    getDuration() {
+        if (this.options.duration !== undefined) {
+            return this.options.duration;
+        }
+        
+        const typeConfig = NOTIFICATION_TYPES[this.type.toUpperCase()] || NOTIFICATION_TYPES.INFO;
+        return typeConfig.defaultDuration;
+    }
+
+    startAutoCloseTimer(duration) {
+        this.clearAutoCloseTimer();
+        
+        this.timer = setTimeout(() => {
+            if (!this.isRemoving) {
+                this.close();
+            }
+        }, duration);
+    }
+
+    clearAutoCloseTimer() {
+        if (this.timer) {
+            clearTimeout(this.timer);
+            this.timer = null;
+        }
+    }
+
+    pauseAutoClose() {
+        if (this.isPaused) return;
+        
+        this.isPaused = true;
+        this.clearAutoCloseTimer();
+        this.pauseProgressBar();
+        
+        this.dispatchEvent('paused');
+    }
+
+    resumeAutoClose() {
+        if (!this.isPaused) return;
+        
+        this.isPaused = false;
+        
+        const duration = this.getDuration();
+        if (duration > 0 && !this.options.persistent && !this.isRemoving) {
+            const remainingTime = this.calculateRemainingTime(duration);
+            this.startAutoCloseTimer(remainingTime);
+        }
+        
+        this.resumeProgressBar();
+        this.dispatchEvent('resumed');
+    }
+
+    calculateRemainingTime(originalDuration) {
+        if (!this.progressElement) return originalDuration;
+        
+        const computedStyle = window.getComputedStyle(this.progressElement, '::after');
+        const transform = computedStyle.transform;
+        
+        return originalDuration * 0.5; // Conservative estimate
+    }
+
+    // ========================================================================
+    // PROGRESS BAR METHODS
+    // ========================================================================
+
+    startProgressBar(duration) {
+        if (!this.progressElement) return;
+        
+        this.progressElement.style.setProperty('--progress-duration', `${duration}ms`);
+        this.progressElement.classList.add('notification__progress--active');
+        
+        this.progressElement.addEventListener('animationend', (e) => {
+            if (e.animationName === 'progressCountdown') {
+                this.progressElement.classList.remove('notification__progress--active');
+            }
+        }, { once: true });
+    }
+
+    pauseProgressBar() {
+        if (this.progressElement) {
+            this.progressElement.classList.add('notification__progress--paused');
+            this.progressElement.classList.remove('notification__progress--resumed');
+        }
+    }
+
+    resumeProgressBar() {
+        if (this.progressElement) {
+            this.progressElement.classList.remove('notification__progress--paused');
+            this.progressElement.classList.add('notification__progress--resumed');
+        }
+    }
+
+    stopProgressBar() {
+        if (this.progressElement) {
+            this.progressElement.classList.remove(
+                'notification__progress--active',
+                'notification__progress--paused',
+                'notification__progress--resumed'
+            );
+        }
+    }
+
+    // ========================================================================
+    // ACTION HANDLING METHODS
+    // ========================================================================
+
     handleActionClick(actionIndex) {
         const action = this.options.actions[actionIndex];
         if (action && typeof action.action === 'function') {
@@ -998,24 +886,22 @@ export class NotificationComponent {
         }
     }
 
-    /**
-     * Gestisce fine animazione
-     */
+    // ========================================================================
+    // ANIMATION METHODS
+    // ========================================================================
+
     handleAnimationEnd(e) {
         if (e.target !== this.element) return;
         
         const animationName = e.animationName;
         
-        // Gestisce fine animazione di uscita
         if (this.element.classList.contains('notification--exiting')) {
             if (animationName === 'slideOutRight' || 
                 animationName === 'slideOutUp' || 
                 animationName === 'fadeOut') {
                 this.remove();
             }
-        } 
-        // Gestisce fine animazione di entrata
-        else if (this.element.classList.contains('notification--entering')) {
+        } else if (this.element.classList.contains('notification--entering')) {
             if (animationName === 'slideInRight' || 
                 animationName === 'slideInDown') {
                 this.element.classList.remove('notification--entering');
@@ -1025,44 +911,38 @@ export class NotificationComponent {
         }
     }
 
-    /**
-     * Mostra la notifica con animazione
-     */
     show() {
         if (this.isVisible) return;
         
-        let prefersReducedMotion = false;
-        try {
-            prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        } catch (error) {
-            // Fallback se matchMedia non è disponibile
-            prefersReducedMotion = false;
-        }
+        const prefersReducedMotion = this.prefersReducedMotion();
         
         this.dispatchEvent('showing');
         
         if (this.options.enableAnimations && !prefersReducedMotion) {
-            // Assicurati che l'elemento sia inizialmente nascosto
-            this.element.style.opacity = '0';
-            this.element.style.transform = this.getInitialTransform();
-            
-            // Forza reflow per assicurare che gli stili iniziali siano applicati
-            this.element.offsetHeight;
-            
-            // Avvia animazione di entrata
-            this.element.classList.add('notification--entering');
-            
-            // Rimuovi stili inline per permettere all'animazione CSS di funzionare
-            requestAnimationFrame(() => {
-                this.element.style.opacity = '';
-                this.element.style.transform = '';
-            });
+            this.showWithAnimation();
         } else {
             this.isVisible = true;
             this.dispatchEvent('shown');
         }
         
-        // Focus automatico se richiesto
+        this.focusIfNeeded(prefersReducedMotion);
+    }
+
+    showWithAnimation() {
+        this.element.style.opacity = '0';
+        this.element.style.transform = this.getInitialTransform();
+        
+        this.element.offsetHeight; // Force reflow
+        
+        this.element.classList.add('notification--entering');
+        
+        requestAnimationFrame(() => {
+            this.element.style.opacity = '';
+            this.element.style.transform = '';
+        });
+    }
+
+    focusIfNeeded(prefersReducedMotion) {
         if (this.type === 'error' || this.type === 'warning') {
             setTimeout(() => {
                 this.element.focus();
@@ -1070,17 +950,23 @@ export class NotificationComponent {
         }
     }
 
-    /**
-     * Ottiene trasformazione iniziale per animazione di entrata
-     */
     getInitialTransform() {
         const isMobile = window.innerWidth <= 767;
         return isMobile ? 'translateY(-100%)' : 'translateX(100%)';
     }
 
-    /**
-     * Chiude la notifica
-     */
+    prefersReducedMotion() {
+        try {
+            return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        } catch (error) {
+            return false;
+        }
+    }
+
+    // ========================================================================
+    // CLOSE AND REMOVE METHODS
+    // ========================================================================
+
     close() {
         if (this.isRemoving) return;
         
@@ -1090,35 +976,26 @@ export class NotificationComponent {
         
         this.dispatchEvent('closing');
         
-        let prefersReducedMotion = false;
-        try {
-            prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        } catch (error) {
-            // Fallback se matchMedia non è disponibile
-            prefersReducedMotion = false;
-        }
+        const prefersReducedMotion = this.prefersReducedMotion();
         
         if (this.options.enableAnimations && !prefersReducedMotion) {
-            // Rimuovi classe entering se presente
-            this.element.classList.remove('notification--entering');
-            
-            // Aggiungi classe exiting per animazione di uscita
-            this.element.classList.add('notification--exiting');
-            
-            // Fallback timeout nel caso l'evento animationend non venga triggerato
-            setTimeout(() => {
-                if (this.isRemoving && this.element && this.element.parentNode) {
-                    this.remove();
-                }
-            }, 350); // Leggermente più lungo della durata dell'animazione (0.3s)
+            this.closeWithAnimation();
         } else {
             this.remove();
         }
     }
 
-    /**
-     * Rimuove la notifica dal DOM
-     */
+    closeWithAnimation() {
+        this.element.classList.remove('notification--entering');
+        this.element.classList.add('notification--exiting');
+        
+        setTimeout(() => {
+            if (this.isRemoving && this.element && this.element.parentNode) {
+                this.remove();
+            }
+        }, 350);
+    }
+
     remove() {
         this.cleanup();
         
@@ -1129,11 +1006,17 @@ export class NotificationComponent {
         this.dispatchEvent('removed');
     }
 
-    /**
-     * Pulisce event listeners e timer
-     */
+    // ========================================================================
+    // CLEANUP METHODS
+    // ========================================================================
+
     cleanup() {
-        // Rimuovi event listeners
+        this.removeEventListeners();
+        this.clearTimers();
+        this.stopProgressBar();
+    }
+
+    removeEventListeners() {
         if (this.options.enableKeyboardNavigation) {
             this.element.removeEventListener('keydown', this.handleKeyDown);
             this.element.removeEventListener('focusin', this.handleFocusIn);
@@ -1143,7 +1026,6 @@ export class NotificationComponent {
         this.element.removeEventListener('mouseenter', this.handleMouseEnter);
         this.element.removeEventListener('mouseleave', this.handleMouseLeave);
         
-        // Rimuovi touch event listeners
         this.element.removeEventListener('touchstart', this.handleTouchStart);
         this.element.removeEventListener('touchmove', this.handleTouchMove);
         this.element.removeEventListener('touchend', this.handleTouchEnd);
@@ -1156,8 +1038,9 @@ export class NotificationComponent {
         this.actionButtons.forEach((button, index) => {
             button.removeEventListener('click', this.handleActionClick);
         });
-        
-        // Pulisci timer
+    }
+
+    clearTimers() {
         this.clearAutoCloseTimer();
         this.cancelLongPress();
         this.removeTouchFeedback();
@@ -1166,14 +1049,12 @@ export class NotificationComponent {
             clearTimeout(this.progressTimer);
             this.progressTimer = null;
         }
-
-        // Ferma progress bar
-        this.stopProgressBar();
     }
 
-    /**
-     * Aggiorna contenuto della notifica
-     */
+    // ========================================================================
+    // UPDATE AND STATE METHODS
+    // ========================================================================
+
     updateContent(newData) {
         if (newData.message !== undefined) {
             this.message = newData.message;
@@ -1184,28 +1065,28 @@ export class NotificationComponent {
         }
         
         if (newData.title !== undefined) {
-            this.title = newData.title;
-            const titleElement = this.element.querySelector('.notification__title');
-            if (titleElement) {
-                titleElement.textContent = this.title;
-            } else if (this.title) {
-                // Aggiungi titolo se non esisteva
-                const bodyElement = this.element.querySelector('.notification__body');
-                const titleEl = document.createElement('div');
-                titleEl.className = 'notification__title';
-                titleEl.textContent = this.title;
-                bodyElement.insertBefore(titleEl, bodyElement.firstChild);
-            }
+            this.updateTitle(newData.title);
         }
         
-        // Aggiorna screen reader
         this.announceToScreenReader();
         this.dispatchEvent('updated', { newData });
     }
 
-    /**
-     * Ottiene stato della notifica
-     */
+    updateTitle(newTitle) {
+        this.title = newTitle;
+        const titleElement = this.element.querySelector('.notification__title');
+        
+        if (titleElement) {
+            titleElement.textContent = this.title;
+        } else if (this.title) {
+            const bodyElement = this.element.querySelector('.notification__body');
+            const titleEl = document.createElement('div');
+            titleEl.className = 'notification__title';
+            titleEl.textContent = this.title;
+            bodyElement.insertBefore(titleEl, bodyElement.firstChild);
+        }
+    }
+
     getState() {
         return {
             id: this.id,
@@ -1220,9 +1101,10 @@ export class NotificationComponent {
         };
     }
 
-    /**
-     * Dispatch eventi personalizzati
-     */
+    // ========================================================================
+    // EVENT DISPATCH AND UTILITY METHODS
+    // ========================================================================
+
     dispatchEvent(eventName, detail = {}) {
         const event = new CustomEvent(`notification:${eventName}`, {
             detail: {
@@ -1240,22 +1122,16 @@ export class NotificationComponent {
         document.dispatchEvent(event);
     }
 
-    /**
-     * Escape HTML per sicurezza
-     */
     escapeHtml(text) {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
     }
 
-    /**
-     * Metodi statici di utilità
-     */
-    
-    /**
-     * Crea notifica di successo
-     */
+    // ========================================================================
+    // STATIC FACTORY METHODS
+    // ========================================================================
+
     static success(message, options = {}) {
         return new NotificationComponent({
             type: 'success',
@@ -1264,9 +1140,6 @@ export class NotificationComponent {
         });
     }
 
-    /**
-     * Crea notifica di errore
-     */
     static error(message, options = {}) {
         return new NotificationComponent({
             type: 'error',
@@ -1276,9 +1149,6 @@ export class NotificationComponent {
         });
     }
 
-    /**
-     * Crea notifica di warning
-     */
     static warning(message, options = {}) {
         return new NotificationComponent({
             type: 'warning',
@@ -1287,9 +1157,6 @@ export class NotificationComponent {
         });
     }
 
-    /**
-     * Crea notifica informativa
-     */
     static info(message, options = {}) {
         return new NotificationComponent({
             type: 'info',
@@ -1298,23 +1165,14 @@ export class NotificationComponent {
         });
     }
 
-    /**
-     * Verifica se il tipo è valido
-     */
     static isValidType(type) {
         return Object.keys(NOTIFICATION_TYPES).includes(type.toUpperCase());
     }
 
-    /**
-     * Ottiene configurazione per tipo
-     */
     static getTypeConfig(type) {
         return NOTIFICATION_TYPES[type.toUpperCase()] || NOTIFICATION_TYPES.INFO;
     }
 
-    /**
-     * Ottiene tutti i tipi supportati
-     */
     static getSupportedTypes() {
         return Object.keys(NOTIFICATION_TYPES).map(key => key.toLowerCase());
     }

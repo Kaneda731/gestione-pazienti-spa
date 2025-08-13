@@ -1,6 +1,5 @@
 @import 'forms/diagnosi-dimissione';
 @import 'forms/eventi';
-@import 'forms/filters';
 @import 'forms/mobile';
 
 /* Evidenzia la checkbox Paziente Infetto */
@@ -379,12 +378,7 @@ label[for="data_infezione"] {
 
 
 /* Stili per il fieldset dei filtri */
-.filters-fieldset {
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius);
-    padding: 1.5rem;
-    margin-bottom: 2rem;
-}
+@import 'forms/filters-fieldset';
 
 @import 'forms/input-groups';
 
@@ -403,42 +397,7 @@ label[for="data_infezione"] {
 
 @import 'forms/datepicker';
 
-/* Uniforma altezza per pulsanti Applica/Resetta e selettore tipo grafico */
-.chart-type-selector-container {
-    .custom-select-trigger,
-    .form-select {
-        height: 48px !important;
-        min-height: 48px !important;
-        display: flex;
-        align-items: center;
-    }
-}
-
-#apply-filters-btn,
-#reset-filters-btn {
-    height: 48px !important;
-    min-height: 48px !important;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* Media query per mobile - uniforma altezza */
-@media (max-width: 767px) {
-    .chart-type-selector-container {
-        .custom-select-trigger,
-        .form-select {
-            height: 44px !important;
-            min-height: 44px !important;
-        }
-    }
-    
-    #apply-filters-btn,
-    #reset-filters-btn {
-        height: 44px !important;
-        min-height: 44px !important;
-    }
-}
+@import 'forms/filters';
 
 /* Stili per la sezione Dimissione/Trasferimento */
 .discharge-transfer-section {

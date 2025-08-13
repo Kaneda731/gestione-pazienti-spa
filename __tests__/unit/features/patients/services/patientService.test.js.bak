@@ -1,0 +1,211 @@
+/**
+ * Test suite per PatientService - Versione corretta
+ */
+
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+
+// Mock tutte le dipendenze prima di importare il servizio
+vi.mock('vitest', async () => {
+  const actual = await import('vitest');
+  return {
+    ...actual,
+    vi: {
+      ...actual.vi,
+      mock: actual.vi.mock,
+      fn: actual.vi.fn
+    }
+  };
+});
+
+// Mock globale per tutti i servizi
+const mockSupabase = {
+  from: vi.fn(() => ({
+    select: vi.fn().mockReturnThis(),
+    insert: vi.fn().mockReturnThis(),
+    update: vi.fn().mockReturnThis(),
+    delete: vi.fn().mockReturnThis(),
+    eq: vi.fn().mockReturnThis(),
+    ilike: vi.fn().mockReturnThis(),
+    order: vi.fn().mockReturnThis(),
+    range: vi.fn().mockReturnThis(),
+    single: vi.fn().mockResolvedValue({ data: null, error: null }),
+    then: vi.fn().mockImplementation(function(callback) {
+      return callback({ data: [], error: null });
+    })
+  })),
+  auth: {
+    getUser: vi.fn().mockResolvedValue({ data: { user: { id: 'test-user-123' } }, error: null })
+  }
+};
+
+const mockStateService = {
+  setLoading: vi.fn(),
+  getFilters: vi.fn().mockReturnValue({})
+};
+
+const mockNotificationService = {
+  success: vi.fn(),
+  error: vi.fn(),
+  warning: vi.fn()
+};
+
+// Mock dei moduli
+vi.mock('@/core/services/supabaseClient.js', () => ({
+  supabase: mockSupabase
+}));
+
+vi.mock('@/core/services/stateService.js', () => ({
+  stateService: mockStateService
+}));
+
+vi.mock('@/core/services/notificationService.js', () => ({
+  notificationService: mockNotificationService
+}));
+
+// Dati mock
+const mockPatients = [
+  {
+    id: 1,
+    nome: 'Mario',
+    cognome: 'Rossi',
+    data_nascita: '1990-01-01',
+    data_ricovero: '2024-01-01',
+    diagnosi: 'Infarto',
+    reparto_appartenenza: 'Cardiologia',
+    data_dimissione: null,
+    attivo: true
+  },
+  {
+    id: 2,
+    nome: 'Luigi',
+    cognome: 'Bianchi',
+    data_nascita: '1985-05-05',
+    data_ricovero: '2024-01-02',
+    diagnosi: 'Polmonite',
+    reparto_appartenenza: 'Pneumologia',
+    data_dimissione: null,
+    attivo: true
+  }
+];
+
+// Import dopo i mock
+import { patientService } from '@/features/patients/services/patientService.js';
+
+describe('PatientService - Fixed Tests', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  describe('getPatients', () => {
+    it('should fetch patients with default parameters', async () => {
+      const mockQuery = {
+        select: vi.fn().mockReturnThis(),
+        order: vi.fn().mockReturnThis(),
+        range: vi.fn().mockReturnThis(),
+        then: vi.fn()
+      };
+      
+      mockSupabase.from.mockReturnValue(mockQuery);
+      mockQuery.then.mockImplementation((callback) => 
+        callback({ data: mockPatients, error: null })
+      );
+
+      const result = await patientService.getPatients();
+
+      expect(result.patients).toEqual(mockPatients);
+      expect(result.totalCount).toBe(mockPatients.length);
+      expect(mockSupabase.from).toHaveBeenCalledWith('patients');
+    });
+  });
+
+  describe('createPatient', () => {
+    it('should create a new patient successfully', async () => {
+      const newPatient = {
+        nome: 'Maria',
+        cognome: 'Verdi',
+        data_nascita: '1988-03-15',
+        data_ricovero: '2024-01-15',
+        diagnosi: 'Diabete',
+        reparto_appartenenza: 'Endocrinologia'
+      };
+
+      const mockQuery = {
+        insert: vi.fn().mockReturnThis(),
+        select: vi.fn().mockReturnThis(),
+        then: vi.fn()
+      };
+      
+      mockSupabase.from.mockReturnValue(mockQuery);
+      mockQuery.then.mockImplementation((callback) => 
+        callback({ data: [{ ...newPatient, id: 3 }], error: null })
+      );
+
+      const result = await patientService.createPatient(newPatient);
+
+      expect(result.nome).toBe('Maria');
+      expect(mockSupabase.from).toHaveBeenCalledWith('patients');
+    });
+  });
+
+  describe('searchPatients', () => {
+    it('should search patients by term', async () => {
+      const searchTerm = 'Mario';
+      const mockResults = [mockPatients[0]];
+
+      const mockQuery = {
+        select: vi.fn().mockReturnThis(),
+        ilike: vi.fn().mockReturnThis(),
+        or: vi.fn().mockReturnThis(),
+        then: vi.fn()
+      };
+      
+      mockSupabase.from.mockReturnValue(mockQuery);
+      mockQuery.then.mockImplementation((callback) => 
+        callback({ data: mockResults, error: null })
+      );
+
+      const results = await patientService.searchPatients(searchTerm);
+
+      expect(results).toEqual(mockResults);
+    });
+  });
+
+  describe('exportPatients', () => {
+    it('should export patients to CSV', async () => {
+      const mockQuery = {
+        select: vi.fn().mockReturnThis(),
+        order: vi.fn().mockReturnThis(),
+        then: vi.fn()
+      };
+      
+      mockSupabase.from.mockReturnValue(mockQuery);
+      mockQuery.then.mockImplementation((callback) => 
+        callback({ data: mockPatients, error: null })
+      );
+
+      await patientService.exportPatients();
+
+      expect(mockNotificationService.success).toHaveBeenCalledWith('Esportazione completata');
+    });
+  });
+
+  describe('getPatientStats', () => {
+    it('should return correct statistics', async () => {
+      const mockQuery = {
+        select: vi.fn().mockReturnThis(),
+        then: vi.fn()
+      };
+      
+      mockSupabase.from.mockReturnValue(mockQuery);
+      mockQuery.then.mockImplementation((callback) => 
+        callback({ data: mockPatients, error: null })
+      );
+
+      const stats = await patientService.getPatientStats();
+
+      expect(stats.totalPatients).toBe(2);
+      expect(stats.activePatients).toBe(2);
+      expect(stats.byDiagnosis['Infarto']).toBe(1);
+    });
+  });
+});

@@ -29,7 +29,10 @@ export function highlight(text = '', term = '') {
   const t = term.trim();
   if (!t) return escapeHtml(text);
   try {
-    const pattern = new RegExp(`(${t.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&')})`, 'ig');
+    // Escape all regex-significant characters reliably
+    // Character class: . * + ? ^ $ { } ( ) | [ ] \\
+    const escaped = t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const pattern = new RegExp(`(${escaped})`, 'ig');
     const replaced = escapeHtml(text).replace(pattern, '<mark>$1</mark>');
     return DOMPurify.sanitize(replaced, { ALLOWED_TAGS: ['mark'] });
   } catch {

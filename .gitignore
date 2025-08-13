@@ -33,6 +33,7 @@ Thumbs.db
 # Core app files
 !src/**
 !index.html
+!public/**
 !package.json
 !package-lock.json
 !vite.config.js
@@ -58,6 +59,8 @@ Thumbs.db
 # All JavaScript files not in src/
 *.js
 !vite.config.js
+!__tests__/**/*.js
+!__tests__/**
 
 # Ensure source files remain included (override the broad *.js ignore)
 !src/**/*.js
@@ -72,14 +75,9 @@ Thumbs.db
 !playwright.config.js
 !package.json
 
-# All test files and directories
-__tests__/
-test*/
-tests*/
-**/*.test.*
-**/*.spec.*
-*.test.*
-*.spec.*
+# Local-only test files kept under src (do not include in repo runs)
+src/**/*.vt.js
+src/qa-setup/**
 
 # All coverage and reports
 coverage*/

@@ -1,0 +1,246 @@
+/**
+ * Test suite per PatientService - Versione corretta con mock funzionanti
+ */
+
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { patientService } from '../../../../../src/features/patients/services/patientService.js';
+
+// Mock dipendenze
+const mockSupabase = {
+  from: vi.fn(),
+  auth: {
+    getUser: vi.fn()
+  }
+};
+
+vi.mock('../../../../../src/core/services/supabaseClient.js', () => ({
+  supabase: mockSupabase
+}));
+
+const mockStateService = {
+  setLoading: vi.fn(),
+  getFilters: vi.fn()
+};
+
+vi.mock('../../../../../src/core/services/stateService.js', () => ({
+  stateService: mockStateService
+}));
+
+const mockNotificationService = {
+  success: vi.fn(),
+  error: vi.fn(),
+  warning: vi.fn()
+};
+
+vi.mock('../../../../../src/core/services/notificationService.js', () => ({
+  notificationService: mockNotificationService
+}));
+
+// Dati mock
+const mockPatients = [
+  {
+    id: 1,
+    nome: 'Mario',
+    cognome: 'Rossi',
+    data_nascita: '1990-01-01',
+    data_ricovero: '2024-01-01',
+    diagnosi: 'Infarto',
+    reparto_appartenenza: 'Cardiologia',
+    data_dimissione: null,
+    attivo: true
+  },
+  {
+    id: 2,
+    nome: 'Luigi',
+    cognome: 'Bianchi',
+    data_nascita: '1985-05-05',
+    data_ricovero: '2024-01-02',
+    diagnosi: 'Polmonite',
+    reparto_appartenenza: 'Pneumologia',
+    data_dimissione: null,
+    attivo: true
+  }
+];
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  
+  // Setup mock user autenticato
+  mockSupabase.auth.getUser.mockResolvedValue({
+    data: { user: { id: 'test-user-123' } },
+    error: null
+  });
+  
+  mockStateService.getFilters.mockReturnValue({});
+});
+
+describe('PatientService - Fixed Tests', () => {
+  describe('getPatients', () => {
+    it('should fetch patients with default parameters', async () => {
+      const mockQuery = {
+        select: vi.fn().mockReturnThis(),
+        order: vi.fn().mockReturnThis(),
+        range: vi.fn().mockReturnThis(),
+        then: vi.fn()
+      };
+      
+      mockSupabase.from.mockReturnValue(mockQuery);
+      mockQuery.then.mockImplementation((callback) => 
+        callback({ data: mockPatients, error: null })
+      );
+
+      const result = await patientService.getPatients();
+
+      expect(result).toEqual({
+        patients: mockPatients,
+        totalCount: mockPatients.length,
+        currentPage: 0,
+        totalPages: 1,
+        hasNextPage: false,
+        hasPrevPage: false
+      });
+      expect(mockSupabase.from).toHaveBeenCalledWith('patients');
+    });
+
+    it('should handle errors gracefully', async () => {
+      const mockError = new Error('Database error');
+      const mockQuery = {
+        select: vi.fn().mockReturnThis(),
+        order: vi.fn().mockReturnThis(),
+        range: vi.fn().mockReturnThis(),
+        then: vi.fn()
+      };
+      
+      mockSupabase.from.mockReturnValue(mockQuery);
+      mockQuery.then.mockImplementation((callback) => 
+        callback({ data: null, error: mockError })
+      );
+
+      await expect(patientService.getPatients()).rejects.toThrow('Database error');
+      expect(mockNotificationService.error).toHaveBeenCalledWith('Errore nel caricamento pazienti: Database error');
+    });
+  });
+
+  describe('createPatient', () => {
+    it('should create a new patient successfully', async () => {
+      const newPatient = {
+        nome: 'Maria',
+        cognome: 'Verdi',
+        data_nascita: '1988-03-15',
+        data_ricovero: '2024-01-15',
+        diagnosi: 'Diabete',
+        reparto_appartenenza: 'Endocrinologia'
+      };
+
+      const mockQuery = {
+        insert: vi.fn().mockReturnThis(),
+        select: vi.fn().mockReturnThis(),
+        then: vi.fn()
+      };
+      
+      mockSupabase.from.mockReturnValue(mockQuery);
+      mockQuery.then.mockImplementation((callback) => 
+        callback({ data: [{ ...newPatient, id: 3 }], error: null })
+      );
+
+      const result = await patientService.createPatient(newPatient);
+
+      expect(result).toMatchObject(newPatient);
+      expect(mockNotificationService.success).toHaveBeenCalledWith('Paziente creato con successo');
+    });
+
+    it('should validate required fields', async () => {
+      const invalidPatient = { nome: '', cognome: 'Test' };
+
+      await expect(patientService.createPatient(invalidPatient))
+        .rejects.toThrow('Il campo nome è obbligatorio');
+    });
+
+    it('should validate future birth date', async () => {
+      const invalidPatient = {
+        nome: 'Test',
+        cognome: 'User',
+        data_nascita: '2050-01-01', // Futuro
+        data_ricovero: '2024-01-01',
+        diagnosi: 'Test',
+        reparto_appartenenza: 'Test'
+      };
+
+      await expect(patientService.createPatient(invalidPatient))
+        .rejects.toThrow('La data di nascita non può essere nel futuro');
+    });
+  });
+
+  describe('searchPatients', () => {
+    it('should search patients by term', async () => {
+      const searchTerm = 'Mario';
+      const mockResults = [mockPatients[0]];
+
+      const mockQuery = {
+        select: vi.fn().mockReturnThis(),
+        ilike: vi.fn().mockReturnThis(),
+        or: vi.fn().mockReturnThis(),
+        then: vi.fn()
+      };
+      
+      mockSupabase.from.mockReturnValue(mockQuery);
+      mockQuery.then.mockImplementation((callback) => 
+        callback({ data: mockResults, error: null })
+      );
+
+      const results = await patientService.searchPatients(searchTerm);
+
+      expect(results).toEqual(mockResults);
+      expect(mockSupabase.from).toHaveBeenCalledWith('patients');
+    });
+  });
+
+  describe('exportPatients', () => {
+    it('should export patients to CSV', async () => {
+      const mockQuery = {
+        select: vi.fn().mockReturnThis(),
+        order: vi.fn().mockReturnThis(),
+        then: vi.fn()
+      };
+      
+      mockSupabase.from.mockReturnValue(mockQuery);
+      mockQuery.then.mockImplementation((callback) => 
+        callback({ data: mockPatients, error: null })
+      );
+
+      await patientService.exportPatients();
+
+      expect(mockNotificationService.success).toHaveBeenCalledWith('Esportazione completata');
+    });
+  });
+
+  describe('getPatientStats', () => {
+    it('should return correct statistics', async () => {
+      const mockQuery = {
+        select: vi.fn().mockReturnThis(),
+        then: vi.fn()
+      };
+      
+      mockSupabase.from.mockReturnValue(mockQuery);
+      mockQuery.then.mockImplementation((callback) => 
+        callback({ data: mockPatients, error: null })
+      );
+
+      const stats = await patientService.getPatientStats();
+
+      expect(stats).toEqual({
+        totalPatients: 2,
+        activePatients: 2,
+        dischargedPatients: 0,
+        byDiagnosis: {
+          'Infarto': 1,
+          'Polmonite': 1
+        },
+        byDepartment: {
+          'Cardiologia': 1,
+          'Pneumologia': 1
+        }
+      });
+    });
+  });
+});

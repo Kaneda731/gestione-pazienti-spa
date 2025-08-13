@@ -15,8 +15,8 @@ export default defineConfig({
       }
     },
     
-    // Setup files
-    setupFiles: ['__tests__/setup/__setup__/vitest.setup.js'],
+    // Setup file (no tests inside)
+    setupFiles: ['__tests__/setup/vitest.setup.js'],
     
     // Globals per i test
     globals: true,
@@ -28,7 +28,6 @@ export default defineConfig({
       reportsDirectory: './coverage',
       exclude: [
         'node_modules/**',
-        '__tests__/**',
         'coverage/**',
         'dist/**',
         'docs/**',
@@ -46,8 +45,10 @@ export default defineConfig({
       }
     },
     
-    // Include/exclude patterns
-    include: ['__tests__/unit/**/*.test.js', '__tests__/integration/**/*.test.js'],
+    // Include patterns: run tests from __tests__ tree
+    include: [
+      '__tests__/**/*.{test,spec}.{js,jsx,ts,tsx}'
+    ],
     exclude: [
       'node_modules/**',
       'dist/**',

@@ -132,10 +132,10 @@ const searchPatients = async (searchTerm, activeOnly = false) => {
     let query = supabase
       .from("pazienti")
       .select(
-        "id, nome, cognome, data_ricovero, diagnosi, reparto_appartenenza"
+        "id, nome, cognome, codice_rad, data_ricovero, diagnosi, reparto_appartenenza"
       )
       .not("user_id", "is", null)
-      .or(`nome.ilike.%${searchTerm}%,cognome.ilike.%${searchTerm}%`)
+      .or(`nome.ilike.%${searchTerm}%,cognome.ilike.%${searchTerm}%,codice_rad.ilike.%${searchTerm}%`)
       .order("cognome");
 
     if (activeOnly) {

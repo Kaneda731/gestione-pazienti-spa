@@ -2,11 +2,11 @@
 import CustomDatepicker from '../../../shared/components/forms/CustomDatepicker.js';
 import { initCustomSelects } from '../../../shared/components/forms/CustomSelect.js';
 import { notificationService } from '../../../core/services/notifications/notificationService.js';
-import { debounce } from '../../../shared/utils/dom.js';
+import { attach as attachPatientAutocomplete } from '../../../shared/components/ui/PatientAutocomplete.js';
 
 
 let datepickerInstance = null;
-let debouncedSearch;
+let autocompleteHandle = null;
 
 // Contiene gli elementi del DOM per un accesso più facile
 export const dom = {
@@ -29,16 +29,12 @@ export const dom = {
     get externalTransferFields() { return document.getElementById('external-transfer-fields'); }
 };
 
-function clearSearchResults() {
-    if (dom.resultsContainer) {
-        dom.resultsContainer.innerHTML = '';
-    }
-}
+// Ricerca paziente gestita da PatientAutocomplete; helpers legacy rimossi
 
 /**
  * Inizializza i componenti della UI, come il datepicker.
  */
-export function initializeUI(searchCallback) {
+export function initializeUI(onSelectPatient) {
     datepickerInstance = new CustomDatepicker('[data-datepicker]', {
         dateFormat: "d/m/Y",
     });
@@ -46,18 +42,19 @@ export function initializeUI(searchCallback) {
     // Inizializza i custom select per tutte le select con data-custom="true"
     initCustomSelects('.form-select[data-custom="true"]');
 
-    debouncedSearch = debounce(searchCallback, 300);
-
-    if (dom.searchInput) {
-        dom.searchInput.addEventListener('input', (e) => {
-            const query = e.target.value.trim();
-            if (query.length > 2) {
-                setLoading(true);
-                debouncedSearch(query);
-            } else {
-                clearSearchResults();
+    // Autocomplete pazienti centralizzato (solo pazienti attivi)
+    if (dom.searchInput && dom.resultsContainer) {
+        const handle = attachPatientAutocomplete({
+            input: dom.searchInput,
+            resultsContainer: dom.resultsContainer,
+            activeOnly: true,
+            minChars: 2,
+            debounceMs: 250,
+            onSelect: (patient) => {
+                onSelectPatient?.(patient);
             }
         });
+        autocompleteHandle = handle;
     }
     
     // Inizializza i listener per i campi di trasferimento
@@ -74,6 +71,10 @@ export function cleanupUI() {
         datepickerInstance.destroy();
         datepickerInstance = null;
     }
+    if (autocompleteHandle && typeof autocompleteHandle.destroy === 'function') {
+        autocompleteHandle.destroy();
+        autocompleteHandle = null;
+    }
     
     // Distrugge tutti i custom select
     const customSelects = document.querySelectorAll('.form-select[data-custom="true"]');
@@ -89,23 +90,7 @@ export function cleanupUI() {
  * @param {Array<Object>} patients - La lista dei pazienti.
  * @param {function} onSelect - La callback da eseguire quando un paziente viene selezionato.
  */
-export function renderSearchResults(patients, onSelect) {
-    if (!dom.resultsContainer) return;
-    
-    dom.resultsContainer.innerHTML = '';
-    if (patients.length === 0) {
-        dom.resultsContainer.innerHTML = '<p class="text-center text-muted">Nessun paziente attivo trovato.</p>';
-        return;
-    }
-    patients.forEach(p => {
-        const item = document.createElement('button');
-        item.className = 'list-group-item list-group-item-action';
-        const radText = p.codice_rad ? ` (RAD: ${p.codice_rad})` : '';
-        item.textContent = `${p.cognome} ${p.nome}${radText} (Ricovero: ${new Date(p.data_ricovero).toLocaleDateString()})`;
-        item.onclick = () => onSelect(p);
-        dom.resultsContainer.appendChild(item);
-    });
-}
+// renderSearchResults rimosso: ora gestito dal componente autocomplete
 
 /**
  * Mostra il form di dimissione per il paziente selezionato.
@@ -129,15 +114,7 @@ export function displayDischargeForm(patient) {
  * Mostra o nasconde l'indicatore di caricamento.
  * @param {boolean} isLoading
  */
-export function setLoading(isLoading) {
-    if (!dom.resultsContainer) return;
-    
-    if (isLoading) {
-        dom.resultsContainer.innerHTML = '<div class="text-center"><div class="spinner-border"></div></div>';
-    } else {
-        dom.resultsContainer.innerHTML = '';
-    }
-}
+// setLoading rimosso: loading gestito dal componente autocomplete
 
 /**
  * Resetta la vista al suo stato iniziale.

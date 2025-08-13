@@ -1,4 +1,201 @@
 /* forms/_eventi.scss
    Eventi Clinici: tabs, cards, modal rules. */
 
-// Placeholder: styles will be migrated incrementally.
+/* Stili per il tab degli eventi clinici */
+.nav-tabs .nav-link {
+    border: 1px solid transparent;
+    border-top-left-radius: var(--border-radius);
+    border-top-right-radius: var(--border-radius);
+    color: var(--text-secondary);
+    font-weight: 500;
+    padding: 0.75rem 1.5rem;
+    transition: all 0.2s ease;
+    
+    .material-icons {
+        font-size: 18px;
+        vertical-align: text-bottom;
+    }
+    
+    &:hover {
+        border-color: var(--border-color);
+        color: var(--primary-color);
+        background-color: rgba(37, 99, 235, 0.05);
+    }
+    
+    &.active {
+        color: var(--primary-color);
+        background-color: var(--bg-primary);
+        border-color: var(--border-color) var(--border-color) var(--bg-primary);
+        font-weight: 600;
+    }
+}
+
+.tab-content {
+    border: 1px solid var(--border-color);
+    border-top: none;
+    border-radius: 0 0 var(--border-radius) var(--border-radius);
+    padding: 2rem;
+    background: var(--bg-primary);
+}
+
+/* Stili per la lista eventi */
+.eventi-list {
+    max-height: 500px;
+    overflow-y: auto;
+    
+    &::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    &::-webkit-scrollbar-track {
+        background: var(--bg-secondary);
+        border-radius: 3px;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+        background: var(--border-color);
+        border-radius: 3px;
+        
+        &:hover {
+            background: var(--text-muted);
+        }
+    }
+}
+
+.evento-card {
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    transition: all 0.2s ease;
+    
+    &:hover {
+        border-color: var(--primary-color);
+        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
+        transform: translateY(-1px);
+    }
+    
+    .badge {
+        font-size: 0.75rem;
+        padding: 0.375rem 0.75rem;
+        
+        .material-icons {
+            margin-right: 0.25rem;
+        }
+    }
+    
+    .dropdown-toggle {
+        border: none;
+        background: transparent;
+        
+        &:focus {
+            box-shadow: none;
+        }
+    }
+}
+
+/* Stili per il form nuovo evento */
+#nuovo-evento-form {
+    .card {
+        border: 2px solid var(--primary-color);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+        
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-color), rgba(37, 99, 235, 0.8)) !important;
+            border-bottom: none;
+            
+            h6 {
+                display: flex;
+                align-items: center;
+                margin: 0;
+                
+                .material-icons {
+                    font-size: 18px;
+                }
+            }
+        }
+    }
+}
+
+/* Animazioni per i campi condizionali degli eventi */
+#tipo-intervento-container,
+#agente-patogeno-container {
+    transition: all 0.3s ease-in-out;
+    overflow: hidden;
+    
+    &[style*="display: none"] {
+        opacity: 0;
+        max-height: 0;
+        margin: 0;
+        padding: 0;
+    }
+    
+    &[style*="display: block"] {
+        opacity: 1;
+        max-height: 200px;
+        overflow: visible; /* Permette al dropdown di essere visibile */
+    }
+}
+
+/* Assicura che il container del tipo intervento abbia posizione relativa quando visibile */
+#tipo-intervento-container[style*="display: block"] {
+    position: relative;
+    z-index: 1;
+}
+
+/* Stili per l'info post-operatoria */
+#post-op-info {
+    border-left: 4px solid;
+    font-weight: 600;
+    
+    &.alert-danger {
+        border-left-color: #dc3545;
+        background-color: rgba(220, 53, 69, 0.1);
+        color: #721c24;
+    }
+    
+    &.alert-warning {
+        border-left-color: #fd7e14;
+        background-color: rgba(253, 126, 20, 0.1);
+        color: #653208;
+    }
+    
+    &.alert-info {
+        border-left-color: #0dcaf0;
+        background-color: rgba(13, 202, 240, 0.1);
+        color: #055160;
+    }
+    
+    .material-icons {
+        font-size: 20px;
+    }
+}
+
+/* Responsive per mobile */
+@media (max-width: 768px) {
+    .nav-tabs .nav-link {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+        
+        .material-icons {
+            font-size: 16px;
+        }
+    }
+    
+    .tab-content {
+        padding: 1rem;
+    }
+
+    .evento-card {
+        .card-body {
+            padding: 1rem;
+        }
+        
+        .badge {
+            font-size: 0.7rem;
+            padding: 0.25rem 0.5rem;
+        }
+    }
+
+    #nuovo-evento-form .card-header h6 {
+        font-size: 0.9rem;
+    }
+}

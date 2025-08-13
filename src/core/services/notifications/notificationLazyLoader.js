@@ -1,4 +1,4 @@
-// src/core/services/notificationLazyLoader.js
+// src/core/services/notifications/notificationLazyLoader.js
 
 /**
  * Lazy loading per componenti non critici del sistema notifiche
@@ -272,14 +272,14 @@ class NotificationLazyLoader {
             case 'virtual':
                 return this.loadModule(
                     'NotificationVirtualContainer',
-                    '../../shared/components/notifications/NotificationVirtualContainer.js'
+                    '../../../shared/components/notifications/NotificationVirtualContainer.js'
                 );
                 
             case 'standard':
             default:
                 return this.loadModule(
                     'NotificationContainer',
-                    '../../shared/components/notifications/NotificationContainer.js'
+                    '../../../shared/components/notifications/NotificationContainer.js'
                 );
         }
     }

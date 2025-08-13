@@ -1,5 +1,5 @@
 // src/features/charts/views/grafico-api.js
-import { supabase } from '../../../core/services/supabaseClient.js';
+import { supabase } from '../../../core/services/supabase/supabaseClient.js';
 import { getFilterOptions } from '../../../shared/utils/index.js';
 
 /**

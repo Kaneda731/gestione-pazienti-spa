@@ -1,6 +1,6 @@
 // src/app/mobile/mobile-navigation.js
 import { signOut, currentUser } from '../../core/auth/authService.js';
-import { logger } from '../../core/services/loggerService.js';
+import { logger } from '../../core/services/logger/loggerService.js';
 
 let isCurrentlyMobile = window.innerWidth <= 767;
 

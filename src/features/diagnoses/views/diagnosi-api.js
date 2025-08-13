@@ -1,5 +1,5 @@
 // src/features/diagnoses/views/diagnosi-api.js
-import { supabase } from '../../../core/services/supabaseClient.js';
+import { supabase } from '../../../core/services/supabase/supabaseClient.js';
 
 /**
  * Recupera tutte le diagnosi dal database.

@@ -1,4 +1,4 @@
-import { isDevelopment, isTest } from '../../app/config/environment.js';
+import { isDevelopment, isTest } from '../../../app/config/environment.js';
 
 // Esporta sia la classe che l'istanza singleton
 export class LoggerService {

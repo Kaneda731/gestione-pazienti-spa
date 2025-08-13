@@ -1,6 +1,6 @@
-import { supabase } from '../core/services/supabaseClient.js';
+import { supabase } from '../core/services/supabase/supabaseClient.js';
 import { currentUser } from '../core/auth/authService.js';
-import { logger } from '../core/services/loggerService.js';
+import { logger } from '../core/services/logger/loggerService.js';
 import { isDevelopment } from './config/environment.js';
 import { sanitizeHtml } from '../shared/utils/sanitizeHtml.js';
 

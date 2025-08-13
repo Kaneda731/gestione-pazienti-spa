@@ -1,5 +1,5 @@
 // src/features/patients/views/dimissione-api.js
-import { supabase } from '../../../core/services/supabaseClient.js';
+import { supabase } from '../../../core/services/supabase/supabaseClient.js';
 
 /**
  * Cerca i pazienti attivi per cognome.

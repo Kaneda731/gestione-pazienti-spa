@@ -1,9 +1,9 @@
 // src/shared/components/ui/AuthUI.js
 import { sanitizeHtml } from '../../utils/sanitizeHtml.js';
-import { Modal } from '../../../core/services/bootstrapService.js';
+import { Modal } from '../../../core/services/bootstrap/bootstrapService.js';
 import { signInWithGoogle, signOut, currentUser } from '../../../core/auth/authService.js';
 import { syncMobileAuth } from '../../../app/mobile/mobile-navigation.js';
-import { logger } from '../../../core/services/loggerService.js';
+import { logger } from '../../../core/services/logger/loggerService.js';
 
 
 export function updateAuthUI(session) {

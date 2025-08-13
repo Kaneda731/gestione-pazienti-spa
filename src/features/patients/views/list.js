@@ -6,11 +6,11 @@ import { fetchPazienti, exportPazientiToCSV, updatePazienteStatus, deletePazient
 import { renderPazienti, showLoading, showError, updateSortIndicators, ensureCorrectView } from './list-renderer.js';
 import { initCustomSelects } from '../../../shared/components/forms/CustomSelect.js';
 // Rimosso import del vecchio modalService
-import { supabase } from '../../../core/services/supabaseClient.js';
+import { supabase } from '../../../core/services/supabase/supabaseClient.js';
 import { currentUser } from '../../../core/auth/authService.js';
 import { getCurrentFilters } from './list-state-migrated.js';
-import { logger } from '../../../core/services/loggerService.js';
-import { stateService } from '../../../core/services/stateService.js';
+import { logger } from '../../../core/services/logger/loggerService.js';
+import { stateService } from '../../../core/services/state/stateService.js';
 
 let currentPazienti = [];
 

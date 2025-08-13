@@ -1,6 +1,6 @@
 // src/shared/components/ui/ConfirmModal.js
 
-import { Modal } from '../../../core/services/bootstrapService.js';
+import { Modal } from '../../../core/services/bootstrap/bootstrapService.js';
 
 /**
  * Componente per modali di conferma riutilizzabili

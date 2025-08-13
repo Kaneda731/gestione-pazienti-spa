@@ -16,7 +16,7 @@ import {
   showError,
 } from "./eventi-clinici-ui.js";
 
-import { logger } from "../../../core/services/loggerService.js";
+import { logger } from "../../../core/services/logger/loggerService.js";
 import { initCustomSelects } from "../../../shared/components/forms/CustomSelect.js";
 import { initCustomDatepickers } from "../../../shared/components/forms/CustomDatepicker.js";
 

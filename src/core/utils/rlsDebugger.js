@@ -5,8 +5,8 @@
  * Aiuta a identificare problemi con Row Level Security
  */
 
-import { supabase } from '../services/supabaseClient.js';
-import { logger } from '../services/loggerService.js';
+import { supabase } from '../services/supabase/supabaseClient.js';
+import { logger } from '../services/logger/loggerService.js';
 
 class RLSDebugger {
   /**

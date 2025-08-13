@@ -1,6 +1,6 @@
 // src/features/eventi-clinici/views/eventi-clinici-ui.js
 
-import { logger } from "../../../core/services/loggerService.js";
+import { logger } from "../../../core/services/logger/loggerService.js";
 import { formatDate } from "../../../shared/utils/formatting.js";
 import { sanitizeHtml } from "../../../shared/utils/sanitizeHtml.js";
 

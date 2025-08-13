@@ -1,7 +1,7 @@
 // src/features/patients/views/dimissione-ui.js
 import CustomDatepicker from '../../../shared/components/forms/CustomDatepicker.js';
 import { initCustomSelects } from '../../../shared/components/forms/CustomSelect.js';
-import { notificationService } from '../../../core/services/notificationService.js';
+import { notificationService } from '../../../core/services/notifications/notificationService.js';
 import { debounce } from '../../../shared/utils/dom.js';
 
 

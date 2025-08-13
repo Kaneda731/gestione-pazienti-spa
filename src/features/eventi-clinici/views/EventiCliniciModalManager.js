@@ -18,8 +18,8 @@ import {
   renderPatientSearchResults
 } from './eventi-clinici-ui.js';
 
-import { logger } from '../../../core/services/loggerService.js';
-import { notificationService } from '../../../core/services/notificationService.js';
+import { logger } from '../../../core/services/logger/loggerService.js';
+import { notificationService } from '../../../core/services/notifications/notificationService.js';
 import { sanitizeHtml } from '../../../shared/utils/sanitizeHtml.js';
 import { getFormData, validateFormData, hideSearchResults, debounce } from './EventiCliniciUtils.js';
 

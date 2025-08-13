@@ -1,6 +1,6 @@
-// src/core/services/notificationErrorHandler.js
+// src/core/services/notifications/notificationErrorHandler.js
 
-import { logger } from './loggerService.js';
+import { logger } from '../logger/loggerService.js';
 
 /**
  * Gestore centralizzato per errori del sistema di notifiche

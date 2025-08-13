@@ -1,9 +1,9 @@
 // src/features/patients/views/list-api.js
-import { supabase } from '../../../core/services/supabaseClient.js';
+import { supabase } from '../../../core/services/supabase/supabaseClient.js';
 import { state, domElements, getCurrentFilters } from './list-state-migrated.js';
 import { convertToCSV } from '../../../shared/utils/index.js';
 import { patientService } from '../services/patientService.js';
-import { logger } from '../../../core/services/loggerService.js';
+import { logger } from '../../../core/services/logger/loggerService.js';
 import { sanitizeHtml } from '../../../shared/utils/sanitizeHtml.js';
 
 const ITEMS_PER_PAGE = 10;

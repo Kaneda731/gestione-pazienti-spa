@@ -1,5 +1,5 @@
 // src/shared/utils/helpers.js
-import { supabase } from '../../core/services/supabaseClient.js';
+import { supabase } from '../../core/services/supabase/supabaseClient.js';
 import { sanitizeHtml } from './sanitizeHtml.js';
 
 /**

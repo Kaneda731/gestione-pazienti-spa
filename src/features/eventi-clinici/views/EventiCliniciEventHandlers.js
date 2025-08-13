@@ -1,7 +1,7 @@
 // src/features/eventi-clinici/views/EventiCliniciEventHandlers.js
 
 import { toggleEventTypeFields } from './eventi-clinici-ui.js';
-import { logger } from '../../../core/services/loggerService.js';
+import { logger } from '../../../core/services/logger/loggerService.js';
 import { hideAllSearchResults } from './EventiCliniciUtils.js';
 
 /**

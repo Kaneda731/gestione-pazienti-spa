@@ -3,8 +3,8 @@ import { eventiCliniciService } from '../../eventi-clinici/services/eventiClinic
 import { postOperativeCalculator } from '../../eventi-clinici/utils/post-operative-calculator.js';
 import { initCustomSelects, updateCustomSelect, CustomSelect } from '../../../shared/components/forms/CustomSelect.js';
 import CustomDatepicker from '../../../shared/components/forms/CustomDatepicker.js';
-import { notificationService } from '../../../core/services/notificationService.js';
-import { logger } from '../../../core/services/loggerService.js';
+import { notificationService } from '../../../core/services/notifications/notificationService.js';
+import { logger } from '../../../core/services/logger/loggerService.js';
 import { sanitizeHtml } from '../../../shared/utils/sanitizeHtml.js';
 import { ResolveInfectionModal } from '../../eventi-clinici/components/ResolveInfectionModal.js';
 

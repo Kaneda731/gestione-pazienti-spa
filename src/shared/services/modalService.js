@@ -11,7 +11,7 @@
  */
 
 // Importa Bootstrap Modal dal servizio centralizzato
-import { Modal } from '../../core/services/bootstrapService.js';
+import { Modal } from '../../core/services/bootstrap/bootstrapService.js';
 
 import { sanitizeHtml } from '../utils/sanitizeHtml.js';
 

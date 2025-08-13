@@ -1,6 +1,6 @@
 // src/js/services/errorService.js
 
-import { logger } from './loggerService.js';
+import { logger } from '../logger/loggerService.js';
 
 /**
  * Inizializza la gestione centralizzata degli errori e del logging.

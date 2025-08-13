@@ -1,6 +1,6 @@
 // src/js/services/stateService.js
 
-import { logger } from "./loggerService.js";
+import { logger } from "../logger/loggerService.js";
 
 /**
  * Servizio centralizzato per la gestione dello stato dell'applicazione

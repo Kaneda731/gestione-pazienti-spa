@@ -5,8 +5,8 @@
  * Sostituisce la gestione frammentata dello stato con un approccio centralizzato
  */
 
-import { stateService } from '../../../core/services/stateService.js';
-import { logger } from '../../../core/services/loggerService.js';
+import { stateService } from '../../../core/services/state/stateService.js';
+import { logger } from '../../../core/services/logger/loggerService.js';
 
 // Cache degli elementi DOM
 export const domElements = {};

@@ -1,4 +1,4 @@
-// src/core/services/bootstrapService.js
+// src/core/services/bootstrap/bootstrapService.js
 
 /**
  * Servizio centralizzato per gestire Bootstrap

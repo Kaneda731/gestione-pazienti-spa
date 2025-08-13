@@ -1,4 +1,4 @@
-// src/core/services/notificationAnimationManager.js
+// src/core/services/notifications/notificationAnimationManager.js
 
 /**
  * Gestione ottimizzata delle animazioni per notifiche

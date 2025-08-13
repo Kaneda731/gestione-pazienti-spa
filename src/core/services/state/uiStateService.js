@@ -5,7 +5,7 @@
  * Fornisce componenti riutilizzabili per loading, empty state, errori
  */
 
-import { sanitizeHtml } from '../../shared/utils/sanitizeHtml.js';
+import { sanitizeHtml } from '../../../shared/utils/sanitizeHtml.js';
 
 export class UIStateService {
     constructor() {

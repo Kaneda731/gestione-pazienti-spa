@@ -1,6 +1,6 @@
-// src/core/services/notificationService.js
+// src/core/services/notifications/notificationService.js
 
-import { stateService } from './stateService.js';
+import { stateService } from '../state/stateService.js';
 import { NotificationErrorHandler } from './notificationErrorHandler.js';
 import { notificationEventManager } from './notificationEventManager.js';
 import { notificationAnimationManager } from './notificationAnimationManager.js';
@@ -117,7 +117,7 @@ class NotificationService {
     async initializeContainer() {
         this.useVirtualScrolling = false; // Disabilita virtual scrolling per ora
         
-        const { NotificationContainer } = await import('../../shared/components/notifications/NotificationContainer.js');
+    const { NotificationContainer } = await import('../../../shared/components/notifications/NotificationContainer.js');
         
         this.notificationContainer = new NotificationContainer({
             position: this.settings.position,
@@ -150,7 +150,7 @@ class NotificationService {
 
     async initializeFallback() {
         try {
-            const { NotificationContainer } = await import('../../shared/components/notifications/NotificationContainer.js');
+            const { NotificationContainer } = await import('../../../shared/components/notifications/NotificationContainer.js');
             
             this.notificationContainer = new NotificationContainer({
                 position: this.settings.position,

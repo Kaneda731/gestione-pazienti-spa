@@ -1,5 +1,5 @@
 // src/features/diagnoses/views/diagnosi-ui.js
-import { notificationService } from '../../../core/services/notificationService.js';
+import { notificationService } from '../../../core/services/notifications/notificationService.js';
 
 // Contiene gli elementi del DOM per un accesso più facile
 export const dom = {

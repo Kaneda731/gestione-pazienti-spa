@@ -1,4 +1,4 @@
-// src/core/services/notificationEventManager.js
+// src/core/services/notifications/notificationEventManager.js
 
 /**
  * Gestione centralizzata degli event listeners per notifiche

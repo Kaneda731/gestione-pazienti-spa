@@ -1,5 +1,5 @@
 // src/features/patients/views/form-api.js
-import { supabase } from '../../../core/services/supabaseClient.js';
+import { supabase } from '../../../core/services/supabase/supabaseClient.js';
 
 /**
  * Recupera le opzioni per il campo diagnosi.

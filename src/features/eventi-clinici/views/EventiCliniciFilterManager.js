@@ -25,8 +25,8 @@ import {
   getFiltersFromUI
 } from './eventi-clinici-ui.js';
 
-import { logger } from '../../../core/services/loggerService.js';
-import { notificationService } from '../../../core/services/notificationService.js';
+import { logger } from '../../../core/services/logger/loggerService.js';
+import { notificationService } from '../../../core/services/notifications/notificationService.js';
 import { hideAllSearchResults, hideSearchResults, debounce } from './EventiCliniciUtils.js';
 
 /**

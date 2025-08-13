@@ -1,6 +1,6 @@
 // src/features/eventi-clinici/components/ResolveInfectionModal.js
 
-import { Modal } from '../../../core/services/bootstrapService.js';
+import { Modal } from '../../../core/services/bootstrap/bootstrapService.js';
 import CustomDatepicker from '../../../shared/components/forms/CustomDatepicker.js';
 import { sanitizeHtml } from '../../../shared/utils/sanitizeHtml.js';
 

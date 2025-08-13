@@ -1,4 +1,4 @@
-// src/core/services/notificationVirtualScroller.js
+// src/core/services/notifications/notificationVirtualScroller.js
 
 /**
  * Virtual scrolling per gestire molte notifiche simultanee

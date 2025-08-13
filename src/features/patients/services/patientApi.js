@@ -1,6 +1,6 @@
 // src/features/patients/services/patientApi.js
 
-import { supabase } from "../../../core/services/supabaseClient.js";
+import { supabase } from "../../../core/services/supabase/supabaseClient.js";
 
 /**
  * Costruisce una query Supabase per i pazienti applicando filtri comuni.

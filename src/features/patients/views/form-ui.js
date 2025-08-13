@@ -1,7 +1,7 @@
 // src/features/patients/views/form-ui.js
 import { initCustomSelects, updateCustomSelect } from '../../../shared/components/forms/CustomSelect.js';
 import CustomDatepicker from '../../../shared/components/forms/CustomDatepicker.js';
-import { notificationService } from '../../../core/services/notificationService.js';
+import { notificationService } from '../../../core/services/notifications/notificationService.js';
 import { initEventiCliniciTab, setCurrentPatient, cleanupEventiCliniciTab, isPatientCurrentlyInfected } from './eventi-clinici-tab.js';
 import { sanitizeHtml } from '../../../shared/utils/sanitizeHtml.js';
 import { InfectionEventModal } from '../../eventi-clinici/components/InfectionEventModal.js';

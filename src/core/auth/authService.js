@@ -1,6 +1,6 @@
-import { supabase } from '../services/supabaseClient.js';
+import { supabase } from '../services/supabase/supabaseClient.js';
 import { oauthManager } from './oauthService.js';
-import { logger } from '../services/loggerService.js';
+import { logger } from '../services/logger/loggerService.js';
 
 // Esporta una variabile per contenere lo stato dell'utente e del suo profilo
 export let currentUser = {

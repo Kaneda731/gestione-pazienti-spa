@@ -10,27 +10,27 @@ import { STORAGE_KEYS } from "./config/constants.js";
 
 // Importa tutti gli stili, nell'ordine corretto
 import "flatpickr/dist/flatpickr.min.css";
-import "/src/css/desktop.scss";
-import "/src/css/mobile.scss";
+import "/src/styles/desktop.scss";
+import "/src/styles/mobile.scss";
 
 // Core services
-import { initErrorHandling } from "../core/services/errorService.js";
+import { initErrorHandling } from "../core/services/error/errorService.js";
 import { initAuth } from "../core/auth/authService.js";
-import { initTheme } from "../core/services/themeService.js";
-import { logger } from "../core/services/loggerService.js";
+import { initTheme } from "../core/services/theme/themeService.js";
+import { logger } from "../core/services/logger/loggerService.js";
 
 // Extension error handling
 import "../core/utils/extensionErrorHandler.js";
 
 // Shared services
 import "../shared/components/ui/index.js";
-import "../core/services/bootstrapService.js";
-import { stateService } from "../core/services/stateService.js";
-import { notificationService } from "../core/services/notificationService.js";
-import "../core/services/uiStateService.js";
+import "../core/services/bootstrap/bootstrapService.js";
+import { stateService } from "../core/services/state/stateService.js";
+import { notificationService } from "../core/services/notifications/notificationService.js";
+import "../core/services/state/uiStateService.js";
 
 // Emergency commands (sempre disponibili per sicurezza)
-import "../core/services/emergencyCommands.js";
+import "../core/services/emergency/emergencyCommands.js";
 
 // Expose notificationService globally for development testing
 if (isDevelopment) {
@@ -47,7 +47,7 @@ import { initializeAuthEventListeners } from "../shared/components/ui/AuthUI.js"
 
 // Router
 import { renderView } from "./router.js";
-import { initBackToMenuButtons } from "../core/services/navigationService.js";
+import { initBackToMenuButtons } from "../core/services/navigation/navigationService.js";
 
 /**
  * Inizializza l'applicazione

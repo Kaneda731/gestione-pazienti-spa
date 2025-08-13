@@ -5,7 +5,7 @@
  */
 
 import { supabase } from './supabaseClient.js';
-import { logger } from './loggerService.js';
+import { logger } from '../logger/loggerService.js';
 
 class ViteSupabaseMiddleware {
     constructor() {

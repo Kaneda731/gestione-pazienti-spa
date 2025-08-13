@@ -1,12 +1,10 @@
 // src/features/patients/views/dimissione.js
-import { searchActivePatients, dischargePatientWithTransfer } from './dimissione-api.js';
+import { dischargePatientWithTransfer } from './dimissione-api.js';
 import { 
     dom,
     initializeUI, 
     cleanupUI,
-    renderSearchResults,
     displayDischargeForm,
-    setLoading,
     resetView,
     showFeedback,
     validateDischargeForm,
@@ -14,30 +12,6 @@ import {
 } from './dimissione-ui.js';
 
 let selectedPatient = null;
-
-async function handleSearch(query) {
-    if (!dom.searchInput) {
-        console.error('Elemento searchInput non trovato');
-        return;
-    }
-    
-    if (query.length < 2) {
-        renderSearchResults([], () => {}); // Pulisce i risultati se la query è troppo corta
-        return;
-    }
-    
-    setLoading(true);
-    try {
-        const patients = await searchActivePatients(query);
-        renderSearchResults(patients, (patient) => {
-            selectedPatient = patient;
-            displayDischargeForm(patient);
-        });
-    } catch (error) {
-        showFeedback(error.message, 'error');
-        setLoading(false); // Interrompi il caricamento solo in caso di errore
-    }
-}
 
 async function handleDischargeSubmit(event) {
     event.preventDefault();
@@ -85,7 +59,11 @@ function setupEventListeners() {
 }
 
 export function initDimissioneView() {
-    initializeUI(handleSearch);
+    // Usa l'autocomplete centralizzato: la UI chiamerà onSelectPatient alla scelta
+    initializeUI((patient) => {
+        selectedPatient = patient;
+        displayDischargeForm(patient);
+    });
     setupEventListeners();
     
     if (dom.searchInput) {

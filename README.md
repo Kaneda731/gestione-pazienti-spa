@@ -286,11 +286,78 @@ Apri `http://localhost:5173` (o porta indicata da Vite).
 npm run test
 ```
 
-## Build e Deploy
-- Build locale: `npm run build`
-- Anteprima: `npm run preview`
-- Netlify: la pipeline genera automaticamente la build su push; il file `_redirects` è generato in build.
-
-## Suggerimenti
-- Mantieni gli import consistenti con `@/` per ridurre rotture durante futuri spostamenti.
-- Quando aggiungi nuovi servizi, posizionali nella sottocartella di dominio in `src/core/services/`.
+  ## Build e Deploy
+  - Build locale: `npm run build`
+  - Anteprima: `npm run preview`
+  - Netlify: la pipeline genera automaticamente la build su push; il file `_redirects` è generato in build.
+  
+  ## Suggerimenti
+  - Mantieni gli import consistenti con `@/` per ridurre rotture durante futuri spostamenti.
+  - Quando aggiungi nuovi servizi, posizionali nella sottocartella di dominio in `src/core/services/`.
+  
+  ## Centralizzazione servizi: TODO
+  
+  Obiettivo: centralizzare la ricerca pazienti e le relative UI per eliminare duplicazioni tra `Eventi Clinici` e `Dimissione`.
+  
+  - **shared/services/patientSearchService.js**
+    - [ ] Definire API pubblica:
+      - [ ] `search(term, { activeOnly=false, limit=20, signal })`
+      - [ ] `searchRealtime(term, { activeOnly=false, debounceMs=250, onUpdate, onError })`
+    - [ ] Integrare con `patientService.searchPatients` e uniformare i criteri:
+      - [ ] Campi: `nome`, `cognome`, `codice_rad`
+      - [ ] `activeOnly`: filtro dimissione/stato
+      - [ ] `limit`/ordinamento coerenti
+    - [ ] Caching in-memory con TTL (30–60s) su chiave `{term, activeOnly}`
+    - [ ] Debounce configurabile per realtime
+    - [ ] Normalizzare shape risultati (id, nomeCompleto, codice_rad, stato)
+    - [ ] Gestione errori/log centralizzata (logger + notificationService)
+    - [ ] Test rapido: nessun risultato, molti risultati, errore
+  
+  - **shared/components/ui/PatientAutocomplete.js**
+    - [ ] API componente:
+      - [ ] `attach({ input, resultsContainer, onSelect, activeOnly=false, minChars=2, debounceMs=250 })`
+      - [ ] `destroy()`
+    - [ ] Stati UI: Loading, No results (`EmptyState.js`), Error
+    - [ ] Navigazione tastiera (↑/↓/Enter/Escape), focus management, chiusura on blur
+    - [ ] Rendering risultati (nome, cognome, codice_rad), evidenziazione opzionale
+    - [ ] Selezione: set `input.value` e `input.dataset.patientId`, `onSelect(patient)`
+    - [ ] A11y: ruoli ARIA (combobox, listbox, option), `aria-expanded`, `aria-activedescendant`, `aria-controls`, annunci `aria-live`
+  
+  - **shared/utils/searchUtils.js**
+    - [ ] `debounce(fn, ms)`
+    - [ ] `highlight(text, term)` sicuro (no XSS; DOMPurify se necessario)
+    - [ ] `toSearchKey(term, activeOnly)` per cache keys
+    - [ ] Helpers AbortController per cancellare richieste realtime
+  
+  - **shared/services/cacheService.js** (opzionale)
+    - [ ] `get(key)`, `set(key, value, ttlMs)`, `has(key)`, `purgeExpired()`
+  
+  - **Allineamento servizi esistenti (patients)**
+    - [ ] Verificare `features/patients/services/patientApi.js`:
+      - [ ] `searchPatients` copre `nome`, `cognome`, `codice_rad`
+      - [ ] Parametro `activeOnly` rispettato
+      - [ ] `limit`/order coerenti
+    - [ ] `patientService.js` rimane thin layer (no duplicazioni di logica)
+  
+  - **Migrazione Eventi Clinici**
+    - [ ] `features/eventi-clinici/views/eventi-clinici-api.js`: rimuovere ricerca custom (debounce/cache) e usare il service
+    - [ ] `EventiCliniciFilterManager.js` e `EventiCliniciModalManager.js`: usare `PatientAutocomplete.attach(...)`
+    - [ ] `eventi-clinici-ui.js`: usare `dataset.patientId` impostato dal componente e rimuovere reset duplicati
+    - [ ] Verifiche: lista + modal mostrano risultati coerenti; selezione popola correttamente
+  
+  - **Migrazione Dimissione**
+    - [ ] `features/patients/views/dimissione-api.js`: sostituire `searchActivePatients` con `patientSearchService.search(term, { activeOnly:true })`
+    - [ ] `dimissione-ui.js`: integrare `PatientAutocomplete.attach(...)` e rimuovere debounce/render manuali
+    - [ ] Verifiche: solo pazienti attivi, selezione e form ok
+  
+  - **Pulizia**
+    - [ ] Eliminare utilità duplicate (debounce, cache, rendering risultati)
+    - [ ] Consolidare messaggi di empty state
+    - [ ] Aggiornare import e rimuovere codice morto
+  
+  - **Test e QA**
+    - [ ] Regressione Eventi Clinici (lista, modal)
+    - [ ] Regressione Dimissione
+    - [ ] Lista pazienti: filtro `search` coerente
+    - [ ] Performance: niente doppie chiamate, cache TTL ok
+    - [ ] A11y: tastiera e annunci corretti

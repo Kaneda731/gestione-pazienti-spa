@@ -3,6 +3,7 @@
 import { toggleEventTypeFields } from './eventi-clinici-ui.js';
 import { logger } from '../../../core/services/logger/loggerService.js';
 import { hideAllSearchResults } from './EventiCliniciUtils.js';
+import { attach as attachPatientAutocomplete } from '../../../shared/components/ui/PatientAutocomplete.js';
 
 /**
  * Gestione degli event handlers per gli eventi clinici
@@ -262,22 +263,30 @@ export class EventiCliniciEventHandlers {
    * Configura i listener per la ricerca
    */
   setupSearchListeners() {
-    // Main patient search with real-time filtering
-    if (this.domElements.searchPatientInput) {
-      const searchHandler = this.filterManager.createPatientSearchHandler(
-        null,
-        (searchTerm) => this.filterManager.handlePatientSearchFilter(searchTerm)
-      );
-      
-      this.domElements.searchPatientInput.addEventListener('input', searchHandler);
-      this.cleanupFunctions.push(() => this.domElements.searchPatientInput.removeEventListener('input', searchHandler));
+    // Main patient search using shared PatientAutocomplete
+    if (this.domElements.searchPatientInput && this.domElements.patientSearchResults) {
+      const { destroy } = attachPatientAutocomplete({
+        input: this.domElements.searchPatientInput,
+        resultsContainer: this.domElements.patientSearchResults,
+        activeOnly: true,
+        onSelect: () => this.filterManager.handlePatientSearchFilter(this.domElements.searchPatientInput.value),
+      });
+      this.cleanupFunctions.push(() => destroy && destroy());
     }
 
-    // Modal patient search
-    if (this.domElements.eventPatientInput) {
-      const handler = this.modalManager.createModalPatientSearchHandler();
-      this.domElements.eventPatientInput.addEventListener('input', handler);
-      this.cleanupFunctions.push(() => this.domElements.eventPatientInput.removeEventListener('input', handler));
+    // Modal patient search using shared PatientAutocomplete
+    if (this.domElements.eventPatientInput && this.domElements.eventPatientSearchResults) {
+      const { destroy } = attachPatientAutocomplete({
+        input: this.domElements.eventPatientInput,
+        resultsContainer: this.domElements.eventPatientSearchResults,
+        activeOnly: true,
+        onSelect: (patient) => {
+          if (this.domElements.eventPatientId) {
+            this.domElements.eventPatientId.value = patient.id;
+          }
+        },
+      });
+      this.cleanupFunctions.push(() => destroy && destroy());
     }
 
     // Hide search results when clicking outside

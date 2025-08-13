@@ -2,11 +2,11 @@
 import CustomDatepicker from '../../../shared/components/forms/CustomDatepicker.js';
 import { initCustomSelects } from '../../../shared/components/forms/CustomSelect.js';
 import { notificationService } from '../../../core/services/notifications/notificationService.js';
-import { debounce } from '../../../shared/utils/dom.js';
+import { attach as attachPatientAutocomplete } from '../../../shared/components/ui/PatientAutocomplete.js';
 
 
 let datepickerInstance = null;
-let debouncedSearch;
+let autocompleteHandle = null;
 
 // Contiene gli elementi del DOM per un accesso più facile
 export const dom = {
@@ -38,7 +38,7 @@ function clearSearchResults() {
 /**
  * Inizializza i componenti della UI, come il datepicker.
  */
-export function initializeUI(searchCallback) {
+export function initializeUI(onSelectPatient) {
     datepickerInstance = new CustomDatepicker('[data-datepicker]', {
         dateFormat: "d/m/Y",
     });
@@ -46,18 +46,19 @@ export function initializeUI(searchCallback) {
     // Inizializza i custom select per tutte le select con data-custom="true"
     initCustomSelects('.form-select[data-custom="true"]');
 
-    debouncedSearch = debounce(searchCallback, 300);
-
-    if (dom.searchInput) {
-        dom.searchInput.addEventListener('input', (e) => {
-            const query = e.target.value.trim();
-            if (query.length > 2) {
-                setLoading(true);
-                debouncedSearch(query);
-            } else {
-                clearSearchResults();
+    // Autocomplete pazienti centralizzato (solo pazienti attivi)
+    if (dom.searchInput && dom.resultsContainer) {
+        const handle = attachPatientAutocomplete({
+            input: dom.searchInput,
+            resultsContainer: dom.resultsContainer,
+            activeOnly: true,
+            minChars: 2,
+            debounceMs: 250,
+            onSelect: (patient) => {
+                onSelectPatient?.(patient);
             }
         });
+        autocompleteHandle = handle;
     }
     
     // Inizializza i listener per i campi di trasferimento
@@ -73,6 +74,10 @@ export function cleanupUI() {
     if (datepickerInstance) {
         datepickerInstance.destroy();
         datepickerInstance = null;
+    }
+    if (autocompleteHandle && typeof autocompleteHandle.destroy === 'function') {
+        autocompleteHandle.destroy();
+        autocompleteHandle = null;
     }
     
     // Distrugge tutti i custom select

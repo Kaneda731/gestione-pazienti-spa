@@ -1,4 +1,28 @@
 /* forms/_datepicker.scss
    Datepicker theme/overrides. */
 
-// Placeholder: styles will be migrated incrementally.
+/* Stili per il datepicker (Tema Chiaro) */
+.datepicker {
+    --bs-datepicker-cell-selected-bg: var(--primary-color);
+    --bs-datepicker-cell-today-color: var(--primary-color);
+    --bs-datepicker-font-size: var(--font-size-sm);
+}
+
+/* Stili per i gruppi di input con icone (es. datepicker) */
+.input-group-icon {
+    position: relative;
+
+    .form-control {
+        // Aggiungi padding a destra per fare spazio all'icona
+        padding-right: 2.5rem; 
+    }
+
+    .input-icon {
+        position: absolute;
+        top: 50%;
+        right: 0.75rem;
+        transform: translateY(-50%);
+        pointer-events: none; // L'icona non deve catturare i click
+        color: var(--text-muted);
+    }
+}

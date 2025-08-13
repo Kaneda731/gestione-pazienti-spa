@@ -12,7 +12,7 @@ class ResponsiveChartAdapter {
   constructor(breakpoints = {
     mobile: 767,
     tablet: 991,
-    desktop: 1199
+    desktop: 1200
   }) {
     // Inizializza la factory degli adapter
     this.adapterFactory = new ChartAdapterFactory(breakpoints);
@@ -25,6 +25,8 @@ class ResponsiveChartAdapter {
     
     // Handler per il ridimensionamento
     this.resizeHandler = null;
+    // Unsubscribe per il device change, per evitare leak
+    this.unsubscribeDeviceChange = null;
   }
 
 
@@ -58,9 +60,13 @@ class ResponsiveChartAdapter {
     if (this.resizeHandler) {
       window.removeEventListener('resize', this.resizeHandler);
     }
+    if (typeof this.unsubscribeDeviceChange === 'function') {
+      try { this.unsubscribeDeviceChange(); } catch (e) { console.warn('Errore durante unsubscribe device change:', e); }
+      this.unsubscribeDeviceChange = null;
+    }
     
     // Crea un nuovo handler con throttling
-    this.resizeHandler = ChartUtils.throttle(() => {
+    const onResize = () => {
       const newDevice = this.adapterFactory.getCurrentDeviceType();
       
       // Aggiorna solo se il tipo di dispositivo è cambiato
@@ -77,16 +83,27 @@ class ResponsiveChartAdapter {
         
         // Aggiorna le opzioni del grafico
         const adaptedOptions = this.adaptOptions(options);
-        chart.options = { ...chart.options, ...adaptedOptions };
+        const { scales: _ignoreScales1, ...restOptions1 } = chart.options || {};
+        chart.options = { ...restOptions1, ...adaptedOptions };
         chart.update();
+      } else {
+        // Anche se il device non cambia, assicura il resize del canvas
+        // (es. variazione larghezza dentro lo stesso breakpoint)
+        if (typeof chart.resize === 'function') {
+          // Evita resize eccessivi grazie al throttling
+          chart.resize();
+        } else if (typeof chart.update === 'function') {
+          chart.update('none');
+        }
       }
-    }, 250);
+    };
+    this.resizeHandler = ChartUtils.throttle(onResize, 250);
     
     // Aggiungi il nuovo handler
     window.addEventListener('resize', this.resizeHandler);
     
     // Registra anche un listener per il cambio di dispositivo
-    this.adapterFactory.onDeviceChange((newDevice) => {
+    this.unsubscribeDeviceChange = this.adapterFactory.onDeviceChange((newDevice) => {
       // Ottieni il nuovo adapter
       this.currentAdapter = this.adapterFactory.getAdapterForDevice(newDevice);
       
@@ -97,9 +114,19 @@ class ResponsiveChartAdapter {
       
       // Aggiorna le opzioni del grafico
       const adaptedOptions = this.adaptOptions(options);
-      chart.options = { ...chart.options, ...adaptedOptions };
+      const { scales: _ignoreScales2, ...restOptions2 } = chart.options || {};
+      chart.options = { ...restOptions2, ...adaptedOptions };
       chart.update();
     });
+
+    // Esegui subito un adattamento iniziale per allineare stato/layout
+    if (chart && chart.canvas && chart.canvas.parentNode) {
+      this.adaptLayout(chart.canvas.parentNode);
+    }
+    const initialOptions = this.adaptOptions(options);
+    const { scales: _ignoreScales3, ...restOptions3 } = chart.options || {};
+    chart.options = { ...restOptions3, ...initialOptions };
+    chart.update();
   }
 
   /**
@@ -214,6 +241,10 @@ class ResponsiveChartAdapter {
     if (this.resizeHandler) {
       window.removeEventListener('resize', this.resizeHandler);
       this.resizeHandler = null;
+    }
+    if (typeof this.unsubscribeDeviceChange === 'function') {
+      try { this.unsubscribeDeviceChange(); } catch (e) { console.warn('Errore durante unsubscribe device change:', e); }
+      this.unsubscribeDeviceChange = null;
     }
   }
 }

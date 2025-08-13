@@ -59,6 +59,12 @@ Thumbs.db
 *.js
 !vite.config.js
 
+# Ensure source files remain included (override the broad *.js ignore)
+!src/**/*.js
+!src/**/*.ts
+!src/**/*.jsx
+!src/**/*.tsx
+
 # All configuration files (except essential ones)
 *.config.*
 !vite.config.js

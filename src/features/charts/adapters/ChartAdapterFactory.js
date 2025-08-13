@@ -14,7 +14,7 @@ class ChartAdapterFactory {
   constructor(breakpoints = {
     mobile: 767,
     tablet: 991,
-    desktop: 1199
+    desktop: 1200
   }) {
     this.deviceDetector = new DeviceDetector(breakpoints);
     this.adapters = {

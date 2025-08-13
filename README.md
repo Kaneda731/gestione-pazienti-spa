@@ -1,6 +1,177 @@
 # gestione-pazienti-spa
 Applicazione SPA per la gestione dei pazienti con Supabase
 
+## Sommario
+- Introduzione
+- Stack Tecnologico
+- Struttura del Progetto
+- Setup & Avvio
+- Variabili d'Ambiente
+- Script NPM
+- Convenzioni (Import, Naming, Struttura servizi)
+- Testing
+- Build & Deploy (Netlify)
+- Best Practices (SPA)
+- Troubleshooting
+- Contributi e Stile di Codice
+- Licenza
+
+## Introduzione
+SPA per la gestione dei pazienti, con autenticazione e persistenza dati su Supabase. Il progetto utilizza Vite per sviluppo/build, Vitest per i test, e Netlify per il deploy.
+
+## Stack Tecnologico
+- Vite (build tool, dev server)
+- Vanilla JS/ESM
+- Sass/SCSS per gli stili
+- Supabase (Auth, Database, RLS)
+- Vitest (testing)
+- Netlify (hosting / CI build)
+
+## Struttura del Progetto
+
+```
+src/
+  app/                        # bootstrap app, main entry, router
+  core/
+    services/                 # servizi core, raggruppati per dominio
+      auth/
+        roleService.js
+      bootstrap/
+        bootstrapService.js
+      emergency/
+        emergencyCommands.js
+      error/
+        errorService.js
+      logger/
+        loggerService.js
+      navigation/
+        navigationService.js
+      notifications/
+        notification*.js
+      state/
+        stateService.js
+        uiStateService.js
+      supabase/
+        supabaseClient.js
+        viteSupabaseMiddleware.js
+      theme/
+        themeService.js
+  features/                   # funzionalità di dominio (patients, diagnosi, ecc.)
+  shared/                     # componenti/utilità condivisi
+  views/                      # viste/entry lato UI
+  assets/
+    favicon.svg
+  styles/                     # ex css/
+    desktop.scss
+    mobile.scss
+    modules/
+index.html                    # entry HTML
+vite.config.js                # alias '@/'=> 'src/' e ottimizzazioni
+vitest.config.js              # configurazione test
+```
+
+Note reorg:
+- `src/css/` → `src/styles/`
+- `src/favicon.svg` → `src/assets/favicon.svg`
+- Servizi in `src/core/services/` raggruppati in sottocartelle per dominio.
+
+## Setup & Avvio
+1) Prerequisiti: Node.js 18+, npm 9+
+2) Installazione dipendenze:
+```bash
+npm install
+```
+3) Avvio sviluppo:
+```bash
+npm run dev
+```
+Apri `http://localhost:5173` (o porta indicata da Vite).
+
+## Variabili d'Ambiente
+Configura le chiavi Supabase (non committare segreti):
+- Crea un file `.env.local` (o usa variabili d’ambiente del sistema)
+- Esempio:
+```bash
+VITE_SUPABASE_URL=https://<your-project>.supabase.co
+VITE_SUPABASE_ANON_KEY=ey...
+```
+Le variabili con prefisso `VITE_` sono esposte lato client (Vite).
+
+## Script NPM
+- `npm run dev`: sviluppo con HMR
+- `npm run build`: build produzione
+- `npm run preview`: anteprima build locale
+- `npm run test`: esecuzione test (Vitest)
+
+## Convenzioni
+### Import con alias
+- Alias `@` → `src/` (configurato in `vite.config.js`)
+- Preferire `@/` per evitare path relativi profondi.
+- Esempi:
+```js
+import { logger } from '@/core/services/logger/loggerService.js'
+import { supabase } from '@/core/services/supabase/supabaseClient.js'
+import { stateService } from '@/core/services/state/stateService.js'
+import '@/core/services/bootstrap/bootstrapService.js'
+```
+
+### Struttura Servizi
+Organizzati per dominio in `src/core/services/`:
+- `auth/`, `bootstrap/`, `emergency/`, `error/`, `logger/`, `navigation/`, `notifications/`, `state/`, `supabase/`, `theme/`.
+
+### Naming & Stili
+- File JS: camelCase per export, kebab-case/flat dove coerente con feature.
+- SCSS: modulare in `styles/modules/` e importato da `desktop.scss`/`mobile.scss`.
+
+## Testing
+Esegui test:
+```bash
+npm run test
+```
+Note: alcuni test legacy potrebbero richiedere adattamenti post-reorg.
+
+## Build & Deploy (Netlify)
+Build locale:
+```bash
+npm run build
+```
+Anteprima build:
+```bash
+npm run preview
+```
+Deploy: Netlify build su push (file `_redirects` generato in build). Verifica log Netlify per warning (Sass, dynamic import mixed static/dynamic).
+
+## Best Practices (SPA)
+Consulta la knowledge base completa in `docs/spa-best-practices.md`.
+
+Checklist rapida per le PR:
+- Performance
+  - [ ] Code splitting e lazy load su route/feature
+  - [ ] Nessuna regressione CWV; Lighthouse ok
+  - [ ] SW caching sicuro (se usato)
+- Security
+  - [ ] Niente `innerHTML` non sanitizzato; usare DOMPurify quando serve
+  - [ ] CSP strict valutata/applicata; evitare inline script/style
+  - [ ] CORS minimizzato (no wildcard con credenziali)
+- Accessibilità
+  - [ ] Focus gestito al cambio pagina; navigazione tastiera ok
+  - [ ] Ruoli/nome accessibile/label corretti; axe scan principale
+- Testing
+  - [ ] Test unit/component/e2e aggiornati; selettori stabili `data-*`
+
+## Troubleshooting
+- Import rotti dopo spostamenti: verificare mapping alias `@` e usare i nuovi percorsi dei servizi.
+- Sass deprecation warnings: consultare i file in `styles/modules/components/charts/` per refactor futuro.
+- Dynamic import anche statico: Vite non farà code-splitting per quei moduli; considerare di unificare la modalità di import.
+
+## Contributi e Stile di Codice
+- Preferire import con `@/`
+- Raggruppare nuovi servizi nelle sottocartelle di dominio adeguate
+- PR piccole e atomiche; includere note di migrazione se si spostano file
+
+## Licenza
+Proprietaria (o specificare licenza adottata).
+
 ## Requisiti
 - Node.js 18+
 - npm 9+

@@ -48,6 +48,7 @@ Thumbs.db
 # All documentation and markdown (except README)
 *.md
 !README.md
+!docs/spa-best-practices.md
 
 # All JSON files (except package files)
 *.json

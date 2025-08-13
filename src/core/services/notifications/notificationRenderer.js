@@ -1,6 +1,7 @@
 // Logica di rendering e container notifiche
 
 import { NOTIFICATION_TYPES, RESPONSIVE_CONFIG, getDurationForType } from './notificationConfig.js';
+import { logger } from '../logger/loggerService.js';
 import { NotificationErrorHandler } from './notificationErrorHandler.js';
 import { createProgressBar } from './notificationProgressBar.js';
 
@@ -109,7 +110,7 @@ export function createNotificationElement({
             // Progress bar per auto-close - usa sempre JavaScript per controllo preciso
             const notificationDuration = getDurationForType(notification.type, options.duration);
             if (notificationDuration > 0 && !options.persistent) {
-                console.log(`🔧 Creating progress bar placeholder for ${notification.type} (${notificationDuration}ms)`);
+                logger.debug(`🔧 Creating progress bar placeholder for ${notification.type} (${notificationDuration}ms)`);
                 // Placeholder per progress bar JavaScript
                 contentHtml += `
                     <div class="notification__progress notification__progress--js-placeholder" 
@@ -124,7 +125,7 @@ export function createNotificationElement({
             div.innerHTML = contentHtml;
             
         } catch (htmlError) {
-            console.error('❌ Error building notification HTML:', htmlError);
+            logger.error('❌ Error building notification HTML:', htmlError);
             // Fallback: contenuto semplice
             div.innerHTML = `
                 <div class="notification__content">
@@ -147,7 +148,7 @@ export function createNotificationElement({
                 notificationContainer
             });
         } catch (eventError) {
-            console.error('❌ Error attaching notification events:', eventError);
+            logger.error('❌ Error attaching notification events:', eventError);
             // Fallback: aggiungi solo evento di chiusura base
             const closeBtn = div.querySelector('.notification__close');
             if (closeBtn) {
@@ -171,7 +172,7 @@ export function createNotificationElement({
                 });
             }
         } catch (touchError) {
-            console.error('❌ Error attaching touch events:', touchError);
+            logger.error('❌ Error attaching touch events:', touchError);
             // Touch events sono opzionali, continua senza
         }
 
@@ -180,7 +181,7 @@ export function createNotificationElement({
             const notificationDuration = getDurationForType(notification.type, options.duration);
             if (notificationDuration > 0 && !options.persistent) {
                 const progressBarPlaceholder = div.querySelector('.notification__progress--js-placeholder');
-                console.log('🔍 Looking for progress bar placeholder:', progressBarPlaceholder);
+                logger.debug('🔍 Looking for progress bar placeholder:', progressBarPlaceholder);
                 
                 if (progressBarPlaceholder) {
                     // Crea progress bar JavaScript che gestisce anche l'autoclose
@@ -195,7 +196,7 @@ export function createNotificationElement({
                             try {
                                 removeNotification(notification.id);
                             } catch (removeError) {
-                                console.error('❌ Error in progress complete callback:', removeError);
+                                logger.error('❌ Error in progress complete callback:', removeError);
                                 if (div.parentNode) {
                                     div.remove();
                                 }

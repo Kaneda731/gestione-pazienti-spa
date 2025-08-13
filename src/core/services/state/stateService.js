@@ -496,7 +496,7 @@ class StateService {
     }
 
     const currentNotifications = this.getState("notifications");
-    console.log(
+    logger.debug(
       `[StateService] Current notifications before adding: ${currentNotifications.length}`,
       currentNotifications
     );
@@ -504,7 +504,7 @@ class StateService {
     // Gestisci limite massimo notifiche
     let notifications = [...currentNotifications, notification];
     if (notifications.length > settings.maxStoredNotifications) {
-      console.warn(
+      logger.warn(
         `[StateService] Max stored notifications (${settings.maxStoredNotifications}) exceeded. Trimming old notifications.`
       );
       // Rimuovi le notifiche più vecchie (eccetto errori persistenti)
@@ -520,14 +520,14 @@ class StateService {
         (n) =>
           !toRemove.includes(n) || (n.options.persistent && n.type === "error")
       );
-      console.log(
+      logger.debug(
         `[StateService] Notifications after trimming: ${notifications.length}`,
         notifications
       );
     }
 
     this.setState("notifications", notifications);
-    console.log(
+    logger.debug(
       `[StateService] Notification added. New notifications array length: ${
         this.getState("notifications").length
       }`,
@@ -538,11 +538,11 @@ class StateService {
 
   removeNotification(id) {
     const before = this.getState("notifications");
-    console.log("[StateService] Notifiche prima della rimozione:", before);
+    logger.debug("[StateService] Notifiche prima della rimozione:", before);
     const notifications = before.filter((n) => n.id !== id);
     this.setState("notifications", notifications);
     const after = this.getState("notifications");
-    console.log("[StateService] Notifiche dopo la rimozione:", after);
+    logger.debug("[StateService] Notifiche dopo la rimozione:", after);
   }
 
   /**

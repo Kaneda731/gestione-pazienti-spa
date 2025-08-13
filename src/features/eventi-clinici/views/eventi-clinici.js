@@ -221,6 +221,30 @@ async function initializeManagers() {
         if (!eventId) return;
 
         try {
+          // Chiudi la modal Azioni se è aperta, per evitare sovrapposizioni su mobile
+          const azioniModalEl = document.getElementById('eventi-azioni-modal');
+          if (azioniModalEl) {
+            try {
+              const { Modal } = await import('bootstrap');
+              const inst = Modal.getInstance(azioniModalEl) || Modal.getOrCreateInstance(azioniModalEl);
+              inst.hide();
+              // Attendi la chiusura completa (fallback timeout breve)
+              await new Promise((resolve) => {
+                let done = false;
+                const t = setTimeout(() => { if (!done) { done = true; resolve(); } }, 250);
+                azioniModalEl.addEventListener('hidden.bs.modal', () => {
+                  if (!done) { done = true; clearTimeout(t); resolve(); }
+                }, { once: true });
+              });
+            } catch {
+              // Fallback se Bootstrap non è disponibile (modal mostrata via fallback)
+              azioniModalEl.classList.remove('show');
+              azioniModalEl.style.display = 'none';
+              document.querySelectorAll('.modal-backdrop').forEach((bd) => bd.parentNode && bd.parentNode.removeChild(bd));
+              document.body.classList.remove('modal-open');
+            }
+          }
+
           if (detailBtn) {
             modalManager.showEventDetail(eventId);
             return;

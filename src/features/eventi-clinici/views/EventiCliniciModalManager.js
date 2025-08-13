@@ -34,6 +34,48 @@ export class EventiCliniciModalManager {
     this.eventDetailModal = null;
   }
 
+  // Attende che un modal Bootstrap sia completamente nascosto
+  waitForModalHidden(modalElement, timeoutMs = 500) {
+    return new Promise((resolve) => {
+      if (!modalElement) return resolve();
+
+      const done = () => {
+        modalElement.removeEventListener('hidden.bs.modal', onHidden);
+        clearTimeout(timer);
+        resolve();
+      };
+
+      const onHidden = () => done();
+      modalElement.addEventListener('hidden.bs.modal', onHidden, { once: true });
+
+      const timer = setTimeout(() => {
+        // Fallback in caso l'evento non arrivi su alcuni device
+        done();
+      }, timeoutMs);
+    });
+  }
+
+  // Ripulisce eventuali backdrop duplicati e garantisce un solo modal aperto
+  ensureSingleModalOpen() {
+    try {
+      // Rimuove backdrop duplicati lasciando l'ultimo
+      const backdrops = Array.from(document.querySelectorAll('.modal-backdrop'));
+      if (backdrops.length > 1) {
+        backdrops.slice(0, -1).forEach((bd) => bd.parentNode && bd.parentNode.removeChild(bd));
+      }
+
+      // Se nessun modal è visibile, rimuovi la classe dal body
+      const anyOpen = document.querySelector('.modal.show');
+      if (!anyOpen) {
+        document.body.classList.remove('modal-open');
+      } else {
+        document.body.classList.add('modal-open');
+      }
+    } catch (e) {
+      // Non bloccare il flusso in caso di errori di cleanup
+    }
+  }
+
   /**
    * Inizializza i modali Bootstrap
    */
@@ -209,13 +251,18 @@ export class EventiCliniciModalManager {
         return;
       }
 
-      // Close detail modal if open
+      // Close detail modal if open, poi apri il form solo dopo che è stato nascosto
+      const detailEl = this.domElements && this.domElements.eventDetailModal;
       if (this.eventDetailModal) {
         this.eventDetailModal.hide();
+        await this.waitForModalHidden(detailEl);
       }
 
       // Open edit modal
       this.openEventModal(evento);
+
+      // Safety: assicurati che non restino backdrop/scroll bloccati su mobile
+      this.ensureSingleModalOpen();
 
     } catch (error) {
       logger.error('❌ Errore modifica evento:', error);

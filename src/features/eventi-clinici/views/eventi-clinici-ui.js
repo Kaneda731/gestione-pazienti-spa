@@ -518,23 +518,11 @@ function createTableRow(ev) {
  * Crea i pulsanti di azione per la tabella
  */
 function createActionButtons(ev) {
-  const resolveButton = ev.tipo_evento === 'infezione' && !ev.data_fine_evento
-    ? `<button class="btn btn-outline-success event-resolve-btn" data-evento-id="${ev.id}" title="Risolvi">
-         <span class="material-icons">check_circle</span>
-       </button>`
-    : '';
-
   return `
     <div class="btn-group btn-group-sm" role="group">
-      <button class="btn btn-outline-primary event-detail-btn" data-evento-id="${ev.id}" title="Dettagli">
-        <span class="material-icons">visibility</span>
-      </button>
-      <button class="btn btn-outline-secondary event-edit-btn" data-evento-id="${ev.id}" title="Modifica">
-        <span class="material-icons">edit</span>
-      </button>
-      ${resolveButton}
-      <button class="btn btn-outline-danger event-delete-btn" data-evento-id="${ev.id}" title="Elimina">
-        <span class="material-icons">delete</span>
+      <button class="btn btn-primary event-detail-btn" data-evento-id="${ev.id}" title="Apri dettagli evento" aria-label="Apri dettagli evento">
+        <span class="material-icons align-middle me-1">visibility</span>
+        <span class="align-middle">Dettagli</span>
       </button>
     </div>
   `;
@@ -1002,12 +990,32 @@ export function renderEventDetails(evento) {
 
   const detailsHTML = createEventDetailsHTML(evento);
   domElements.detailContent.innerHTML = sanitizeHtml(detailsHTML);
+
+  // Rimuovi eventuali duplicati dei pulsanti Modifica/Elimina dal footer della modal dettagli
+  try {
+    const modalEl = domElements.eventDetailModal;
+    if (modalEl) {
+      const footer = modalEl.querySelector('.modal-footer');
+      if (footer) {
+        footer.querySelectorAll('.event-edit-btn, .event-delete-btn').forEach((btn) => btn.remove());
+        // Se il footer resta vuoto (o solo con spazi), rimuovi eventuali nodi di testo vuoti
+        if (!footer.querySelector('*') || footer.textContent.trim() === '') {
+          footer.classList.add('d-none');
+        }
+      }
+    }
+  } catch (err) {
+    logger.warn('Footer cleanup dettagli evento non riuscito:', err);
+  }
 }
 
 /**
  * Crea l'HTML per i dettagli dell'evento
  */
 function createEventDetailsHTML(evento) {
+  const isInfezione = evento.tipo_evento === 'infezione';
+  const isAttiva = isInfezione && !evento.data_fine_evento;
+
   const statusSection = evento.tipo_evento === 'infezione'
     ? `<div class="col-md-6">
          <strong>Stato:</strong>
@@ -1041,8 +1049,30 @@ function createEventDetailsHTML(evento) {
   const typeSpecificSection = createTypeSpecificSection(evento);
   const timestampSection = createTimestampSection(evento);
 
+  // Azioni nella scheda dettagli: Modifica, Elimina, e Risolvi (solo infezione attiva)
+  const resolveBtn = isAttiva
+    ? `<button class="btn btn-success btn-sm event-resolve-btn" data-evento-id="${evento.id}" title="Risolvi">
+         <span class="material-icons align-middle me-1">check_circle</span>
+         Risolvi
+       </button>`
+    : '';
+
+  const actionsToolbar = `
+    <div class="event-detail-actions d-flex flex-wrap gap-2 justify-content-end mb-3">
+      <button class="btn btn-outline-secondary btn-sm event-edit-btn" data-evento-id="${evento.id}" title="Modifica">
+        <span class="material-icons align-middle me-1">edit</span>
+        Modifica
+      </button>
+      <button class="btn btn-outline-danger btn-sm event-delete-btn" data-evento-id="${evento.id}" title="Elimina">
+        <span class="material-icons align-middle me-1">delete</span>
+        Elimina
+      </button>
+      ${resolveBtn}
+    </div>`;
+
   return `
     <div class="event-details">
+      ${actionsToolbar}
       <div class="row g-3">
         <div class="col-md-6">
           <strong>Tipo Evento:</strong>

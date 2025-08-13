@@ -205,44 +205,35 @@ export async function initEventiCliniciView(urlParams) {
  */
 async function initializeManagers() {
   try {
-    // Setup event card listeners function
+    // Setup event listeners with delegation so dynamically added buttons work (e.g., in detail modal)
     const setupEventCardListeners = () => {
-      // Event detail buttons
-      document.querySelectorAll(".event-detail-btn").forEach((btn) => {
-        const handler = (e) => {
-          e.stopPropagation();
-          const eventId = btn.dataset.eventoId;
-          modalManager.showEventDetail(eventId);
-        };
-        btn.addEventListener("click", handler);
-      });
+      document.addEventListener("click", async (e) => {
+        const detailBtn = e.target.closest && e.target.closest(".event-detail-btn");
+        const editBtn = e.target.closest && e.target.closest(".event-edit-btn");
+        const deleteBtn = e.target.closest && e.target.closest(".event-delete-btn");
+        const resolveBtn = e.target.closest && e.target.closest(".event-resolve-btn");
 
-      // Event edit buttons
-      document.querySelectorAll(".event-edit-btn").forEach((btn) => {
-        const handler = (e) => {
-          e.stopPropagation();
-          const eventId = btn.dataset.eventoId;
-          modalManager.editEvent(eventId);
-        };
-        btn.addEventListener("click", handler);
-      });
+        if (!detailBtn && !editBtn && !deleteBtn && !resolveBtn) return;
 
-      // Event delete buttons
-      document.querySelectorAll(".event-delete-btn").forEach((btn) => {
-        const handler = (e) => {
-          e.stopPropagation();
-          const eventId = btn.dataset.eventoId;
-          modalManager.confirmDeleteEvent(eventId);
-        };
-        btn.addEventListener("click", handler);
-      });
+        e.stopPropagation();
+        const btnEl = detailBtn || editBtn || deleteBtn || resolveBtn;
+        const eventId = btnEl && btnEl.dataset && btnEl.dataset.eventoId;
+        if (!eventId) return;
 
-      // Resolve infection buttons
-      document.querySelectorAll(".event-resolve-btn").forEach((btn) => {
-        const handler = async (e) => {
-          e.stopPropagation();
-          const eventId = btn.dataset.eventoId;
-          try {
+        try {
+          if (detailBtn) {
+            modalManager.showEventDetail(eventId);
+            return;
+          }
+          if (editBtn) {
+            modalManager.editEvent(eventId);
+            return;
+          }
+          if (deleteBtn) {
+            modalManager.confirmDeleteEvent(eventId);
+            return;
+          }
+          if (resolveBtn) {
             const { ResolveInfectionModal } = await import(
               "../components/ResolveInfectionModal.js"
             );
@@ -252,11 +243,11 @@ async function initializeManagers() {
               await resolveInfezioneEvento(eventId, dataFine);
               await dataManager.loadEventsData();
             }
-          } catch (err) {
-            logger.error("Errore nella risoluzione infezione:", err);
+            return;
           }
-        };
-        btn.addEventListener("click", handler);
+        } catch (err) {
+          logger.error("Errore gestione azione evento:", err);
+        }
       });
     };
 

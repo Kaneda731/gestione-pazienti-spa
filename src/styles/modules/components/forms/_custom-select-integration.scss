@@ -5,6 +5,40 @@
 /*
   REGOLE PER CUSTOM SELECT SPOSTATE DA JS A CSS
 */
+/*
+  Uniforma l'altezza del trigger del custom select
+  per allinearlo a input/datepicker.
+*/
+.custom-select-trigger {
+  height: 50px !important;
+  min-height: 50px !important;
+  display: flex;
+  align-items: center;
+  padding: 0 0.75rem;
+  background: #fff;
+  border: 1px solid var(--input-border);
+  border-radius: var(--border-radius-sm);
+}
+
+@media (max-width: 767px) {
+  .custom-select-trigger {
+    height: 46px !important;
+    min-height: 46px !important;
+  }
+}
+
+/* Mantenere continuità visiva quando il dropdown è aperto */
+.custom-select-wrapper.open .custom-select-trigger {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+/* Variante quando il dropdown si apre verso l'alto */
+.custom-select-wrapper.open.dropdown-up .custom-select-trigger {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
 select.custom-select-original {
   display: none !important; /* Forza il select originale a nascondersi */
 }
@@ -146,6 +180,10 @@ select.custom-select-original {
 /* Stile per le opzioni del dropdown */
 .custom-select-option {
   padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
   cursor: pointer;
   transition: background-color 0.15s ease;
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
@@ -155,4 +193,11 @@ select.custom-select-original {
     background-color: rgba(37, 99, 235, 0.1);
     color: var(--primary-color);
   }
+}
+
+/* Allinea icone Material nelle opzioni */
+.custom-select-option .material-icons {
+  font-size: 20px;
+  line-height: 1;
+  vertical-align: middle;
 }

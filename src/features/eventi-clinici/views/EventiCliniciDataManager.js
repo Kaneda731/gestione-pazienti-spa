@@ -29,6 +29,8 @@ export class EventiCliniciDataManager {
   constructor(state, setupEventCardListenersCallback) {
     this.state = state;
     this.setupEventCardListenersCallback = setupEventCardListenersCallback;
+    // Evita di aggiungere più volte gli stessi listener (es. dopo ogni reload dati)
+    this._cardListenersAttached = false;
   }
 
   /**
@@ -73,9 +75,13 @@ export class EventiCliniciDataManager {
    * Configura i listener per le card degli eventi
    */
   setupEventCardListeners() {
-    // Usa la funzione passata dal costruttore
+    // Evita registrazioni multiple dello stesso handler globale
+    if (this._cardListenersAttached) return;
+
+    // Usa la funzione passata dal costruttore per registrare i listener una sola volta
     if (this.setupEventCardListenersCallback) {
       this.setupEventCardListenersCallback();
+      this._cardListenersAttached = true;
     }
   }
 

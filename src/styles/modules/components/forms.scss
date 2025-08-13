@@ -1,3 +1,13 @@
+@import 'forms/base';
+@import 'forms/input-groups';
+@import 'forms/custom-select-integration';
+@import 'forms/datepicker';
+@import 'forms/diagnosi-dimissione';
+@import 'forms/eventi';
+@import 'forms/filters';
+@import 'forms/patient-search';
+@import 'forms/mobile';
+
 /* Evidenzia la checkbox Paziente Infetto */
 #infetto.form-check-input {
   width: 1.5em;

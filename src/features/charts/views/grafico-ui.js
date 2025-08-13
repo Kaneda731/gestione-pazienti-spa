@@ -79,14 +79,6 @@ export async function initializeUI() {
         if (dom.chartContainer) {
             try {
                 responsiveAdapter.adaptLayout(dom.chartContainer);
-                
-                // Implementa il layout responsive specifico per mobile o desktop
-                const deviceType = responsiveAdapter.detectDevice();
-                if (deviceType === 'mobile') {
-                    responsiveAdapter.implementMobileResponsiveLayout(dom.chartContainer, null);
-                } else if (deviceType === 'desktop') {
-                    responsiveAdapter.implementDesktopResponsiveLayout(dom.chartContainer, null);
-                }
             } catch (layoutError) {
                 console.error('Errore nell\'adattamento del layout:', layoutError);
                 // Continua l'esecuzione anche in caso di errore nel layout

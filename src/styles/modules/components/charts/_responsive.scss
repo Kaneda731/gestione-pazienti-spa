@@ -61,6 +61,16 @@ $chart-heights: (
       animation: spin 1s linear infinite;
     }
   }
+
+  // Optional gradient theme (light and dark aware)
+  &.chart-gradient {
+    background: linear-gradient(135deg, #e3eef7 0%, #c8d8e8 100%);
+  }
+
+  // Force light gradient regardless of dark mode or theme
+  &.chart-gradient.force-light {
+    background: linear-gradient(135deg, #e3eef7 0%, #c8d8e8 100%) !important;
+  }
 }
 
 // =============================================================================
@@ -258,6 +268,16 @@ $chart-heights: (
   
   .chart-container {
     background-color: rgba(30, 30, 30, 0.5);
+
+    &.chart-gradient {
+      // Dark variant of the gradient for better contrast
+      background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+    }
+
+    // Keep light gradient if force-light is present
+    &.chart-gradient.force-light {
+      background: linear-gradient(135deg, #e3eef7 0%, #c8d8e8 100%) !important;
+    }
   }
 }
 
@@ -270,5 +290,14 @@ $chart-heights: (
   
   .chart-container {
     background-color: rgba(30, 30, 30, 0.5);
+
+    &.chart-gradient {
+      background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+    }
+
+    // Keep light gradient if force-light is present under Bootstrap dark theme
+    &.chart-gradient.force-light {
+      background: linear-gradient(135deg, #e3eef7 0%, #c8d8e8 100%) !important;
+    }
   }
 }

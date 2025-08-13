@@ -443,9 +443,10 @@ export async function drawChart(data) {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
+            // Disabilitiamo il titolo interno di Chart.js: il titolo visibile è l'header della card
             title: {
-                display: true,
-                text: 'Distribuzione Diagnosi dei Pazienti',
+                display: false,
+                text: '',
                 font: { size: 18, weight: 'bold' }
             },
             legend: {
@@ -506,17 +507,13 @@ export async function drawChart(data) {
             currentChartType
         );
 
-        // Applica le opzioni responsive se possibile
+        // Applica l'adattamento responsive: evitiamo di ri-fondere le opzioni qui
+        // (createChart ha già applicato adaptOptions). Limitiamoci al resize handler.
         if (responsiveAdapter && currentChart) {
             try {
-                const adaptedOptions = responsiveAdapter.adaptOptions(currentChart.options);
-                currentChart.options = { ...currentChart.options, ...adaptedOptions };
-                
-                // Gestisci il resize solo se tutti i componenti necessari sono disponibili
                 if (typeof responsiveAdapter.handleResize === 'function') {
                     responsiveAdapter.handleResize(currentChart, chartOptions);
                 }
-                
                 currentChart.update();
             } catch (adaptError) {
                 console.error('Errore durante l\'adattamento del grafico:', adaptError);

@@ -9,7 +9,7 @@ class DeviceDetector {
   constructor(breakpoints = {
     mobile: 767,
     tablet: 991,
-    desktop: 1199
+    desktop: 1200
   }) {
     this.breakpoints = breakpoints;
     this.currentDevice = this.detectDevice();

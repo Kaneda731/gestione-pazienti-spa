@@ -508,8 +508,12 @@ class PatientTransactionService {
 
     const sanitized = { ...data };
     
-    // Rimuovi campi sensibili se presenti
-    const sensitiveFields = ['password', 'token', 'auth', 'secret'];
+    // Rimuovi campi sensibili se presenti (PII + credenziali)
+    const sensitiveFields = [
+      'password', 'token', 'auth', 'secret',
+      'nome', 'cognome', 'codice_fiscale', 'codice_rad', 'telefono', 'email',
+      'indirizzo', 'indirizzo_residenza', 'citta', 'cap', 'note', 'descrizione'
+    ];
     sensitiveFields.forEach(field => {
       if (sanitized[field]) {
         sanitized[field] = '[REDACTED]';

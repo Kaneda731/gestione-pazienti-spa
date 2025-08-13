@@ -1,7 +1,47 @@
-import { isDevelopment, isTest } from '../../../app/config/environment.js';
+import { isDevelopment, isTest, isProduction } from '../../../app/config/environment.js';
 
 // Esporta sia la classe che l'istanza singleton
 export class LoggerService {
+    /**
+     * Sanitize arguments to avoid leaking sensitive data in production
+     * - Keeps primitives as-is
+     * - For Error objects: keeps only name and message
+     * - For plain objects: redacts known sensitive fields
+     */
+    sanitizeArgs(args) {
+        if (!isProduction) return args;
+
+        const sensitiveKeys = new Set([
+            'password', 'token', 'auth', 'secret',
+            // PII fields potentially present in patient payloads
+            'nome', 'cognome', 'codice_fiscale', 'codice_rad', 'telefono', 'email',
+            'indirizzo', 'indirizzo_residenza', 'citta', 'cap', 'note', 'descrizione'
+        ]);
+
+        const sanitizeValue = (val) => {
+            if (val == null) return val;
+            if (typeof val === 'string') {
+                // Truncate very long strings to avoid accidental dumps
+                return val.length > 200 ? val.slice(0, 200) + '…' : val;
+            }
+            if (val instanceof Error) {
+                return { name: val.name, message: val.message };
+            }
+            if (Array.isArray(val)) {
+                return val.map(sanitizeValue);
+            }
+            if (typeof val === 'object') {
+                const out = {};
+                for (const [k, v] of Object.entries(val)) {
+                    out[k] = sensitiveKeys.has(k) ? '[REDACTED]' : sanitizeValue(v);
+                }
+                return out;
+            }
+            return val;
+        };
+
+        return args.map(sanitizeValue);
+    }
     /**
      * Log di debug - attivo solo in sviluppo e test
      * @param {...any} args - Argomenti da loggare
@@ -27,7 +67,9 @@ export class LoggerService {
      * @param {...any} args - Argomenti da loggare
      */
     error(...args) {
-        console.error(...args);
+        // Always log errors, but sanitize payload in production
+        const safeArgs = this.sanitizeArgs(args);
+        console.error(...safeArgs);
     }
 
     /**

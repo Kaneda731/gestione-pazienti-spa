@@ -1,5 +1,6 @@
 // src/features/patients/views/form-api.js
 import { supabase } from '../../../core/services/supabase/supabaseClient.js';
+import { logger } from '../../../core/services/logger/loggerService.js';
 
 /**
  * Recupera le opzioni per il campo diagnosi.
@@ -12,7 +13,7 @@ export async function getDiagnosiOptions() {
         .order('nome', { ascending: true });
 
     if (error) {
-        console.error('Error loading diagnosi options:', error.message);
+        logger.error('Error loading diagnosi options:', error);
         throw new Error('Impossibile caricare le opzioni di diagnosi.');
     }
 
@@ -34,7 +35,7 @@ export async function getPatientById(patientId) {
         .single();
 
     if (error) {
-        console.error('Error loading patient for editing:', error.message);
+        logger.error('Error loading patient for editing:', error);
         throw new Error('Impossibile caricare i dati del paziente.');
     }
 
@@ -69,7 +70,7 @@ export async function savePatient(patientData, patientId) {
     }
 
     if (result.error) {
-        console.error('Error saving patient:', result.error.message);
+        logger.error('Error saving patient:', result.error);
         throw new Error(`Errore durante il salvataggio: ${result.error.message}`);
     }
 

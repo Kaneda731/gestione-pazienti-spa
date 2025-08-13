@@ -10,8 +10,8 @@ import { STORAGE_KEYS } from "./config/constants.js";
 
 // Importa tutti gli stili, nell'ordine corretto
 import "flatpickr/dist/flatpickr.min.css";
-import "/src/css/desktop.scss";
-import "/src/css/mobile.scss";
+import "/src/styles/desktop.scss";
+import "/src/styles/mobile.scss";
 
 // Core services
 import { initErrorHandling } from "../core/services/errorService.js";

@@ -2,4 +2,17 @@
    Input groups: heights, alignment, icons.
    NOTE: Keep exact selectors; migrate progressively. */
 
+/* Input group sizing for Diagnosi and Dimissione */
+#diagnosi-form .input-group .form-control,
+#diagnosi-form .input-group .form-select,
+#form-dimissione .input-group .form-control,
+#form-dimissione .input-group .form-select {
+  min-height: 56px;
+  font-size: 16px;
+  padding: 1rem 1.25rem;
+  border-radius: 8px;
+  width: 100%;
+  margin-bottom: 0;
+}
+
 // Placeholder: styles will be migrated incrementally.

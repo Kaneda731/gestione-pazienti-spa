@@ -1,5 +1,3 @@
-@import 'forms/base';
-@import 'forms/input-groups';
 @import 'forms/custom-select-integration';
 @import 'forms/datepicker';
 @import 'forms/diagnosi-dimissione';
@@ -390,102 +388,14 @@ label[for="data_infezione"] {
     margin-bottom: 2rem;
 }
 
-#diagnosi-form .input-group .form-control,
-#diagnosi-form .input-group .form-select,
-#form-dimissione .input-group .form-control,
-#form-dimissione .input-group .form-select {
-    min-height: 56px;
-    font-size: 16px;
-    padding: 1rem 1.25rem;
-    border-radius: 8px;
-    width: 100%;
-    margin-bottom: 0;
-}
-
+@import 'forms/input-groups';
 
 /* ===================================
    FORM STYLES
    =================================== */
 
 /* Base form styles */
-
-/* 
-  DEFINIZIONE UNICA PER TUTTI I CAMPI FORM
-  Questa è la fonte di verità per l'aspetto dei campi.
-  min-height è !important per stabilire una base solida.
-*/
-.form-control,
-.form-select,
-.custom-select-trigger {
-    border: 1px solid var(--input-border);
-    border-radius: var(--border-radius-sm);
-    padding: 1rem 1.25rem;
-    min-height: 56px !important; /* Base height for all form controls */
-    display: flex;
-    align-items: center;
-    transition: var(--transition);
-    background: var(--input-bg);
-    font-size: 1rem;
-    color: var(--text-primary);
-    font-family: var(--font-family-base);
-    outline: none;
-    box-shadow: var(--shadow-sm);
-}
-
-.form-control:focus,
-.form-select:focus,
-.custom-select-wrapper.open .custom-select-trigger {
-    border-color: var(--input-border-focus);
-    box-shadow: var(--focus-shadow);
-    background: var(--bg-primary);
-    z-index: 2;
-}
-
-/* Effetto hover per desktop - uguale per tutti i campi */
-@media (min-width: 992px) {
-    .form-control:hover,
-    .form-select:hover,
-    .custom-select-trigger:hover {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.1);
-    }
-}
-
-.form-label {
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 0.5rem;
-    font-family: var(--font-family-base);
-    letter-spacing: 0.01em;
-}
-
-/* Form sections */
-.form-section {
-    background: var(--bg-secondary);
-    border-radius: var(--border-radius);
-    padding: 1.5rem;
-    border: 1px solid var(--border-color);
-    margin-bottom: 1.5rem;
-    box-shadow: var(--shadow-sm);
-}
-
-.section-title {
-    color: var(--text-primary);
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    margin-bottom: 1rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.section-title .material-icons {
-    color: var(--primary-color);
-    background: rgba(37, 99, 235, 0.1);
-    border-radius: 50%;
-    padding: 6px;
-    font-size: 20px;
-}
+@import 'forms/base';
 
 
 

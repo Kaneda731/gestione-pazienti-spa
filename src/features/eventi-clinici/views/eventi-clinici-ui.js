@@ -171,8 +171,13 @@ function populateSelectOptions(selectElement, options) {
         selectElement.appendChild(optionElement);
       });
 
-      // Refresh the CustomSelect to show new options
-      customSelectInstance.refresh();
+      // Aggiorna la UI del CustomSelect in base ai metodi disponibili
+      if (typeof customSelectInstance.updateOptions === 'function') {
+        customSelectInstance.updateOptions();
+      } else if (typeof customSelectInstance.refresh === 'function') {
+        // fallback per eventuali versioni precedenti
+        customSelectInstance.refresh();
+      }
     } else {
       // Fallback to standard select
       const firstOption = selectElement.querySelector('option[value=""]');

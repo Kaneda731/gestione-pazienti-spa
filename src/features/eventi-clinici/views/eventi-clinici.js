@@ -345,47 +345,60 @@ async function loadFilterSuggestions() {
       agentiPatogeni: suggestions.agentiPatogeni?.length || 0,
     });
 
-    await populateDepartmentFilter(reparti);
-    await populateAdvancedFilters(suggestions);
+  await populateDepartmentFilter(reparti);
+  await populateAdvancedFilters(suggestions);
 
-    // Force refresh of all CustomSelects after population
-    setTimeout(() => {
-      document
-        .querySelectorAll('select[data-custom="true"]')
-        .forEach((select) => {
-          logger.log(
-            "🔧 Checking CustomSelect:",
-            select.id,
-            "has instance?",
-            !!select._customSelect
-          );
-          if (
-            select._customSelect &&
-            typeof select._customSelect.refresh === "function"
-          ) {
+  // Force refresh of all CustomSelects after population
+  setTimeout(() => {
+    document
+      .querySelectorAll('select[data-custom="true"]')
+      .forEach((select) => {
+        logger.log(
+          "🔧 Checking CustomSelect:",
+          select.id,
+          "has instance?",
+          !!select._customSelect
+        );
+        // Preferisci la nuova API se presente
+        const instance = select.customSelectInstance || select._customSelect;
+        if (instance) {
+          if (typeof instance.updateOptions === 'function') {
+            logger.log("🔧 Updating CustomSelect options:", select.id);
+            instance.updateOptions();
+          } else if (typeof instance.refresh === 'function') {
             logger.log("🔧 Refreshing CustomSelect:", select.id);
-            select._customSelect.refresh();
+            instance.refresh();
           }
-        });
-    }, 50);
+        }
+      });
+  }, 50);
 
-    // Additional refresh after more time
-    setTimeout(() => {
-      const repartoSelect = document.getElementById("eventi-filter-reparto");
-      if (repartoSelect && repartoSelect._customSelect) {
-        logger.log("🔧 Final refresh of reparto CustomSelect");
-        repartoSelect._customSelect.refresh();
+  // Additional refresh after more time
+  setTimeout(() => {
+    const repartoSelect = document.getElementById("eventi-filter-reparto");
+    if (repartoSelect) {
+      const instance = repartoSelect.customSelectInstance || repartoSelect._customSelect;
+      if (instance) {
+        logger.log("🔧 Final update/refresh of reparto CustomSelect");
+        if (typeof instance.updateOptions === 'function') {
+          instance.updateOptions();
+        } else if (typeof instance.refresh === 'function') {
+          instance.refresh();
+        }
       }
-    }, 500);
+    }
+  }, 500);
 
-    logger.log("✅ Suggerimenti filtri caricati:", {
-      suggestions,
-      reparti: reparti.length,
-    });
-  } catch (error) {
-    logger.error("❌ Errore caricamento suggerimenti filtri:", error);
-  }
+  logger.log("✅ Suggerimenti filtri caricati:", {
+    suggestions,
+    reparti: reparti.length,
+  });
+} catch (error) {
+  logger.error("❌ Errore caricamento suggerimenti filtri:", error);
 }
+
+}
+
 
 /**
  * Gestisce i parametri URL

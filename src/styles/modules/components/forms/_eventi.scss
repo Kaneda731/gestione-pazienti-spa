@@ -199,3 +199,33 @@
         font-size: 0.9rem;
     }
 }
+
+/* ===================================
+   Advanced Filters: prevent dropdown clipping
+   =================================== */
+#advanced-filters {
+  overflow: visible !important; /* override collapse default when shown */
+
+  &.collapse.show {
+    overflow: visible !important;
+  }
+
+  .card,
+  .card-body {
+    overflow: visible !important; /* override global .card { overflow: hidden } */
+    position: relative; /* stacking context for menus */
+    z-index: 1;
+  }
+
+  /* Ensure menus stack above card */
+  .dropdown-menu {
+    z-index: 2050; /* above backdrops/navbars */
+  }
+
+  /* If a custom select renders a sibling menu */
+  .select-dropdown,
+  .custom-select-dropdown,
+  .cs-dropdown {
+    z-index: 2050;
+  }
+}

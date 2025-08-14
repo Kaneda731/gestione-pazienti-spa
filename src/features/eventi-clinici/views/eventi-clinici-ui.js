@@ -7,6 +7,8 @@ import { coreApplyResponsiveDesign } from "./responsive/applyResponsiveDesign.js
 import { debounce } from "./utils/debounce.js";
 export { updateSearchResultsCount } from "./ui/results-info/updateResultsInfo.js";
 import { populateDepartmentFilterCore } from "./filters/populateDepartmentFilter.js";
+import { populateTipoInterventoFilterCore } from "./filters/populateTipoInterventoFilter.js";
+import { populateAgentePatogenoFilterCore } from "./filters/populateAgentePatogenoFilter.js";
 
 /**
  * UI renderer per la timeline degli eventi clinici
@@ -1181,11 +1183,11 @@ export async function populateDepartmentFilter(reparti) {
 export async function populateAdvancedFilters(suggestions) {
   try {
     if (domElements.filterTipoIntervento && suggestions.tipiIntervento) {
-      populateSelectOptions(domElements.filterTipoIntervento, suggestions.tipiIntervento);
+      await populateTipoInterventoFilterCore(domElements.filterTipoIntervento, suggestions.tipiIntervento, logger);
     }
 
     if (domElements.filterAgentePatogeno && suggestions.agentiPatogeni) {
-      populateSelectOptions(domElements.filterAgentePatogeno, suggestions.agentiPatogeni);
+      await populateAgentePatogenoFilterCore(domElements.filterAgentePatogeno, suggestions.agentiPatogeni, logger);
     }
 
     logger.log('✅ Filtri avanzati popolati:', suggestions);

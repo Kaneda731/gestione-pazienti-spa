@@ -135,7 +135,6 @@ function renderEventIcon(iconValue, tipo, color, extraClass = '') {
   
   return `<span class="${classes}">${material}</span>`;
 }
-
 /**
  * Raggruppa eventi per data
  */
@@ -148,60 +147,6 @@ function groupEventsByDate(eventi) {
     groups[date].push(evento);
     return groups;
   }, {});
-}
-
-/**
- * Utility per popolare opzioni di select
- */
-function populateSelectOptions(selectElement, options) {
-  try {
-    // Check if it's a CustomSelect (correct property name)
-    const customSelectInstance = selectElement.customSelectInstance;
-    
-    if (customSelectInstance) {
-      // Use CustomSelect API
-      logger.log('🔧 Popolamento CustomSelect con', options.length, 'opzioni');
-      
-      // Clear existing options except the first one
-      const firstOption = selectElement.querySelector('option[value=""]');
-      selectElement.innerHTML = '';
-      if (firstOption) {
-        selectElement.appendChild(firstOption);
-      }
-
-      // Add new options
-      options.forEach(option => {
-        const optionElement = document.createElement('option');
-        optionElement.value = option;
-        optionElement.textContent = option;
-        selectElement.appendChild(optionElement);
-      });
-
-      // Aggiorna la UI del CustomSelect in base ai metodi disponibili
-      if (typeof customSelectInstance.updateOptions === 'function') {
-        customSelectInstance.updateOptions();
-      } else if (typeof customSelectInstance.refresh === 'function') {
-        // fallback per eventuali versioni precedenti
-        customSelectInstance.refresh();
-      }
-    } else {
-      // Fallback to standard select
-      const firstOption = selectElement.querySelector('option[value=""]');
-      selectElement.innerHTML = '';
-      if (firstOption) {
-        selectElement.appendChild(firstOption);
-      }
-
-      options.forEach(option => {
-        const optionElement = document.createElement('option');
-        optionElement.value = option;
-        optionElement.textContent = option;
-        selectElement.appendChild(optionElement);
-      });
-    }
-  } catch (error) {
-    logger.error('❌ Errore popolamento select:', error);
-  }
 }
 
 // ============================================================================

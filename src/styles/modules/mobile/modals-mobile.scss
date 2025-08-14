@@ -10,19 +10,21 @@
     .modal-dialog {
         margin: 1rem;
         max-width: calc(100vw - 2rem);
-        min-height: calc(100vh - 2rem);
+        min-height: calc(100dvh - 2rem);
         display: flex;
         align-items: center;
     }
     
     .modal-dialog-centered {
-        min-height: calc(100vh - 2rem);
+        min-height: calc(100dvh - 2rem);
     }
     
     .modal-content {
         border-radius: 16px;
-        max-height: calc(100vh - 2rem);
-        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        max-height: calc(100dvh - 2rem);
+        overflow: hidden;
         width: 100%;
         touch-action: manipulation;
         will-change: transform;
@@ -73,6 +75,9 @@
 
     .modal-body {
         padding: 1.25rem;
+        flex: 1 1 auto;
+        overflow: auto;
+        -webkit-overflow-scrolling: touch;
     }
     
     .modal-body hr {
@@ -169,12 +174,12 @@
         .modal-dialog {
             margin: 0.5rem;
             max-width: calc(100vw - 1rem);
-            min-height: calc(100vh - 1rem);
+            min-height: calc(100dvh - 1rem);
         }
         
         .modal-content {
             border-radius: 12px;
-            max-height: calc(100vh - 1rem);
+            max-height: calc(100dvh - 1rem);
         }
         
         .modal-header {

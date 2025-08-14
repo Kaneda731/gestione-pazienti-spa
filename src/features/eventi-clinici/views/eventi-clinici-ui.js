@@ -518,12 +518,23 @@ function createTableRow(ev) {
  * Crea i pulsanti di azione per la tabella
  */
 function createActionButtons(ev) {
+  const showResolve = ev.tipo_evento === 'infezione' && !ev.data_fine_evento;
+  const resolveBtn = showResolve
+    ? `
+      <button class="btn btn-sm btn-outline-success event-resolve-btn" data-evento-id="${ev.id}" title="Risolvi infezione" aria-label="Risolvi infezione">
+        <span class="material-icons align-middle me-1">check_circle</span>
+        <span class="btn-text align-middle">Risolvi</span>
+      </button>
+    `
+    : '';
+
   return `
     <div class="btn-group btn-group-sm" role="group">
-      <button class="btn btn-primary event-detail-btn" data-evento-id="${ev.id}" title="Apri dettagli evento" aria-label="Apri dettagli evento">
+      <button class="btn btn-sm btn-outline-primary event-detail-btn" data-evento-id="${ev.id}" title="Apri dettagli evento" aria-label="Apri dettagli evento">
         <span class="material-icons align-middle me-1">visibility</span>
-        <span class="align-middle">Dettagli</span>
+        <span class="btn-text align-middle">Dettagli</span>
       </button>
+      ${resolveBtn}
     </div>
   `;
 }

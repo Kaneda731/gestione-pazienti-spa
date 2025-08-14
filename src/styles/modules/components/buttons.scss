@@ -1,6 +1,7 @@
-/* Fix: uniforma altezza e padding dei bottoni resetta/esporta nella barra azioni filtri (desktop) */
-#filter-actions-container > #reset-filters-btn.btn,
-#filter-actions-container > #export-csv-btn.btn {
+/* Fix: uniforma altezza e padding dei bottoni resetta/esporta nella barra azioni filtri (desktop)
+   Aggiornato agli ID correnti della vista Eventi Clinici */
+#eventi-reset-filters-btn.btn,
+#eventi-export-csv-btn.btn {
   min-height: var(--btn-height) !important;
   height: var(--btn-height) !important;
   padding: var(--btn-padding-y) var(--btn-padding-x) !important;
@@ -9,6 +10,80 @@
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+}
+
+/* Estendi uniformità ai bottoni di paginazione Eventi Clinici */
+#eventi-prev-page-btn.btn,
+#eventi-next-page-btn.btn {
+  min-height: var(--btn-height) !important;
+  height: var(--btn-height) !important;
+  padding: var(--btn-padding-y) var(--btn-padding-x) !important;
+  font-size: var(--btn-font-size) !important;
+  box-sizing: border-box !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Uniforma i bottoni azione all'interno della sezione filtri (toggle, export, filtri) */
+.eventi-filters-section .btn {
+  min-height: var(--btn-height) !important;
+  height: var(--btn-height) !important;
+  padding: var(--btn-padding-y) var(--btn-padding-x) !important;
+  font-size: var(--btn-font-size) !important;
+  line-height: 1 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.375rem;
+}
+
+/* Assicura che i trigger dropdown abbiano la stessa altezza */
+.eventi-filters-section .btn.dropdown-toggle {
+  min-height: var(--btn-height) !important;
+  height: var(--btn-height) !important;
+  padding: var(--btn-padding-y) var(--btn-padding-x) !important;
+}
+
+/* Eventi Clinici: allinea i trigger dropdown (Esporta, Filtri) anche fuori dalla sezione filtri */
+#eventi-clinici-view .btn-group > .btn.dropdown-toggle {
+  min-height: var(--btn-height) !important;
+  height: var(--btn-height) !important;
+  padding: var(--btn-padding-y) var(--btn-padding-x) !important;
+  font-size: var(--btn-font-size) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.375rem;
+}
+
+/* Garantisci visibilità dei menu dropdown nella barra filtri */
+#eventi-clinici-view .eventi-filters-section { overflow: visible; }
+#eventi-clinici-view .eventi-filters-section .btn-group { position: relative; }
+#eventi-clinici-view .eventi-filters-section .dropdown-menu {
+  z-index: 1060 !important; /* sopra card-body */
+}
+
+/* Fallback: mostra il menu quando il toggle è espanso (in caso di JS/Popper non attivo) */
+#eventi-clinici-view .eventi-filters-section .dropdown-toggle[aria-expanded="true"] + .dropdown-menu {
+  display: block !important;
+  position: absolute;
+  top: 100%;
+  left: 0;
+}
+
+/* Mantieni comportamento predefinito dei menu dropdown in Eventi Clinici */
+
+/* Allinea "Nuovo Evento" all'altezza standard dei bottoni filtri */
+#eventi-add-btn.btn {
+  min-height: var(--btn-height);
+  height: var(--btn-height);
+  padding: var(--btn-padding-y) var(--btn-padding-x);
+  font-size: var(--btn-font-size);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
 }
 /* === STANDARD DIMENSIONI BOTTONI DESKTOP & MOBILE === */
 :root {

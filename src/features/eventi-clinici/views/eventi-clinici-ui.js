@@ -3,6 +3,8 @@
 import { logger } from "../../../core/services/logger/loggerService.js";
 import { formatDate } from "../../../shared/utils/formatting.js";
 import { sanitizeHtml } from "../../../shared/utils/sanitizeHtml.js";
+import { coreApplyResponsiveDesign } from "./responsive/applyResponsiveDesign.js";
+import { debounce } from "./utils/debounce.js";
 
 /**
  * UI renderer per la timeline degli eventi clinici
@@ -1156,25 +1158,8 @@ function createTimestampSection(evento) {
  * Applica responsive design basato sulla dimensione dello schermo
  */
 export function applyResponsiveDesign() {
-  const isMobile = window.innerWidth < 768;
-  const isTablet = window.innerWidth >= 768 && window.innerWidth < 1200;
-  const useTable = window.innerWidth >= 1200;
-
-  if (domElements.tableContainer) {
-    domElements.tableContainer.style.display = useTable ? 'block' : 'none';
-  }
-  
-  if (domElements.timelineContainer) {
-    domElements.timelineContainer.style.display = useTable ? 'none' : 'block';
-    domElements.timelineContainer.classList.toggle("mobile-layout", isMobile);
-    domElements.timelineContainer.classList.toggle("tablet-layout", isTablet);
-  }
-
-  const eventCards = document.querySelectorAll(".timeline-event-card");
-  eventCards.forEach((card) => {
-    card.classList.toggle("mobile-card", isMobile);
-    card.classList.toggle("tablet-card", isTablet);
-  });
+  // Delegates to core responsive function operating on cached domElements
+  coreApplyResponsiveDesign(domElements);
 }
 
 // ============================================================================
@@ -1533,5 +1518,6 @@ export function updateSearchResultsCount(count, totalCount, filters) {
 
 // Initialize responsive design on window resize
 if (typeof window !== "undefined") {
-  window.addEventListener("resize", applyResponsiveDesign);
+  const handleResize = debounce(() => applyResponsiveDesign(), 150);
+  window.addEventListener("resize", handleResize);
 }

@@ -96,6 +96,10 @@ export class EventiCliniciModalManager {
 
       if (eventDetailModalEl) {
         this.eventDetailModal = new Modal(eventDetailModalEl);
+        // Safety: rimuovi il focus dai discendenti prima che il modal venga nascosto
+        eventDetailModalEl.addEventListener('hide.bs.modal', () => {
+          this._defocus(eventDetailModalEl);
+        });
       }
 
       logger.log('✅ Modali inizializzati');
@@ -254,6 +258,7 @@ export class EventiCliniciModalManager {
       // Close detail modal if open, poi apri il form solo dopo che è stato nascosto
       const detailEl = this.domElements && this.domElements.eventDetailModal;
       if (this.eventDetailModal) {
+        this._defocus(detailEl);
         this.eventDetailModal.hide();
         await this.waitForModalHidden(detailEl);
       }
@@ -311,6 +316,8 @@ export class EventiCliniciModalManager {
 
       // Close detail modal if open
       if (this.eventDetailModal) {
+        const detailEl = this.domElements && this.domElements.eventDetailModal;
+        this._defocus(detailEl);
         this.eventDetailModal.hide();
       }
 
@@ -363,8 +370,22 @@ export class EventiCliniciModalManager {
     }
 
     if (this.eventDetailModal) {
+      const detailEl = this.domElements && this.domElements.eventDetailModal;
+      this._defocus(detailEl);
       this.eventDetailModal.hide();
       this.eventDetailModal = null;
     }
   }
 }
+
+// Helper: rimuove il focus da elementi interni ad un modal per evitare warning aria-hidden
+EventiCliniciModalManager.prototype._defocus = function(modalElement) {
+  try {
+    const active = document.activeElement;
+    if (modalElement && active && modalElement.contains(active) && typeof active.blur === 'function') {
+      active.blur();
+    }
+  } catch {
+    // no-op
+  }
+};

@@ -65,16 +65,22 @@ export class InfectionEventModal {
                     return;
                 }
 
+                this._defocus(modalElement);
                 modal.hide();
                 resolve(data);
             };
 
             const handleCancel = () => {
+                this._defocus(modalElement);
                 modal.hide();
                 resolve(null);
             };
 
             form.addEventListener('submit', handleSubmit);
+            // Defocus quando il modal sta per nascondersi (es. tramite btn-close o ESC)
+            modalElement.addEventListener('hide.bs.modal', () => {
+                this._defocus(modalElement);
+            });
             modalElement.addEventListener('hidden.bs.modal', () => {
                 // Distruggi l'istanza del datepicker per pulire le risorse
                 if (this.datepickerInstance) {
@@ -129,5 +135,19 @@ export class InfectionEventModal {
                 </div>
             </div>
         `;
+    }
+
+    /**
+     * Rimuove il focus da elementi interni al modal per evitare warning aria-hidden
+     */
+    _defocus(modalElement) {
+        try {
+            const active = document.activeElement;
+            if (active && modalElement.contains(active) && typeof active.blur === 'function') {
+                active.blur();
+            }
+        } catch {
+            // no-op
+        }
     }
 }

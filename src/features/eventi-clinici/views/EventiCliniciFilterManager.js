@@ -42,12 +42,12 @@ export class EventiCliniciFilterManager {
   /**
    * Gestisce il filtro di ricerca pazienti con debouncing
    */
-  async handlePatientSearchFilter(searchTerm) {
+  async handlePatientSearchFilter(searchTerm, pazienteId) {
     try {
       showSearchingState();
       
-      const result = await applyPatientSearch(searchTerm);
-  renderEventsResponsive(result);
+      const result = await applyPatientSearch(searchTerm, pazienteId || '');
+      renderEventsResponsive(result);
       this.setupEventCardListenersCallback();
       
       // Update UI indicators
@@ -220,7 +220,6 @@ export class EventiCliniciFilterManager {
         data_a: '',
         reparto: '',
         agente_patogeno: '',
-        tipo_intervento: '',
         sortColumn: 'data_evento',
         sortDirection: 'desc'
       };

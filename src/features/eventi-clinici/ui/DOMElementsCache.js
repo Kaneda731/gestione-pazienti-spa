@@ -93,9 +93,6 @@ export class DOMElementsCache {
       filterDateFrom: document.getElementById("eventi-filter-date-from"),
       filterDateTo: document.getElementById("eventi-filter-date-to"),
       filterReparto: document.getElementById("eventi-filter-reparto"),
-      filterAgentePatogeno: document.getElementById(
-        "eventi-filter-agente-patogeno"
-      ),
       filterTipoIntervento: document.getElementById(
         "eventi-filter-tipo-intervento"
       ),

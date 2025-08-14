@@ -23,6 +23,7 @@ class EventiCliniciService {
 
       const {
         paziente_search = "",
+        paziente_id = "",
         tipo_evento = "",
         data_da = "",
         data_a = "",
@@ -47,6 +48,9 @@ class EventiCliniciService {
         `, { count: "exact" });
 
       // Filtri
+      if (paziente_id) {
+        query = query.eq("paziente_id", paziente_id);
+      }
       if (tipo_evento) {
         query = query.eq("tipo_evento", tipo_evento);
       }
@@ -64,7 +68,7 @@ class EventiCliniciService {
       }
 
       // Ricerca paziente per nome/cognome/codice_rad (join: serve query separata)
-      if (paziente_search && paziente_search.trim() !== "") {
+      if (!paziente_id && paziente_search && paziente_search.trim() !== "") {
         const searchPattern = `%${paziente_search.trim()}%`;
         // Use the same search logic as dimissione-api.js for consistency
         const pazientiRes = await supabase
@@ -91,9 +95,11 @@ class EventiCliniciService {
       const startIndex = page * limit;
       const endIndex = startIndex + limit - 1;
 
-      query = query
-        .order(sortColumn, { ascending: sortDirection === "asc" })
-        .range(startIndex, endIndex);
+      // Applica ordinamento solo se sortColumn è valorizzato (supporto stato neutro)
+      if (sortColumn && String(sortColumn).trim() !== "") {
+        query = query.order(sortColumn, { ascending: sortDirection === "asc" });
+      }
+      query = query.range(startIndex, endIndex);
 
       const { data, error, count } = await query;
 
@@ -153,7 +159,10 @@ class EventiCliniciService {
         query = query.lte("data_evento", data_a);
       }
 
-      query = query.order(sortColumn, { ascending: sortDirection === "asc" });
+      // Applica ordinamento solo se sortColumn è valorizzato (supporto stato neutro)
+      if (sortColumn && String(sortColumn).trim() !== "") {
+        query = query.order(sortColumn, { ascending: sortDirection === "asc" });
+      }
 
       const { data, error } = await query;
 
@@ -422,6 +431,65 @@ class EventiCliniciService {
       return data || [];
     } catch (error) {
       console.error("Errore nella ricerca pazienti:", error);
+      notificationService.error(`Errore nella ricerca: ${error.message}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Cerca pazienti che hanno almeno un evento clinico
+   * Restituisce SOLO pazienti presenti nella tabella eventi_clinici
+   */
+  async searchPazientiWithEvents(searchTerm, activeOnly = true) {
+    try {
+      const searchPattern = `%${searchTerm.trim()}%`;
+
+      // Join da eventi_clinici -> pazienti (inner) e filtra sui campi pazienti
+      let query = supabase
+        .from("eventi_clinici")
+        .select(
+          "pazienti: paziente_id (id, nome, cognome, data_ricovero, diagnosi, reparto_appartenenza, codice_rad, user_id, data_dimissione)"
+        );
+
+      // Filtra per pazienti attivi se richiesto
+      if (activeOnly) {
+        query = query.is("pazienti.data_dimissione", null);
+      }
+
+      // Escludi pazienti senza user_id
+      query = query.not("pazienti.user_id", "is", null);
+
+      // Applica ricerca su campi pazienti
+      query = query.or(
+        `pazienti.cognome.ilike.${searchPattern},pazienti.nome.ilike.${searchPattern},pazienti.codice_rad.ilike.${searchPattern}`
+      );
+
+      // Ordina per cognome del paziente
+      query = query.order("pazienti.cognome", { ascending: true });
+
+      const { data, error } = await query;
+      if (error) throw error;
+
+      // Deduplica per id paziente
+      const uniqueMap = new Map();
+      (data || []).forEach((row) => {
+        const p = row?.pazienti;
+        if (p && !uniqueMap.has(p.id)) {
+          uniqueMap.set(p.id, {
+            id: p.id,
+            nome: p.nome,
+            cognome: p.cognome,
+            data_ricovero: p.data_ricovero,
+            diagnosi: p.diagnosi,
+            reparto_appartenenza: p.reparto_appartenenza,
+            codice_rad: p.codice_rad,
+          });
+        }
+      });
+
+      return Array.from(uniqueMap.values());
+    } catch (error) {
+      console.error("Errore nella ricerca pazienti con eventi:", error);
       notificationService.error(`Errore nella ricerca: ${error.message}`);
       throw error;
     }

@@ -3,6 +3,11 @@
 import { logger } from "../../../core/services/logger/loggerService.js";
 import { formatDate } from "../../../shared/utils/formatting.js";
 import { sanitizeHtml } from "../../../shared/utils/sanitizeHtml.js";
+import { coreApplyResponsiveDesign } from "./responsive/applyResponsiveDesign.js";
+import { debounce } from "./utils/debounce.js";
+export { updateSearchResultsCount } from "./ui/results-info/updateResultsInfo.js";
+import { populateDepartmentFilterCore } from "./filters/populateDepartmentFilter.js";
+// Rimosso filtro Agente Patogeno (ridondante)
 
 /**
  * UI renderer per la timeline degli eventi clinici
@@ -40,8 +45,7 @@ export function initializeDOMElements() {
     filterDateFrom: document.getElementById("eventi-filter-date-from"),
     filterDateTo: document.getElementById("eventi-filter-date-to"),
     filterReparto: document.getElementById("eventi-filter-reparto"),
-    filterAgentePatogeno: document.getElementById("eventi-filter-agente-patogeno"),
-    filterTipoIntervento: document.getElementById("eventi-filter-tipo-intervento"),
+    // filterAgentePatogeno rimosso
     filterSortColumn: document.getElementById("eventi-sort-column"),
     filterSortDirection: document.getElementById("eventi-sort-direction"),
 
@@ -54,9 +58,7 @@ export function initializeDOMElements() {
     saveFiltersBtn: document.getElementById("eventi-save-filters-btn"),
     loadFiltersBtn: document.getElementById("eventi-load-filters-btn"),
     
-    // Advanced filters
-    advancedFiltersToggle: document.querySelector('[data-bs-target="#advanced-filters"]'),
-    advancedFiltersContainer: document.getElementById("advanced-filters"),
+    // Advanced filters removed
 
     // Pagination
     paginationControls: document.getElementById("eventi-pagination-controls"),
@@ -129,7 +131,6 @@ function renderEventIcon(iconValue, tipo, color, extraClass = '') {
   
   return `<span class="${classes}">${material}</span>`;
 }
-
 /**
  * Raggruppa eventi per data
  */
@@ -142,60 +143,6 @@ function groupEventsByDate(eventi) {
     groups[date].push(evento);
     return groups;
   }, {});
-}
-
-/**
- * Utility per popolare opzioni di select
- */
-function populateSelectOptions(selectElement, options) {
-  try {
-    // Check if it's a CustomSelect (correct property name)
-    const customSelectInstance = selectElement.customSelectInstance;
-    
-    if (customSelectInstance) {
-      // Use CustomSelect API
-      logger.log('🔧 Popolamento CustomSelect con', options.length, 'opzioni');
-      
-      // Clear existing options except the first one
-      const firstOption = selectElement.querySelector('option[value=""]');
-      selectElement.innerHTML = '';
-      if (firstOption) {
-        selectElement.appendChild(firstOption);
-      }
-
-      // Add new options
-      options.forEach(option => {
-        const optionElement = document.createElement('option');
-        optionElement.value = option;
-        optionElement.textContent = option;
-        selectElement.appendChild(optionElement);
-      });
-
-      // Aggiorna la UI del CustomSelect in base ai metodi disponibili
-      if (typeof customSelectInstance.updateOptions === 'function') {
-        customSelectInstance.updateOptions();
-      } else if (typeof customSelectInstance.refresh === 'function') {
-        // fallback per eventuali versioni precedenti
-        customSelectInstance.refresh();
-      }
-    } else {
-      // Fallback to standard select
-      const firstOption = selectElement.querySelector('option[value=""]');
-      selectElement.innerHTML = '';
-      if (firstOption) {
-        selectElement.appendChild(firstOption);
-      }
-
-      options.forEach(option => {
-        const optionElement = document.createElement('option');
-        optionElement.value = option;
-        optionElement.textContent = option;
-        selectElement.appendChild(optionElement);
-      });
-    }
-  } catch (error) {
-    logger.error('❌ Errore popolamento select:', error);
-  }
 }
 
 // ============================================================================
@@ -418,10 +365,13 @@ function createEventCardContent(evento) {
         ${detailsSection}
       </div>
       <div class="mt-2 text-end">
-        <button class="btn btn-outline-secondary btn-sm open-actions-modal">
-          <span class="material-icons align-middle me-1" style="font-size:1.05em;">more_horiz</span>
-          Azioni
-        </button>
+        <div class="btn-group btn-group-sm" role="group">
+          <button class="btn btn-outline-primary event-detail-btn" data-evento-id="${evento.id}" title="Apri dettagli evento" aria-label="Apri dettagli evento">
+            <span class="material-icons align-middle me-1">visibility</span>
+            <span class="btn-text align-middle">Dettagli</span>
+          </button>
+          <!-- Pulsante Risolvi rimosso nella card mobile; disponibile nella modal Dettagli -->
+        </div>
       </div>
     </div>
   `;
@@ -431,20 +381,7 @@ function createEventCardContent(evento) {
  * Configura gli event handlers per una card evento
  */
 function setupEventCardHandlers(card, evento) {
-  const openModal = (e) => {
-    if (e && (e.target.closest('button') || e.target.closest('a'))) return;
-    showActionsModal(evento);
-  };
-
-  card.addEventListener('click', openModal);
-  
-  const explicitBtn = card.querySelector('.open-actions-modal');
-  if (explicitBtn) {
-    explicitBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      showActionsModal(evento);
-    });
-  }
+  // Nessuna azione di modal: i pulsanti inline gestiscono le azioni tramite delegation globale
 }
 
 /**
@@ -546,99 +483,7 @@ function createActionButtons(ev) {
 /**
  * Crea la modal Azioni (se non esiste) e la restituisce
  */
-function ensureActionsModal() {
-  let modal = document.getElementById('eventi-azioni-modal');
-  if (modal) return modal;
-
-  modal = document.createElement('div');
-  modal.id = 'eventi-azioni-modal';
-  modal.className = 'modal fade';
-  modal.setAttribute('tabindex', '-1');
-  modal.setAttribute('aria-hidden', 'true');
-  modal.innerHTML = sanitizeHtml(`
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">
-            <span class="material-icons align-middle me-1">more_horiz</span>
-            Azioni evento
-          </h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
-        </div>
-        <div class="modal-body">
-          <div id="azioni-modal-body"></div>
-        </div>
-      </div>
-    </div>
-  `);
-
-  document.body.appendChild(modal);
-  return modal;
-}
-
-/**
- * Mostra la modal con le azioni per uno specifico evento
- */
-function showActionsModal(evento) {
-  const modalEl = ensureActionsModal();
-  const body = modalEl.querySelector('#azioni-modal-body');
-  if (!body) return;
-
-  const isInfezione = evento.tipo_evento === 'infezione';
-  const isAttiva = isInfezione && !evento.data_fine_evento;
-
-  const actionsHTML = createActionsModalContent(evento, isAttiva);
-  body.innerHTML = sanitizeHtml(actionsHTML);
-
-  showModal(modalEl);
-}
-
-/**
- * Crea il contenuto HTML per la modal delle azioni
- */
-function createActionsModalContent(evento, isAttiva) {
-  const resolveAction = isAttiva
-    ? `<button type="button" class="azione-btn is-resolve event-resolve-btn" data-evento-id="${evento.id}" aria-label="Risolvi infezione">
-         <span class="azione-icon" aria-hidden="true"><span class="material-icons">check_circle</span></span>
-         <span class="azione-label">Risolvi</span>
-         <span class="material-icons azione-chevron" aria-hidden="true">chevron_right</span>
-       </button>`
-    : '';
-
-  return `
-    <div class="azioni-actions">
-      <button type="button" class="azione-btn is-detail event-detail-btn" data-evento-id="${evento.id}" aria-label="Apri dettagli evento">
-        <span class="azione-icon" aria-hidden="true"><span class="material-icons">visibility</span></span>
-        <span class="azione-label">Dettagli</span>
-        <span class="material-icons azione-chevron" aria-hidden="true">chevron_right</span>
-      </button>
-      <button type="button" class="azione-btn is-edit event-edit-btn" data-evento-id="${evento.id}" aria-label="Modifica evento">
-        <span class="azione-icon" aria-hidden="true"><span class="material-icons">edit</span></span>
-        <span class="azione-label">Modifica</span>
-        <span class="material-icons azione-chevron" aria-hidden="true">chevron_right</span>
-      </button>
-      ${resolveAction}
-      <button type="button" class="azione-btn is-delete event-delete-btn" data-evento-id="${evento.id}" aria-label="Elimina evento">
-        <span class="azione-icon" aria-hidden="true"><span class="material-icons">delete</span></span>
-        <span class="azione-label">Elimina</span>
-        <span class="material-icons azione-chevron" aria-hidden="true">chevron_right</span>
-      </button>
-    </div>
-  `;
-}
-
-/**
- * Mostra una modal usando Bootstrap o fallback
- */
-function showModal(modalEl) {
-  import('bootstrap').then(({ Modal }) => {
-    const modal = Modal.getOrCreateInstance(modalEl, { backdrop: true, focus: true });
-    modal.show();
-  }).catch(() => {
-    modalEl.classList.add('show');
-    modalEl.style.display = 'block';
-  });
-}
+// Modal azioni rimossa: pulsanti inline nelle card gestiscono le azioni
 
 // ============================================================================
 // STATE RENDERING FUNCTIONS
@@ -1156,25 +1001,8 @@ function createTimestampSection(evento) {
  * Applica responsive design basato sulla dimensione dello schermo
  */
 export function applyResponsiveDesign() {
-  const isMobile = window.innerWidth < 768;
-  const isTablet = window.innerWidth >= 768 && window.innerWidth < 1200;
-  const useTable = window.innerWidth >= 1200;
-
-  if (domElements.tableContainer) {
-    domElements.tableContainer.style.display = useTable ? 'block' : 'none';
-  }
-  
-  if (domElements.timelineContainer) {
-    domElements.timelineContainer.style.display = useTable ? 'none' : 'block';
-    domElements.timelineContainer.classList.toggle("mobile-layout", isMobile);
-    domElements.timelineContainer.classList.toggle("tablet-layout", isTablet);
-  }
-
-  const eventCards = document.querySelectorAll(".timeline-event-card");
-  eventCards.forEach((card) => {
-    card.classList.toggle("mobile-card", isMobile);
-    card.classList.toggle("tablet-card", isTablet);
-  });
+  // Delegates to core responsive function operating on cached domElements
+  coreApplyResponsiveDesign(domElements);
 }
 
 // ============================================================================
@@ -1185,64 +1013,7 @@ export function applyResponsiveDesign() {
  * Popola il filtro reparti con le opzioni disponibili
  */
 export async function populateDepartmentFilter(reparti) {
-  if (!domElements.filterReparto) {
-    logger.warn('⚠️ Elemento filterReparto non trovato');
-    return;
-  }
-
-  try {
-    // Check if it's a CustomSelect (correct property name)
-    const customSelectInstance = domElements.filterReparto.customSelectInstance;
-    
-    if (customSelectInstance) {
-      // Use CustomSelect API
-      logger.log('🔧 Popolamento CustomSelect reparto con', reparti.length, 'opzioni');
-      
-      // Clear existing options except the first one
-      const firstOption = domElements.filterReparto.querySelector('option[value=""]');
-      domElements.filterReparto.innerHTML = '';
-      if (firstOption) {
-        domElements.filterReparto.appendChild(firstOption);
-      }
-
-      // Add new options
-      reparti.forEach(reparto => {
-        const option = document.createElement('option');
-        option.value = reparto;
-        option.textContent = reparto;
-        domElements.filterReparto.appendChild(option);
-      });
-
-      // Use updateOptions method to refresh the CustomSelect
-      if (typeof customSelectInstance.updateOptions === 'function') {
-        customSelectInstance.updateOptions();
-        logger.log('🔧 CustomSelect options updated');
-      } else if (typeof customSelectInstance.refresh === 'function') {
-        customSelectInstance.refresh();
-        logger.log('🔧 CustomSelect refreshed');
-      }
-    } else {
-      // Fallback to standard select
-      logger.log('🔧 Popolamento select standard reparto con', reparti.length, 'opzioni');
-      
-      const firstOption = domElements.filterReparto.querySelector('option[value=""]');
-      domElements.filterReparto.innerHTML = '';
-      if (firstOption) {
-        domElements.filterReparto.appendChild(firstOption);
-      }
-
-      reparti.forEach(reparto => {
-        const option = document.createElement('option');
-        option.value = reparto;
-        option.textContent = reparto;
-        domElements.filterReparto.appendChild(option);
-      });
-    }
-
-    logger.log('✅ Filtro reparti popolato con', reparti.length, 'opzioni');
-  } catch (error) {
-    logger.error('❌ Errore popolamento filtro reparti:', error);
-  }
+  await populateDepartmentFilterCore(domElements.filterReparto, reparti, logger);
 }
 
 /**
@@ -1250,17 +1021,10 @@ export async function populateDepartmentFilter(reparti) {
  */
 export async function populateAdvancedFilters(suggestions) {
   try {
-    if (domElements.filterTipoIntervento && suggestions.tipiIntervento) {
-      populateSelectOptions(domElements.filterTipoIntervento, suggestions.tipiIntervento);
-    }
-
-    if (domElements.filterAgentePatogeno && suggestions.agentiPatogeni) {
-      populateSelectOptions(domElements.filterAgentePatogeno, suggestions.agentiPatogeni);
-    }
-
-    logger.log('✅ Filtri avanzati popolati:', suggestions);
+    // Nessun filtro avanzato da popolare (agente patogeno rimosso)
+    logger.log('✅ Filtri popolati: nessun filtro avanzato attivo');
   } catch (error) {
-    logger.error('❌ Errore popolamento filtri avanzati:', error);
+    logger.error('❌ Errore popolamento filtri:', error);
   }
 }
 
@@ -1276,15 +1040,24 @@ export function applyFiltersToUI(filters) {
     { element: domElements.filterDateFrom, key: 'data_da' },
     { element: domElements.filterDateTo, key: 'data_a' },
     { element: domElements.filterReparto, key: 'reparto' },
-    { element: domElements.filterAgentePatogeno, key: 'agente_patogeno' },
-    { element: domElements.filterTipoIntervento, key: 'tipo_intervento' },
     { element: domElements.filterSortColumn, key: 'sortColumn' },
     { element: domElements.filterSortDirection, key: 'sortDirection' }
   ];
 
   filterMappings.forEach(({ element, key }) => {
-    if (element && filters[key]) {
+    if (element && Object.prototype.hasOwnProperty.call(filters, key)) {
       element.value = filters[key];
+      // Se è un CustomSelect, sincronizza anche l'etichetta
+      if (element.customSelectInstance && typeof element.customSelectInstance.setValue === 'function') {
+        try {
+          element.customSelectInstance.setValue(element.value, true); // silent
+        } catch (e) {
+          // fallback: aggiorna le opzioni e l'etichetta
+          if (typeof element.customSelectInstance.updateOptions === 'function') {
+            element.customSelectInstance.updateOptions();
+          }
+        }
+      }
     }
   });
 
@@ -1301,15 +1074,23 @@ export function resetFiltersUI() {
     { element: domElements.filterDateFrom, value: '' },
     { element: domElements.filterDateTo, value: '' },
     { element: domElements.filterReparto, value: '' },
-    { element: domElements.filterAgentePatogeno, value: '' },
-    { element: domElements.filterTipoIntervento, value: '' },
-    { element: domElements.filterSortColumn, value: 'data_evento' },
+    { element: domElements.filterSortColumn, value: '' },
     { element: domElements.filterSortDirection, value: 'desc' }
   ];
 
   resetMappings.forEach(({ element, value }) => {
     if (element) {
       element.value = value;
+      // Se è un CustomSelect, sincronizza anche l'etichetta verso il placeholder/valore
+      if (element.customSelectInstance && typeof element.customSelectInstance.setValue === 'function') {
+        try {
+          element.customSelectInstance.setValue(value, true); // silent
+        } catch (e) {
+          if (typeof element.customSelectInstance.updateOptions === 'function') {
+            element.customSelectInstance.updateOptions();
+          }
+        }
+      }
     }
   });
 
@@ -1334,9 +1115,7 @@ export function getFiltersFromUI() {
     data_da: domElements.filterDateFrom?.value || '',
     data_a: domElements.filterDateTo?.value || '',
     reparto: domElements.filterReparto?.value || '',
-    agente_patogeno: domElements.filterAgentePatogeno?.value || '',
-    tipo_intervento: domElements.filterTipoIntervento?.value || '',
-    sortColumn: domElements.filterSortColumn?.value || 'data_evento',
+    sortColumn: domElements.filterSortColumn?.value || '',
     sortDirection: domElements.filterSortDirection?.value || 'desc'
   };
 }
@@ -1497,35 +1276,7 @@ export function highlightSearchTerms(content, searchTerm) {
 /**
  * Aggiorna contatore risultati ricerca
  */
-export function updateSearchResultsCount(count, totalCount, filters) {
-  let resultsInfo = document.getElementById('search-results-info');
-  
-  if (!resultsInfo) {
-    resultsInfo = document.createElement('div');
-    resultsInfo.id = 'search-results-info';
-    resultsInfo.className = 'search-results-info text-muted mb-3';
-    
-    const timelineContainer = domElements.timelineContainer;
-    if (timelineContainer && timelineContainer.parentNode) {
-      timelineContainer.parentNode.insertBefore(resultsInfo, timelineContainer);
-    }
-  }
-
-  const hasActiveFilters = Object.values(filters || {}).some(value => 
-    value && value.toString().trim() !== ''
-  );
-
-  if (hasActiveFilters) {
-    resultsInfo.innerHTML = sanitizeHtml(`
-      <span class="material-icons me-1">filter_list</span>
-      Trovati <strong>${count}</strong> eventi su ${totalCount} totali
-      ${filters.paziente_search ? `per "${sanitizeHtml(filters.paziente_search)}"` : ''}
-    `);
-    resultsInfo.style.display = 'block';
-  } else {
-    resultsInfo.style.display = 'none';
-  }
-}
+ 
 
 // ============================================================================
 // EVENT LISTENERS
@@ -1533,5 +1284,6 @@ export function updateSearchResultsCount(count, totalCount, filters) {
 
 // Initialize responsive design on window resize
 if (typeof window !== "undefined") {
-  window.addEventListener("resize", applyResponsiveDesign);
+  const handleResize = debounce(() => applyResponsiveDesign(), 150);
+  window.addEventListener("resize", handleResize);
 }

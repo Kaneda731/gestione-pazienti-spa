@@ -50,12 +50,14 @@ export class ConfirmModal {
                 
                 // Gestisci conferma
                 const handleConfirm = () => {
+                    this._defocus(modalElement);
                     modal.hide();
                     resolve(true);
                 };
                 
                 // Gestisci annullamento
                 const handleCancel = () => {
+                    this._defocus(modalElement);
                     modal.hide();
                     resolve(false);
                 };
@@ -63,6 +65,10 @@ export class ConfirmModal {
                 // Aggiungi event listeners
                 confirmBtn.addEventListener('click', handleConfirm);
                 cancelBtn.addEventListener('click', handleCancel);
+                // Defocus anche quando parte l'hide da altri trigger (es. btn-close)
+                modalElement.addEventListener('hide.bs.modal', () => {
+                    this._defocus(modalElement);
+                });
                 
                 // Rimuovi il modal dal DOM quando viene nascosto
                 modalElement.addEventListener('hidden.bs.modal', () => {
@@ -80,6 +86,20 @@ export class ConfirmModal {
                 resolve(result);
             }
         });
+    }
+
+    /**
+     * Rimuove il focus da elementi interni al modal per evitare warning aria-hidden
+     */
+    _defocus(modalElement) {
+        try {
+            const active = document.activeElement;
+            if (active && modalElement.contains(active) && typeof active.blur === 'function') {
+                active.blur();
+            }
+        } catch {
+            // no-op
+        }
     }
 
     /**

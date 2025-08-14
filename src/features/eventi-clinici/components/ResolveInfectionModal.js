@@ -50,11 +50,16 @@ export class ResolveInfectionModal {
                     return;
                 }
 
+                this._defocus(modalElement);
                 modal.hide();
                 resolve(formattedDate);
             };
 
             form.addEventListener('submit', handleSubmit);
+            // Defocus quando il modal sta per nascondersi (es. tramite btn-close o ESC)
+            modalElement.addEventListener('hide.bs.modal', () => {
+                this._defocus(modalElement);
+            });
             modalElement.addEventListener('hidden.bs.modal', () => {
                 if (this.datepickerInstance) this.datepickerInstance.destroy();
                 modalElement.remove();
@@ -92,6 +97,20 @@ export class ResolveInfectionModal {
                 </div>
             </div>
         `;
+    }
+
+    /**
+     * Rimuove il focus da elementi interni al modal per evitare warning aria-hidden
+     */
+    _defocus(modalElement) {
+        try {
+            const active = document.activeElement;
+            if (active && modalElement.contains(active) && typeof active.blur === 'function') {
+                active.blur();
+            }
+        } catch {
+            // no-op
+        }
     }
 
     showError(message) {

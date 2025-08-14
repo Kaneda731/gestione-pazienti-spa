@@ -120,9 +120,11 @@ export class PatientAutocomplete {
     this.results.innerHTML = listHtml;
     this._open();
 
-    // Bind clicks
+    // Bind selection early on mousedown to avoid input blur closing the list before click
     Array.from(this.results.querySelectorAll('.dropdown-item')).forEach(btn => {
-      btn.addEventListener('click', () => {
+      const selectFn = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         const id = btn.getAttribute('data-id');
         const match = items.find(x => String(x.id) === String(id));
         if (match) {
@@ -132,7 +134,9 @@ export class PatientAutocomplete {
           this._close();
           this.onSelect?.(match);
         }
-      });
+      };
+      btn.addEventListener('mousedown', selectFn);
+      btn.addEventListener('click', selectFn); // fallback
     });
   }
 }

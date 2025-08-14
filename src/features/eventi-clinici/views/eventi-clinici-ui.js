@@ -5,6 +5,7 @@ import { formatDate } from "../../../shared/utils/formatting.js";
 import { sanitizeHtml } from "../../../shared/utils/sanitizeHtml.js";
 import { coreApplyResponsiveDesign } from "./responsive/applyResponsiveDesign.js";
 import { debounce } from "./utils/debounce.js";
+export { updateSearchResultsCount } from "./ui/results-info/updateResultsInfo.js";
 
 /**
  * UI renderer per la timeline degli eventi clinici
@@ -1482,35 +1483,7 @@ export function highlightSearchTerms(content, searchTerm) {
 /**
  * Aggiorna contatore risultati ricerca
  */
-export function updateSearchResultsCount(count, totalCount, filters) {
-  let resultsInfo = document.getElementById('search-results-info');
-  
-  if (!resultsInfo) {
-    resultsInfo = document.createElement('div');
-    resultsInfo.id = 'search-results-info';
-    resultsInfo.className = 'search-results-info text-muted mb-3';
-    
-    const timelineContainer = domElements.timelineContainer;
-    if (timelineContainer && timelineContainer.parentNode) {
-      timelineContainer.parentNode.insertBefore(resultsInfo, timelineContainer);
-    }
-  }
-
-  const hasActiveFilters = Object.values(filters || {}).some(value => 
-    value && value.toString().trim() !== ''
-  );
-
-  if (hasActiveFilters) {
-    resultsInfo.innerHTML = sanitizeHtml(`
-      <span class="material-icons me-1">filter_list</span>
-      Trovati <strong>${count}</strong> eventi su ${totalCount} totali
-      ${filters.paziente_search ? `per "${sanitizeHtml(filters.paziente_search)}"` : ''}
-    `);
-    resultsInfo.style.display = 'block';
-  } else {
-    resultsInfo.style.display = 'none';
-  }
-}
+ 
 
 // ============================================================================
 // EVENT LISTENERS

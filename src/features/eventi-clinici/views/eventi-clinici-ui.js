@@ -7,8 +7,7 @@ import { coreApplyResponsiveDesign } from "./responsive/applyResponsiveDesign.js
 import { debounce } from "./utils/debounce.js";
 export { updateSearchResultsCount } from "./ui/results-info/updateResultsInfo.js";
 import { populateDepartmentFilterCore } from "./filters/populateDepartmentFilter.js";
-import { populateTipoInterventoFilterCore } from "./filters/populateTipoInterventoFilter.js";
-import { populateAgentePatogenoFilterCore } from "./filters/populateAgentePatogenoFilter.js";
+// Rimosso filtro Agente Patogeno (ridondante)
 
 /**
  * UI renderer per la timeline degli eventi clinici
@@ -46,8 +45,7 @@ export function initializeDOMElements() {
     filterDateFrom: document.getElementById("eventi-filter-date-from"),
     filterDateTo: document.getElementById("eventi-filter-date-to"),
     filterReparto: document.getElementById("eventi-filter-reparto"),
-    filterAgentePatogeno: document.getElementById("eventi-filter-agente-patogeno"),
-    filterTipoIntervento: document.getElementById("eventi-filter-tipo-intervento"),
+    // filterAgentePatogeno rimosso
     filterSortColumn: document.getElementById("eventi-sort-column"),
     filterSortDirection: document.getElementById("eventi-sort-direction"),
 
@@ -60,9 +58,7 @@ export function initializeDOMElements() {
     saveFiltersBtn: document.getElementById("eventi-save-filters-btn"),
     loadFiltersBtn: document.getElementById("eventi-load-filters-btn"),
     
-    // Advanced filters
-    advancedFiltersToggle: document.querySelector('[data-bs-target="#advanced-filters"]'),
-    advancedFiltersContainer: document.getElementById("advanced-filters"),
+    // Advanced filters removed
 
     // Pagination
     paginationControls: document.getElementById("eventi-pagination-controls"),
@@ -374,12 +370,7 @@ function createEventCardContent(evento) {
             <span class="material-icons align-middle me-1">visibility</span>
             <span class="btn-text align-middle">Dettagli</span>
           </button>
-          ${evento.tipo_evento === 'infezione' && !evento.data_fine_evento ? `
-            <button class="btn btn-outline-success event-resolve-btn" data-evento-id="${evento.id}" title="Risolvi infezione" aria-label="Risolvi infezione">
-              <span class="material-icons align-middle me-1">check_circle</span>
-              <span class="btn-text align-middle">Risolvi</span>
-            </button>
-          ` : ''}
+          <!-- Pulsante Risolvi rimosso nella card mobile; disponibile nella modal Dettagli -->
         </div>
       </div>
     </div>
@@ -1030,17 +1021,10 @@ export async function populateDepartmentFilter(reparti) {
  */
 export async function populateAdvancedFilters(suggestions) {
   try {
-    if (domElements.filterTipoIntervento && suggestions.tipiIntervento) {
-      await populateTipoInterventoFilterCore(domElements.filterTipoIntervento, suggestions.tipiIntervento, logger);
-    }
-
-    if (domElements.filterAgentePatogeno && suggestions.agentiPatogeni) {
-      await populateAgentePatogenoFilterCore(domElements.filterAgentePatogeno, suggestions.agentiPatogeni, logger);
-    }
-
-    logger.log('✅ Filtri avanzati popolati:', suggestions);
+    // Nessun filtro avanzato da popolare (agente patogeno rimosso)
+    logger.log('✅ Filtri popolati: nessun filtro avanzato attivo');
   } catch (error) {
-    logger.error('❌ Errore popolamento filtri avanzati:', error);
+    logger.error('❌ Errore popolamento filtri:', error);
   }
 }
 
@@ -1056,15 +1040,24 @@ export function applyFiltersToUI(filters) {
     { element: domElements.filterDateFrom, key: 'data_da' },
     { element: domElements.filterDateTo, key: 'data_a' },
     { element: domElements.filterReparto, key: 'reparto' },
-    { element: domElements.filterAgentePatogeno, key: 'agente_patogeno' },
-    { element: domElements.filterTipoIntervento, key: 'tipo_intervento' },
     { element: domElements.filterSortColumn, key: 'sortColumn' },
     { element: domElements.filterSortDirection, key: 'sortDirection' }
   ];
 
   filterMappings.forEach(({ element, key }) => {
-    if (element && filters[key]) {
+    if (element && Object.prototype.hasOwnProperty.call(filters, key)) {
       element.value = filters[key];
+      // Se è un CustomSelect, sincronizza anche l'etichetta
+      if (element.customSelectInstance && typeof element.customSelectInstance.setValue === 'function') {
+        try {
+          element.customSelectInstance.setValue(element.value, true); // silent
+        } catch (e) {
+          // fallback: aggiorna le opzioni e l'etichetta
+          if (typeof element.customSelectInstance.updateOptions === 'function') {
+            element.customSelectInstance.updateOptions();
+          }
+        }
+      }
     }
   });
 
@@ -1081,15 +1074,23 @@ export function resetFiltersUI() {
     { element: domElements.filterDateFrom, value: '' },
     { element: domElements.filterDateTo, value: '' },
     { element: domElements.filterReparto, value: '' },
-    { element: domElements.filterAgentePatogeno, value: '' },
-    { element: domElements.filterTipoIntervento, value: '' },
-    { element: domElements.filterSortColumn, value: 'data_evento' },
+    { element: domElements.filterSortColumn, value: '' },
     { element: domElements.filterSortDirection, value: 'desc' }
   ];
 
   resetMappings.forEach(({ element, value }) => {
     if (element) {
       element.value = value;
+      // Se è un CustomSelect, sincronizza anche l'etichetta verso il placeholder/valore
+      if (element.customSelectInstance && typeof element.customSelectInstance.setValue === 'function') {
+        try {
+          element.customSelectInstance.setValue(value, true); // silent
+        } catch (e) {
+          if (typeof element.customSelectInstance.updateOptions === 'function') {
+            element.customSelectInstance.updateOptions();
+          }
+        }
+      }
     }
   });
 
@@ -1114,9 +1115,7 @@ export function getFiltersFromUI() {
     data_da: domElements.filterDateFrom?.value || '',
     data_a: domElements.filterDateTo?.value || '',
     reparto: domElements.filterReparto?.value || '',
-    agente_patogeno: domElements.filterAgentePatogeno?.value || '',
-    tipo_intervento: domElements.filterTipoIntervento?.value || '',
-    sortColumn: domElements.filterSortColumn?.value || 'data_evento',
+    sortColumn: domElements.filterSortColumn?.value || '',
     sortDirection: domElements.filterSortDirection?.value || 'desc'
   };
 }

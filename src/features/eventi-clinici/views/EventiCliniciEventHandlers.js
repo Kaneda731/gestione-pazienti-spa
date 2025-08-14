@@ -133,14 +133,7 @@ export class EventiCliniciEventHandlers {
       this.cleanupFunctions.push(() => this.domElements.filterReparto.removeEventListener('change', handler));
     }
 
-    // Advanced filters
-    if (this.domElements.filterAgentePatogeno) {
-      const handler = this.filterManager.createDebouncedFilterHandler(async () => {
-        await this.filterManager.handleCombinedFiltersChange();
-      }, 500);
-      this.domElements.filterAgentePatogeno.addEventListener('input', handler);
-      this.cleanupFunctions.push(() => this.domElements.filterAgentePatogeno.removeEventListener('input', handler));
-    }
+    // Filtro Agente Patogeno rimosso
 
     if (this.domElements.filterTipoIntervento) {
       const handler = this.filterManager.createDebouncedFilterHandler(async () => {
@@ -269,7 +262,7 @@ export class EventiCliniciEventHandlers {
         input: this.domElements.searchPatientInput,
         resultsContainer: this.domElements.patientSearchResults,
         activeOnly: true,
-        onSelect: () => this.filterManager.handlePatientSearchFilter(this.domElements.searchPatientInput.value),
+        onSelect: (patient) => this.filterManager.handlePatientSearchFilter(this.domElements.searchPatientInput.value, patient?.id),
       });
       this.cleanupFunctions.push(() => destroy && destroy());
     }

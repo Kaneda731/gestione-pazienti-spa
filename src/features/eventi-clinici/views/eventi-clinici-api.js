@@ -30,13 +30,12 @@ let filterTimeout = null;
 // Advanced search state
 let currentFilters = {
   paziente_search: '',
+  paziente_id: '',
   tipo_evento: '',
   data_da: '',
   data_a: '',
   reparto: '',
-  agente_patogeno: '',
-  tipo_intervento: '',
-  sortColumn: 'data_evento',
+  sortColumn: '',
   sortDirection: 'desc'
 };
 
@@ -223,7 +222,7 @@ export async function searchPazientiForEvents(searchTerm, activeOnly = true) {
       try {
         logger.log('🔍 Ricerca pazienti:', { searchTerm, activeOnly });
 
-        const pazienti = await eventiCliniciService.searchPazienti(searchTerm.trim(), activeOnly);
+        const pazienti = await eventiCliniciService.searchPazientiWithEvents(searchTerm.trim(), activeOnly);
         const transformedPazienti = pazienti.map(transformPazienteForUI);
 
         updateSearchCache(cacheKey, transformedPazienti);
@@ -400,16 +399,21 @@ export async function applyDepartmentFilter(reparto) {
 }
 
 /**
- * Applica ricerca paziente e filtra eventi
+ * Applica ricerca paziente e filtra eventi (accetta opzionale pazienteId per filtro esatto)
  */
-export async function applyPatientSearch(searchTerm) {
+export async function applyPatientSearch(searchTerm, pazienteId = '') {
   try {
     logger.log('👤 Applicazione ricerca paziente:', searchTerm);
 
-    const filters = { ...currentFilters, paziente_search: searchTerm || '' };
+    const filters = {
+      ...currentFilters,
+      paziente_search: searchTerm || '',
+      paziente_id: pazienteId || ''
+    };
     const result = await fetchEventiClinici(filters, 0);
 
     currentFilters.paziente_search = searchTerm || '';
+    currentFilters.paziente_id = pazienteId || '';
 
     logger.log('✅ Ricerca paziente applicata:', {
       termine: searchTerm,
@@ -536,8 +540,7 @@ export function resetCurrentFiltersToDefaults() {
     data_a: '',
     reparto: '',
     agente_patogeno: '',
-    tipo_intervento: '',
-    sortColumn: 'data_evento',
+    sortColumn: '',
     sortDirection: 'desc'
   };
   logger.log('🔧 Filtri in memoria reimpostati ai default');
@@ -557,8 +560,7 @@ export async function resetFiltersAndState() {
       data_a: '',
       reparto: '',
       agente_patogeno: '',
-      tipo_intervento: '',
-      sortColumn: 'data_evento',
+      sortColumn: '',
       sortDirection: 'desc'
     };
 
@@ -612,7 +614,9 @@ export async function loadFiltersFromState() {
     const savedFilters = stateService.getState('eventiCliniciFilters');
     
     if (savedFilters) {
-      currentFilters = { ...currentFilters, ...savedFilters };
+      // Sanitize deprecated keys from legacy saved state
+      const { tipo_intervento, ...sanitized } = savedFilters;
+      currentFilters = { ...currentFilters, ...sanitized };
       logger.log('📂 Filtri caricati dallo stato:', currentFilters);
     }
     
@@ -967,13 +971,7 @@ function validateFilterCombination(filters) {
     errors.push('La data di fine non può essere nel futuro');
   }
 
-  if (filters.tipo_intervento && filters.tipo_evento !== 'intervento') {
-    errors.push('Il filtro tipo intervento può essere usato solo con eventi di tipo intervento');
-  }
-  
-  if (filters.agente_patogeno && filters.tipo_evento !== 'infezione') {
-    errors.push('Il filtro agente patogeno può essere usato solo con eventi di tipo infezione');
-  }
+  // Filtro agente patogeno rimosso
 
   if (errors.length > 0) {
     throw new Error(errors.join(', '));
@@ -984,6 +982,9 @@ function validateFilterCombination(filters) {
  * Valida parametri di ordinamento
  */
 function validateSortParameters(sortColumn, sortDirection) {
+  // Allow neutral sort: when empty or falsy, skip validation and sorting
+  if (!sortColumn) return;
+
   const validColumns = ['data_evento', 'tipo_evento', 'created_at', 'paziente_nome'];
   const validDirections = ['asc', 'desc'];
 

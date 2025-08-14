@@ -6,6 +6,7 @@ import { sanitizeHtml } from "../../../shared/utils/sanitizeHtml.js";
 import { coreApplyResponsiveDesign } from "./responsive/applyResponsiveDesign.js";
 import { debounce } from "./utils/debounce.js";
 export { updateSearchResultsCount } from "./ui/results-info/updateResultsInfo.js";
+import { populateDepartmentFilterCore } from "./filters/populateDepartmentFilter.js";
 
 /**
  * UI renderer per la timeline degli eventi clinici
@@ -1171,64 +1172,7 @@ export function applyResponsiveDesign() {
  * Popola il filtro reparti con le opzioni disponibili
  */
 export async function populateDepartmentFilter(reparti) {
-  if (!domElements.filterReparto) {
-    logger.warn('⚠️ Elemento filterReparto non trovato');
-    return;
-  }
-
-  try {
-    // Check if it's a CustomSelect (correct property name)
-    const customSelectInstance = domElements.filterReparto.customSelectInstance;
-    
-    if (customSelectInstance) {
-      // Use CustomSelect API
-      logger.log('🔧 Popolamento CustomSelect reparto con', reparti.length, 'opzioni');
-      
-      // Clear existing options except the first one
-      const firstOption = domElements.filterReparto.querySelector('option[value=""]');
-      domElements.filterReparto.innerHTML = '';
-      if (firstOption) {
-        domElements.filterReparto.appendChild(firstOption);
-      }
-
-      // Add new options
-      reparti.forEach(reparto => {
-        const option = document.createElement('option');
-        option.value = reparto;
-        option.textContent = reparto;
-        domElements.filterReparto.appendChild(option);
-      });
-
-      // Use updateOptions method to refresh the CustomSelect
-      if (typeof customSelectInstance.updateOptions === 'function') {
-        customSelectInstance.updateOptions();
-        logger.log('🔧 CustomSelect options updated');
-      } else if (typeof customSelectInstance.refresh === 'function') {
-        customSelectInstance.refresh();
-        logger.log('🔧 CustomSelect refreshed');
-      }
-    } else {
-      // Fallback to standard select
-      logger.log('🔧 Popolamento select standard reparto con', reparti.length, 'opzioni');
-      
-      const firstOption = domElements.filterReparto.querySelector('option[value=""]');
-      domElements.filterReparto.innerHTML = '';
-      if (firstOption) {
-        domElements.filterReparto.appendChild(firstOption);
-      }
-
-      reparti.forEach(reparto => {
-        const option = document.createElement('option');
-        option.value = reparto;
-        option.textContent = reparto;
-        domElements.filterReparto.appendChild(option);
-      });
-    }
-
-    logger.log('✅ Filtro reparti popolato con', reparti.length, 'opzioni');
-  } catch (error) {
-    logger.error('❌ Errore popolamento filtro reparti:', error);
-  }
+  await populateDepartmentFilterCore(domElements.filterReparto, reparti, logger);
 }
 
 /**

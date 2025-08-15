@@ -1,9 +1,9 @@
 // src/features/eventi-clinici/views/eventi-clinici-api.js
 
 import { eventiCliniciService } from '../services/eventiCliniciService.js';
-import { logger } from '../../../core/services/logger/loggerService.js';
-import { notificationService } from '../../../core/services/notifications/notificationService.js';
-import { formatDate } from '../../../shared/utils/formatting.js';
+import { logger } from '@/core/services/logger/loggerService.js';
+import { notificationService } from '@/core/services/notifications/notificationService.js';
+import { formatDate } from '@/shared/utils/formatting.js';
 
 /**
  * API wrapper per la gestione degli eventi clinici
@@ -564,7 +564,7 @@ export async function resetFiltersAndState() {
       sortDirection: 'desc'
     };
 
-    const { stateService } = await import('../../../core/services/state/stateService.js');
+    const { stateService } = await import('@/core/services/state/stateService.js');
     stateService.setState('eventiCliniciFilters', null);
 
     clearSearchCache();
@@ -594,7 +594,7 @@ export async function resetFiltersAndState() {
  */
 export async function saveFiltersToState() {
   try {
-    const { stateService } = await import('../../../core/services/state/stateService.js');
+    const { stateService } = await import('@/core/services/state/stateService.js');
     stateService.setState('eventiCliniciFilters', currentFilters);
     logger.log('💾 Filtri salvati nello stato:', currentFilters);
     notificationService.success('Filtri salvati con successo');
@@ -610,7 +610,7 @@ export async function saveFiltersToState() {
  */
 export async function loadFiltersFromState() {
   try {
-    const { stateService } = await import('../../../core/services/state/stateService.js');
+    const { stateService } = await import('@/core/services/state/stateService.js');
     const savedFilters = stateService.getState('eventiCliniciFilters');
     
     if (savedFilters) {
@@ -767,7 +767,7 @@ export async function getDepartmentsList() {
   try {
     logger.log('🏥 Caricamento lista reparti');
 
-    const { supabase } = await import('../../../core/services/supabase/supabaseClient.js');
+    const { supabase } = await import('@/core/services/supabase/supabaseClient.js');
     const { data, error } = await supabase
       .from('pazienti')
       .select('reparto_appartenenza')
@@ -971,7 +971,10 @@ function validateFilterCombination(filters) {
     errors.push('La data di fine non può essere nel futuro');
   }
 
-  // Filtro agente patogeno rimosso
+  // Validazione tipo_intervento: consentito solo quando tipo_evento è "intervento"
+  if (filters.tipo_intervento && filters.tipo_evento !== 'intervento') {
+    errors.push('Il filtro tipo intervento può essere usato solo con eventi di tipo intervento');
+  }
 
   if (errors.length > 0) {
     throw new Error(errors.join(', '));

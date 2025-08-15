@@ -5,9 +5,9 @@ import {
     dischargePatientWithTransfer,
     validateDischargeData
 } from '../../../../src/features/patients/views/dimissione-api.js';
-import { supabase } from '../../../../src/core/services/supabaseClient.js';
+import { supabase } from '@/core/services/supabase/supabaseClient.js';
 
-vi.mock('../../../../src/core/services/supabaseClient.js', () => ({
+vi.mock('@/core/services/supabase/supabaseClient.js', () => ({
     supabase: {
         from: vi.fn(),
     }

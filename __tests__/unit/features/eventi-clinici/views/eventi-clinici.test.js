@@ -4,7 +4,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { JSDOM } from 'jsdom';
 
 // Setup mocks before imports
-vi.mock('../../../../../src/features/eventi-clinici/views/eventi-clinici-api.js', () => ({
+vi.mock('@/features/eventi-clinici/views/eventi-clinici-api.js', () => ({
   fetchEventiClinici: vi.fn(),
   fetchEventiByPaziente: vi.fn(),
   createEventoClinico: vi.fn(),
@@ -33,7 +33,7 @@ vi.mock('../../../../../src/features/eventi-clinici/views/eventi-clinici-api.js'
   getFilterStats: vi.fn(() => ({ totalEvents: 0, filteredEvents: 0, activeFiltersCount: 0, activeFilters: [], filterEfficiency: 0 }))
 }));
 
-vi.mock('../../../../../src/features/eventi-clinici/views/eventi-clinici-ui.js', () => ({
+vi.mock('@/features/eventi-clinici/views/eventi-clinici-ui.js', () => ({
   initializeDOMElements: vi.fn(),
   renderEventsTimeline: vi.fn(),
   renderEventsResponsive: vi.fn(),
@@ -85,7 +85,7 @@ vi.mock('../../../../../src/features/eventi-clinici/views/eventi-clinici-ui.js',
   }))
 }));
 
-vi.mock('../../../../../src/core/services/loggerService.js', () => ({
+vi.mock('@/core/services/logger/loggerService.js', () => ({
   logger: {
     log: vi.fn(),
     error: vi.fn(),
@@ -99,7 +99,7 @@ vi.mock('../../../../../src/core/services/loggerService.js', () => ({
   }
 }));
 
-vi.mock('../../../../../src/core/services/notificationService.js', () => ({
+vi.mock('@/core/services/notifications/notificationService.js', () => ({
   notificationService: {
     success: vi.fn(),
     error: vi.fn(),
@@ -107,11 +107,11 @@ vi.mock('../../../../../src/core/services/notificationService.js', () => ({
   }
 }));
 
-vi.mock('../../../../../src/shared/components/forms/CustomSelect.js', () => ({
+vi.mock('@/shared/components/forms/CustomSelect.js', () => ({
   initCustomSelects: vi.fn()
 }));
 
-vi.mock('../../../../../src/shared/components/forms/CustomDatepicker.js', () => ({
+vi.mock('@/shared/components/forms/CustomDatepicker.js', () => ({
   initCustomDatepickers: vi.fn()
 }));
 
@@ -126,7 +126,7 @@ vi.mock('bootstrap', () => ({
 }));
 
 // Mock the new manager classes
-vi.mock('../../../../../src/features/eventi-clinici/views/EventiCliniciDataManager.js', () => ({
+vi.mock('@/features/eventi-clinici/views/EventiCliniciDataManager.js', () => ({
   EventiCliniciDataManager: vi.fn().mockImplementation(() => ({
     loadEventsData: vi.fn().mockResolvedValue({
       eventi: [],
@@ -144,7 +144,7 @@ vi.mock('../../../../../src/features/eventi-clinici/views/EventiCliniciDataManag
   }))
 }));
 
-vi.mock('../../../../../src/features/eventi-clinici/views/EventiCliniciFilterManager.js', () => ({
+vi.mock('@/features/eventi-clinici/views/EventiCliniciFilterManager.js', () => ({
   EventiCliniciFilterManager: vi.fn().mockImplementation(() => ({
     applyFilters: vi.fn(),
     resetFilters: vi.fn(),
@@ -153,7 +153,7 @@ vi.mock('../../../../../src/features/eventi-clinici/views/EventiCliniciFilterMan
   }))
 }));
 
-vi.mock('../../../../../src/features/eventi-clinici/views/EventiCliniciModalManager.js', () => ({
+vi.mock('@/features/eventi-clinici/views/EventiCliniciModalManager.js', () => ({
   EventiCliniciModalManager: vi.fn().mockImplementation(() => ({
     initializeModals: vi.fn(),
     showEventDetail: vi.fn(),
@@ -163,7 +163,7 @@ vi.mock('../../../../../src/features/eventi-clinici/views/EventiCliniciModalMana
   }))
 }));
 
-vi.mock('../../../../../src/features/eventi-clinici/views/EventiCliniciEventHandlers.js', () => ({
+vi.mock('@/features/eventi-clinici/views/EventiCliniciEventHandlers.js', () => ({
   EventiCliniciEventHandlers: vi.fn().mockImplementation(() => ({
     setupEventListeners: vi.fn(),
     initializeAdvancedFiltersState: vi.fn(),
@@ -172,7 +172,7 @@ vi.mock('../../../../../src/features/eventi-clinici/views/EventiCliniciEventHand
 }));
 
 // Import after mocks
-import { initEventiCliniciView } from '../../../../../src/features/eventi-clinici/views/eventi-clinici.js';
+import { initEventiCliniciView } from '@/features/eventi-clinici/views/eventi-clinici.js';
 import { 
   fetchEventiClinici,
   searchPazientiForEvents,
@@ -185,7 +185,7 @@ import {
   applyEventTypeFilter,
   searchPatientsRealTime,
   applyPatientSearch
-} from '../../../../../src/features/eventi-clinici/views/eventi-clinici-api.js';
+} from '@/features/eventi-clinici/views/eventi-clinici-api.js';
 import {
   initializeDOMElements,
   renderEventsTimeline,
@@ -195,9 +195,9 @@ import {
   renderPatientSearchResults,
   getDOMElements,
   applyResponsiveDesign
-} from '../../../../../src/features/eventi-clinici/views/eventi-clinici-ui.js';
-import { logger } from '../../../../../src/core/services/loggerService.js';
-import { notificationService } from '../../../../../src/core/services/notificationService.js';
+} from '@/features/eventi-clinici/views/eventi-clinici-ui.js';
+import { logger } from '@/core/services/logger/loggerService.js';
+import { notificationService } from '@/core/services/notifications/notificationService.js';
 
 describe('Eventi Clinici Main Controller Tests', () => {
   let dom;

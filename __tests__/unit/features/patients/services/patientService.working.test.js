@@ -6,7 +6,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Mock semplice dei moduli
-vi.mock('@/core/services/supabaseClient.js', () => ({
+vi.mock('@/core/services/supabase/supabaseClient.js', () => ({
   supabase: {
     from: vi.fn(),
     auth: {
@@ -15,14 +15,14 @@ vi.mock('@/core/services/supabaseClient.js', () => ({
   }
 }));
 
-vi.mock('@/core/services/stateService.js', () => ({
+vi.mock('@/core/services/state/stateService.js', () => ({
   stateService: {
     setLoading: vi.fn(),
     getFilters: vi.fn()
   }
 }));
 
-vi.mock('@/core/services/notificationService.js', () => ({
+vi.mock('@/core/services/notifications/notificationService.js', () => ({
   notificationService: {
     success: vi.fn(),
     error: vi.fn(),
@@ -31,9 +31,9 @@ vi.mock('@/core/services/notificationService.js', () => ({
 }));
 
 // Import dopo i mock
-import { supabase } from '@/core/services/supabaseClient.js';
-import { stateService } from '@/core/services/stateService.js';
-import { notificationService } from '@/core/services/notificationService.js';
+import { supabase } from '@/core/services/supabase/supabaseClient.js';
+import { stateService } from '@/core/services/state/stateService.js';
+import { notificationService } from '@/core/services/notifications/notificationService.js';
 
 // Mock del servizio con implementazione semplificata
 class MockPatientService {

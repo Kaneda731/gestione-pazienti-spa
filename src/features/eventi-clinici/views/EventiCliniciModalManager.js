@@ -21,7 +21,7 @@ import {
 import { logger } from '../../../core/services/logger/loggerService.js';
 import { notificationService } from '../../../core/services/notifications/notificationService.js';
 import { sanitizeHtml } from '../../../shared/utils/sanitizeHtml.js';
-import { getFormData, validateFormData, hideSearchResults, debounce } from './EventiCliniciUtils.js';
+import { getFormData, validateFormData, hideSearchResults, debounce } from './utils/index.js';
 
 /**
  * Gestione dei modali per gli eventi clinici

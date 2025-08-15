@@ -1,5 +1,5 @@
 // src/features/patients/views/dimissione.js
-import { dischargePatientWithTransfer } from './dimissione-api.js';
+import { dischargePatientWithTransfer } from '@/features/patients/views/dimissione-api.js';
 import { 
     dom,
     initializeUI, 
@@ -9,7 +9,7 @@ import {
     showFeedback,
     validateDischargeForm,
     getDischargeFormData
-} from './dimissione-ui.js';
+} from '@/features/patients/views/dimissione-ui.js';
 
 let selectedPatient = null;
 

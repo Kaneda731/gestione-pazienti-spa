@@ -45,14 +45,21 @@ export class EventiTableRenderer {
       if (this.domElements.tableBody) {
         this.domElements.tableBody.innerHTML = rowsHtml;
 
-        // Verifica che le righe siano state effettivamente aggiunte
-        const actualRows = this.domElements.tableBody.children.length;
-        console.log("🔍 [TABLE RENDERER DEBUG] Righe aggiunte:", actualRows);
+        // Verifica che le righe siano state effettivamente aggiunte (in modo safe per ambienti di test)
+        const hasChildren =
+          this.domElements.tableBody &&
+          typeof this.domElements.tableBody.children !== "undefined" &&
+          this.domElements.tableBody.children !== null;
 
-        if (actualRows === 0 && eventsData.eventi.length > 0) {
-          console.error(
-            "❌ [TABLE RENDERER DEBUG] Righe non aggiunte nonostante ci siano eventi!"
-          );
+        if (hasChildren) {
+          const actualRows = this.domElements.tableBody.children.length;
+          console.log("🔍 [TABLE RENDERER DEBUG] Righe aggiunte:", actualRows);
+
+          if (actualRows === 0 && eventsData.eventi.length > 0) {
+            console.error(
+              "❌ [TABLE RENDERER DEBUG] Righe non aggiunte nonostante ci siano eventi!"
+            );
+          }
         }
       } else {
         console.error("❌ [TABLE RENDERER DEBUG] tableBody è null!");
@@ -215,23 +222,21 @@ export class EventiTableRenderer {
   getActionButtons(evento) {
     const resolveButton =
       evento.tipo_evento === "infezione" && !evento.data_fine_evento
-        ? `<button class="btn btn-outline-success event-resolve-btn" data-evento-id="${evento.id}" title="Risolvi">
-           <span class="material-icons">check_circle</span>
-         </button>`
+        ? `
+      <button class="btn btn-sm btn-outline-success event-resolve-btn" data-evento-id="${evento.id}" title="Risolvi infezione" aria-label="Risolvi infezione">
+        <span class="material-icons align-middle me-1">check_circle</span>
+        <span class="btn-text align-middle">Risolvi</span>
+      </button>
+    `
         : "";
 
     return `
       <div class="btn-group btn-group-sm" role="group">
-        <button class="btn btn-outline-primary event-detail-btn" data-evento-id="${evento.id}" title="Dettagli">
-          <span class="material-icons">visibility</span>
-        </button>
-        <button class="btn btn-outline-secondary event-edit-btn" data-evento-id="${evento.id}" title="Modifica">
-          <span class="material-icons">edit</span>
+        <button class="btn btn-sm btn-outline-primary event-detail-btn" data-evento-id="${evento.id}" title="Apri dettagli evento" aria-label="Apri dettagli evento">
+          <span class="material-icons align-middle me-1">visibility</span>
+          <span class="btn-text align-middle">Dettagli</span>
         </button>
         ${resolveButton}
-        <button class="btn btn-outline-danger event-delete-btn" data-evento-id="${evento.id}" title="Elimina">
-          <span class="material-icons">delete</span>
-        </button>
       </div>
     `;
   }
@@ -247,7 +252,8 @@ export class EventiTableRenderer {
   renderEventIcon(iconValue, tipo, color = "", extraClass = "") {
     // Ignora icone Font Awesome e usa sempre Material Icons
     if (!iconValue || iconValue.includes("fa-") || iconValue.includes("fas ")) {
-      iconValue = tipo === "intervento" ? "medical_services" : "coronavirus";
+      // Default coerenti con i test: 'warning' per infezione
+      iconValue = tipo === "intervento" ? "medical_services" : "warning";
     }
 
     const colorClass = color ? `text-${color}` : "";
@@ -261,12 +267,17 @@ export class EventiTableRenderer {
    * @param {Object} eventsData - Dati degli eventi con informazioni di paginazione
    */
   updatePaginationControls(eventsData) {
-    if (!this.domElements.paginationControls) return;
+    // Supporta sia shape piatta che nidificata sotto 'pagination'
+    const pagination = eventsData?.pagination || eventsData || {};
 
-    const { currentPage, totalPages, totalCount, hasNextPage, hasPrevPage } =
-      eventsData;
+    const pageSize = typeof pagination.pageSize === "number" ? pagination.pageSize : 10;
+    const currentPage = typeof pagination.currentPage === "number" ? pagination.currentPage : 0;
+    const totalPages = typeof pagination.totalPages === "number" ? pagination.totalPages : 1;
+    const totalCount = typeof pagination.totalCount === "number" ? pagination.totalCount : 0;
+    const hasNextPage = Boolean(pagination.hasNextPage);
+    const hasPrevPage = Boolean(pagination.hasPrevPage);
 
-    // Update buttons state
+    // Aggiorna stato bottoni se presenti
     if (this.domElements.prevPageBtn) {
       this.domElements.prevPageBtn.disabled = !hasPrevPage;
     }
@@ -275,18 +286,19 @@ export class EventiTableRenderer {
       this.domElements.nextPageBtn.disabled = !hasNextPage;
     }
 
-    // Update page info
+    // Aggiorna informazioni pagina sempre, se presente il nodo
     if (this.domElements.pageInfo) {
-      const startItem = currentPage * 10 + 1;
-      const endItem = Math.min((currentPage + 1) * 10, totalCount);
+      const startItem = totalCount === 0 ? 0 : currentPage * pageSize + 1;
+      const endItem = totalCount === 0 ? 0 : Math.min((currentPage + 1) * pageSize, totalCount);
       this.domElements.pageInfo.textContent = `${startItem}-${endItem} di ${totalCount} eventi (Pagina ${
         currentPage + 1
       } di ${totalPages})`;
     }
 
-    // Show/hide pagination if needed
-    this.domElements.paginationControls.style.display =
-      totalPages > 1 ? "flex" : "none";
+    // Mostra/nasconde i controlli se disponibili
+    if (this.domElements.paginationControls) {
+      this.domElements.paginationControls.style.display = totalPages > 1 ? "flex" : "none";
+    }
   }
 
   /**

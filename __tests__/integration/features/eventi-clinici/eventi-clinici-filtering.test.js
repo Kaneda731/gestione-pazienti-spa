@@ -4,7 +4,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 
 // Setup mocks before imports
 vi.mock(
-  "../../../../src/features/eventi-clinici/services/eventiCliniciService.js",
+  "@/features/eventi-clinici/services/eventiCliniciService.js",
   () => ({
     eventiCliniciService: {
       getAllEventi: vi.fn().mockResolvedValue({
@@ -24,7 +24,7 @@ vi.mock(
   })
 );
 
-vi.mock("../../../../src/core/services/loggerService.js", () => ({
+vi.mock("@/core/services/logger/loggerService.js", () => ({
   logger: {
     log: vi.fn(),
     error: vi.fn(),
@@ -32,7 +32,7 @@ vi.mock("../../../../src/core/services/loggerService.js", () => ({
   },
 }));
 
-vi.mock("../../../../src/core/services/notificationService.js", () => ({
+vi.mock("@/core/services/notifications/notificationService.js", () => ({
   notificationService: {
     error: vi.fn(),
     success: vi.fn(),
@@ -40,7 +40,7 @@ vi.mock("../../../../src/core/services/notificationService.js", () => ({
   },
 }));
 
-vi.mock("../../../../src/core/services/stateService.js", () => ({
+vi.mock("@/core/services/state/stateService.js", () => ({
   stateService: {
     setState: vi.fn(),
     getState: vi.fn().mockReturnValue(null),
@@ -52,7 +52,7 @@ vi.mock("../../../../src/core/services/stateService.js", () => ({
 }));
 
 // Mock supabase client
-vi.mock("../../../../src/core/services/supabaseClient.js", () => ({
+vi.mock("@/core/services/supabase/supabaseClient.js", () => ({
   supabase: {
     from: vi.fn(() => ({
       select: vi.fn(() => ({
@@ -79,12 +79,12 @@ import {
   resetFiltersAndState,
   getFilterStats,
   getCurrentFilters,
-} from "../../../../src/features/eventi-clinici/views/eventi-clinici-api.js";
+} from "@/features/eventi-clinici/views/eventi-clinici-api.js";
 
-import { eventiCliniciService } from "../../../../src/features/eventi-clinici/services/eventiCliniciService.js";
-import { logger } from "../../../../src/core/services/loggerService.js";
-import { notificationService } from "../../../../src/core/services/notificationService.js";
-import { stateService } from "../../../../src/core/services/stateService.js";
+import { eventiCliniciService } from "@/features/eventi-clinici/services/eventiCliniciService.js";
+import { logger } from "@/core/services/logger/loggerService.js";
+import { notificationService } from "@/core/services/notifications/notificationService.js";
+import { stateService } from "@/core/services/state/stateService.js";
 
 describe("Eventi Clinici Comprehensive Filtering System", () => {
   beforeEach(() => {
@@ -223,7 +223,7 @@ describe("Eventi Clinici Comprehensive Filtering System", () => {
       };
 
       // Mock dynamic import
-      vi.doMock("../../../../src/core/services/supabaseClient.js", () => ({
+      vi.doMock("@/core/services/supabase/supabaseClient.js", () => ({
         supabase: mockSupabase,
       }));
 
@@ -237,7 +237,7 @@ describe("Eventi Clinici Comprehensive Filtering System", () => {
 
     it("should handle database errors gracefully", async () => {
       // Mock failed supabase import
-      vi.doMock("../../../../src/core/services/supabaseClient.js", () => {
+      vi.doMock("@/core/services/supabase/supabaseClient.js", () => {
         throw new Error("Database connection failed");
       });
 
@@ -389,7 +389,7 @@ describe("Eventi Clinici Comprehensive Filtering System", () => {
   describe("Filter State Persistence", () => {
     it("should save filters to state service", async () => {
       // Mock dynamic import
-      vi.doMock("../../../../src/core/services/stateService.js", () => ({
+      vi.doMock("@/core/services/state/stateService.js", () => ({
         stateService: {
           setState: vi.fn(),
         },
@@ -410,7 +410,7 @@ describe("Eventi Clinici Comprehensive Filtering System", () => {
       };
 
       // Mock the dynamic import
-      vi.doMock("../../../../src/core/services/stateService.js", () => ({
+      vi.doMock("@/core/services/state/stateService.js", () => ({
         stateService: {
           getState: vi.fn().mockReturnValue(mockFilters),
         },
@@ -448,7 +448,7 @@ describe("Eventi Clinici Comprehensive Filtering System", () => {
       eventiCliniciService.getAllEventi.mockResolvedValue(mockResponse);
 
       // Mock the dynamic import
-      vi.doMock("../../../../src/core/services/stateService.js", () => ({
+      vi.doMock("@/core/services/state/stateService.js", () => ({
         stateService: {
           setState: vi.fn(),
         },

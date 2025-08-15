@@ -7,6 +7,8 @@ import { coreApplyResponsiveDesign } from "./responsive/applyResponsiveDesign.js
 import { debounce } from "./utils/debounce.js";
 export { updateSearchResultsCount } from "./ui/results-info/updateResultsInfo.js";
 import { populateDepartmentFilterCore } from "./filters/populateDepartmentFilter.js";
+import { EventiTableRenderer } from "./ui/EventiTableRenderer.js";
+import { EventiTimelineRenderer } from "./ui/EventiTimelineRenderer.js";
 // Rimosso filtro Agente Patogeno (ridondante)
 
 /**
@@ -20,6 +22,10 @@ import { populateDepartmentFilterCore } from "./filters/populateDepartmentFilter
 
 // DOM elements cache
 let domElements = {};
+
+// Renderers cache
+let tableRenderer = null;
+let timelineRenderer = null;
 
 // Re-export per reset filtri dalla UI
 export { resetCurrentFiltersToDefaults } from './eventi-clinici-api.js';
@@ -103,11 +109,53 @@ export function initializeDOMElements() {
   logger.log("✅ DOM elements inizializzati per eventi clinici UI");
 }
 
+// =========================================================================
+// UI RESET FUNCTION
+// =========================================================================
+
+/**
+ * Resetta lo stato UI locale per evitare riferimenti DOM stali tra navigazioni
+ */
+export function resetUIState() {
+  try {
+    tableRenderer = null;
+    timelineRenderer = null;
+    domElements = {};
+    logger.log("🧹 UI state reset: renderers e domElements azzerati");
+  } catch (err) {
+    logger.warn("⚠️ Errore durante resetUIState:", err);
+  }
+}
+
 /**
  * Ottiene i riferimenti DOM (per uso esterno)
  */
 export function getDOMElements() {
   return domElements;
+}
+
+/**
+ * Inizializza i renderer se non presenti
+ */
+function ensureRenderers() {
+  if (!tableRenderer) {
+    tableRenderer = new EventiTableRenderer(domElements, {
+      showError,
+      updatePaginationControls,
+    });
+  } else {
+    // Riallinea i riferimenti DOM al re-ingresso
+    tableRenderer.domElements = domElements;
+  }
+  if (!timelineRenderer) {
+    timelineRenderer = new EventiTimelineRenderer(domElements, {
+      showError,
+      updatePaginationControls,
+    });
+  } else {
+    // Riallinea i riferimenti DOM al re-ingresso
+    timelineRenderer.domElements = domElements;
+  }
 }
 
 // ============================================================================
@@ -175,12 +223,14 @@ export function renderEventsResponsive(eventsData) {
     logger.warn('⚠️ timelineContainer non trovato');
   }
 
+  // Delega ai renderer modulari
+  ensureRenderers();
   if (useTable) {
-    logger.log('🔧 Rendering tabella');
-    renderEventsTable(eventsData);
+    logger.log('🔧 Rendering tabella (renderer)');
+    tableRenderer.renderTable(eventsData);
   } else {
-    logger.log('🔧 Rendering timeline');
-    renderEventsTimeline(eventsData);
+    logger.log('🔧 Rendering timeline (renderer)');
+    timelineRenderer.renderTimeline(eventsData);
   }
 }
 
@@ -189,34 +239,9 @@ export function renderEventsResponsive(eventsData) {
  */
 export function renderEventsTimeline(eventsData) {
   try {
-    logger.log("🎨 Rendering timeline eventi:", eventsData);
-
-    if (!domElements.timelineContainer) {
-      logger.error("❌ Container timeline non trovato");
-      return;
-    }
-
-    domElements.timelineContainer.innerHTML = sanitizeHtml("");
-
-    if (!eventsData.eventi || eventsData.eventi.length === 0) {
-      renderEmptyState();
-      return;
-    }
-
-    const timelineElement = createTimelineElement();
-    const eventsByDate = groupEventsByDate(eventsData.eventi);
-
-    Object.keys(eventsByDate)
-      .sort((a, b) => new Date(b) - new Date(a))
-      .forEach((date) => {
-        const dateGroup = createDateGroup(date, eventsByDate[date]);
-        timelineElement.appendChild(dateGroup);
-      });
-
-    domElements.timelineContainer.appendChild(timelineElement);
-    updatePaginationControls(eventsData);
-
-    logger.log("✅ Timeline renderizzata con successo");
+    logger.log("🎨 Rendering timeline (renderer):", eventsData);
+    ensureRenderers();
+    timelineRenderer.renderTimeline(eventsData);
   } catch (error) {
     logger.error("❌ Errore rendering timeline:", error);
     showError("Errore nel rendering della timeline");
@@ -228,27 +253,9 @@ export function renderEventsTimeline(eventsData) {
  */
 export function renderEventsTable(eventsData) {
   try {
-    logger.log("🎨 Rendering tabella eventi:", eventsData);
-
-    if (!domElements.tableBody) return;
-
-    domElements.tableBody.innerHTML = sanitizeHtml('');
-
-    if (!eventsData.eventi || eventsData.eventi.length === 0) {
-      const row = document.createElement('tr');
-      const td = document.createElement('td');
-      td.colSpan = 8;
-      td.className = 'text-center text-muted';
-      td.textContent = 'Nessun evento trovato';
-      row.appendChild(td);
-      domElements.tableBody.appendChild(row);
-      updatePaginationControls(eventsData);
-      return;
-    }
-
-    const rowsHtml = eventsData.eventi.map(ev => createTableRow(ev)).join('');
-    domElements.tableBody.innerHTML = rowsHtml;
-    updatePaginationControls(eventsData);
+    logger.log("🎨 Rendering tabella (renderer):", eventsData);
+    ensureRenderers();
+    tableRenderer.renderTable(eventsData);
   } catch (error) {
     logger.error('❌ Errore rendering tabella eventi:', error);
     showError('Errore nel rendering della tabella');

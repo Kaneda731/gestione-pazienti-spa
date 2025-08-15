@@ -2,7 +2,7 @@
 
 import { toggleEventTypeFields } from './eventi-clinici-ui.js';
 import { logger } from '../../../core/services/logger/loggerService.js';
-import { hideAllSearchResults } from './EventiCliniciUtils.js';
+import { hideAllSearchResults } from './utils/index.js';
 import { attach as attachPatientAutocomplete } from '../../../shared/components/ui/PatientAutocomplete.js';
 
 /**

@@ -5,30 +5,39 @@ import {
     dom,
     initializeUI,
     cleanupUI,
-    renderSearchResults,
     displayDischargeForm,
-    setLoading,
     resetView,
     showFeedback,
     handleDischargeTypeChange,
     initializeTransferFieldListeners,
     validateDischargeForm,
     getDischargeFormData
-} from '../../../../../src/features/patients/views/dimissione-ui.js';
+} from '@/features/patients/views/dimissione-ui.js';
 
-// Mock dependencies
-vi.mock('../../../../../src/shared/components/forms/CustomDatepicker.js', () => ({
+// Mock dependencies utilizzate nel modulo UI
+vi.mock('@/shared/components/forms/CustomDatepicker.js', () => ({
     default: vi.fn().mockImplementation(() => ({
         destroy: vi.fn()
     }))
 }));
 
-vi.mock('../../../../../src/shared/utils/helpers.js', () => ({
-    mostraMessaggio: vi.fn()
+vi.mock('@/shared/components/forms/CustomSelect.js', () => ({
+    initCustomSelects: vi.fn()
 }));
 
-vi.mock('../../../../../src/shared/utils/dom.js', () => ({
-    debounce: vi.fn((fn) => fn)
+vi.mock('@/shared/components/ui/PatientAutocomplete.js', () => ({
+    attach: vi.fn().mockReturnValue({
+        destroy: vi.fn()
+    })
+}));
+
+vi.mock('@/core/services/notifications/notificationService.js', () => ({
+    notificationService: {
+        success: vi.fn(),
+        error: vi.fn(),
+        warning: vi.fn(),
+        info: vi.fn()
+    }
 }));
 
 describe('Enhanced Dimissione UI', () => {

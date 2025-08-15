@@ -27,7 +27,7 @@ import {
 
 import { logger } from '../../../core/services/logger/loggerService.js';
 import { notificationService } from '../../../core/services/notifications/notificationService.js';
-import { hideAllSearchResults, hideSearchResults, debounce } from './EventiCliniciUtils.js';
+import { hideAllSearchResults, hideSearchResults, debounce } from './utils/index.js';
 
 /**
  * Gestione dei filtri per gli eventi clinici

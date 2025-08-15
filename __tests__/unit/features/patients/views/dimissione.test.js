@@ -2,17 +2,12 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { JSDOM } from 'jsdom';
 
-// Mock dependencies
-vi.mock('../../../../../src/app/router.js', () => ({
-    navigateTo: vi.fn()
-}));
-
-vi.mock('../../../../../src/features/patients/views/dimissione-api.js', () => ({
-    searchActivePatients: vi.fn(),
+// Mock dependencies (uso alias '@')
+vi.mock('@/features/patients/views/dimissione-api.js', () => ({
     dischargePatientWithTransfer: vi.fn()
 }));
 
-vi.mock('../../../../../src/features/patients/views/dimissione-ui.js', () => ({
+vi.mock('@/features/patients/views/dimissione-ui.js', () => ({
     dom: {
         searchInput: null,
         dischargeForm: null,
@@ -23,9 +18,7 @@ vi.mock('../../../../../src/features/patients/views/dimissione-ui.js', () => ({
     },
     initializeUI: vi.fn(),
     cleanupUI: vi.fn(),
-    renderSearchResults: vi.fn(),
     displayDischargeForm: vi.fn(),
-    setLoading: vi.fn(),
     resetView: vi.fn(),
     showFeedback: vi.fn(),
     validateDischargeForm: vi.fn(),
@@ -36,8 +29,6 @@ describe('Enhanced Dimissione Controller', () => {
     let mockDOM;
     let mockDocument;
     let initDimissioneView;
-    let navigateTo;
-    let searchActivePatients;
     let dischargePatientWithTransfer;
     let dimissioneUI;
 
@@ -67,14 +58,11 @@ describe('Enhanced Dimissione Controller', () => {
         global.window = mockDOM.window;
         global.setTimeout = vi.fn((fn) => fn());
 
-        // Import modules after setting up mocks
-        const routerModule = await import('../../../../../src/app/router.js');
-        const apiModule = await import('../../../../../src/features/patients/views/dimissione-api.js');
-        const uiModule = await import('../../../../../src/features/patients/views/dimissione-ui.js');
-        const controllerModule = await import('../../../../../src/features/patients/views/dimissione.js');
+        // Import modules after setting up mocks (uso alias '@')
+        const apiModule = await import('@/features/patients/views/dimissione-api.js');
+        const uiModule = await import('@/features/patients/views/dimissione-ui.js');
+        const controllerModule = await import('@/features/patients/views/dimissione.js');
 
-        navigateTo = routerModule.navigateTo;
-        searchActivePatients = apiModule.searchActivePatients;
         dischargePatientWithTransfer = apiModule.dischargePatientWithTransfer;
         dimissioneUI = uiModule;
         initDimissioneView = controllerModule.initDimissioneView;
@@ -136,13 +124,9 @@ describe('Enhanced Dimissione Controller', () => {
             // Set up a selected patient
             const mockPatient = { id: 'patient-123', nome: 'Mario', cognome: 'Rossi' };
             
-            // Simulate patient selection by triggering the search callback
-            const searchCallback = dimissioneUI.initializeUI.mock.calls[0][0];
-            dimissioneUI.renderSearchResults.mockImplementation((patients, onSelect) => {
-                onSelect(mockPatient);
-            });
-            
-            await searchCallback('Mario');
+            // Simula la selezione paziente invocando la callback onSelectPatient
+            const onSelectPatient = dimissioneUI.initializeUI.mock.calls[0][0];
+            onSelectPatient(mockPatient);
             
             // Mock successful discharge
             dischargePatientWithTransfer.mockResolvedValue({});
@@ -168,20 +152,14 @@ describe('Enhanced Dimissione Controller', () => {
             );
             
             expect(dimissioneUI.resetView).toHaveBeenCalled();
-            // The actual implementation uses window.location.hash instead of navigateTo
-            // expect(navigateTo).toHaveBeenCalledWith('home');
         });
 
         it('should handle successful internal transfer', async () => {
             const mockPatient = { id: 'patient-123', nome: 'Mario', cognome: 'Rossi' };
             
-            // Simulate patient selection
-            const searchCallback = dimissioneUI.initializeUI.mock.calls[0][0];
-            dimissioneUI.renderSearchResults.mockImplementation((patients, onSelect) => {
-                onSelect(mockPatient);
-            });
-            
-            await searchCallback('Mario');
+            // Simula selezione paziente
+            const onSelectPatient = dimissioneUI.initializeUI.mock.calls[0][0];
+            onSelectPatient(mockPatient);
             
             // Mock internal transfer data
             dimissioneUI.getDischargeFormData.mockReturnValue({
@@ -210,13 +188,9 @@ describe('Enhanced Dimissione Controller', () => {
         it('should handle successful external transfer', async () => {
             const mockPatient = { id: 'patient-123', nome: 'Mario', cognome: 'Rossi' };
             
-            // Simulate patient selection
-            const searchCallback = dimissioneUI.initializeUI.mock.calls[0][0];
-            dimissioneUI.renderSearchResults.mockImplementation((patients, onSelect) => {
-                onSelect(mockPatient);
-            });
-            
-            await searchCallback('Mario');
+            // Simula selezione paziente
+            const onSelectPatient = dimissioneUI.initializeUI.mock.calls[0][0];
+            onSelectPatient(mockPatient);
             
             // Mock external transfer data
             dimissioneUI.getDischargeFormData.mockReturnValue({
@@ -246,13 +220,9 @@ describe('Enhanced Dimissione Controller', () => {
         it('should handle validation errors', async () => {
             const mockPatient = { id: 'patient-123', nome: 'Mario', cognome: 'Rossi' };
             
-            // Simulate patient selection
-            const searchCallback = dimissioneUI.initializeUI.mock.calls[0][0];
-            dimissioneUI.renderSearchResults.mockImplementation((patients, onSelect) => {
-                onSelect(mockPatient);
-            });
-            
-            await searchCallback('Mario');
+            // Selezione paziente
+            const onSelectPatient = dimissioneUI.initializeUI.mock.calls[0][0];
+            onSelectPatient(mockPatient);
             
             // Mock validation failure
             dimissioneUI.validateDischargeForm.mockReturnValue({
@@ -298,13 +268,9 @@ describe('Enhanced Dimissione Controller', () => {
         it('should handle API errors', async () => {
             const mockPatient = { id: 'patient-123', nome: 'Mario', cognome: 'Rossi' };
             
-            // Simulate patient selection
-            const searchCallback = dimissioneUI.initializeUI.mock.calls[0][0];
-            dimissioneUI.renderSearchResults.mockImplementation((patients, onSelect) => {
-                onSelect(mockPatient);
-            });
-            
-            await searchCallback('Mario');
+            // Selezione paziente
+            const onSelectPatient = dimissioneUI.initializeUI.mock.calls[0][0];
+            onSelectPatient(mockPatient);
             
             // Mock API error
             dischargePatientWithTransfer.mockRejectedValue(new Error('Database connection failed'));
@@ -323,55 +289,7 @@ describe('Enhanced Dimissione Controller', () => {
             );
             
             expect(dimissioneUI.resetView).not.toHaveBeenCalled();
-            expect(navigateTo).not.toHaveBeenCalled();
         });
     });
-
-    describe('search functionality', () => {
-        let cleanup;
-
-        beforeEach(() => {
-            cleanup = initDimissioneView();
-        });
-
-        afterEach(() => {
-            if (cleanup) cleanup();
-        });
-
-        it('should handle search with results', async () => {
-            const mockPatients = [
-                { id: '1', nome: 'Mario', cognome: 'Rossi', data_ricovero: '2024-12-01' },
-                { id: '2', nome: 'Luigi', cognome: 'Verdi', data_ricovero: '2024-12-02' }
-            ];
-            
-            searchActivePatients.mockResolvedValue(mockPatients);
-            
-            const searchCallback = dimissioneUI.initializeUI.mock.calls[0][0];
-            await searchCallback('Mario');
-            
-            expect(searchActivePatients).toHaveBeenCalledWith('Mario');
-            expect(dimissioneUI.renderSearchResults).toHaveBeenCalledWith(
-                mockPatients,
-                expect.any(Function)
-            );
-        });
-
-        it('should handle search errors', async () => {
-            searchActivePatients.mockRejectedValue(new Error('Search failed'));
-            
-            const searchCallback = dimissioneUI.initializeUI.mock.calls[0][0];
-            await searchCallback('Mario');
-            
-            expect(dimissioneUI.showFeedback).toHaveBeenCalledWith('Search failed', 'error');
-            expect(dimissioneUI.setLoading).toHaveBeenCalledWith(false);
-        });
-
-        it('should not search for short queries', async () => {
-            const searchCallback = dimissioneUI.initializeUI.mock.calls[0][0];
-            await searchCallback('M');
-            
-            expect(searchActivePatients).not.toHaveBeenCalled();
-            expect(dimissioneUI.renderSearchResults).toHaveBeenCalledWith([], expect.any(Function));
-        });
-    });
+    // Ricerca gestita da Autocomplete: test legacy rimossi
 });

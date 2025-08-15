@@ -14,6 +14,7 @@ import {
   applyResponsiveDesign,
   resetFiltersUI,
   showError,
+  resetUIState,
 } from "./eventi-clinici-ui.js";
 
 import { logger } from "../../../core/services/logger/loggerService.js";
@@ -59,6 +60,10 @@ let filterManager = null;
 let modalManager = null;
 let eventHandlers = null;
 
+// Listener di delega globale per pulsanti delle card (registrato per mount)
+let cardDelegationHandler = null;
+let removeCardDelegationListener = null;
+
 /**
  * Inizializza gli elementi DOM con retry semplice
  */
@@ -67,7 +72,6 @@ async function initializeDOMElementsWithRetry(maxRetries = 5, delay = 100) {
     try {
       // Verifica che gli elementi critici siano presenti nel DOM
       const criticalElements = [
-        "eventi-table-container",
         "eventi-timeline-container",
         "eventi-add-btn",
         "eventi-reset-filters-btn",
@@ -114,7 +118,7 @@ async function initializeDOMElementsWithRetry(maxRetries = 5, delay = 100) {
  */
 export async function initEventiCliniciView(urlParams) {
   try {
-    logger.log("🚀 Inizializzazione vista eventi clinici - START");
+    logger.log("🚀 Inizializzazione vista eventi clinici");
 
     // Initialize DOM elements
     logger.log("📝 Step 1: Inizializzazione DOM elements");
@@ -174,7 +178,7 @@ export async function initEventiCliniciView(urlParams) {
     handleUrlParameters(urlParams);
     logger.log("✅ Parametri URL gestiti");
 
-    logger.log("🎉 Vista eventi clinici inizializzata con successo");
+    logger.log("✅ Vista eventi clinici inizializzata con successo");
 
     // Return cleanup function
     return cleanup;
@@ -205,7 +209,10 @@ async function initializeManagers() {
   try {
     // Setup event listeners with delegation so dynamically added buttons work (e.g., in detail modal)
     const setupEventCardListeners = () => {
-      document.addEventListener("click", async (e) => {
+      // Evita registrazioni multiple nello stesso mount
+      if (cardDelegationHandler) return;
+
+      cardDelegationHandler = async (e) => {
         const detailBtn = e.target.closest && e.target.closest(".event-detail-btn");
         const editBtn = e.target.closest && e.target.closest(".event-edit-btn");
         const deleteBtn = e.target.closest && e.target.closest(".event-delete-btn");
@@ -270,7 +277,19 @@ async function initializeManagers() {
         } catch (err) {
           logger.error("Errore gestione azione evento:", err);
         }
-      });
+      };
+
+      document.addEventListener("click", cardDelegationHandler);
+      removeCardDelegationListener = () => {
+        try {
+          document.removeEventListener("click", cardDelegationHandler);
+        } catch (e) {
+          // Evita lint no-empty e fornisce contesto in debug
+          logger.warn("Listener di delega non rimosso (forse già rimosso)", e);
+        }
+        cardDelegationHandler = null;
+        removeCardDelegationListener = null;
+      };
     };
 
     // Initialize data manager
@@ -453,6 +472,22 @@ function cleanup() {
     dataManager.clearCache();
   }
 
+  // Detach listener di delega globale per evitare duplicazioni tra mount
+  if (removeCardDelegationListener) {
+    try {
+      removeCardDelegationListener();
+    } catch (err) {
+      logger.warn("⚠️ Errore durante la rimozione del listener di delega:", err);
+    }
+  }
+
+  // Reset UI state per evitare riferimenti DOM stali tra navigazioni
+  try {
+    resetUIState();
+  } catch (err) {
+    logger.warn("⚠️ Errore durante resetUIState:", err);
+  }
+
   // Reset state
   currentState = {
     currentPage: 0,
@@ -477,6 +512,13 @@ function cleanup() {
   filterManager = null;
   modalManager = null;
   eventHandlers = null;
+
+  // Azzeramento riferimenti al listener di delega
+  cardDelegationHandler = null;
+  removeCardDelegationListener = null;
+
+  // Azzeramento riferimenti DOM locali del controller
+  domElements = {};
 
   logger.log("✅ Cleanup completato");
 }

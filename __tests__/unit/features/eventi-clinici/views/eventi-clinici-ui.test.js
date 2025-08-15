@@ -4,7 +4,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { JSDOM } from 'jsdom';
 
 // Setup mocks before imports
-vi.mock('../../../../../src/core/services/loggerService.js', () => ({
+vi.mock('../../../../../src/core/services/logger/loggerService.js', () => ({
   logger: {
     log: vi.fn(),
     error: vi.fn(),
@@ -38,7 +38,7 @@ import {
   getDOMElements
 } from '../../../../../src/features/eventi-clinici/views/eventi-clinici-ui.js';
 
-import { logger } from '../../../../../src/core/services/loggerService.js';
+import { logger } from '../../../../../src/core/services/logger/loggerService.js';
 
 describe('Eventi Clinici UI Tests', () => {
   let dom;

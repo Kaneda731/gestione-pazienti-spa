@@ -6,7 +6,7 @@ import {
   updateEventoClinico,
   deleteEventoClinico,
   searchPazientiForEvents
-} from './eventi-clinici-api.js';
+} from '../eventi-clinici-api.js';
 
 import {
   populateEventForm,
@@ -16,12 +16,12 @@ import {
   updateModalTitle,
   renderEventDetails,
   renderPatientSearchResults
-} from './eventi-clinici-ui.js';
+} from '../eventi-clinici-ui.js';
 
-import { logger } from '../../../core/services/logger/loggerService.js';
-import { notificationService } from '../../../core/services/notifications/notificationService.js';
-import { sanitizeHtml } from '../../../shared/utils/sanitizeHtml.js';
-import { getFormData, validateFormData, hideSearchResults, debounce } from './utils/index.js';
+import { logger } from '../../../../core/services/logger/loggerService.js';
+import { notificationService } from '../../../../core/services/notifications/notificationService.js';
+import { sanitizeHtml } from '../../../../shared/utils/sanitizeHtml.js';
+import { getFormData, validateFormData, hideSearchResults, debounce } from '../utils/index.js';
 
 /**
  * Gestione dei modali per gli eventi clinici
@@ -135,8 +135,8 @@ export class EventiCliniciModalManager {
           // L'istanza esiste già, assicuriamoci che sia funzionante
           eventDateInput._flatpickrInstance.redraw();
         } else {
-          // Inizializza ex-novo se non esiste
-          import('../../../shared/components/forms/CustomDatepicker.js').then(({ initCustomDatepickers }) => {
+        // Inizializza ex-novo se non esiste
+          import('../../../../shared/components/forms/CustomDatepicker.js').then(({ initCustomDatepickers }) => {
             initCustomDatepickers('[data-datepicker]', {
               maxDate: 'today',
               allowInput: true,
@@ -288,7 +288,7 @@ export class EventiCliniciModalManager {
    * Conferma eliminazione evento
    */
   async confirmDeleteEvent(eventId) {
-    const { ConfirmModal } = await import('../../../shared/components/ui/ConfirmModal.js');
+    const { ConfirmModal } = await import('../../../../shared/components/ui/ConfirmModal.js');
     
     const modal = ConfirmModal.forClinicalEventDeletion();
     const confirmed = await modal.show();

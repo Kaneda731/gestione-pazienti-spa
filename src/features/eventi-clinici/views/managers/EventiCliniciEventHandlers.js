@@ -1,9 +1,9 @@
 // src/features/eventi-clinici/views/EventiCliniciEventHandlers.js
 
-import { toggleEventTypeFields } from './eventi-clinici-ui.js';
-import { logger } from '../../../core/services/logger/loggerService.js';
-import { hideAllSearchResults } from './utils/index.js';
-import { attach as attachPatientAutocomplete } from '../../../shared/components/ui/PatientAutocomplete.js';
+import { toggleEventTypeFields } from '../eventi-clinici-ui.js';
+import { logger } from '../../../../core/services/logger/loggerService.js';
+import { hideAllSearchResults } from '../utils/index.js';
+import { attach as attachPatientAutocomplete } from '../../../../shared/components/ui/PatientAutocomplete.js';
 
 /**
  * Gestione degli event handlers per gli eventi clinici
@@ -296,7 +296,7 @@ export class EventiCliniciEventHandlers {
    * Configura i listener per la finestra
    */
   async setupWindowListeners() {
-    const { applyResponsiveDesign } = await import('./eventi-clinici-ui.js');
+    const { applyResponsiveDesign } = await import('../eventi-clinici-ui.js');
     const resizeHandler = () => applyResponsiveDesign();
     window.addEventListener('resize', resizeHandler);
     this.cleanupFunctions.push(() => window.removeEventListener('resize', resizeHandler));

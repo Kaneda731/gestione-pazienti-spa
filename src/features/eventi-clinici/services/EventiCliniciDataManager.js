@@ -6,7 +6,7 @@ import {
   getFilterStats,
   getCurrentFilters,
   clearSearchCache
-} from './eventi-clinici-api.js';
+} from '../api/eventi-clinici-api.js';
 
 import {
   renderEventsResponsive,
@@ -17,7 +17,7 @@ import {
   showFilterStats,
   showExportProgress,
   showExportSuccess
-} from './eventi-clinici-ui.js';
+} from '../views/eventi-clinici-ui.js';
 
 import { logger } from '../../../core/services/logger/loggerService.js';
 import { notificationService } from '../../../core/services/notifications/notificationService.js';

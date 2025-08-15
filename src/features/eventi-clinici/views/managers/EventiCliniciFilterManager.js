@@ -11,7 +11,7 @@ import {
   saveFiltersToState,
   loadFiltersFromState,
   searchPatientsRealTime
-} from './eventi-clinici-api.js';
+} from '../eventi-clinici-api.js';
 
 import {
   renderEventsResponsive,
@@ -23,11 +23,11 @@ import {
   showSearchingState,
   hideSearchingState,
   getFiltersFromUI
-} from './eventi-clinici-ui.js';
+} from '../eventi-clinici-ui.js';
 
-import { logger } from '../../../core/services/logger/loggerService.js';
-import { notificationService } from '../../../core/services/notifications/notificationService.js';
-import { hideAllSearchResults, hideSearchResults, debounce } from './utils/index.js';
+import { logger } from '../../../../core/services/logger/loggerService.js';
+import { notificationService } from '../../../../core/services/notifications/notificationService.js';
+import { hideAllSearchResults, hideSearchResults, debounce } from '../utils/index.js';
 
 /**
  * Gestione dei filtri per gli eventi clinici

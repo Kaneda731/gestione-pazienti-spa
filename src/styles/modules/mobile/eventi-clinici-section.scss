@@ -863,6 +863,13 @@
   transition: all 0.3s ease !important;
 }
 
+/* Nascondi il gruppo Esporta su mobile e lascia Resetta centrato */
+@media (max-width: 767px) {
+  #eventi-export-group {
+    display: none !important;
+  }
+}
+
 #eventi-reset-filters-btn:hover,
 .btn-group .btn:hover {
   transform: translateY(-1px) !important;

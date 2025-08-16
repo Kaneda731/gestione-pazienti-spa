@@ -232,6 +232,13 @@ export function renderEventsResponsive(eventsData) {
     logger.log('🔧 Rendering timeline (renderer)');
     timelineRenderer.renderTimeline(eventsData);
   }
+
+  // Re-applica le classi responsive dopo ogni re-render per coprire nuovi nodi
+  try {
+    applyResponsiveDesign();
+  } catch (e) {
+    logger.warn('⚠️ applyResponsiveDesign fallita dopo renderEventsResponsive:', e);
+  }
 }
 
 /**

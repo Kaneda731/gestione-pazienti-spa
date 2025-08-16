@@ -48,7 +48,7 @@ export class EventiTimelineRenderer {
       Object.keys(eventsByDate)
         .sort((a, b) => new Date(b) - new Date(a)) // Most recent first
         .forEach((date) => {
-          const dateGroup = this.createDateGroup(date, eventsByDate[date], this.callbacks.showActionsModal);
+          const dateGroup = this.createDateGroup(date, eventsByDate[date]);
           timelineElement.appendChild(dateGroup);
         });
 
@@ -80,7 +80,7 @@ export class EventiTimelineRenderer {
         return;
       }
 
-      const newCard = this.createEventCard(evento, this.callbacks.showActionsModal);
+      const newCard = this.createEventCard(evento);
       existingCard.replaceWith(newCard);
       
       logger.log(`✅ Evento ${evento.id} aggiornato nella timeline`);
@@ -132,10 +132,9 @@ export class EventiTimelineRenderer {
    * Crea un gruppo di eventi per una data specifica
    * @param {string} date - Data del gruppo
    * @param {Array} eventi - Eventi per quella data
-   * @param {Function} showActionsModalCallback - Callback per mostrare la modal delle azioni
    * @returns {HTMLElement} Elemento del gruppo data
    */
-  createDateGroup(date, eventi, showActionsModalCallback) {
+  createDateGroup(date, eventi) {
     const dateGroup = document.createElement("div");
     dateGroup.className = "timeline-date-group";
 
@@ -159,7 +158,7 @@ export class EventiTimelineRenderer {
     );
 
     eventi.forEach((evento) => {
-      const eventCard = this.createEventCard(evento, showActionsModalCallback);
+      const eventCard = this.createEventCard(evento);
       dateGroup.appendChild(eventCard);
     });
 
@@ -169,10 +168,9 @@ export class EventiTimelineRenderer {
   /**
    * Crea una card per un singolo evento
    * @param {Object} evento - Dati dell'evento
-   * @param {Function} showActionsModalCallback - Callback per mostrare la modal delle azioni
    * @returns {HTMLElement} Elemento card dell'evento
    */
-  createEventCard(evento, showActionsModalCallback) {
+  createEventCard(evento) {
     const card = document.createElement("div");
     // Mappa stati evento su classi card mobile riusate dalla lista pazienti
     const isInfezione = evento.tipo_evento === 'infezione';
@@ -200,8 +198,13 @@ export class EventiTimelineRenderer {
     const pazienteInfo = evento.pazienteInfo
       ? `
           <div class="card-meta mobile-text-sm mt-1">
-            <span class="material-icons me-1" style="font-size:1em;vertical-align:middle;">person</span>
-            ${sanitizeHtml(evento.pazienteInfo.nomeCompleto)} • <span class="badge bg-secondary">${sanitizeHtml(evento.pazienteInfo.reparto)}</span>
+            <div class="d-flex align-items-center">
+              <span class="material-icons me-1" style="font-size:1em;vertical-align:middle;">person</span>
+              <span class="patient-name">${sanitizeHtml(evento.pazienteInfo.nomeCompleto)}</span>
+            </div>
+            <div class="mt-1">
+              <span class="badge bg-secondary">${sanitizeHtml(evento.pazienteInfo.reparto)}</span>
+            </div>
           </div>
         `
       : '';
@@ -224,37 +227,19 @@ export class EventiTimelineRenderer {
             ${detailsSection}
           </div>
           <div class="mt-2 text-end">
-            <button class="btn btn-outline-secondary btn-sm open-actions-modal">
-              <span class="material-icons align-middle me-1" style="font-size:1.05em;">more_horiz</span>
-              Azioni
-            </button>
+            <div class="btn-group btn-group-sm" role="group">
+              <button class="btn btn-outline-primary event-detail-btn" data-evento-id="${evento.id}" title="Apri dettagli evento" aria-label="Apri dettagli evento">
+                <span class="material-icons align-middle me-1">visibility</span>
+                <span class="btn-text align-middle">Dettagli</span>
+              </button>
+            </div>
           </div>
         </div>
     `;
 
     card.innerHTML = sanitizeHtml(cardContent);
 
-    // Apertura modal azioni: al click sulla card o sul bottone dedicato
-    const openModal = (e) => {
-      // Evita doppi trigger da elementi interattivi interni
-      if (e && (e.target.closest('button') || e.target.closest('a'))) return;
-      if (showActionsModalCallback) {
-        showActionsModalCallback(evento);
-      }
-    };
-
-    // Click sull'intera card apre le azioni
-    card.addEventListener('click', openModal);
-    // Click sul bottone "Azioni" esplicito
-    const explicitBtn = card.querySelector('.open-actions-modal');
-    if (explicitBtn) {
-      explicitBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (showActionsModalCallback) {
-          showActionsModalCallback(evento);
-        }
-      });
-    }
+    // Nessun handler locale: la gestione click avviene via delega globale su .event-detail-btn
 
     return card;
   }

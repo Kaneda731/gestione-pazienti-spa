@@ -423,3 +423,53 @@
     transition: none;
     }
 }
+
+/* ==========================================
+   Responsive helpers & status styles (mobile)
+   ========================================== */
+
+/* Container-level flags applicati da JS */
+.mobile-layout {
+  /* spacing più compatto sui blocchi interni della timeline */
+  .timeline-date-header { margin: 0.5rem 0; }
+  .timeline-date-title { font-size: 0.85rem; }
+  .timeline-event-card { margin-left: 24px; }
+}
+
+.tablet-layout {
+  .timeline-date-header { margin: 0.6rem 0; }
+  .timeline-event-card { margin-left: 28px; }
+}
+
+/* Card modifiers applicati da JS */
+.timeline-event-card {
+  border-left: 4px solid transparent; /* colorato dalle status-classes */
+}
+.timeline-event-card.mobile-card {
+  /* dimensioni più compatte su mobile */
+  .card-body { padding: 0.75rem 0.9rem; }
+}
+.timeline-event-card.tablet-card {
+  .card-body { padding: 0.85rem 1rem; }
+}
+
+/* Variante "lista compatta" usata nelle cards */
+.card.card-list-compact {
+  border-radius: 12px;
+  .card-body { padding: 0.8rem 1rem; }
+  .btn-group.btn-group-sm .btn { padding: 0.25rem 0.5rem; }
+
+  /* sui device molto piccoli, mostra solo icone nei bottoni */
+  @media (max-width: 400px) {
+    .btn .btn-text { display: none; }
+    .btn .material-icons { margin-right: 0 !important; }
+  }
+}
+
+/* Utility testo più piccolo per mobile */
+.mobile-text-sm { font-size: 0.92rem; line-height: 1.25; }
+
+/* Stato visuale delle cards evento */
+.timeline-event-card.status-infected { border-left-color: var(--bs-warning); }
+.timeline-event-card.status-error   { border-left-color: var(--bs-danger); }
+.timeline-event-card.status-success { border-left-color: var(--bs-success); }

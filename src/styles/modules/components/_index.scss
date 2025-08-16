@@ -1,0 +1,13 @@
+/* ===================================
+   COMPONENTS (Sass modules via @forward)
+   =================================== */
+
+// Manteniamo il set esatto già esposto da common per evitare regressioni
+@forward "./forms";
+@forward "./confirm-modals";
+@forward "./custom-select";
+@forward "./flatpickr-light";
+@forward "./flatpickr-dark";
+@forward "./datepicker-override";
+@forward "./notifications";
+@forward "./charts";

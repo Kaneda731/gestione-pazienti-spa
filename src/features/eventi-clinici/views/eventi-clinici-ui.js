@@ -28,7 +28,7 @@ let tableRenderer = null;
 let timelineRenderer = null;
 
 // Re-export per reset filtri dalla UI
-export { resetCurrentFiltersToDefaults } from './eventi-clinici-api.js';
+export { resetCurrentFiltersToDefaults } from '../api/eventi-clinici-api.js';
 
 // ============================================================================
 // DOM INITIALIZATION

@@ -4,7 +4,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { JSDOM } from 'jsdom';
 
 // Setup mocks before imports
-vi.mock('@/features/eventi-clinici/views/eventi-clinici-api.js', () => ({
+vi.mock('@/features/eventi-clinici/api/eventi-clinici-api.js', () => ({
   fetchEventiClinici: vi.fn(),
   fetchEventiByPaziente: vi.fn(),
   createEventoClinico: vi.fn(),
@@ -125,8 +125,8 @@ vi.mock('bootstrap', () => ({
   Modal: vi.fn(() => mockModal)
 }));
 
-// Mock the new manager classes
-vi.mock('@/features/eventi-clinici/views/EventiCliniciDataManager.js', () => ({
+// Mock the new manager classes (canonical paths)
+vi.mock('@/features/eventi-clinici/services/EventiCliniciDataManager.js', () => ({
   EventiCliniciDataManager: vi.fn().mockImplementation(() => ({
     loadEventsData: vi.fn().mockResolvedValue({
       eventi: [],
@@ -144,7 +144,7 @@ vi.mock('@/features/eventi-clinici/views/EventiCliniciDataManager.js', () => ({
   }))
 }));
 
-vi.mock('@/features/eventi-clinici/views/EventiCliniciFilterManager.js', () => ({
+vi.mock('@/features/eventi-clinici/views/managers/EventiCliniciFilterManager.js', () => ({
   EventiCliniciFilterManager: vi.fn().mockImplementation(() => ({
     applyFilters: vi.fn(),
     resetFilters: vi.fn(),
@@ -153,7 +153,7 @@ vi.mock('@/features/eventi-clinici/views/EventiCliniciFilterManager.js', () => (
   }))
 }));
 
-vi.mock('@/features/eventi-clinici/views/EventiCliniciModalManager.js', () => ({
+vi.mock('@/features/eventi-clinici/views/managers/EventiCliniciModalManager.js', () => ({
   EventiCliniciModalManager: vi.fn().mockImplementation(() => ({
     initializeModals: vi.fn(),
     showEventDetail: vi.fn(),
@@ -163,7 +163,7 @@ vi.mock('@/features/eventi-clinici/views/EventiCliniciModalManager.js', () => ({
   }))
 }));
 
-vi.mock('@/features/eventi-clinici/views/EventiCliniciEventHandlers.js', () => ({
+vi.mock('@/features/eventi-clinici/views/managers/EventiCliniciEventHandlers.js', () => ({
   EventiCliniciEventHandlers: vi.fn().mockImplementation(() => ({
     setupEventListeners: vi.fn(),
     initializeAdvancedFiltersState: vi.fn(),
@@ -185,7 +185,7 @@ import {
   applyEventTypeFilter,
   searchPatientsRealTime,
   applyPatientSearch
-} from '@/features/eventi-clinici/views/eventi-clinici-api.js';
+} from '@/features/eventi-clinici/api/eventi-clinici-api.js';
 import {
   initializeDOMElements,
   renderEventsTimeline,

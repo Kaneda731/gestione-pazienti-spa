@@ -3,8 +3,8 @@
 import {
   getSuggestedFilters,
   getDepartmentsList,
-} from "./eventi-clinici-api.js";
-import { resetCurrentFiltersToDefaults } from "./eventi-clinici-api.js";
+} from "../api/eventi-clinici-api.js";
+import { resetCurrentFiltersToDefaults } from "../api/eventi-clinici-api.js";
 
 import {
   initializeDOMElements,
@@ -22,11 +22,11 @@ import { initCustomSelects } from "../../../shared/components/forms/CustomSelect
 import { initCustomDatepickers } from "../../../shared/components/forms/CustomDatepicker.js";
 
 // Import new modules
-import { EventiCliniciDataManager } from "./EventiCliniciDataManager.js";
-import { EventiCliniciFilterManager } from "./EventiCliniciFilterManager.js";
-import { EventiCliniciModalManager } from "./EventiCliniciModalManager.js";
-import { EventiCliniciEventHandlers } from "./EventiCliniciEventHandlers.js";
-import { resolveInfezioneEvento } from "./eventi-clinici-api.js";
+import { EventiCliniciDataManager } from "../services/EventiCliniciDataManager.js";
+import { EventiCliniciFilterManager } from "./managers/EventiCliniciFilterManager.js";
+import { EventiCliniciModalManager } from "./managers/EventiCliniciModalManager.js";
+import { EventiCliniciEventHandlers } from "./managers/EventiCliniciEventHandlers.js";
+import { resolveInfezioneEvento } from "../api/eventi-clinici-api.js";
 
 /**
  * Controller principale per la gestione degli eventi clinici
@@ -157,7 +157,7 @@ export async function initEventiCliniciView(urlParams) {
     try {
       // Test diretto senza manager
       logger.log("🧪 Test caricamento diretto...");
-      const { fetchEventiClinici } = await import("./eventi-clinici-api.js");
+      const { fetchEventiClinici } = await import("../api/eventi-clinici-api.js");
       const testResult = await fetchEventiClinici({}, 0);
       logger.log("🧪 Test result:", testResult);
 

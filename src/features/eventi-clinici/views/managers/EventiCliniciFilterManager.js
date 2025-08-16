@@ -11,7 +11,7 @@ import {
   saveFiltersToState,
   loadFiltersFromState,
   searchPatientsRealTime
-} from '../eventi-clinici-api.js';
+} from '../../api/eventi-clinici-api.js';
 
 import {
   renderEventsResponsive,

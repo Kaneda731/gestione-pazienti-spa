@@ -1,0 +1,20 @@
+/* ===================================
+   COMMON (Sass modules via @forward)
+   =================================== */
+
+// Base Bootstrap + tema scuro condivisi
+@forward "../_bootstrap-base";
+@forward "../themes/_dark-mode";
+
+// Componenti condivisi
+@forward "../components/forms";
+@forward "../components/confirm-modals";
+@forward "../components/_custom-select";
+@forward "../components/flatpickr-light";
+@forward "../components/flatpickr-dark";
+@forward "../components/datepicker-override";
+@forward "../components/notifications";
+@forward "../components/charts";
+
+// Stili feature condivisi
+@forward "../../../features/eventi-clinici/css/eventi-clinici";

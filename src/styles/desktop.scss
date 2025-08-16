@@ -3,7 +3,7 @@
    =================================== */
 
 // 1. Import base Bootstrap components condivisi
-@import "modules/_common.scss";
+@use "modules/common/index" as *;
 
 // 2. Componenti Bootstrap specifici per desktop
 @import "bootstrap/scss/dropdown";

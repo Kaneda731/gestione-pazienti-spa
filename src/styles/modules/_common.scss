@@ -1,20 +1,6 @@
 /* ===================================
    COMMON (desktop + mobile)
    =================================== */
-
-// Base Bootstrap + tema scuro condivisi
-@import "_bootstrap-base.scss";
-@import "themes/_dark-mode.scss";
-
-// Componenti condivisi
-@import "components/forms.scss";
-@import "components/confirm-modals.scss";
-@import "components/_custom-select.scss";
-@import "components/flatpickr-light.scss";
-@import "components/flatpickr-dark.scss";
-@import "components/datepicker-override.scss";
-@import "components/notifications.scss";
-@import "components/charts.scss";
-
-// Stili feature condivisi
-@import "../../features/eventi-clinici/css/eventi-clinici.scss";
+// DEPRECATO: usare `@use "modules/common" as *;` nei fogli principali.
+// Questo file rimane come compat layer durante la migrazione.
+@use "./common/index" as *;

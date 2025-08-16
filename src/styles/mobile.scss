@@ -3,7 +3,7 @@
    =================================== */
 
 // Import condivisi (Bootstrap base, tema scuro, componenti comuni)
-@import "modules/_common.scss";
+@use "modules/common/index" as *;
 
 // Stili specifici per mobile
 @import "modules/mobile/layout-mobile.scss";

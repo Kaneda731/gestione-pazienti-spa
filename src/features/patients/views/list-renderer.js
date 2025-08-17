@@ -39,6 +39,12 @@ function getEnhancedStatusBadge(patient) {
         badgeIcon =
           '<span class="material-icons" style="font-size: 0.8em; margin-right: 2px;">home</span>';
         break;
+      case "decesso":
+        badgeClass = "bg-dark";
+        badgeText = "Decesso";
+        badgeIcon =
+          '<span class="material-icons" style="font-size: 0.8em; margin-right: 2px;">heart_broken</span>';
+        break;
     }
   }
 
@@ -89,6 +95,7 @@ function getTransferInfo(patient) {
       return externalInfo;
 
     case "dimissione":
+    case "decesso":
     default:
       return '<small class="text-muted">-</small>';
   }

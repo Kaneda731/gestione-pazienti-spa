@@ -83,7 +83,7 @@ export function validatePatientData(data) {
 
     // Validazione campi dimissione/trasferimento
     if (data.tipo_dimissione) {
-      const tipiValidi = ["dimissione", "trasferimento_interno", "trasferimento_esterno"];
+      const tipiValidi = ["dimissione", "trasferimento_interno", "trasferimento_esterno", "decesso"];
       if (!tipiValidi.includes(data.tipo_dimissione)) {
         throw new Error(`Tipo dimissione non valido. Valori ammessi: ${tipiValidi.join(", ")}`);
       }
@@ -111,14 +111,15 @@ export function validatePatientData(data) {
         }
       }
 
-      // Validazione codice dimissione (obbligatorio se c'è tipo dimissione)
-      if (!data.codice_dimissione) {
-        throw new Error("Il codice dimissione è obbligatorio quando si specifica il tipo dimissione");
-      }
-
-      const codiciDimissioneValidi = ["3", "6"];
-      if (!codiciDimissioneValidi.includes(data.codice_dimissione)) {
-        throw new Error(`Codice dimissione non valido. Valori ammessi: ${codiciDimissioneValidi.join(", ")}`);
+      // Validazione codice dimissione (non richiesto per 'decesso')
+      if (data.tipo_dimissione !== "decesso") {
+        if (!data.codice_dimissione) {
+          throw new Error("Il codice dimissione è obbligatorio quando si specifica il tipo dimissione (escluso 'decesso')");
+        }
+        const codiciDimissioneValidi = ["3", "6"];
+        if (!codiciDimissioneValidi.includes(data.codice_dimissione)) {
+          throw new Error(`Codice dimissione non valido. Valori ammessi: ${codiciDimissioneValidi.join(", ")}`);
+        }
       }
     }
 }
@@ -137,7 +138,7 @@ export function validateDischargeData(dischargeData) {
     }
 
     // Validazione tipo dimissione
-    const tipiValidi = ["dimissione", "trasferimento_interno", "trasferimento_esterno"];
+    const tipiValidi = ["dimissione", "trasferimento_interno", "trasferimento_esterno", "decesso"];
     if (!tipiValidi.includes(dischargeData.tipo_dimissione)) {
       throw new Error(`Tipo dimissione non valido. Valori ammessi: ${tipiValidi.join(", ")}`);
     }
@@ -174,13 +175,14 @@ export function validateDischargeData(dischargeData) {
       }
     }
 
-    // Validazione codice dimissione (sempre obbligatorio)
-    if (!dischargeData.codice_dimissione) {
-      throw new Error("Il codice dimissione è obbligatorio");
-    }
-
-    const codiciDimissioneValidi = ["3", "6"];
-    if (!codiciDimissioneValidi.includes(dischargeData.codice_dimissione)) {
-      throw new Error(`Codice dimissione non valido. Valori ammessi: ${codiciDimissioneValidi.join(", ")}`);
+    // Validazione codice dimissione (non richiesto per 'decesso')
+    if (dischargeData.tipo_dimissione !== "decesso") {
+      if (!dischargeData.codice_dimissione) {
+        throw new Error("Il codice dimissione è obbligatorio");
+      }
+      const codiciDimissioneValidi = ["3", "6"];
+      if (!codiciDimissioneValidi.includes(dischargeData.codice_dimissione)) {
+        throw new Error(`Codice dimissione non valido. Valori ammessi: ${codiciDimissioneValidi.join(", ")}`);
+      }
     }
 }

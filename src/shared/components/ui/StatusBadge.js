@@ -14,12 +14,15 @@ export class StatusBadge {
      */
     render() {
         const isDimesso = this.patient.data_dimissione;
-        
-        if (isDimesso) {
-            return `<span class="badge bg-secondary">Dimesso</span>`;
-        } else {
+        if (!isDimesso) {
             return `<span class="badge bg-success">Attivo</span>`;
         }
+
+        if (this.patient.tipo_dimissione === 'decesso') {
+            return `<span class="badge bg-dark">Decesso</span>`;
+        }
+
+        return `<span class="badge bg-secondary">Dimesso</span>`;
     }
 
     /**
@@ -28,9 +31,10 @@ export class StatusBadge {
      */
     renderForCard() {
         const isDimesso = this.patient.data_dimissione;
-        const statusClass = isDimesso ? 'dimesso' : 'attivo';
-        const statusText = isDimesso ? 'Dimesso' : 'Attivo';
-        
+        const isDecesso = isDimesso && this.patient.tipo_dimissione === 'decesso';
+        const statusClass = isDecesso ? 'decesso' : (isDimesso ? 'dimesso' : 'attivo');
+        const statusText = isDecesso ? 'Decesso' : (isDimesso ? 'Dimesso' : 'Attivo');
+
         return `<span class="patient-status ${statusClass}">${statusText}</span>`;
     }
 
@@ -39,7 +43,8 @@ export class StatusBadge {
      * @returns {string} Classe CSS
      */
     getStatusClass() {
-        return this.patient.data_dimissione ? 'dimesso' : 'attivo';
+        if (!this.patient.data_dimissione) return 'attivo';
+        return this.patient.tipo_dimissione === 'decesso' ? 'decesso' : 'dimesso';
     }
 
     /**
@@ -47,6 +52,7 @@ export class StatusBadge {
      * @returns {string} Testo dello stato
      */
     getStatusText() {
-        return this.patient.data_dimissione ? 'Dimesso' : 'Attivo';
+        if (!this.patient.data_dimissione) return 'Attivo';
+        return this.patient.tipo_dimissione === 'decesso' ? 'Decesso' : 'Dimesso';
     }
 }

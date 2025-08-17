@@ -222,6 +222,7 @@ export function handleDischargeTypeChange(dischargeType) {
             }
             break;
         case 'dimissione':
+        case 'decesso':
         default:
             // Nessun campo aggiuntivo richiesto per dimissione normale
             break;
@@ -229,7 +230,7 @@ export function handleDischargeTypeChange(dischargeType) {
     
     // Il codice dimissione è sempre richiesto
     if (dom.codiceDimissioneSelect) {
-        dom.codiceDimissioneSelect.required = true;
+        dom.codiceDimissioneSelect.required = dischargeType !== 'decesso';
     }
 }
 
@@ -285,8 +286,8 @@ export function validateDischargeForm() {
         errors.push('Il tipo di dimissione è obbligatorio');
     }
     
-    // Validazione codice dimissione
-    if (!dischargeCode) {
+    // Validazione codice dimissione (non richiesto per 'decesso')
+    if (dischargeType !== 'decesso' && !dischargeCode) {
         errors.push('Il codice dimissione è obbligatorio');
     }
     

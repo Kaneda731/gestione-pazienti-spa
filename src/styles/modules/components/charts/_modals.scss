@@ -12,7 +12,7 @@
  */
 
 // Import chart mixins for reusable patterns
-@import 'chart-mixins';
+@use './index' as *;
 
 // =============================================================================
 // MODAL CONFIGURATION VARIABLES

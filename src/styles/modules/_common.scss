@@ -1,0 +1,6 @@
+/* ===================================
+   COMMON (desktop + mobile)
+   =================================== */
+// DEPRECATO: usare `@use "modules/common" as *;` nei fogli principali.
+// Questo file rimane come compat layer durante la migrazione.
+@use "./common/index" as *;

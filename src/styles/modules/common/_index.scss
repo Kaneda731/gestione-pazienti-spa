@@ -1,0 +1,13 @@
+/* ===================================
+   COMMON (Sass modules via @forward)
+   =================================== */
+
+// Base Bootstrap + tema scuro condivisi
+@forward "../_bootstrap-base";
+@forward "../themes/_dark-mode";
+
+// Componenti condivisi
+@forward "../components";
+
+// Stili feature condivisi
+@forward "../../../features/eventi-clinici/css/eventi-clinici";

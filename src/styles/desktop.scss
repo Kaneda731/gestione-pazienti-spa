@@ -3,7 +3,7 @@
    =================================== */
 
 // 1. Import base Bootstrap components condivisi
-@import "modules/_bootstrap-base.scss";
+@use "modules/common/index" as *;
 
 // 2. Componenti Bootstrap specifici per desktop
 @import "bootstrap/scss/dropdown";
@@ -12,23 +12,14 @@
 @import "bootstrap/scss/pagination";
 
 // 5. Stili personalizzati del progetto (solo desktop)
-@import "modules/themes/_dark-mode.scss";
 @import "modules/base.scss";
 @import "modules/layout/responsive.scss";
 @import "modules/layout/pagination.scss";
 @import "modules/layout/_layout.scss";
 @import "modules/components/buttons.scss";
 @import "modules/components/cards.scss";
-@import "modules/components/forms.scss";
 @import 'modules/components/tables';
 @import "modules/components/modals.scss";
-@import "modules/components/confirm-modals.scss";
 @import "modules/components/navbar.scss";
 @import "modules/components/menu-cards.scss";
-@import "modules/components/_custom-select.scss";
-@import "modules/components/flatpickr-light.scss";
-@import "modules/components/flatpickr-dark.scss";
-@import "modules/components/datepicker-override.scss";
-@import "modules/components/notifications.scss";
-@import "modules/components/charts.scss";
-@import "../features/eventi-clinici/css/eventi-clinici.scss";
+

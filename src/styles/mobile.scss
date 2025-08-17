@@ -2,11 +2,10 @@
    MOBILE SCSS STYLESHEET
    =================================== */
 
-// Import base Bootstrap components condivisi
-@import "modules/_bootstrap-base.scss";
+// Import condivisi (Bootstrap base, tema scuro, componenti comuni)
+@use "modules/common/index" as *;
 
 // Stili specifici per mobile
-@import "modules/themes/_dark-mode.scss"; // Carica il tema base
 @import "modules/mobile/layout-mobile.scss";
 @import "modules/mobile/card-border-dark-mobile.scss";
 @import "modules/mobile/mobile-components.scss";
@@ -17,20 +16,12 @@
 @import "modules/mobile/patient-form-tabs.scss";
 @import "modules/mobile/discharge-transfer-section.scss";
 @import "modules/mobile/eventi-clinici-section.scss";
-@import "modules/components/forms.scss";
 @import "modules/mobile/mobile-buttons.scss";
 @import "modules/mobile/modals-mobile.scss";
-@import "modules/components/confirm-modals.scss";
 @import "modules/mobile/pagination-mobile.scss";
 @import "modules/mobile/tables-mobile.scss";
 @import "modules/mobile/dark-mode-mobile.scss";
 @import "modules/mobile/navigation-mobile.scss";
 @import "modules/mobile/menu-cards-mobile.scss";
-@import "modules/components/_custom-select.scss";
-@import "modules/components/flatpickr-light.scss";
-@import "modules/components/flatpickr-dark.scss";
-@import "modules/components/datepicker-override.scss";
-@import "modules/components/notifications.scss";
-@import "modules/components/charts.scss";
 @import "modules/components/charts-mobile.scss";
-@import "../features/eventi-clinici/css/eventi-clinici.scss";
+

@@ -1,0 +1,28 @@
+/**
+ * Media Utils — wrapper mixins per Sass Modules
+ *
+ * Forniscono un modo idiomatico per "bubble" delle media queries al top-level
+ * evitando i warning di Sass su nested rules. Usare con `@content` dentro i
+ * selettori/mixin chiamanti.
+ */
+
+// Dark mode wrapper
+@mixin prefers-dark {
+  @media (prefers-color-scheme: dark) {
+    @content;
+  }
+}
+
+// Reduced motion wrapper
+@mixin reduced-motion {
+  @media (prefers-reduced-motion: reduce) {
+    @content;
+  }
+}
+
+// Generic media query wrapper
+@mixin mq($query) {
+  @media #{$query} {
+    @content;
+  }
+}

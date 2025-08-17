@@ -164,6 +164,37 @@ Checklist rapida per le PR:
 - Sass deprecation warnings: consultare i file in `styles/modules/components/charts/` per refactor futuro.
 - Dynamic import anche statico: Vite non farà code-splitting per quei moduli; considerare di unificare la modalità di import.
 
+## SCSS: Media Query Wrapper Mixins (Charts)
+Per eliminare i warning Sass sulle nested rules dentro `@media`, i charts usano wrapper mixin con `@content`:
+
+- File: `src/styles/modules/components/charts/_media-utils.scss`
+- Esportati dal barrel: `src/styles/modules/components/charts/_index.scss` via `@forward 'media-utils';`
+- Uso: importare il barrel nei partials charts con `@use './index' as *;`
+
+Esempi d’uso:
+
+```scss
+// Dark mode
+@include prefers-dark {
+  background: var(--dark-color);
+}
+
+// Reduced motion
+@include reduced-motion {
+  animation: none;
+}
+
+// Breakpoint generico
+@include mq('(min-width: 992px)') {
+  justify-content: flex-end;
+}
+```
+
+Linee guida di migrazione:
+- Non annidare selettori con `& { ... }` dentro `@media`.
+- Usa sempre i wrapper: `prefers-dark`, `reduced-motion`, `mq($query)`.
+- File aggiornati: `charts/_chart-mixins.scss`, `charts/_responsive.scss`.
+
 ## Contributi e Stile di Codice
 - Preferire import con `@/`
 - Raggruppare nuovi servizi nelle sottocartelle di dominio adeguate

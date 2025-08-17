@@ -11,6 +11,8 @@
  * @version 2.0
  */
 
+@use './media-utils' as *;
+
 // =============================================================================
 // SCSS FUNCTIONS FOR CHART CALCULATIONS
 // =============================================================================
@@ -88,7 +90,7 @@
   }
   
   // Dark mode support
-  @media (prefers-color-scheme: dark) {
+  @include prefers-dark {
     background: var(--dark-color);
     border-color: rgba(255, 255, 255, 0.1);
   }
@@ -208,7 +210,7 @@
   justify-content: center;
   margin-top: var(--spacing-md);
   
-  .chart-legend-item {
+  & .chart-legend-item {
     display: flex;
     align-items: center;
     margin: var(--spacing-sm);
@@ -225,7 +227,7 @@
     }
   }
   
-  .chart-legend-color {
+  & .chart-legend-color {
     width: 12px;
     height: 12px;
     border-radius: 50%;
@@ -233,20 +235,20 @@
   }
   
   // Responsive adjustments
-  @media (max-width: 767px) {
+  @include mq('(max-width: 767px)') {
     flex-direction: column;
     align-items: flex-start;
     
-    .chart-legend-item {
+    & .chart-legend-item {
       margin: var(--spacing-xs);
     }
   }
   
-  @media (min-width: 768px) and (max-width: 991px) {
+  @include mq('(min-width: 768px) and (max-width: 991px)') {
     justify-content: center;
   }
   
-  @media (min-width: 992px) {
+  @include mq('(min-width: 992px)') {
     justify-content: flex-end;
   }
 }
@@ -288,7 +290,7 @@
   border: 1px solid var(--border-color);
   overflow: hidden;
   
-  @media (prefers-color-scheme: dark) {
+  @include prefers-dark {
     background: var(--dark-color);
     color: var(--light-color);
     border-color: rgba(255, 255, 255, 0.1);
@@ -316,7 +318,7 @@
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
   
-  @media (prefers-color-scheme: dark) {
+  @include prefers-dark {
     border-bottom-color: rgba(255, 255, 255, 0.1);
     background: linear-gradient(135deg, 
       rgba(37, 99, 235, 0.15) 0%, 
@@ -352,7 +354,7 @@
     color: var(--danger-color);
   }
   
-  @media (prefers-color-scheme: dark) {
+  @include prefers-dark {
     color: var(--text-light);
   }
 }
@@ -378,7 +380,7 @@
   color: var(--text-primary);
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
   
-  @media (prefers-color-scheme: dark) {
+  @include prefers-dark {
     background: rgba(0, 0, 0, 0.2);
     border-left-color: rgba(255, 255, 255, 0.2);
     color: var(--light-color);
@@ -432,28 +434,28 @@
     background-color: chart-color-variant(var(--success-color), 0.95);
     border-left: 4px solid var(--success-light);
     
-    @media (prefers-color-scheme: dark) {
+    @include prefers-dark {
       background-color: chart-color-variant(var(--success-color), 0.85);
     }
   } @else if $type == 'error' {
     background-color: chart-color-variant(var(--danger-color), 0.95);
     border-left: 4px solid var(--danger-light);
     
-    @media (prefers-color-scheme: dark) {
+    @include prefers-dark {
       background-color: chart-color-variant(var(--danger-color), 0.85);
     }
   } @else if $type == 'info' {
     background-color: chart-color-variant(var(--info-color), 0.95);
     border-left: 4px solid var(--info-light);
     
-    @media (prefers-color-scheme: dark) {
+    @include prefers-dark {
       background-color: chart-color-variant(var(--info-color), 0.85);
     }
   } @else if $type == 'warning' {
     background-color: chart-color-variant(var(--warning-color), 0.95);
     border-left: 4px solid var(--warning-light);
     
-    @media (prefers-color-scheme: dark) {
+    @include prefers-dark {
       background-color: chart-color-variant(var(--warning-color), 0.85);
     }
   } @else {
@@ -482,7 +484,7 @@
   }
   
   // Reduced motion support
-  @media (prefers-reduced-motion: reduce) {
+  @include reduced-motion {
     animation: none;
     transition: opacity 0.2s ease;
   }
@@ -574,7 +576,7 @@
   pointer-events: none;
   z-index: 1000;
   
-  @media (prefers-color-scheme: dark) {
+  @include prefers-dark {
     background-color: rgba(30, 30, 30, 0.9);
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: var(--shadow-lg);

@@ -13,6 +13,7 @@
 
 // Import chart mixins for reusable patterns
 @use './index' as *;
+@use 'sass:map';
 
 // =============================================================================
 // MODAL CONFIGURATION VARIABLES
@@ -37,7 +38,7 @@ $modal-z-indices: (
 
 .chart-modal {
   @include chart-modal-overlay;
-  z-index: map-get($modal-z-indices, 'overlay');
+  z-index: map.get($modal-z-indices, 'overlay');
   
   // Responsive padding adjustments
   padding: var(--spacing-md);
@@ -54,16 +55,18 @@ $modal-z-indices: (
 }
 
 .chart-modal-content {
-  @include chart-modal-content(map-get($modal-sizes, 'md'));
-  z-index: map-get($modal-z-indices, 'content');
-  
-  // Enhanced visual hierarchy
-  border-top: 4px solid var(--primary-color);
+  @include chart-modal-content(map.get($modal-sizes, 'md'));
+
+  & {
+    z-index: map.get($modal-z-indices, 'content');
+    // Enhanced visual hierarchy
+    border-top: 4px solid var(--primary-color);
+  }
   
   // Size variants
-  &.modal-sm { max-width: map-get($modal-sizes, 'sm'); }
-  &.modal-lg { max-width: map-get($modal-sizes, 'lg'); }
-  &.modal-xl { max-width: map-get($modal-sizes, 'xl'); }
+  &.modal-sm { max-width: map.get($modal-sizes, 'sm'); }
+  &.modal-lg { max-width: map.get($modal-sizes, 'lg'); }
+  &.modal-xl { max-width: map.get($modal-sizes, 'xl'); }
   
   // Mobile-first responsive design
   @media (max-width: 480px) {

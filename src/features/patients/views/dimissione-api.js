@@ -1,5 +1,6 @@
 // src/features/patients/views/dimissione-api.js
 import { supabase } from '../../../core/services/supabase/supabaseClient.js';
+import { logger } from '../../../core/services/logger/loggerService.js';
 
 /**
  * Cerca i pazienti attivi per cognome.
@@ -49,6 +50,13 @@ export async function dischargePatientWithTransfer(patientId, dischargeData) {
         throw new Error(`Dati di dimissione non validi: ${validationResult.errors.join(', ')}`);
     }
 
+    // Log input validato (solo dev/test)
+    try {
+        logger.group('[DimissioneAPI] Input validato');
+        logger.log({ patientId, ...dischargeData });
+        logger.groupEnd();
+    } catch (_) { /* no-op */ }
+
     // Prima verifichiamo se il paziente esiste e non è già dimesso
     const { data: existingPatient, error: checkError } = await supabase
         .from('pazienti')
@@ -72,6 +80,13 @@ export async function dischargePatientWithTransfer(patientId, dischargeData) {
     // Prepara i dati per l'aggiornamento
     const updateData = prepareDischargeUpdateData(dischargeData, existingPatient);
 
+    // Log dati di update calcolati (solo dev/test)
+    try {
+        logger.group('[DimissioneAPI] Update payload');
+        logger.log(updateData);
+        logger.groupEnd();
+    } catch (_) { /* no-op */ }
+
     // Procediamo con l'aggiornamento
     const { data, error } = await supabase
         .from('pazienti')
@@ -88,6 +103,14 @@ export async function dischargePatientWithTransfer(patientId, dischargeData) {
         throw new Error('Paziente non trovato durante l\'aggiornamento.');
     }
     
+    // Log risultato dell'update con focus su codice_clinica
+    try {
+        const updated = data[0] || {};
+        logger.group('[DimissioneAPI] Update result');
+        logger.log({ id: updated.id, tipo_dimissione: updated.tipo_dimissione, codice_clinica: updated.codice_clinica, codice_dimissione: updated.codice_dimissione });
+        logger.groupEnd();
+    } catch (_) { /* no-op */ }
+
     return data[0];
 }
 

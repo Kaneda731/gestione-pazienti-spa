@@ -306,6 +306,11 @@ export function validateDischargeForm() {
         if (!codiceClinica) {
             errors.push('Il codice clinica è obbligatorio per i trasferimenti esterni');
         }
+        // Consenti solo codici clinica previsti (al momento: 56 e 60)
+        const allowedClinicCodes = ['56', '60'];
+        if (codiceClinica && !allowedClinicCodes.includes(codiceClinica)) {
+            errors.push('Codice clinica non valido: consentiti solo 56 (Riab. Motoria) o 60 (Lunga Degenza)');
+        }
     }
     
     return {

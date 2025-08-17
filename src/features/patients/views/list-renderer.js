@@ -46,10 +46,10 @@ function getEnhancedStatusBadge(patient) {
   let dischargeCode = "";
   if (patient.codice_dimissione) {
     const codeText =
-      patient.codice_dimissione === "3"
-        ? "Ord."
-        : patient.codice_dimissione === "6"
-        ? "Vol."
+      patient.codice_dimissione === "6"
+        ? "Dimissione ordinaria"
+        : patient.codice_dimissione === "3"
+        ? "Trasferimento"
         : patient.codice_dimissione;
     dischargeCode = ` <small>(${codeText})</small>`;
   }
@@ -79,9 +79,9 @@ function getTransferInfo(patient) {
       if (patient.codice_clinica) {
         const clinicName =
           patient.codice_clinica === "56"
-            ? "Riab. Cardiologica"
+            ? "Riab. Motoria"
             : patient.codice_clinica === "60"
-            ? "Riab. Generale"
+            ? "Lunga Degenza"
             : `Cod. ${patient.codice_clinica}`;
         externalInfo += `<br>(${clinicName})`;
       }

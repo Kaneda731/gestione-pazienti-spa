@@ -36,6 +36,17 @@ class PatientService {
         pagination
       );
 
+      // Debug: traccia un campione di codice_clinica per trasferimenti esterni
+      try {
+        const sample = (patients || [])
+          .filter(p => p && p.tipo_dimissione === 'trasferimento_esterno')
+          .slice(0, 5)
+          .map(p => ({ id: p.id, codice_clinica: p.codice_clinica }));
+        logger.group('[patientService.getPatients] Result summary');
+        logger.log({ page, limit, totalCount, sampleExternalTransfers: sample });
+        logger.groupEnd();
+      } catch (_) { /* no-op */ }
+
       return {
         patients,
         totalCount,
@@ -66,6 +77,9 @@ class PatientService {
     try {
       const data = await patientApi.getPatientById(id);
       this.cache.set(cacheKey, { data, timestamp: Date.now() });
+      try {
+        logger.log('[patientService.getPatientById] Received', { id: data?.id, tipo_dimissione: data?.tipo_dimissione, codice_clinica: data?.codice_clinica || null });
+      } catch (_) { /* no-op */ }
       return data;
     } catch (error) {
       logger.error("Errore nel caricamento paziente:", error);
@@ -231,6 +245,17 @@ class PatientService {
     try {
       stateService.setLoading(true, "Preparazione esportazione...");
       const patients = await patientApi.getAllPatients(filters);
+
+      // Debug: traccia un campione di codice_clinica per trasferimenti esterni nell'export
+      try {
+        const sample = (patients || [])
+          .filter(p => p && p.tipo_dimissione === 'trasferimento_esterno')
+          .slice(0, 5)
+          .map(p => ({ id: p.id, codice_clinica: p.codice_clinica }));
+        logger.group('[patientService.exportPatients] Export dataset sample');
+        logger.log({ total: patients?.length || 0, sampleExternalTransfers: sample });
+        logger.groupEnd();
+      } catch (_) { /* no-op */ }
 
       if (!patients || patients.length === 0) {
         notificationService.warning("Nessun dato da esportare per i filtri selezionati.");

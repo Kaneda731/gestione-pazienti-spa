@@ -58,7 +58,19 @@
                         <div id="internal-transfer-fields" class="d-none">
                             <div class="mb-3">
                                 <label for="reparto_destinazione" class="form-label">Reparto di Destinazione</label>
-                                <input type="text" id="reparto_destinazione" name="reparto_destinazione" class="form-control" placeholder="Inserisci il reparto di destinazione">
+                                <input type="text" id="reparto_destinazione" name="reparto_destinazione" class="form-control" placeholder="Inserisci il reparto di destinazione" list="reparti_suggeriti">
+                                <datalist id="reparti_suggeriti">
+                                    <option value="Cardiologia"></option>
+                                    <option value="Neurologia"></option>
+                                    <option value="Medicina Interna"></option>
+                                    <option value="Pneumologia"></option>
+                                    <option value="Gastroenterologia"></option>
+                                    <option value="Urologia"></option>
+                                    <option value="Ginecologia"></option>
+                                    <option value="Pediatria"></option>
+                                    <option value="CR1"></option>
+                                    <option value="CR3"></option>
+                                </datalist>
                             </div>
                         </div>
 
@@ -82,8 +94,8 @@
                             <label for="codice_dimissione" class="form-label">Codice Dimissione</label>
                             <select id="codice_dimissione" name="codice_dimissione" class="form-select" data-custom="true" required>
                                 <option value="">Seleziona codice dimissione</option>
-                                <option value="3">3 - Dimissione Ordinaria</option>
-                                <option value="6">6 - Trasferimento</option>
+                                <option value="6">6 - Dimissione ordinaria</option>
+                                <option value="3">3 - Trasferimento</option>
                             </select>
                         </div>
                         

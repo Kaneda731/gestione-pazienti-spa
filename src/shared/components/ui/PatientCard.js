@@ -278,8 +278,8 @@ export class PatientCard {
                     externalInfo += `<br>→ ${this.patient.clinica_destinazione}`;
                 }
                 if (this.patient.codice_clinica) {
-                    const clinicName = this.patient.codice_clinica === '56' ? 'Riab. Cardiologica' : 
-                                     this.patient.codice_clinica === '60' ? 'Riab. Generale' : 
+                    const clinicName = this.patient.codice_clinica === '56' ? 'Riab. Motoria' : 
+                                     this.patient.codice_clinica === '60' ? 'Lunga Degenza' : 
                                      `Cod. ${this.patient.codice_clinica}`;
                     externalInfo += `<br>(${clinicName})`;
                 }

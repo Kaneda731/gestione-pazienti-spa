@@ -87,7 +87,11 @@ describe('Enhanced Patient List Renderer', () => {
 
         let dischargeCode = '';
         if (patient.codice_dimissione) {
-          const codeText = patient.codice_dimissione === '3' ? 'Ord.' : patient.codice_dimissione === '6' ? 'Vol.' : patient.codice_dimissione;
+          const codeText = patient.codice_dimissione === '6'
+            ? 'Dimissione ordinaria'
+            : patient.codice_dimissione === '3'
+            ? 'Trasferimento'
+            : patient.codice_dimissione;
           dischargeCode = ` <small>(${codeText})</small>`;
         }
 
@@ -108,7 +112,7 @@ describe('Enhanced Patient List Renderer', () => {
       expect(badge).toContain('bg-info');
       expect(badge).toContain('Trasf. Interno');
       expect(badge).toContain('swap_horiz');
-      expect(badge).toContain('(Ord.)');
+      expect(badge).toContain('(Trasferimento)');
     });
 
     it('should generate external transfer status badge', () => {
@@ -129,7 +133,11 @@ describe('Enhanced Patient List Renderer', () => {
 
         let dischargeCode = '';
         if (patient.codice_dimissione) {
-          const codeText = patient.codice_dimissione === '6' ? 'Vol.' : patient.codice_dimissione;
+          const codeText = patient.codice_dimissione === '6'
+            ? 'Dimissione ordinaria'
+            : patient.codice_dimissione === '3'
+            ? 'Trasferimento'
+            : patient.codice_dimissione;
           dischargeCode = ` <small>(${codeText})</small>`;
         }
 
@@ -151,7 +159,7 @@ describe('Enhanced Patient List Renderer', () => {
       expect(badge).toContain('bg-warning text-dark');
       expect(badge).toContain('Trasf. Esterno');
       expect(badge).toContain('exit_to_app');
-      expect(badge).toContain('(Vol.)');
+      expect(badge).toContain('(Dimissione ordinaria)');
     });
 
     it('should generate regular discharge status badge', () => {
@@ -247,8 +255,8 @@ describe('Enhanced Patient List Renderer', () => {
             externalInfo += `<br>→ ${patient.clinica_destinazione}`;
           }
           if (patient.codice_clinica) {
-            const clinicName = patient.codice_clinica === '56' ? 'Riab. Cardiologica' : 
-                             patient.codice_clinica === '60' ? 'Riab. Generale' : 
+            const clinicName = patient.codice_clinica === '56' ? 'Riab. Motoria' : 
+                             patient.codice_clinica === '60' ? 'Lunga Degenza' : 
                              `Cod. ${patient.codice_clinica}`;
             externalInfo += `<br>(${clinicName})`;
           }
@@ -273,7 +281,52 @@ describe('Enhanced Patient List Renderer', () => {
       expect(transferInfo).toContain('text-warning');
       expect(transferInfo).toContain('Esterno');
       expect(transferInfo).toContain('→ Clinica San Giuseppe');
-      expect(transferInfo).toContain('Riab. Cardiologica');
+      expect(transferInfo).toContain('Riab. Motoria');
+    });
+
+    it("should display code for unknown clinic code like '3'", () => {
+      const getTransferInfo = (patient) => {
+        if (!patient.data_dimissione || !patient.tipo_dimissione) {
+          return '-';
+        }
+
+        if (patient.tipo_dimissione === 'trasferimento_esterno') {
+          let externalInfo = '<small class="text-warning"><strong>Esterno</strong>';
+          if (patient.clinica_destinazione) {
+            externalInfo += `
+→ ${patient.clinica_destinazione}`;
+          }
+          if (patient.codice_clinica) {
+            const clinicName = patient.codice_clinica === '56' ? 'Riab. Motoria' :
+                             patient.codice_clinica === '60' ? 'Lunga Degenza' :
+                             `Cod. ${patient.codice_clinica}`;
+            externalInfo += `
+(${clinicName})`;
+          }
+          externalInfo += '</small>';
+          return externalInfo;
+        }
+
+        return '-';
+      };
+
+      const externalTransferPatient = {
+        id: '2',
+        nome: 'Luigi',
+        cognome: 'Bianchi',
+        data_dimissione: '2024-01-20',
+        tipo_dimissione: 'trasferimento_esterno',
+        clinica_destinazione: 'Clinica X',
+        codice_clinica: '3'
+      };
+
+      const transferInfo = getTransferInfo(externalTransferPatient);
+      expect(transferInfo).toContain('text-warning');
+      expect(transferInfo).toContain('Esterno');
+      expect(transferInfo).toContain('→ Clinica X');
+      expect(transferInfo).toContain('Cod. 3');
+      expect(transferInfo).not.toContain('Riab. Motoria');
+      expect(transferInfo).not.toContain('Lunga Degenza');
     });
 
     it('should handle external transfer without destination clinic', () => {

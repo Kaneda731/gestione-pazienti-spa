@@ -131,12 +131,12 @@ export function validateDischargeData(dischargeData) {
         errors.push('Il tipo di dimissione è obbligatorio');
     }
     
-    if (!dischargeData.codice_dimissione) {
+    if (dischargeData.tipo_dimissione !== 'decesso' && !dischargeData.codice_dimissione) {
         errors.push('Il codice dimissione è obbligatorio');
     }
     
     // Validazione valori consentiti
-    const tipiDimissioneValidi = ['dimissione', 'trasferimento_interno', 'trasferimento_esterno'];
+    const tipiDimissioneValidi = ['dimissione', 'trasferimento_interno', 'trasferimento_esterno', 'decesso'];
     if (dischargeData.tipo_dimissione && !tipiDimissioneValidi.includes(dischargeData.tipo_dimissione)) {
         errors.push('Tipo di dimissione non valido');
     }
@@ -211,6 +211,11 @@ function prepareDischargeUpdateData(dischargeData, existingPatient) {
         tipo_dimissione: dischargeData.tipo_dimissione,
         codice_dimissione: dischargeData.codice_dimissione
     };
+
+    // Per decesso, il codice_dimissione non è previsto
+    if (dischargeData.tipo_dimissione === 'decesso') {
+        updateData.codice_dimissione = null;
+    }
     
     // Aggiungi campi specifici in base al tipo di dimissione
     if (dischargeData.tipo_dimissione === 'trasferimento_interno') {
@@ -224,7 +229,7 @@ function prepareDischargeUpdateData(dischargeData, existingPatient) {
         // Pulisci i campi di trasferimento interno
         updateData.reparto_destinazione = null;
     } else {
-        // Per dimissione normale, pulisci tutti i campi di trasferimento
+        // Per dimissione normale o decesso, pulisci tutti i campi di trasferimento
         updateData.reparto_destinazione = null;
         updateData.clinica_destinazione = null;
         updateData.codice_clinica = null;

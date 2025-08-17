@@ -12,7 +12,7 @@
  */
 
 // Import chart mixins for reusable patterns
-@import 'chart-mixins';
+@use './index' as *;
 
 // =============================================================================
 // RESPONSIVE CONFIGURATION
@@ -168,7 +168,7 @@ $chart-heights: (
     contain: layout style paint;
     
     // Reduce motion for better performance
-    @media (prefers-reduced-motion: reduce) {
+    @include reduced-motion {
       transition: none;
       transform: none !important;
     }

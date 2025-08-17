@@ -87,7 +87,11 @@ describe('Enhanced Patient List Renderer', () => {
 
         let dischargeCode = '';
         if (patient.codice_dimissione) {
-          const codeText = patient.codice_dimissione === '3' ? 'Ord.' : patient.codice_dimissione === '6' ? 'Vol.' : patient.codice_dimissione;
+          const codeText = patient.codice_dimissione === '6'
+            ? 'Dimissione ordinaria'
+            : patient.codice_dimissione === '3'
+            ? 'Trasferimento'
+            : patient.codice_dimissione;
           dischargeCode = ` <small>(${codeText})</small>`;
         }
 
@@ -108,7 +112,7 @@ describe('Enhanced Patient List Renderer', () => {
       expect(badge).toContain('bg-info');
       expect(badge).toContain('Trasf. Interno');
       expect(badge).toContain('swap_horiz');
-      expect(badge).toContain('(Ord.)');
+      expect(badge).toContain('(Trasferimento)');
     });
 
     it('should generate external transfer status badge', () => {
@@ -129,7 +133,11 @@ describe('Enhanced Patient List Renderer', () => {
 
         let dischargeCode = '';
         if (patient.codice_dimissione) {
-          const codeText = patient.codice_dimissione === '6' ? 'Vol.' : patient.codice_dimissione;
+          const codeText = patient.codice_dimissione === '6'
+            ? 'Dimissione ordinaria'
+            : patient.codice_dimissione === '3'
+            ? 'Trasferimento'
+            : patient.codice_dimissione;
           dischargeCode = ` <small>(${codeText})</small>`;
         }
 
@@ -151,7 +159,7 @@ describe('Enhanced Patient List Renderer', () => {
       expect(badge).toContain('bg-warning text-dark');
       expect(badge).toContain('Trasf. Esterno');
       expect(badge).toContain('exit_to_app');
-      expect(badge).toContain('(Vol.)');
+      expect(badge).toContain('(Dimissione ordinaria)');
     });
 
     it('should generate regular discharge status badge', () => {

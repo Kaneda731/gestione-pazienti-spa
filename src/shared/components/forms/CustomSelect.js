@@ -288,10 +288,21 @@ export class CustomSelect {
         if (option) {
             if (silent) {
                 // Aggiorna solo il valore senza scatenare eventi
+                // Mantieni allineato lo stato interno
+                this.selectedValue = value;
+                this.selectedText = option.textContent;
                 const label = this.wrapper.querySelector('.custom-select-label');
                 if (label) {
                     if (option.hasAttribute('data-icon')) {
-                        label.innerHTML = sanitizeHtml(`${option.getAttribute('data-icon')} ${option.textContent}`);
+                        // Allinea al rendering di selectOption: costruisci DOM sicuro invece di concatenare HTML
+                        const iconHtml = option.getAttribute('data-icon');
+                        label.innerHTML = '';
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = sanitizeHtml(iconHtml);
+                        while (tempDiv.firstChild) {
+                            label.appendChild(tempDiv.firstChild);
+                        }
+                        label.appendChild(document.createTextNode(' ' + option.textContent));
                     } else {
                         label.textContent = option.textContent;
                     }
@@ -476,10 +487,32 @@ export class CustomSelect {
  * @param {string} selector - Il selettore CSS per il <select> da aggiornare.
  */
 export function updateCustomSelect(selector) {
-    const select = document.querySelector(selector);
-    if (select && select.customSelectInstance) {
-        select.customSelectInstance.updateOptions();
-    }
+    // Supporta selettori multipli: aggiorna tutte le select corrispondenti
+    const selects = document.querySelectorAll(selector);
+    if (!selects || selects.length === 0) return;
+    selects.forEach(select => {
+        if (select && select.customSelectInstance) {
+            select.customSelectInstance.updateOptions();
+        }
+    });
+}
+
+/**
+ * Sincronizza SOLO le etichette dei CustomSelect con il valore corrente del <select>
+ * senza ripopolare le opzioni. Utile dopo popolamenti programmati del form.
+ * @param {string} selector
+ */
+export function syncCustomSelectLabels(selector) {
+    const selects = document.querySelectorAll(selector);
+    if (!selects || selects.length === 0) return;
+    selects.forEach(select => {
+        if (select && select.customSelectInstance) {
+            const value = select.value;
+            if (value !== undefined) {
+                select.customSelectInstance.setValue(value, true);
+            }
+        }
+    });
 }
 
 // Funzione di inizializzazione esistente

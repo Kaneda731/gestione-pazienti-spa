@@ -58,7 +58,19 @@
                         <div id="internal-transfer-fields" class="d-none">
                             <div class="mb-3">
                                 <label for="reparto_destinazione" class="form-label">Reparto di Destinazione</label>
-                                <input type="text" id="reparto_destinazione" name="reparto_destinazione" class="form-control" placeholder="Inserisci il reparto di destinazione">
+                                <input type="text" id="reparto_destinazione" name="reparto_destinazione" class="form-control" placeholder="Inserisci il reparto di destinazione" list="reparti_suggeriti">
+                                <datalist id="reparti_suggeriti">
+                                    <option value="Cardiologia"></option>
+                                    <option value="Neurologia"></option>
+                                    <option value="Medicina Interna"></option>
+                                    <option value="Pneumologia"></option>
+                                    <option value="Gastroenterologia"></option>
+                                    <option value="Urologia"></option>
+                                    <option value="Ginecologia"></option>
+                                    <option value="Pediatria"></option>
+                                    <option value="CR1"></option>
+                                    <option value="CR3"></option>
+                                </datalist>
                             </div>
                         </div>
 

@@ -13,6 +13,7 @@
 
 // Import chart mixins for reusable patterns
 @use './index' as *;
+@use 'sass:map';
 
 // =============================================================================
 // RESPONSIVE CONFIGURATION
@@ -81,8 +82,8 @@ $chart-heights: (
   @include responsive-chart('mobile', $enable-touch: true);
   
   // Mobile-specific enhancements
-  min-height: map-get(map-get($chart-heights, 'mobile'), 'min');
-  max-height: map-get(map-get($chart-heights, 'mobile'), 'max');
+  min-height: map.get(map.get($chart-heights, 'mobile'), 'min');
+  max-height: map.get(map.get($chart-heights, 'mobile'), 'max');
   
   // Performance optimizations for mobile
   contain: layout style paint;
@@ -92,8 +93,8 @@ $chart-heights: (
 .chart-tablet {
   @include responsive-chart('tablet', $enable-touch: false);
   
-  min-height: map-get(map-get($chart-heights, 'tablet'), 'min');
-  max-height: map-get(map-get($chart-heights, 'tablet'), 'max');
+  min-height: map.get(map.get($chart-heights, 'tablet'), 'min');
+  max-height: map.get(map.get($chart-heights, 'tablet'), 'max');
   
   // Tablet hover enhancements
   &:hover {
@@ -104,8 +105,8 @@ $chart-heights: (
 .chart-desktop {
   @include responsive-chart('desktop', $enable-touch: false);
   
-  min-height: map-get(map-get($chart-heights, 'desktop'), 'min');
-  max-height: map-get(map-get($chart-heights, 'desktop'), 'max');
+  min-height: map.get(map.get($chart-heights, 'desktop'), 'min');
+  max-height: map.get(map.get($chart-heights, 'desktop'), 'max');
   
   // Desktop advanced interactions
   cursor: crosshair;
@@ -140,7 +141,7 @@ $chart-heights: (
 // =============================================================================
 
 // Mobile-first responsive approach
-@media (max-width: #{map-get($breakpoints, 'mobile')}) {
+@media (max-width: #{map.get($breakpoints, 'mobile')}) {
   .chart-legend {
     flex-direction: column;
     align-items: flex-start;
@@ -191,7 +192,7 @@ $chart-heights: (
 }
 
 // Tablet optimizations
-@media (min-width: #{map-get($breakpoints, 'mobile') + 1px}) and (max-width: #{map-get($breakpoints, 'tablet')}) {
+@media (min-width: #{map.get($breakpoints, 'mobile') + 1px}) and (max-width: #{map.get($breakpoints, 'tablet')}) {
   .chart-legend {
     justify-content: center;
     flex-wrap: wrap;
@@ -211,7 +212,7 @@ $chart-heights: (
 }
 
 // Desktop optimizations
-@media (min-width: #{map-get($breakpoints, 'tablet') + 1px}) {
+@media (min-width: #{map.get($breakpoints, 'tablet') + 1px}) {
   .chart-legend {
     justify-content: flex-end;
     
@@ -241,7 +242,7 @@ $chart-heights: (
 }
 
 // Large desktop optimizations
-@media (min-width: #{map-get($breakpoints, 'desktop')}) {
+@media (min-width: #{map.get($breakpoints, 'desktop')}) {
   .chart-container {
     &.chart-desktop {
       // Enhanced desktop interactions

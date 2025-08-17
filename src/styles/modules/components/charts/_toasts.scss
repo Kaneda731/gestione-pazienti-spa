@@ -13,6 +13,7 @@
 
 // Import chart mixins via Sass Modules barrel
 @use './index' as *;
+@use 'sass:map';
 
 // =============================================================================
 // TOAST CONFIGURATION
@@ -58,11 +59,13 @@ $toast-positions: (
   @include chart-toast('default', 'bottom', false);
   
   // Enhanced base styling
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-  font-family: var(--font-family-base);
-  line-height: var(--line-height-base);
+  & {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-family: var(--font-family-base);
+    line-height: var(--line-height-base);
+  }
   
   // Icon support
   & .toast-icon {
@@ -130,7 +133,7 @@ $toast-positions: (
     // Enhanced styling for each type
     @if $type != 'default' {
       .toast-icon {
-        color: map-get($config, 'border');
+        color: map.get($config, 'border');
       }
     }
   }

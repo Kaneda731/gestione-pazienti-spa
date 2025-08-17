@@ -196,8 +196,11 @@
   
   // Optional aspect ratio constraint
   @if $aspect-ratio {
-    aspect-ratio: #{$aspect-ratio};
-    height: auto;
+    // Evita mixed-decls dopo regole annidate (es. &:hover)
+    & {
+      aspect-ratio: #{$aspect-ratio};
+      height: auto;
+    }
   }
 }
 

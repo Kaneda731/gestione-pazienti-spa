@@ -21,17 +21,9 @@
  */
 
 // =============================================================================
-// DEPENDENCIES - Import mixins and functions first
+// DEPENDENCIES - Sass Modules
 // =============================================================================
-
-/**
- * Chart mixins provide reusable patterns for:
- * - Container styling with responsive behavior
- * - Modal components with accessibility features
- * - Toast notifications with type variants
- * - Animation and interaction patterns
- */
-@import "charts/chart-mixins";
+// I mixin sono importati dai singoli partials tramite `@use './index' as *;`
 
 // =============================================================================
 // FOUNDATION - Base styles that other modules depend on
@@ -44,7 +36,7 @@
  * - Loading states
  * - Touch optimizations
  */
-@import "charts/base";
+@use "charts/base";
 
 // =============================================================================
 // RESPONSIVE LAYERS - Device-specific optimizations
@@ -56,14 +48,14 @@
  * - Performance optimizations
  * - Gesture support
  */
-@import "charts/mobile";
+@use "charts/mobile";
 
 /**
  * Tablet-specific enhancements:
  * - Balanced touch and hover interactions
  * - Optimized layout patterns
  */
-@import "charts/tablet";
+@use "charts/tablet";
 
 /**
  * Desktop-specific features:
@@ -71,7 +63,7 @@
  * - Keyboard navigation
  * - Enhanced interactions
  */
-@import "charts/desktop";
+@use "charts/desktop";
 
 // =============================================================================
 // COMPONENT FEATURES - Specific chart functionality
@@ -83,7 +75,7 @@
  * - Accessibility features
  * - Animation system
  */
-@import "charts/modals";
+@use "charts/modals";
 
 /**
  * Responsive behavior system:
@@ -91,7 +83,7 @@
  * - Device detection
  * - Performance optimizations
  */
-@import "charts/responsive";
+@use "charts/responsive";
 
 /**
  * Toast notification system:
@@ -99,7 +91,7 @@
  * - Type variants (success, error, info, warning)
  * - Enhanced accessibility
  */
-@import "charts/toasts";
+@use "charts/toasts";
 
 // =============================================================================
 // ACCESSIBILITY ENHANCEMENTS - Final layer for inclusive design
@@ -112,7 +104,7 @@
  * - Screen reader optimizations
  * - Keyboard navigation
  */
-@import "charts/accessibility";
+@use "charts/accessibility";
 
 // =============================================================================
 // CHART MODULE UTILITIES - Helper classes and overrides

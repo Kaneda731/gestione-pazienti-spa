@@ -11,6 +11,9 @@
  * @version 2.0
  */
 
+// Import chart mixins via Sass Modules barrel
+@use './index' as *;
+
 // =============================================================================
 // TOAST CONFIGURATION
 // =============================================================================
@@ -62,24 +65,24 @@ $toast-positions: (
   line-height: var(--line-height-base);
   
   // Icon support
-  .toast-icon {
+  & .toast-icon {
     font-size: var(--icon-size-base);
     flex-shrink: 0;
     opacity: 0.9;
   }
   
   // Content wrapper
-  .toast-content {
+  & .toast-content {
     flex: 1;
     min-width: 0; // Prevent flex item overflow
     
-    .toast-title {
+    & .toast-title {
       font-weight: var(--font-weight-bold);
       margin-bottom: var(--spacing-xs);
       font-size: var(--font-size-sm);
     }
     
-    .toast-message {
+    & .toast-message {
       font-size: var(--font-size-sm);
       opacity: 0.95;
       line-height: 1.4;
@@ -87,7 +90,7 @@ $toast-positions: (
   }
   
   // Close button
-  .toast-close {
+  & .toast-close {
     background: none;
     border: none;
     color: rgba(255, 255, 255, 0.8);
@@ -215,7 +218,7 @@ $toast-positions: (
     right: var(--spacing-md);
   }
   
-  .chart-toast {
+  & .chart-toast {
     position: relative;
     margin-bottom: var(--spacing-sm);
     pointer-events: auto;
@@ -232,16 +235,16 @@ $toast-positions: (
   align-items: stretch;
   text-align: left;
   
-  .toast-content {
+  & .toast-content {
     margin-bottom: var(--spacing-sm);
   }
   
-  .toast-actions {
+  & .toast-actions {
     display: flex;
     gap: var(--spacing-sm);
     justify-content: flex-end;
     
-    .toast-action-btn {
+    & .toast-action-btn {
       background: rgba(255, 255, 255, 0.2);
       border: 1px solid rgba(255, 255, 255, 0.3);
       color: white;
@@ -277,15 +280,6 @@ $toast-positions: (
   &:focus {
     outline: var(--focus-outline);
     outline-offset: var(--focus-outline-offset);
-  }
-  
-  // Screen reader support
-  &[role="alert"] {
-    // Announced immediately by screen readers
-  }
-  
-  &[role="status"] {
-    // Announced politely by screen readers
   }
 }
 

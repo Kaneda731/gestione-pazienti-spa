@@ -10,6 +10,7 @@ import {
     validateDischargeForm,
     getDischargeFormData
 } from '@/features/patients/views/dimissione-ui.js';
+import { logger } from '@/core/services/logger/loggerService.js';
 
 let selectedPatient = null;
 
@@ -30,6 +31,21 @@ async function handleDischargeSubmit(event) {
 
     // Raccoglie i dati del form
     const dischargeData = getDischargeFormData();
+
+    // Log strutturato (solo in dev/test) per tracciare payload effettivo sottomesso
+    try {
+        logger.group('[Dimissione] Submit payload');
+        logger.log({
+            patientId: selectedPatient?.id,
+            tipo_dimissione: dischargeData?.tipo_dimissione,
+            codice_dimissione: dischargeData?.codice_dimissione,
+            reparto_destinazione: dischargeData?.reparto_destinazione || null,
+            clinica_destinazione: dischargeData?.clinica_destinazione || null,
+            codice_clinica: dischargeData?.codice_clinica || null,
+            data_dimissione: dischargeData?.data_dimissione || null
+        });
+        logger.groupEnd();
+    } catch (_) { /* no-op */ }
 
     try {
         await dischargePatientWithTransfer(selectedPatient.id, dischargeData);

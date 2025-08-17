@@ -79,9 +79,9 @@ function getTransferInfo(patient) {
       if (patient.codice_clinica) {
         const clinicName =
           patient.codice_clinica === "56"
-            ? "Riab. Cardiologica"
+            ? "Riab. Motoria"
             : patient.codice_clinica === "60"
-            ? "Riab. Generale"
+            ? "Lunga Degenza"
             : `Cod. ${patient.codice_clinica}`;
         externalInfo += `<br>(${clinicName})`;
       }

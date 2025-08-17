@@ -1,6 +1,7 @@
 // src/features/patients/services/patientApi.js
 
 import { supabase } from "../../../core/services/supabase/supabaseClient.js";
+import { logger } from "../../../core/services/logger/loggerService.js";
 
 /**
  * Costruisce una query Supabase per i pazienti applicando filtri comuni.
@@ -51,6 +52,17 @@ const getPaginatedPatients = async (filters = {}, pagination = {}) => {
 
   if (error) throw error;
 
+  // Debug logging: trace codice_clinica values for external transfers
+  try {
+    const sample = (data || [])
+      .filter(p => p && p.tipo_dimissione === 'trasferimento_esterno')
+      .slice(0, 5)
+      .map(p => ({ id: p.id, codice_clinica: p.codice_clinica }));
+    logger.group('[patientApi.getPaginatedPatients] Result summary');
+    logger.log({ total: data?.length || 0, count, externalTransfersSample: sample });
+    logger.groupEnd();
+  } catch (_) { /* no-op */ }
+
   return {
     patients: data || [],
     totalCount: count || 0,
@@ -70,6 +82,15 @@ const getAllPatients = async (filters = {}) => {
 
     const { data, error } = await query;
     if (error) throw error;
+    try {
+        const withCodes = (data || [])
+          .filter(p => p && p.tipo_dimissione === 'trasferimento_esterno')
+          .slice(0, 5)
+          .map(p => ({ id: p.id, codice_clinica: p.codice_clinica }));
+        logger.group('[patientApi.getAllPatients] Result sample');
+        logger.log({ total: data?.length || 0, externalTransfersSample: withCodes });
+        logger.groupEnd();
+    } catch (_) { /* no-op */ }
     return data || [];
 };
 
@@ -85,6 +106,9 @@ const getPatientById = async (id) => {
     .single();
 
   if (error) throw error;
+  try {
+    logger.log('[patientApi.getPatientById] Loaded', { id: data?.id, tipo_dimissione: data?.tipo_dimissione, codice_clinica: data?.codice_clinica || null });
+  } catch (_) { /* no-op */ }
   return data;
 };
 
@@ -106,6 +130,13 @@ const createPatient = async (patientData) => {
  * Aggiorna un paziente esistente.
  */
 const updatePatient = async (id, patientData) => {
+  // Debug logging: payload being sent
+  try {
+    logger.group('[patientApi.updatePatient] Update payload');
+    logger.log({ id, codice_clinica: patientData?.codice_clinica ?? null, tipo_dimissione: patientData?.tipo_dimissione ?? null });
+    logger.groupEnd();
+  } catch (_) { /* no-op */ }
+
   const { data, error } = await supabase
     .from("pazienti")
     .update(patientData)
@@ -114,6 +145,11 @@ const updatePatient = async (id, patientData) => {
     .single();
 
   if (error) throw error;
+  try {
+    logger.group('[patientApi.updatePatient] Update result');
+    logger.log({ id: data?.id, tipo_dimissione: data?.tipo_dimissione ?? null, codice_clinica: data?.codice_clinica ?? null });
+    logger.groupEnd();
+  } catch (_) { /* no-op */ }
   return data;
 };
 

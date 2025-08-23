@@ -3,6 +3,7 @@ import CustomDatepicker from '@/shared/components/forms/CustomDatepicker.js';
 import { initCustomSelects } from '@/shared/components/forms/CustomSelect.js';
 import { notificationService } from '@/core/services/notifications/notificationService.js';
 import { attach as attachPatientAutocomplete } from '@/shared/components/ui/PatientAutocomplete.js';
+import { lookupService } from '@/core/services/lookupService.js';
 
 
 let datepickerInstance = null;
@@ -34,12 +35,15 @@ export const dom = {
 /**
  * Inizializza i componenti della UI, come il datepicker.
  */
-export function initializeUI(onSelectPatient) {
+export async function initializeUI(onSelectPatient) {
     datepickerInstance = new CustomDatepicker('[data-datepicker]', {
         dateFormat: "d/m/Y",
     });
 
-    // Inizializza i custom select per tutte le select con data-custom="true"
+    // Prima popola le select con i dati dal database
+    await populateLookupSelects();
+
+    // Poi inizializza i custom select per tutte le select con data-custom="true"
     initCustomSelects('.form-select[data-custom="true"]');
 
     // Autocomplete pazienti centralizzato (solo pazienti attivi)
@@ -61,6 +65,50 @@ export function initializeUI(onSelectPatient) {
     initializeTransferFieldListeners();
     
     resetView();
+}
+
+/**
+ * Popola le select con i dati dal database
+ */
+async function populateLookupSelects() {
+    try {
+        // Popola le select in parallelo
+        const promises = [];
+        
+        // Codici dimissione
+        if (dom.codiceDimissioneSelect) {
+            promises.push(lookupService.populateCodiciDimissioneSelect(dom.codiceDimissioneSelect));
+        }
+        
+        // Reparti destinazione (solo interni)
+        if (dom.repartoDestinazioneInput) {
+            // Nota: questo è un input, non una select, quindi lo convertiamo in select
+            // oppure usiamo una select nascosta per i dati
+            promises.push(populateRepartiSelect());
+        }
+        
+        // Cliniche
+        if (dom.codiceClinicaSelect) {
+            promises.push(lookupService.populateClinicheSelect(dom.codiceClinicaSelect));
+        }
+        
+        await Promise.all(promises);
+    } catch (error) {
+        console.error('Errore nel caricamento dati lookup:', error);
+        notificationService.error('Errore nel caricamento delle opzioni del form');
+    }
+}
+
+/**
+ * Popola la select dei reparti (che è attualmente un input)
+ */
+async function populateRepartiSelect() {
+    // Per ora manteniamo l'input, ma potremmo convertirlo in select in futuro
+    // Il reparto_destinazione nella pagina dimissione è un input con select custom
+    // Verifichiamo se è effettivamente una select
+    if (dom.repartoDestinazioneInput && dom.repartoDestinazioneInput.tagName === 'SELECT') {
+        await lookupService.populateRepartiSelect(dom.repartoDestinazioneInput, null, 'interno');
+    }
 }
 
 /**
@@ -322,9 +370,9 @@ export function validateDischargeForm() {
 
 /**
  * Raccoglie tutti i dati del form di dimissione/trasferimento
- * @returns {Object} Oggetto con tutti i dati del form
+ * @returns {Promise<Object>} Oggetto con tutti i dati del form
  */
-export function getDischargeFormData() {
+export async function getDischargeFormData() {
     const formData = {
         data_dimissione: dom.dataDimissioneInput?.value,
         tipo_dimissione: dom.tipoDimissioneSelect?.value,
@@ -341,5 +389,55 @@ export function getDischargeFormData() {
         formData.codice_clinica = dom.codiceClinicaSelect?.value;
     }
     
+    // Converti gli ID delle select normalizzate ai valori legacy per compatibilità
+    await convertNormalizedFieldsToLegacy(formData);
+    
     return formData;
+}
+
+/**
+ * Converte gli ID delle select normalizzate ai valori legacy per compatibilità
+ * @param {Object} data - I dati del form
+ */
+async function convertNormalizedFieldsToLegacy(data) {
+    try {
+        const { codiciDimissioneService, repartiService, clinicheService } = await import('@/core/services/index.js');
+        
+        // Converti codice dimissione ID al codice legacy
+        if (data.codice_dimissione && !isNaN(data.codice_dimissione)) {
+            const codice = await codiciDimissioneService.getById(parseInt(data.codice_dimissione));
+            if (codice) {
+                data.codice_dimissione_id = parseInt(data.codice_dimissione);
+                data.codice_dimissione = codice.codice; // Mantieni il valore legacy per compatibilità
+            }
+        }
+        
+        // Converti reparto destinazione nome all'ID (se è una select)
+        if (data.reparto_destinazione && isNaN(data.reparto_destinazione)) {
+            const reparto = await repartiService.getByNome(data.reparto_destinazione);
+            if (reparto) {
+                data.reparto_destinazione_id = reparto.id;
+                // Mantieni il nome per compatibilità
+            }
+        } else if (data.reparto_destinazione && !isNaN(data.reparto_destinazione)) {
+            // Se è già un ID, converti al nome
+            const reparto = await repartiService.getById(parseInt(data.reparto_destinazione));
+            if (reparto) {
+                data.reparto_destinazione_id = parseInt(data.reparto_destinazione);
+                data.reparto_destinazione = reparto.nome;
+            }
+        }
+        
+        // Converti clinica ID al codice legacy
+        if (data.codice_clinica && !isNaN(data.codice_clinica)) {
+            const clinica = await clinicheService.getById(parseInt(data.codice_clinica));
+            if (clinica) {
+                data.clinica_destinazione_id = parseInt(data.codice_clinica);
+                data.codice_clinica = clinica.codice; // Mantieni il valore legacy per compatibilità
+            }
+        }
+    } catch (error) {
+        console.error('Errore nella conversione campi normalizzati:', error);
+        // Non bloccare il salvataggio per errori di conversione
+    }
 }

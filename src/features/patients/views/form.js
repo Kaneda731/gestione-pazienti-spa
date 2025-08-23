@@ -15,7 +15,7 @@ async function handleFormSubmit(event, state) {
   event.preventDefault();
 
   // Con novalidate nel form HTML, non abbiamo più problemi di validazione
-  const formData = getFormData();
+  const formData = await getFormData();
 
   try {
     showFeedbackMessage("Salvataggio in corso...", "info");

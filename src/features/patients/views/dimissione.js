@@ -30,7 +30,7 @@ async function handleDischargeSubmit(event) {
     }
 
     // Raccoglie i dati del form
-    const dischargeData = getDischargeFormData();
+    const dischargeData = await getDischargeFormData();
 
     // Log strutturato (solo in dev/test) per tracciare payload effettivo sottomesso
     try {
@@ -74,9 +74,9 @@ function setupEventListeners() {
     }
 }
 
-export function initDimissioneView() {
+export async function initDimissioneView() {
     // Usa l'autocomplete centralizzato: la UI chiamerà onSelectPatient alla scelta
-    initializeUI((patient) => {
+    await initializeUI((patient) => {
         selectedPatient = patient;
         displayDischargeForm(patient);
     });

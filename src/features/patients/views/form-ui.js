@@ -6,13 +6,18 @@ import { initEventiCliniciTab, setCurrentPatient, cleanupEventiCliniciTab, isPat
 import { sanitizeHtml } from '../../../shared/utils/sanitizeHtml.js';
 import { InfectionEventModal } from '../../eventi-clinici/components/InfectionEventModal.js';
 import infectionDataManager from '../services/infectionDataManager.js';
+import { lookupService } from '../../../core/services/lookupService.js';
 
 let datepickerInstance = null;
 
 /**
  * Inizializza i componenti del form come datepicker e custom selects.
  */
-export function initializeFormComponents() {
+export async function initializeFormComponents() {
+    // Prima popola le select con i dati dal database
+    await populateLookupSelects();
+    
+    // Poi inizializza i custom select
     initCustomSelects('#form-inserimento [data-custom="true"]');
     
     datepickerInstance = new CustomDatepicker('[data-datepicker]', {
@@ -28,6 +33,39 @@ export function initializeFormComponents() {
     
     // Inizializza il tab degli eventi clinici, passando la funzione di callback per aggiornare la UI
     initEventiCliniciTab(updateInfectionStatusFromEvents);
+}
+
+/**
+ * Popola le select con i dati dal database
+ */
+async function populateLookupSelects() {
+    try {
+        // Popola le select in parallelo
+        const promises = [];
+        
+        // Codici dimissione
+        const codiciDimissioneSelect = document.getElementById('codice_dimissione');
+        if (codiciDimissioneSelect) {
+            promises.push(lookupService.populateCodiciDimissioneSelect(codiciDimissioneSelect));
+        }
+        
+        // Reparti destinazione
+        const repartiDestinazioneSelect = document.getElementById('reparto_destinazione');
+        if (repartiDestinazioneSelect) {
+            promises.push(lookupService.populateRepartiSelect(repartiDestinazioneSelect, null, 'interno'));
+        }
+        
+        // Cliniche
+        const clinicheSelect = document.getElementById('codice_clinica');
+        if (clinicheSelect) {
+            promises.push(lookupService.populateClinicheSelect(clinicheSelect));
+        }
+        
+        await Promise.all(promises);
+    } catch (error) {
+        console.error('Errore nel caricamento dati lookup:', error);
+        notificationService.error('Errore nel caricamento delle opzioni del form');
+    }
 }
 
 /**
@@ -382,10 +420,12 @@ export function populateForm(patient) {
 
     // Popola i nuovi campi per dimissione/trasferimento
     setElementValue('tipo_dimissione', patient.tipo_dimissione);
-    setElementValue('reparto_destinazione', patient.reparto_destinazione);
     setElementValue('clinica_destinazione', patient.clinica_destinazione);
-    setElementValue('codice_clinica', patient.codice_clinica);
-    setElementValue('codice_dimissione', patient.codice_dimissione);
+    
+    // Per i campi normalizzati, usa gli ID se disponibili, altrimenti i valori legacy
+    setElementValue('reparto_destinazione', patient.reparto_destinazione_id || patient.reparto_destinazione);
+    setElementValue('codice_clinica', patient.clinica_destinazione_id || patient.codice_clinica);
+    setElementValue('codice_dimissione', patient.codice_dimissione_id || patient.codice_dimissione);
 
     // Mostra/nascondi campi condizionali basati sul tipo dimissione e stato infetto
     handleTipoDimissioneChange(patient.tipo_dimissione || '');
@@ -431,9 +471,9 @@ export function renderDiagnosiOptions(options) {
 
 /**
  * Legge i dati correnti dal form.
- * @returns {Object} I dati del form.
+ * @returns {Promise<Object>} I dati del form.
  */
-export function getFormData() {
+export async function getFormData() {
     const form = document.getElementById('form-inserimento');
     const formData = new FormData(form);
     const data = Object.fromEntries(formData.entries());
@@ -473,13 +513,58 @@ export function getFormData() {
     const tipoDimissione = data.tipo_dimissione;
     if (tipoDimissione !== 'trasferimento_interno') {
         data.reparto_destinazione = null;
+        data.reparto_destinazione_id = null;
     }
     if (tipoDimissione !== 'trasferimento_esterno') {
         data.clinica_destinazione = null;
         data.codice_clinica = null;
+        data.clinica_destinazione_id = null;
     }
 
+    // Converti gli ID delle select normalizzate ai valori legacy per compatibilità
+    await convertNormalizedFieldsToLegacy(data);
+
     return data;
+}
+
+/**
+ * Converte gli ID delle select normalizzate ai valori legacy per compatibilità
+ * @param {Object} data - I dati del form
+ */
+async function convertNormalizedFieldsToLegacy(data) {
+    try {
+        const { codiciDimissioneService, repartiService, clinicheService } = await import('../../../core/services/index.js');
+        
+        // Converti codice dimissione ID al codice legacy
+        if (data.codice_dimissione && !isNaN(data.codice_dimissione)) {
+            const codice = await codiciDimissioneService.getById(parseInt(data.codice_dimissione));
+            if (codice) {
+                data.codice_dimissione_id = parseInt(data.codice_dimissione);
+                data.codice_dimissione = codice.codice; // Mantieni il valore legacy per compatibilità
+            }
+        }
+        
+        // Converti reparto destinazione ID al nome legacy
+        if (data.reparto_destinazione && !isNaN(data.reparto_destinazione)) {
+            const reparto = await repartiService.getById(parseInt(data.reparto_destinazione));
+            if (reparto) {
+                data.reparto_destinazione_id = parseInt(data.reparto_destinazione);
+                data.reparto_destinazione = reparto.nome; // Mantieni il valore legacy per compatibilità
+            }
+        }
+        
+        // Converti clinica ID al codice legacy
+        if (data.codice_clinica && !isNaN(data.codice_clinica)) {
+            const clinica = await clinicheService.getById(parseInt(data.codice_clinica));
+            if (clinica) {
+                data.clinica_destinazione_id = parseInt(data.codice_clinica);
+                data.codice_clinica = clinica.codice; // Mantieni il valore legacy per compatibilità
+            }
+        }
+    } catch (error) {
+        console.error('Errore nella conversione campi normalizzati:', error);
+        // Non bloccare il salvataggio per errori di conversione
+    }
 }
 
 /**

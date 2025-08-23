@@ -51,6 +51,7 @@ export function initializeDOMElements() {
     filterDateFrom: document.getElementById("eventi-filter-date-from"),
     filterDateTo: document.getElementById("eventi-filter-date-to"),
     filterReparto: document.getElementById("eventi-filter-reparto"),
+    filterStato: document.getElementById("eventi-filter-stato"),
     // filterAgentePatogeno rimosso
     filterSortColumn: document.getElementById("eventi-sort-column"),
     filterSortDirection: document.getElementById("eventi-sort-direction"),
@@ -1088,6 +1089,7 @@ export function resetFiltersUI() {
     { element: domElements.filterDateFrom, value: '' },
     { element: domElements.filterDateTo, value: '' },
     { element: domElements.filterReparto, value: '' },
+    { element: domElements.filterStato, value: '' },
     { element: domElements.filterSortColumn, value: '' },
     { element: domElements.filterSortDirection, value: 'desc' }
   ];
@@ -1129,6 +1131,7 @@ export function getFiltersFromUI() {
     data_da: domElements.filterDateFrom?.value || '',
     data_a: domElements.filterDateTo?.value || '',
     reparto: domElements.filterReparto?.value || '',
+    stato: domElements.filterStato?.value || '',
     sortColumn: domElements.filterSortColumn?.value || '',
     sortDirection: domElements.filterSortDirection?.value || 'desc'
   };

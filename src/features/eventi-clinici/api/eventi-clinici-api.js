@@ -35,6 +35,7 @@ let currentFilters = {
   data_da: '',
   data_a: '',
   reparto: '',
+  stato: '',
   sortColumn: '',
   sortDirection: 'desc'
 };
@@ -399,6 +400,31 @@ export async function applyDepartmentFilter(reparto) {
 }
 
 /**
+ * Applica filtro per stato paziente (ricoverato/dimesso)
+ */
+export async function applyPatientStatusFilter(stato) {
+  try {
+    logger.log('👤 Applicazione filtro stato paziente:', stato);
+
+    const filters = { ...currentFilters, stato: stato || '' };
+    const result = await fetchEventiClinici(filters, 0);
+
+    currentFilters.stato = stato || '';
+
+    logger.log('✅ Filtro stato paziente applicato:', {
+      stato,
+      risultati: result.eventi.length
+    });
+
+    return result;
+  } catch (error) {
+    logger.error('❌ Errore applicazione filtro stato paziente:', error);
+    handleApiError(error, 'Errore nell\'applicazione del filtro stato paziente');
+    throw error;
+  }
+}
+
+/**
  * Applica ricerca paziente e filtra eventi (accetta opzionale pazienteId per filtro esatto)
  */
 export async function applyPatientSearch(searchTerm, pazienteId = '') {
@@ -512,7 +538,8 @@ export async function resetAllFilters() {
       tipo_evento: '',
       data_da: '',
       data_a: '',
-      reparto: ''
+      reparto: '',
+      stato: ''
     };
 
     const result = await fetchEventiClinici(currentFilters, 0);
@@ -539,6 +566,7 @@ export function resetCurrentFiltersToDefaults() {
     data_da: '',
     data_a: '',
     reparto: '',
+    stato: '',
     agente_patogeno: '',
     sortColumn: '',
     sortDirection: 'desc'
@@ -559,6 +587,7 @@ export async function resetFiltersAndState() {
       data_da: '',
       data_a: '',
       reparto: '',
+      stato: '',
       agente_patogeno: '',
       sortColumn: '',
       sortDirection: 'desc'

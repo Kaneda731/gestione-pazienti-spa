@@ -28,6 +28,7 @@ class EventiCliniciService {
         data_da = "",
         data_a = "",
         reparto = "",
+        stato = "",
         page = 0,
         limit = 10,
         sortColumn = "data_evento",
@@ -43,7 +44,8 @@ class EventiCliniciService {
             nome,
             cognome,
             reparto_appartenenza,
-            codice_rad
+            codice_rad,
+            data_dimissione
           )
         `, { count: "exact" });
 
@@ -65,6 +67,13 @@ class EventiCliniciService {
 
       if (reparto) {
         query = query.eq("pazienti.reparto_appartenenza", reparto);
+      }
+
+      // Filtro per stato paziente (ricoverato/dimesso)
+      if (stato === "attivo") {
+        query = query.is("pazienti.data_dimissione", null);
+      } else if (stato === "dimesso") {
+        query = query.not("pazienti.data_dimissione", "is", null);
       }
 
       // Ricerca paziente per nome/cognome/codice_rad (join: serve query separata)

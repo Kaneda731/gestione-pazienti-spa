@@ -133,6 +133,15 @@ export class EventiCliniciEventHandlers {
       this.cleanupFunctions.push(() => this.domElements.filterReparto.removeEventListener('change', handler));
     }
 
+    // Patient status filter
+    if (this.domElements.filterStato) {
+      const handler = async () => {
+        await this.filterManager.handlePatientStatusFilter(this.domElements.filterStato.value);
+      };
+      this.domElements.filterStato.addEventListener('change', handler);
+      this.cleanupFunctions.push(() => this.domElements.filterStato.removeEventListener('change', handler));
+    }
+
     // Filtro Agente Patogeno rimosso
 
     if (this.domElements.filterTipoIntervento) {

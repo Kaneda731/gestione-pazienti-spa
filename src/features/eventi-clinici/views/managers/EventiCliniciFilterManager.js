@@ -4,6 +4,7 @@ import {
   applyEventTypeFilter,
   applyDateRangeFilter,
   applyPatientSearch,
+  applyPatientStatusFilter,
   applyCombinedFilters,
   applySorting,
   getCurrentFilters,
@@ -104,6 +105,26 @@ export class EventiCliniciFilterManager {
       
     } catch (error) {
       logger.error('❌ Errore applicazione filtro tipo evento:', error);
+    } finally {
+      hideSearchingState();
+    }
+  }
+
+  /**
+   * Gestisce i cambiamenti nel filtro stato paziente
+   */
+  async handlePatientStatusFilter(stato) {
+    try {
+      showSearchingState();
+      
+      const result = await applyPatientStatusFilter(stato);
+      renderEventsResponsive(result);
+      this.setupEventCardListenersCallback();
+      updateSearchResultsCount(result.eventi.length, result.totalCount, getCurrentFilters());
+      showActiveFiltersIndicator(getCurrentFilters());
+      
+    } catch (error) {
+      logger.error('❌ Errore applicazione filtro stato paziente:', error);
     } finally {
       hideSearchingState();
     }

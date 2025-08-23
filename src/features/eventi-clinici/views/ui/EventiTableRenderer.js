@@ -35,7 +35,7 @@ export class EventiTableRenderer {
       const rowsHtml = this.createTableRows(eventsData.eventi);
 
       // DEBUG: Verifica tableBody
-      console.log("🔍 [TABLE RENDERER DEBUG]", {
+      logger.debug("🔍 [TABLE RENDERER DEBUG]", {
         tableBody: !!this.domElements.tableBody,
         tableBodyId: this.domElements.tableBody?.id,
         rowsHtmlLength: rowsHtml.length,
@@ -53,16 +53,16 @@ export class EventiTableRenderer {
 
         if (hasChildren) {
           const actualRows = this.domElements.tableBody.children.length;
-          console.log("🔍 [TABLE RENDERER DEBUG] Righe aggiunte:", actualRows);
+          logger.debug("🔍 [TABLE RENDERER DEBUG] Righe aggiunte:", actualRows);
 
           if (actualRows === 0 && eventsData.eventi.length > 0) {
-            console.error(
+            logger.error(
               "❌ [TABLE RENDERER DEBUG] Righe non aggiunte nonostante ci siano eventi!"
             );
           }
         }
       } else {
-        console.error("❌ [TABLE RENDERER DEBUG] tableBody è null!");
+        logger.error("❌ [TABLE RENDERER DEBUG] tableBody è null!");
       }
 
       this.updatePaginationControls(eventsData);

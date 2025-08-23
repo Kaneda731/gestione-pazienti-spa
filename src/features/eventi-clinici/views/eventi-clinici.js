@@ -195,7 +195,7 @@ export async function initEventiCliniciView(urlParams) {
         "Errore nel caricamento della vista eventi clinici. Ricaricare la pagina."
       );
     } catch (uiError) {
-      console.error("❌ Impossibile mostrare errore UI:", uiError);
+      logger.error("❌ Impossibile mostrare errore UI:", uiError);
       alert("Errore critico nel caricamento. Ricaricare la pagina.");
     }
 

@@ -73,7 +73,7 @@ export class DOMElementsCache {
     );
     const tableBody = document.getElementById("eventi-table-body");
 
-    console.log("🔍 [DEBUG CACHE] Elementi critici:", {
+    logger.debug("🔍 [DEBUG CACHE] Elementi critici:", {
       tableContainer: !!tableContainer,
       timelineContainer: !!timelineContainer,
       tableBody: !!tableBody,

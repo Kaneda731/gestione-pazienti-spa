@@ -123,7 +123,7 @@ class EventiCliniciService {
         hasPrevPage: page > 0,
       };
     } catch (error) {
-      console.error("Errore nel caricamento eventi clinici:", error);
+      logger.error("Errore nel caricamento eventi clinici:", error);
       notificationService.error(`Errore nel caricamento: ${error.message}`);
       throw error;
     } finally {
@@ -185,7 +185,7 @@ class EventiCliniciService {
 
       return data || [];
     } catch (error) {
-      console.error("Errore nel caricamento eventi paziente:", error);
+      logger.error("Errore nel caricamento eventi paziente:", error);
       notificationService.error(`Errore nel caricamento eventi: ${error.message}`);
       throw error;
     }
@@ -220,7 +220,7 @@ class EventiCliniciService {
       notificationService.success("Evento clinico creato con successo!");
       return data;
     } catch (error) {
-      console.error("Errore nella creazione evento:", error);
+      logger.error("Errore nella creazione evento:", error);
       notificationService.error(`Errore nella creazione: ${error.message}`);
       throw error;
     } finally {
@@ -279,7 +279,7 @@ class EventiCliniciService {
       notificationService.success("Evento clinico aggiornato con successo!");
       return data;
     } catch (error) {
-      console.error("Errore nell'aggiornamento evento:", error);
+      logger.error("Errore nell'aggiornamento evento:", error);
       notificationService.error(`Errore nell'aggiornamento: ${error.message}`);
       throw error;
     } finally {
@@ -327,7 +327,7 @@ class EventiCliniciService {
 
       notificationService.success("Evento clinico eliminato con successo!");
     } catch (error) {
-      console.error("Errore nell'eliminazione evento:", error);
+      logger.error("Errore nell'eliminazione evento:", error);
       notificationService.error(`Errore nell'eliminazione: ${error.message}`);
       throw error;
     } finally {
@@ -410,7 +410,7 @@ class EventiCliniciService {
         descrizione: `Giorno post-operatorio ${diffDays}`,
       };
     } catch (error) {
-      console.error("Errore nel calcolo giorni post-operatori:", error);
+      logger.error("Errore nel calcolo giorni post-operatori:", error);
       throw error;
     }
   }
@@ -439,7 +439,7 @@ class EventiCliniciService {
 
       return data || [];
     } catch (error) {
-      console.error("Errore nella ricerca pazienti:", error);
+      logger.error("Errore nella ricerca pazienti:", error);
       notificationService.error(`Errore nella ricerca: ${error.message}`);
       throw error;
     }
@@ -498,7 +498,7 @@ class EventiCliniciService {
 
       return Array.from(uniqueMap.values());
     } catch (error) {
-      console.error("Errore nella ricerca pazienti con eventi:", error);
+      logger.error("Errore nella ricerca pazienti con eventi:", error);
       notificationService.error(`Errore nella ricerca: ${error.message}`);
       throw error;
     }
@@ -595,7 +595,7 @@ class EventiCliniciService {
 
       return stats;
     } catch (error) {
-      console.error("Errore nel caricamento statistiche eventi:", error);
+      logger.error("Errore nel caricamento statistiche eventi:", error);
       throw error;
     }
   }

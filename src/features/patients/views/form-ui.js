@@ -1,12 +1,22 @@
 // src/features/patients/views/form-ui.js
-import { initCustomSelects, updateCustomSelect } from '../../../shared/components/forms/CustomSelect.js';
-import CustomDatepicker from '../../../shared/components/forms/CustomDatepicker.js';
-import { notificationService } from '../../../core/services/notifications/notificationService.js';
-import { initEventiCliniciTab, setCurrentPatient, cleanupEventiCliniciTab, isPatientCurrentlyInfected } from './eventi-clinici-tab.js';
-import { sanitizeHtml } from '../../../shared/utils/sanitizeHtml.js';
-import { InfectionEventModal } from '../../eventi-clinici/components/InfectionEventModal.js';
-import infectionDataManager from '../services/infectionDataManager.js';
-import { lookupService } from '../../../core/services/lookupService.js';
+import {
+  initCustomSelects,
+  updateCustomSelect,
+} from "../../../shared/components/forms/CustomSelect.js";
+import CustomDatepicker from "../../../shared/components/forms/CustomDatepicker.js";
+import { notificationService } from "../../../core/services/notifications/notificationService.js";
+import {
+  initEventiCliniciTab,
+  setCurrentPatient,
+  cleanupEventiCliniciTab,
+  isPatientCurrentlyInfected,
+} from "./eventi-clinici-tab.js";
+import { sanitizeHtml } from "../../../shared/utils/sanitizeHtml.js";
+import { InfectionEventModal } from "../../eventi-clinici/components/InfectionEventModal.js";
+import { SurgeryEventModal } from "../../eventi-clinici/components/SurgeryEventModal.js";
+import infectionDataManager from "../services/infectionDataManager.js";
+import surgeryDataManager from "../services/surgeryDataManager.js";
+import { lookupService } from "../../../core/services/lookupService.js";
 
 let datepickerInstance = null;
 
@@ -14,80 +24,93 @@ let datepickerInstance = null;
  * Inizializza i componenti del form come datepicker e custom selects.
  */
 export async function initializeFormComponents() {
-    // Prima popola le select con i dati dal database
-    await populateLookupSelects();
-    
-    // Poi inizializza i custom select
-    initCustomSelects('#form-inserimento [data-custom="true"]');
-    
-    datepickerInstance = new CustomDatepicker('[data-datepicker]', {
-        dateFormat: "d/m/Y",
-        allowInput: true,
-    });
+  // Prima popola le select con i dati dal database
+  await populateLookupSelects();
 
-    // Aggiungi event listener per la gestione condizionale dei campi
-    setupConditionalFieldsLogic();
-    
-    // Inizializza la gestione del flag infezione
-    setupInfectionFlagHandler();
-    
-    // Inizializza il tab degli eventi clinici, passando la funzione di callback per aggiornare la UI
-    initEventiCliniciTab(updateInfectionStatusFromEvents);
+  // Poi inizializza i custom select
+  initCustomSelects('#form-inserimento [data-custom="true"]');
+
+  datepickerInstance = new CustomDatepicker("[data-datepicker]", {
+    dateFormat: "d/m/Y",
+    allowInput: true,
+  });
+
+  // Aggiungi event listener per la gestione condizionale dei campi
+  setupConditionalFieldsLogic();
+
+  // Inizializza la gestione del flag infezione
+  setupInfectionFlagHandler();
+
+  // Inizializza la gestione del flag intervento chirurgico
+  setupSurgeryFlagHandler();
+
+  // Inizializza il tab degli eventi clinici, passando la funzione di callback per aggiornare la UI
+  initEventiCliniciTab(updateInfectionStatusFromEvents);
 }
 
 /**
  * Popola le select con i dati dal database
  */
 async function populateLookupSelects() {
-    try {
-        // Popola le select in parallelo
-        const promises = [];
-        
-        // Codici dimissione
-        const codiciDimissioneSelect = document.getElementById('codice_dimissione');
-        if (codiciDimissioneSelect) {
-            promises.push(lookupService.populateCodiciDimissioneSelect(codiciDimissioneSelect));
-        }
-        
-        // Reparti destinazione
-        const repartiDestinazioneSelect = document.getElementById('reparto_destinazione');
-        if (repartiDestinazioneSelect) {
-            promises.push(lookupService.populateRepartiSelect(repartiDestinazioneSelect, null, 'interno'));
-        }
-        
-        // Cliniche
-        const clinicheSelect = document.getElementById('codice_clinica');
-        if (clinicheSelect) {
-            promises.push(lookupService.populateClinicheSelect(clinicheSelect));
-        }
-        
-        await Promise.all(promises);
-    } catch (error) {
-        console.error('Errore nel caricamento dati lookup:', error);
-        notificationService.error('Errore nel caricamento delle opzioni del form');
+  try {
+    // Popola le select in parallelo
+    const promises = [];
+
+    // Codici dimissione
+    const codiciDimissioneSelect = document.getElementById("codice_dimissione");
+    if (codiciDimissioneSelect) {
+      promises.push(
+        lookupService.populateCodiciDimissioneSelect(codiciDimissioneSelect)
+      );
     }
+
+    // Reparti destinazione
+    const repartiDestinazioneSelect = document.getElementById(
+      "reparto_destinazione"
+    );
+    if (repartiDestinazioneSelect) {
+      promises.push(
+        lookupService.populateRepartiSelect(
+          repartiDestinazioneSelect,
+          null,
+          "interno"
+        )
+      );
+    }
+
+    // Cliniche
+    const clinicheSelect = document.getElementById("codice_clinica");
+    if (clinicheSelect) {
+      promises.push(lookupService.populateClinicheSelect(clinicheSelect));
+    }
+
+    await Promise.all(promises);
+  } catch (error) {
+    console.error("Errore nel caricamento dati lookup:", error);
+    notificationService.error("Errore nel caricamento delle opzioni del form");
+  }
 }
 
 /**
  * Configura la logica per mostrare/nascondere campi condizionalmente.
  */
 function setupConditionalFieldsLogic() {
-    const tipoDimissioneSelect = document.getElementById('tipo_dimissione');
-    if (tipoDimissioneSelect) {
-        tipoDimissioneSelect.addEventListener('change', (e) => {
-            handleTipoDimissioneChange(e.target.value);
-        });
-    }
+  const tipoDimissioneSelect = document.getElementById("tipo_dimissione");
+  if (tipoDimissioneSelect) {
+    tipoDimissioneSelect.addEventListener("change", (e) => {
+      handleTipoDimissioneChange(e.target.value);
+    });
+  }
 
-    // Listener per aggiornare il titolo quando nome/cognome cambiano
-    const nomeInput = document.getElementById('nome');
-    const cognomeInput = document.getElementById('cognome');
-    
-    if (nomeInput && cognomeInput) {
-        [nomeInput, cognomeInput].forEach(input => {
-            input.addEventListener('input', updatePatientTitle);
-        });
-    }
+  // Listener per aggiornare il titolo quando nome/cognome cambiano
+  const nomeInput = document.getElementById("nome");
+  const cognomeInput = document.getElementById("cognome");
+
+  if (nomeInput && cognomeInput) {
+    [nomeInput, cognomeInput].forEach((input) => {
+      input.addEventListener("input", updatePatientTitle);
+    });
+  }
 }
 
 /**
@@ -95,49 +118,55 @@ function setupConditionalFieldsLogic() {
  * @param {string} tipoDimissione - Il tipo di dimissione selezionato.
  */
 export function handleTipoDimissioneChange(tipoDimissione) {
-    const repartoContainer = document.getElementById('reparto-destinazione-container');
-    const clinicaContainer = document.getElementById('clinica-destinazione-container');
-    const codiceClinicaContainer = document.getElementById('codice-clinica-container');
+  const repartoContainer = document.getElementById(
+    "reparto-destinazione-container"
+  );
+  const clinicaContainer = document.getElementById(
+    "clinica-destinazione-container"
+  );
+  const codiceClinicaContainer = document.getElementById(
+    "codice-clinica-container"
+  );
 
-    // Nascondi tutti i campi condizionali
-    repartoContainer.style.display = 'none';
-    clinicaContainer.style.display = 'none';
-    codiceClinicaContainer.style.display = 'none';
+  // Nascondi tutti i campi condizionali
+  repartoContainer.style.display = "none";
+  clinicaContainer.style.display = "none";
+  codiceClinicaContainer.style.display = "none";
 
-    // Pulisci i valori dei campi nascosti
-    document.getElementById('reparto_destinazione').value = '';
-    document.getElementById('clinica_destinazione').value = '';
-    document.getElementById('codice_clinica').value = '';
+  // Pulisci i valori dei campi nascosti
+  document.getElementById("reparto_destinazione").value = "";
+  document.getElementById("clinica_destinazione").value = "";
+  document.getElementById("codice_clinica").value = "";
 
-    // Mostra i campi appropriati basati sulla selezione
-    switch (tipoDimissione) {
-        case 'trasferimento_interno':
-            repartoContainer.style.display = 'block';
-            break;
-        case 'trasferimento_esterno':
-            clinicaContainer.style.display = 'block';
-            codiceClinicaContainer.style.display = 'block';
-            break;
-        case 'dimissione':
-            // Nessun campo aggiuntivo necessario per dimissione semplice
-            break;
+  // Mostra i campi appropriati basati sulla selezione
+  switch (tipoDimissione) {
+    case "trasferimento_interno":
+      repartoContainer.style.display = "block";
+      break;
+    case "trasferimento_esterno":
+      clinicaContainer.style.display = "block";
+      codiceClinicaContainer.style.display = "block";
+      break;
+    case "dimissione":
+      // Nessun campo aggiuntivo necessario per dimissione semplice
+      break;
+  }
+
+  // Inizializza i custom select per i campi appena mostrati
+  // Usa setTimeout per assicurarsi che il DOM sia aggiornato dopo il cambio di display
+  setTimeout(() => {
+    if (tipoDimissione === "trasferimento_interno") {
+      const repartoSelect = document.getElementById("reparto_destinazione");
+      if (repartoSelect && !repartoSelect.customSelectInstance) {
+        initCustomSelects("#reparto_destinazione");
+      }
+    } else if (tipoDimissione === "trasferimento_esterno") {
+      const codiceClinicaSelect = document.getElementById("codice_clinica");
+      if (codiceClinicaSelect && !codiceClinicaSelect.customSelectInstance) {
+        initCustomSelects("#codice_clinica");
+      }
     }
-
-    // Inizializza i custom select per i campi appena mostrati
-    // Usa setTimeout per assicurarsi che il DOM sia aggiornato dopo il cambio di display
-    setTimeout(() => {
-        if (tipoDimissione === 'trasferimento_interno') {
-            const repartoSelect = document.getElementById('reparto_destinazione');
-            if (repartoSelect && !repartoSelect.customSelectInstance) {
-                initCustomSelects('#reparto_destinazione');
-            }
-        } else if (tipoDimissione === 'trasferimento_esterno') {
-            const codiceClinicaSelect = document.getElementById('codice_clinica');
-            if (codiceClinicaSelect && !codiceClinicaSelect.customSelectInstance) {
-                initCustomSelects('#codice_clinica');
-            }
-        }
-    }, 50); // Piccolo delay per permettere al CSS di applicare le transizioni
+  }, 50); // Piccolo delay per permettere al CSS di applicare le transizioni
 }
 
 /**
@@ -146,100 +175,184 @@ export function handleTipoDimissioneChange(tipoDimissione) {
  * Questa funzione viene chiamata dalla logica della tab eventi clinici.
  */
 function updateInfectionStatusFromEvents() {
-    const infettoCheckbox = document.getElementById('infetto');
-    const infettoHelper = document.getElementById('infetto-helper-text');
-    if (!infettoCheckbox || !infettoHelper) return;
+  const infettoCheckbox = document.getElementById("infetto");
+  const infettoHelper = document.getElementById("infetto-helper-text");
+  if (!infettoCheckbox || !infettoHelper) return;
 
-    const isInfetto = isPatientCurrentlyInfected();
-    const hasNewInfectionData = infectionDataManager.hasValidInfectionData();
+  const isInfetto = isPatientCurrentlyInfected();
+  const hasNewInfectionData = infectionDataManager.hasValidInfectionData();
 
-    if (isInfetto) {
-        // Se ci sono eventi di infezione attivi, il checkbox è gestito dagli eventi
-        infettoCheckbox.checked = true;
-        infettoCheckbox.disabled = true;
-        infettoHelper.textContent = 'Stato gestito dagli eventi di infezione attivi.';
-        infettoHelper.style.display = 'block';
-        
-        // Clear temporary data if there are active events
-        if (hasNewInfectionData) {
-            infectionDataManager.clearInfectionData();
-            updateInfectionIndicator();
-        }
-    } else {
-        // Se non ci sono eventi attivi, abilita il checkbox per nuovi inserimenti
-        infettoCheckbox.disabled = false;
-        infettoCheckbox.checked = hasNewInfectionData;
-        infettoHelper.style.display = 'none';
-        
-        // Aggiorna l'indicatore visivo
-        updateInfectionIndicator();
+  if (isInfetto) {
+    // Se ci sono eventi di infezione attivi, il checkbox è gestito dagli eventi
+    infettoCheckbox.checked = true;
+    infettoCheckbox.disabled = true;
+    infettoHelper.textContent =
+      "Stato gestito dagli eventi di infezione attivi.";
+    infettoHelper.style.display = "block";
+
+    // Clear temporary data if there are active events
+    if (hasNewInfectionData) {
+      infectionDataManager.clearInfectionData();
+      updateInfectionIndicator();
     }
+  } else {
+    // Se non ci sono eventi attivi, abilita il checkbox per nuovi inserimenti
+    infettoCheckbox.disabled = false;
+    infettoCheckbox.checked = hasNewInfectionData;
+    infettoHelper.style.display = "none";
+
+    // Aggiorna l'indicatore visivo
+    updateInfectionIndicator();
+  }
 }
 
 /**
  * Aggiorna il titolo della pagina con il nome del paziente corrente.
  */
 function updatePatientTitle() {
-    const titleElement = document.getElementById('inserimento-title');
-    if (!titleElement) return;
+  const titleElement = document.getElementById("inserimento-title");
+  if (!titleElement) return;
 
-    const nomeInput = document.getElementById('nome');
-    const cognomeInput = document.getElementById('cognome');
-    const pazienteIdInput = document.getElementById('paziente-id');
-    
-    // Verifica se siamo in modalità modifica (c'è un ID paziente)
-    const isEditMode = pazienteIdInput && pazienteIdInput.value;
-    
-    if (isEditMode) {
-        const nome = nomeInput ? nomeInput.value.trim() : '';
-        const cognome = cognomeInput ? cognomeInput.value.trim() : '';
-        const patientName = `${nome} ${cognome}`.trim();
-        
-        const titleHTML = patientName 
-            ? `<span class="material-icons text-primary me-2">person</span><span class="patient-name fw-bold">${patientName}</span>`
-            : '<span class="material-icons text-primary me-2">person</span>Nome Cognome';
-        titleElement.innerHTML = sanitizeHtml(titleHTML);
+  const nomeInput = document.getElementById("nome");
+  const cognomeInput = document.getElementById("cognome");
+  const pazienteIdInput = document.getElementById("paziente-id");
+
+  // Verifica se siamo in modalità modifica (c'è un ID paziente)
+  const isEditMode = pazienteIdInput && pazienteIdInput.value;
+
+  if (isEditMode) {
+    const nome = nomeInput ? nomeInput.value.trim() : "";
+    const cognome = cognomeInput ? cognomeInput.value.trim() : "";
+    const patientName = `${nome} ${cognome}`.trim();
+
+    const titleHTML = patientName
+      ? `<span class="material-icons text-primary me-2">person</span><span class="patient-name fw-bold">${patientName}</span>`
+      : '<span class="material-icons text-primary me-2">person</span>Nome Cognome';
+    titleElement.innerHTML = sanitizeHtml(titleHTML);
+  } else {
+    // Modalità inserimento - titolo standard
+    titleElement.innerHTML = sanitizeHtml(
+      '<span class="material-icons me-2">person_add</span>Inserimento Nuovo Paziente'
+    );
+  }
+}
+
+/**
+ * Configura l'event listener per il checkbox "ha_intervento" per gestire la modal di intervento
+ */
+export function setupSurgeryFlagHandler() {
+  const interventoCheckbox = document.getElementById("ha_intervento");
+  const interventoLabel = document.querySelector('label[for="ha_intervento"]');
+
+  if (!interventoCheckbox || !interventoLabel) return;
+
+  // Aggiungi event listener per il toggle del checkbox
+  interventoCheckbox.addEventListener("change", async (e) => {
+    const isChecked = e.target.checked;
+
+    if (isChecked) {
+      // Se il checkbox viene selezionato, mostra la modal per i dati dell'intervento
+      const surgeryData = await showSurgeryModal();
+
+      if (surgeryData) {
+        // Save data temporarily
+        surgeryDataManager.setSurgeryData(surgeryData);
+        updateSurgeryIndicator();
+        // Aggiorna la tab eventi clinici
+        updateEventsTabFromCheckboxes();
+      } else {
+        // Se l'utente annulla, deseleziona il checkbox
+        e.target.checked = false;
+        surgeryDataManager.clearSurgeryData();
+        updateSurgeryIndicator();
+        // Aggiorna la tab eventi clinici
+        updateEventsTabFromCheckboxes();
+      }
     } else {
-        // Modalità inserimento - titolo standard
-        titleElement.innerHTML = sanitizeHtml('<span class="material-icons me-2">person_add</span>Inserimento Nuovo Paziente');
+      // Se il checkbox viene deselezionato, pulisci i dati
+      clearSurgeryData();
+      // Aggiorna la tab eventi clinici
+      updateEventsTabFromCheckboxes();
     }
+  });
+
+  // Aggiungi indicatore visivo iniziale
+  updateSurgeryIndicator();
 }
 
 /**
  * Configura l'event listener per il checkbox "infetto" per gestire la modal di infezione
  */
 export function setupInfectionFlagHandler() {
-    const infettoCheckbox = document.getElementById('infetto');
-    const infettoLabel = document.querySelector('label[for="infetto"]');
-    
-    if (!infettoCheckbox || !infettoLabel) return;
+  const infettoCheckbox = document.getElementById("infetto");
+  const infettoLabel = document.querySelector('label[for="infetto"]');
 
-    // Aggiungi event listener per il toggle del checkbox
-    infettoCheckbox.addEventListener('change', async (e) => {
-        const isChecked = e.target.checked;
-        
-        if (isChecked) {
-            // Se il checkbox viene selezionato, mostra la modal per i dati di infezione
-            const infectionData = await showInfectionModal();
-            
-            if (infectionData) {
-                // Save data temporarily
-                infectionDataManager.setInfectionData(infectionData);
-                updateInfectionIndicator();
-            } else {
-                // Se l'utente annulla, deseleziona il checkbox
-                e.target.checked = false;
-                infectionDataManager.clearInfectionData();
-                updateInfectionIndicator();
-            }
-        } else {
-            // Se il checkbox viene deselezionato, pulisci i dati
-            clearInfectionData();
-        }
-    });
+  if (!infettoCheckbox || !infettoLabel) return;
 
-    // Aggiungi indicatore visivo iniziale
-    updateInfectionIndicator();
+  // Aggiungi event listener per il toggle del checkbox
+  infettoCheckbox.addEventListener("change", async (e) => {
+    const isChecked = e.target.checked;
+
+    if (isChecked) {
+      // Se il checkbox viene selezionato, mostra la modal per i dati di infezione
+      const infectionData = await showInfectionModal();
+
+      if (infectionData) {
+        // Save data temporarily
+        infectionDataManager.setInfectionData(infectionData);
+        updateInfectionIndicator();
+        // Aggiorna la tab eventi clinici
+        updateEventsTabFromCheckboxes();
+      } else {
+        // Se l'utente annulla, deseleziona il checkbox
+        e.target.checked = false;
+        infectionDataManager.clearInfectionData();
+        updateInfectionIndicator();
+        // Aggiorna la tab eventi clinici
+        updateEventsTabFromCheckboxes();
+      }
+    } else {
+      // Se il checkbox viene deselezionato, pulisci i dati
+      clearInfectionData();
+      // Aggiorna la tab eventi clinici
+      updateEventsTabFromCheckboxes();
+    }
+  });
+
+  // Aggiungi indicatore visivo iniziale
+  updateInfectionIndicator();
+}
+
+/**
+ * Mostra la modal per raccogliere i dati dell'intervento chirurgico
+ * @returns {Promise<Object|null>} Promise che si risolve con i dati dell'intervento o null se annullato
+ */
+export async function showSurgeryModal() {
+  const nomeInput = document.getElementById("nome");
+  const cognomeInput = document.getElementById("cognome");
+  const patientName =
+    nomeInput && cognomeInput
+      ? `${nomeInput.value.trim()} ${cognomeInput.value.trim()}`.trim()
+      : "";
+
+  // Usa i dati esistenti se disponibili
+  const existingData = surgeryDataManager.getSurgeryData();
+
+  const modal = new SurgeryEventModal({
+    title: "Dati Intervento Chirurgico",
+    patientName: patientName || "Nuovo Paziente",
+    defaultDate:
+      existingData?.data_evento || new Date().toISOString().split("T")[0],
+  });
+
+  try {
+    const result = await modal.show();
+    return result;
+  } catch (error) {
+    console.error("Errore nella modal di intervento:", error);
+    notificationService.error("Errore nell'apertura della modal di intervento");
+    return null;
+  }
 }
 
 /**
@@ -247,29 +360,72 @@ export function setupInfectionFlagHandler() {
  * @returns {Promise<Object|null>} Promise che si risolve con i dati dell'infezione o null se annullato
  */
 export async function showInfectionModal() {
-    const nomeInput = document.getElementById('nome');
-    const cognomeInput = document.getElementById('cognome');
-    const patientName = nomeInput && cognomeInput 
-        ? `${nomeInput.value.trim()} ${cognomeInput.value.trim()}`.trim()
-        : '';
+  const nomeInput = document.getElementById("nome");
+  const cognomeInput = document.getElementById("cognome");
+  const patientName =
+    nomeInput && cognomeInput
+      ? `${nomeInput.value.trim()} ${cognomeInput.value.trim()}`.trim()
+      : "";
 
-    // Usa i dati esistenti se disponibili
-    const existingData = infectionDataManager.getInfectionData();
-    
-    const modal = new InfectionEventModal({
-        title: 'Dati Infezione Paziente',
-        patientName: patientName || 'Nuovo Paziente',
-        defaultDate: existingData?.data_evento || new Date().toISOString().split('T')[0]
-    });
+  // Usa i dati esistenti se disponibili
+  const existingData = infectionDataManager.getInfectionData();
 
-    try {
-        const result = await modal.show();
-        return result;
-    } catch (error) {
-        console.error('Errore nella modal di infezione:', error);
-        notificationService.error('Errore nell\'apertura della modal di infezione');
-        return null;
-    }
+  const modal = new InfectionEventModal({
+    title: "Dati Infezione Paziente",
+    patientName: patientName || "Nuovo Paziente",
+    defaultDate:
+      existingData?.data_evento || new Date().toISOString().split("T")[0],
+  });
+
+  try {
+    const result = await modal.show();
+    return result;
+  } catch (error) {
+    console.error("Errore nella modal di infezione:", error);
+    notificationService.error("Errore nell'apertura della modal di infezione");
+    return null;
+  }
+}
+
+/**
+ * Restituisce i dati dell'intervento chirurgico correnti
+ * @returns {Object|null} Dati dell'intervento o null se non presenti
+ */
+export function getSurgeryData() {
+  return surgeryDataManager.getSurgeryData();
+}
+
+/**
+ * Pulisce i dati temporanei dell'intervento chirurgico
+ */
+export function clearSurgeryData() {
+  surgeryDataManager.clearSurgeryData();
+  updateSurgeryIndicator();
+
+  // Deseleziona il checkbox se necessario
+  const interventoCheckbox = document.getElementById("ha_intervento");
+  if (interventoCheckbox && interventoCheckbox.checked) {
+    interventoCheckbox.checked = false;
+  }
+  
+  // Aggiorna la tab eventi clinici
+  updateEventsTabFromCheckboxes();
+}
+
+/**
+ * Verifica se ci sono dati di intervento validi
+ * @returns {boolean} True se ci sono dati validi
+ */
+export function hasValidSurgeryData() {
+  return surgeryDataManager.hasValidSurgeryData();
+}
+
+/**
+ * Verifica se ci sono dati di intervento (anche se non validi)
+ * @returns {boolean} True se ci sono dati presenti
+ */
+export function hasSurgeryData() {
+  return surgeryDataManager.hasSurgeryData();
 }
 
 /**
@@ -277,21 +433,24 @@ export async function showInfectionModal() {
  * @returns {Object|null} Dati di infezione o null se non presenti
  */
 export function getInfectionData() {
-    return infectionDataManager.getInfectionData();
+  return infectionDataManager.getInfectionData();
 }
 
 /**
  * Pulisce i dati temporanei di infezione
  */
 export function clearInfectionData() {
-    infectionDataManager.clearInfectionData();
-    updateInfectionIndicator();
-    
-    // Deseleziona il checkbox se necessario
-    const infettoCheckbox = document.getElementById('infetto');
-    if (infettoCheckbox && infettoCheckbox.checked) {
-        infettoCheckbox.checked = false;
-    }
+  infectionDataManager.clearInfectionData();
+  updateInfectionIndicator();
+
+  // Deseleziona il checkbox se necessario
+  const infettoCheckbox = document.getElementById("infetto");
+  if (infettoCheckbox && infettoCheckbox.checked) {
+    infettoCheckbox.checked = false;
+  }
+  
+  // Aggiorna la tab eventi clinici
+  updateEventsTabFromCheckboxes();
 }
 
 /**
@@ -299,7 +458,7 @@ export function clearInfectionData() {
  * @returns {boolean} True se ci sono dati validi
  */
 export function hasValidInfectionData() {
-    return infectionDataManager.hasValidInfectionData();
+  return infectionDataManager.hasValidInfectionData();
 }
 
 /**
@@ -307,70 +466,143 @@ export function hasValidInfectionData() {
  * @returns {boolean} True se ci sono dati presenti
  */
 export function hasInfectionData() {
-    return infectionDataManager.hasInfectionData();
+  return infectionDataManager.hasInfectionData();
+}
+
+/**
+ * Aggiorna l'indicatore visivo per la presenza di dati di intervento chirurgico
+ */
+function updateSurgeryIndicator() {
+  const interventoLabel = document.querySelector('label[for="ha_intervento"]');
+  const interventoCheckbox = document.getElementById("ha_intervento");
+
+  if (!interventoLabel || !interventoCheckbox) return;
+
+  // Rimuovi indicatori esistenti
+  const existingBadge = interventoLabel.querySelector(".surgery-data-badge");
+  if (existingBadge) {
+    existingBadge.remove();
+  }
+
+  // Se ci sono dati di intervento, aggiungi un badge
+  if (surgeryDataManager.hasSurgeryData()) {
+    const isValid = surgeryDataManager.hasValidSurgeryData();
+    const badge = document.createElement("span");
+    badge.className = `badge ms-2 surgery-data-badge ${
+      isValid ? "bg-success" : "bg-warning"
+    }`;
+    badge.innerHTML = isValid
+      ? '<span class="material-icons" style="font-size: 12px;">check_circle</span> Dati inseriti'
+      : '<span class="material-icons" style="font-size: 12px;">warning</span> Dati incompleti';
+
+    interventoLabel.appendChild(badge);
+
+    // Aggiungi tooltip con dettagli
+    const surgeryData = surgeryDataManager.getSurgeryData();
+    if (surgeryData) {
+      const hasInfection = surgeryData.has_infection ? " + Infezione" : "";
+      badge.title = `Data: ${
+        surgeryData.data_evento || "Non specificata"
+      }\nTipo: ${
+        surgeryData.tipo_intervento || "Non specificato"
+      }${hasInfection}`;
+    }
+
+    // Aggiungi click handler per riaprire la modal
+    badge.style.cursor = "pointer";
+    badge.addEventListener("click", async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const updatedData = await showSurgeryModal();
+      if (updatedData) {
+        surgeryDataManager.setSurgeryData(updatedData);
+        updateSurgeryIndicator();
+      }
+    });
+  }
 }
 
 /**
  * Aggiorna l'indicatore visivo per la presenza di dati di infezione
  */
 function updateInfectionIndicator() {
-    const infettoLabel = document.querySelector('label[for="infetto"]');
-    const infettoCheckbox = document.getElementById('infetto');
-    
-    if (!infettoLabel || !infettoCheckbox) return;
+  const infettoLabel = document.querySelector('label[for="infetto"]');
+  const infettoCheckbox = document.getElementById("infetto");
 
-    // Rimuovi indicatori esistenti
-    const existingBadge = infettoLabel.querySelector('.infection-data-badge');
-    if (existingBadge) {
-        existingBadge.remove();
+  if (!infettoLabel || !infettoCheckbox) return;
+
+  // Rimuovi indicatori esistenti
+  const existingBadge = infettoLabel.querySelector(".infection-data-badge");
+  if (existingBadge) {
+    existingBadge.remove();
+  }
+
+  // Se ci sono dati di infezione, aggiungi un badge
+  if (infectionDataManager.hasInfectionData()) {
+    const isValid = infectionDataManager.hasValidInfectionData();
+    const badge = document.createElement("span");
+    badge.className = `badge ms-2 infection-data-badge ${
+      isValid ? "bg-success" : "bg-warning"
+    }`;
+    badge.innerHTML = isValid
+      ? '<span class="material-icons" style="font-size: 12px;">check_circle</span> Dati inseriti'
+      : '<span class="material-icons" style="font-size: 12px;">warning</span> Dati incompleti';
+
+    infettoLabel.appendChild(badge);
+
+    // Aggiungi tooltip con dettagli
+    const infectionData = infectionDataManager.getInfectionData();
+    if (infectionData) {
+      badge.title = `Data: ${
+        infectionData.data_evento || "Non specificata"
+      }\nAgente: ${infectionData.agente_patogeno || "Non specificato"}`;
     }
 
-    // Se ci sono dati di infezione, aggiungi un badge
-    if (infectionDataManager.hasInfectionData()) {
-        const isValid = infectionDataManager.hasValidInfectionData();
-        const badge = document.createElement('span');
-        badge.className = `badge ms-2 infection-data-badge ${isValid ? 'bg-success' : 'bg-warning'}`;
-        badge.innerHTML = isValid 
-            ? '<span class="material-icons" style="font-size: 12px;">check_circle</span> Dati inseriti'
-            : '<span class="material-icons" style="font-size: 12px;">warning</span> Dati incompleti';
-        
-        infettoLabel.appendChild(badge);
+    // Aggiungi click handler per riaprire la modal
+    badge.style.cursor = "pointer";
+    badge.addEventListener("click", async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
 
-        // Aggiungi tooltip con dettagli
-        const infectionData = infectionDataManager.getInfectionData();
-        if (infectionData) {
-            badge.title = `Data: ${infectionData.data_evento || 'Non specificata'}\nAgente: ${infectionData.agente_patogeno || 'Non specificato'}`;
-        }
+      const updatedData = await showInfectionModal();
+      if (updatedData) {
+        infectionDataManager.setInfectionData(updatedData);
+        updateInfectionIndicator();
+      }
+    });
+  }
+}
 
-        // Aggiungi click handler per riaprire la modal
-        badge.style.cursor = 'pointer';
-        badge.addEventListener('click', async (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            const updatedData = await showInfectionModal();
-            if (updatedData) {
-                infectionDataManager.setInfectionData(updatedData);
-                updateInfectionIndicator();
-            }
-        });
-    }
+/**
+ * Aggiorna la tab eventi clinici con gli eventi temporanei basati sui checkbox
+ */
+function updateEventsTabFromCheckboxes() {
+    // Importa dinamicamente la funzione dalla tab eventi clinici
+    import('./eventi-clinici-tab.js').then(({ createTemporaryEventsFromCheckboxes }) => {
+        createTemporaryEventsFromCheckboxes();
+    }).catch(error => {
+        console.warn('Impossibile aggiornare la tab eventi clinici:', error);
+    });
 }
 
 /**
  * Distrugge le istanze dei componenti per evitare memory leak.
  */
 export function cleanupFormComponents() {
-    if (datepickerInstance) {
-        datepickerInstance.destroy();
-        datepickerInstance = null;
-    }
-    
-    // Cleanup temporary infection data
-    infectionDataManager.clearInfectionData();
-    
-    // Cleanup del tab eventi clinici
-    cleanupEventiCliniciTab();
+  if (datepickerInstance) {
+    datepickerInstance.destroy();
+    datepickerInstance = null;
+  }
+
+  // Cleanup temporary infection data
+  infectionDataManager.clearInfectionData();
+
+  // Cleanup temporary surgery data
+  surgeryDataManager.clearSurgeryData();
+
+  // Cleanup del tab eventi clinici
+  cleanupEventiCliniciTab();
 }
 
 /**
@@ -378,75 +610,92 @@ export function cleanupFormComponents() {
  * @param {Object} patient - I dati del paziente.
  */
 export function populateForm(patient) {
-    if (!patient) return;
+  if (!patient) return;
 
-    // Funzione helper per impostare il valore di un elemento in modo sicuro
-    const setElementValue = (id, value) => {
-        const element = document.getElementById(id);
-        if (element) {
-            if (element.type === 'checkbox') {
-                element.checked = Boolean(value);
-            } else {
-                element.value = value || '';
-            }
-        } else {
-            console.warn(`Elemento con ID '${id}' non trovato durante populateForm`);
-        }
-    };
+  // Funzione helper per impostare il valore di un elemento in modo sicuro
+  const setElementValue = (id, value) => {
+    const element = document.getElementById(id);
+    if (element) {
+      if (element.type === "checkbox") {
+        element.checked = Boolean(value);
+      } else {
+        element.value = value || "";
+      }
+    } else {
+      console.warn(`Elemento con ID '${id}' non trovato durante populateForm`);
+    }
+  };
 
-    // Converti le date da yyyy-mm-dd a dd/mm/yyyy per il datepicker
-    const formatDateForDisplay = (dateStr) => {
-        if (!dateStr) return '';
-        if (dateStr.includes('-')) {
-            const [year, month, day] = dateStr.split('-');
-            return `${day}/${month}/${year}`;
-        }
-        return dateStr;
-    };
-    
-    // Popola tutti i campi usando la funzione helper
-    setElementValue('paziente-id', patient.id);
-    setElementValue('nome', patient.nome);
-    setElementValue('cognome', patient.cognome);
-    setElementValue('data_nascita', formatDateForDisplay(patient.data_nascita));
-    setElementValue('data_ricovero', formatDateForDisplay(patient.data_ricovero));
-    setElementValue('data_dimissione', formatDateForDisplay(patient.data_dimissione));
-    setElementValue('diagnosi', patient.diagnosi);
-    setElementValue('reparto_appartenenza', patient.reparto_appartenenza);
-    setElementValue('reparto_provenienza', patient.reparto_provenienza);
-    setElementValue('livello_assistenza', patient.livello_assistenza);
-    setElementValue('codice_rad', patient.codice_rad);
-    setElementValue('infetto', patient.infetto);
+  // Converti le date da yyyy-mm-dd a dd/mm/yyyy per il datepicker
+  const formatDateForDisplay = (dateStr) => {
+    if (!dateStr) return "";
+    if (dateStr.includes("-")) {
+      const [year, month, day] = dateStr.split("-");
+      return `${day}/${month}/${year}`;
+    }
+    return dateStr;
+  };
 
-    // Popola i nuovi campi per dimissione/trasferimento
-    setElementValue('tipo_dimissione', patient.tipo_dimissione);
-    setElementValue('clinica_destinazione', patient.clinica_destinazione);
-    
-    // Per i campi normalizzati, usa gli ID se disponibili, altrimenti i valori legacy
-    setElementValue('reparto_destinazione', patient.reparto_destinazione_id || patient.reparto_destinazione);
-    setElementValue('codice_clinica', patient.clinica_destinazione_id || patient.codice_clinica);
-    setElementValue('codice_dimissione', patient.codice_dimissione_id || patient.codice_dimissione);
+  // Popola tutti i campi usando la funzione helper
+  setElementValue("paziente-id", patient.id);
+  setElementValue("nome", patient.nome);
+  setElementValue("cognome", patient.cognome);
+  setElementValue("data_nascita", formatDateForDisplay(patient.data_nascita));
+  setElementValue("data_ricovero", formatDateForDisplay(patient.data_ricovero));
+  setElementValue(
+    "data_dimissione",
+    formatDateForDisplay(patient.data_dimissione)
+  );
+  setElementValue("diagnosi", patient.diagnosi);
+  setElementValue("reparto_appartenenza", patient.reparto_appartenenza);
+  setElementValue("reparto_provenienza", patient.reparto_provenienza);
+  setElementValue("livello_assistenza", patient.livello_assistenza);
+  setElementValue("codice_rad", patient.codice_rad);
+  setElementValue("infetto", patient.infetto);
 
-    // Mostra/nascondi campi condizionali basati sul tipo dimissione e stato infetto
-    handleTipoDimissioneChange(patient.tipo_dimissione || '');
-    
-    // Clear temporary infection data when loading existing patient
-    infectionDataManager.clearInfectionData();
-    updateInfectionIndicator();
-    
-    // Imposta il paziente corrente per il tab eventi clinici
-    setCurrentPatient(patient.id);
+  // Popola i nuovi campi per dimissione/trasferimento
+  setElementValue("tipo_dimissione", patient.tipo_dimissione);
+  setElementValue("clinica_destinazione", patient.clinica_destinazione);
 
-    // Aggiorna il titolo e il pulsante per la modalità modifica
-    const patientName = `${patient.nome || ''} ${patient.cognome || ''}`.trim();
-    const titleHTML = patientName 
-        ? `<span class="patient-name fw-bold">${patientName}</span>`
-        : '<span class="patient-name fw-bold">Nome Cognome</span>';
-    document.getElementById('inserimento-title').innerHTML = sanitizeHtml(titleHTML);
-    document.getElementById('save-patient-btn').innerHTML = sanitizeHtml('<span class="material-icons me-1" style="vertical-align: middle;">save</span>Aggiorna Paziente');
-    
-    // Forza l'aggiornamento di tutti i custom select per mostrare i valori corretti
-    updateCustomSelect('#form-inserimento [data-custom="true"]');
+  // Per i campi normalizzati, usa gli ID se disponibili, altrimenti i valori legacy
+  setElementValue(
+    "reparto_destinazione",
+    patient.reparto_destinazione_id || patient.reparto_destinazione
+  );
+  setElementValue(
+    "codice_clinica",
+    patient.clinica_destinazione_id || patient.codice_clinica
+  );
+  setElementValue(
+    "codice_dimissione",
+    patient.codice_dimissione_id || patient.codice_dimissione
+  );
+
+  // Mostra/nascondi campi condizionali basati sul tipo dimissione e stato infetto
+  handleTipoDimissioneChange(patient.tipo_dimissione || "");
+
+  // Clear temporary infection and surgery data when loading existing patient
+  infectionDataManager.clearInfectionData();
+  surgeryDataManager.clearSurgeryData();
+  updateInfectionIndicator();
+  updateSurgeryIndicator();
+
+  // Imposta il paziente corrente per il tab eventi clinici
+  setCurrentPatient(patient.id);
+
+  // Aggiorna il titolo e il pulsante per la modalità modifica
+  const patientName = `${patient.nome || ""} ${patient.cognome || ""}`.trim();
+  const titleHTML = patientName
+    ? `<span class="patient-name fw-bold">${patientName}</span>`
+    : '<span class="patient-name fw-bold">Nome Cognome</span>';
+  document.getElementById("inserimento-title").innerHTML =
+    sanitizeHtml(titleHTML);
+  document.getElementById("save-patient-btn").innerHTML = sanitizeHtml(
+    '<span class="material-icons me-1" style="vertical-align: middle;">save</span>Aggiorna Paziente'
+  );
+
+  // Forza l'aggiornamento di tutti i custom select per mostrare i valori corretti
+  updateCustomSelect('#form-inserimento [data-custom="true"]');
 }
 
 /**
@@ -454,19 +703,21 @@ export function populateForm(patient) {
  * @param {Array} options - La lista delle opzioni di diagnosi.
  */
 export function renderDiagnosiOptions(options) {
-    const diagnosiSelect = document.getElementById('diagnosi');
-    if (!diagnosiSelect) return;
+  const diagnosiSelect = document.getElementById("diagnosi");
+  if (!diagnosiSelect) return;
 
-    diagnosiSelect.innerHTML = sanitizeHtml('<option value="">Seleziona diagnosi...</option>');
-    options.forEach(diagnosi => {
-        const option = document.createElement('option');
-        option.value = diagnosi.nome;
-        option.textContent = diagnosi.nome;
-        diagnosiSelect.appendChild(option);
-    });
+  diagnosiSelect.innerHTML = sanitizeHtml(
+    '<option value="">Seleziona diagnosi...</option>'
+  );
+  options.forEach((diagnosi) => {
+    const option = document.createElement("option");
+    option.value = diagnosi.nome;
+    option.textContent = diagnosi.nome;
+    diagnosiSelect.appendChild(option);
+  });
 
-    // Forza l'aggiornamento del select specifico
-    updateCustomSelect('#diagnosi');
+  // Forza l'aggiornamento del select specifico
+  updateCustomSelect("#diagnosi");
 }
 
 /**
@@ -474,57 +725,95 @@ export function renderDiagnosiOptions(options) {
  * @returns {Promise<Object>} I dati del form.
  */
 export async function getFormData() {
-    const form = document.getElementById('form-inserimento');
-    const formData = new FormData(form);
-    const data = Object.fromEntries(formData.entries());
+  const form = document.getElementById("form-inserimento");
+  const formData = new FormData(form);
+  const data = Object.fromEntries(formData.entries());
 
-    // Determina lo stato infetto: se ci sono eventi clinici attivi, usa quello stato
-    // altrimenti usa il flag del checkbox se ci sono dati di infezione validi
-    const hasActiveInfection = isPatientCurrentlyInfected();
-    const hasNewInfectionData = infectionDataManager.hasValidInfectionData();
-    
-    data.infetto = hasActiveInfection || hasNewInfectionData;
+  // Determina lo stato infetto: se ci sono eventi clinici attivi, usa quello stato
+  // altrimenti usa il flag del checkbox se ci sono dati di infezione validi
+  const hasActiveInfection = isPatientCurrentlyInfected();
+  const hasNewInfectionData = infectionDataManager.hasValidInfectionData();
+  const hasNewSurgeryData = surgeryDataManager.hasValidSurgeryData();
 
-    // Aggiungi i dati di infezione se presenti e validi
-    if (hasNewInfectionData && !hasActiveInfection) {
-        const infectionData = infectionDataManager.getInfectionData();
-        data._hasInfectionData = true;
-        data._infectionData = infectionData;
-        data._requiresInfectionEvent = true;
+  // Il paziente è infetto se ha infezioni attive, nuovi dati di infezione,
+  // o se l'intervento chirurgico include un'infezione
+  const surgeryHasInfection =
+    hasNewSurgeryData && surgeryDataManager.hasAssociatedInfection();
+  data.infetto =
+    hasActiveInfection || hasNewInfectionData || surgeryHasInfection;
+
+  // Aggiungi i dati di infezione se presenti e validi
+  if (hasNewInfectionData && !hasActiveInfection) {
+    const infectionData = infectionDataManager.getInfectionData();
+    data._hasInfectionData = true;
+    data._infectionData = infectionData;
+    data._requiresInfectionEvent = true;
+  }
+
+  // Aggiungi i dati dell'intervento chirurgico se presenti e validi
+  if (hasNewSurgeryData) {
+    const surgeryData = surgeryDataManager.getSurgeryData();
+    data._hasSurgeryData = true;
+    data._surgeryData = surgeryData;
+    data._requiresSurgeryEvent = true;
+  }
+
+  // Converti le date dal formato dd/mm/yyyy a yyyy-mm-dd per Supabase
+  const dateFields = [
+    "data_nascita",
+    "data_ricovero",
+    "data_dimissione",
+    "data_infezione",
+    "data_evento",
+  ];
+  dateFields.forEach((field) => {
+    if (data[field] && data[field].includes("/")) {
+      const originalValue = data[field];
+      const [day, month, year] = data[field].split("/");
+      data[field] = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+      console.log(`Conversione data ${field}: ${originalValue} -> ${data[field]}`);
+    } else if (data[field]) {
+      console.log(`Data ${field} già in formato corretto: ${data[field]}`);
+    } else {
+      console.log(`Data ${field} vuota o non presente`);
     }
+  });
 
-    // Converti le date dal formato dd/mm/yyyy a yyyy-mm-dd per Supabase
-    const dateFields = ['data_nascita', 'data_ricovero', 'data_dimissione', 'data_infezione', 'data_evento'];
-    dateFields.forEach(field => {
-        if (data[field] && data[field].includes('/')) {
-            const [day, month, year] = data[field].split('/');
-            data[field] = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-        }
-    });
-
-    // Pulisci i campi vuoti per evitare di inviare stringhe vuote
-    Object.keys(data).forEach(key => {
-        if (data[key] === '' || data[key] === null || data[key] === undefined) {
-            data[key] = null;
-        }
-    });
-
-    // Gestisci i campi condizionali - se il tipo dimissione non li richiede, impostali a null
-    const tipoDimissione = data.tipo_dimissione;
-    if (tipoDimissione !== 'trasferimento_interno') {
-        data.reparto_destinazione = null;
-        data.reparto_destinazione_id = null;
+  // Pulisci i campi vuoti per evitare di inviare stringhe vuote
+  Object.keys(data).forEach((key) => {
+    if (data[key] === "" || data[key] === null || data[key] === undefined) {
+      data[key] = null;
     }
-    if (tipoDimissione !== 'trasferimento_esterno') {
-        data.clinica_destinazione = null;
-        data.codice_clinica = null;
-        data.clinica_destinazione_id = null;
+  });
+
+  // Gestisci i campi condizionali - se il tipo dimissione non li richiede, impostali a null
+  const tipoDimissione = data.tipo_dimissione;
+  if (tipoDimissione !== "trasferimento_interno") {
+    data.reparto_destinazione = null;
+    data.reparto_destinazione_id = null;
+  }
+  if (tipoDimissione !== "trasferimento_esterno") {
+    data.clinica_destinazione = null;
+    data.codice_clinica = null;
+    data.clinica_destinazione_id = null;
+  }
+
+  // Rimuovi campi che non appartengono alla tabella pazienti
+  // Questi sono solo campi di interfaccia per gestire la logica del form
+  delete data.ha_intervento; // Campo checkbox per interfaccia, non per database
+  
+  // Debug: verifica che i campi obbligatori siano presenti
+  const requiredFields = ['nome', 'cognome', 'data_ricovero'];
+  requiredFields.forEach(field => {
+    if (!data[field] || data[field].toString().trim() === '') {
+      console.error(`Campo obbligatorio mancante: ${field}`, data);
     }
+  });
+  
+  // Converti gli ID delle select normalizzate ai valori legacy per compatibilità
+  await convertNormalizedFieldsToLegacy(data);
 
-    // Converti gli ID delle select normalizzate ai valori legacy per compatibilità
-    await convertNormalizedFieldsToLegacy(data);
-
-    return data;
+  return data;
 }
 
 /**
@@ -532,39 +821,46 @@ export async function getFormData() {
  * @param {Object} data - I dati del form
  */
 async function convertNormalizedFieldsToLegacy(data) {
-    try {
-        const { codiciDimissioneService, repartiService, clinicheService } = await import('../../../core/services/index.js');
-        
-        // Converti codice dimissione ID al codice legacy
-        if (data.codice_dimissione && !isNaN(data.codice_dimissione)) {
-            const codice = await codiciDimissioneService.getById(parseInt(data.codice_dimissione));
-            if (codice) {
-                data.codice_dimissione_id = parseInt(data.codice_dimissione);
-                data.codice_dimissione = codice.codice; // Mantieni il valore legacy per compatibilità
-            }
-        }
-        
-        // Converti reparto destinazione ID al nome legacy
-        if (data.reparto_destinazione && !isNaN(data.reparto_destinazione)) {
-            const reparto = await repartiService.getById(parseInt(data.reparto_destinazione));
-            if (reparto) {
-                data.reparto_destinazione_id = parseInt(data.reparto_destinazione);
-                data.reparto_destinazione = reparto.nome; // Mantieni il valore legacy per compatibilità
-            }
-        }
-        
-        // Converti clinica ID al codice legacy
-        if (data.codice_clinica && !isNaN(data.codice_clinica)) {
-            const clinica = await clinicheService.getById(parseInt(data.codice_clinica));
-            if (clinica) {
-                data.clinica_destinazione_id = parseInt(data.codice_clinica);
-                data.codice_clinica = clinica.codice; // Mantieni il valore legacy per compatibilità
-            }
-        }
-    } catch (error) {
-        console.error('Errore nella conversione campi normalizzati:', error);
-        // Non bloccare il salvataggio per errori di conversione
+  try {
+    const { codiciDimissioneService, repartiService, clinicheService } =
+      await import("../../../core/services/index.js");
+
+    // Converti codice dimissione ID al codice legacy
+    if (data.codice_dimissione && !isNaN(data.codice_dimissione)) {
+      const codice = await codiciDimissioneService.getById(
+        parseInt(data.codice_dimissione)
+      );
+      if (codice) {
+        data.codice_dimissione_id = parseInt(data.codice_dimissione);
+        data.codice_dimissione = codice.codice; // Mantieni il valore legacy per compatibilità
+      }
     }
+
+    // Converti reparto destinazione ID al nome legacy
+    if (data.reparto_destinazione && !isNaN(data.reparto_destinazione)) {
+      const reparto = await repartiService.getById(
+        parseInt(data.reparto_destinazione)
+      );
+      if (reparto) {
+        data.reparto_destinazione_id = parseInt(data.reparto_destinazione);
+        data.reparto_destinazione = reparto.nome; // Mantieni il valore legacy per compatibilità
+      }
+    }
+
+    // Converti clinica ID al codice legacy
+    if (data.codice_clinica && !isNaN(data.codice_clinica)) {
+      const clinica = await clinicheService.getById(
+        parseInt(data.codice_clinica)
+      );
+      if (clinica) {
+        data.clinica_destinazione_id = parseInt(data.codice_clinica);
+        data.codice_clinica = clinica.codice; // Mantieni il valore legacy per compatibilità
+      }
+    }
+  } catch (error) {
+    console.error("Errore nella conversione campi normalizzati:", error);
+    // Non bloccare il salvataggio per errori di conversione
+  }
 }
 
 /**
@@ -573,17 +869,17 @@ async function convertNormalizedFieldsToLegacy(data) {
  * @param {('success'|'danger')} type - Il tipo di messaggio.
  */
 export function showFeedbackMessage(message, type) {
-    switch(type) {
-        case 'success':
-            notificationService.success(message);
-            break;
-        case 'error':
-            notificationService.error(message);
-            break;
-        case 'warning':
-            notificationService.warning(message);
-            break;
-        default:
-            notificationService.info(message);
-    }
+  switch (type) {
+    case "success":
+      notificationService.success(message);
+      break;
+    case "error":
+      notificationService.error(message);
+      break;
+    case "warning":
+      notificationService.warning(message);
+      break;
+    default:
+      notificationService.info(message);
+  }
 }

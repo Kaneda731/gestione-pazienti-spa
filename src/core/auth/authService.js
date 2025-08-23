@@ -12,17 +12,51 @@ export let currentUser = {
 
 async function fetchUserProfile(user) {
     if (!user) return null;
+    
     try {
         const { data, error, status } = await supabase
             .from('profiles')
             .select(`username, full_name, role`)
             .eq('id', user.id)
             .single();
-        if (error && status !== 406) throw error;
+        
+        if (error && status !== 406) {
+            throw error;
+        }
+        
         return data;
+        
     } catch (error) {
         console.error('Errore nel recuperare il profilo utente:', error);
-        return null;
+        
+        // Fallback leggero per errori imprevisti
+        console.warn('🔄 Uso profilo di fallback per:', user.email);
+        
+        // Tenta di recuperare il ruolo usando la funzione sicura
+        try {
+            const { data: roleData } = await supabase.rpc('get_user_role_safe', {
+                user_uuid: user.id
+            });
+            
+            const safeRole = roleData || 'editor';
+            console.info('✅ Ruolo recuperato con funzione sicura:', safeRole);
+            
+            return {
+                id: user.id,
+                username: user.email?.split('@')[0] || 'utente',
+                full_name: user.user_metadata?.full_name || 
+                          user.user_metadata?.name || 
+                          user.email || 
+                          'Utente',
+                role: safeRole,
+                email: user.email,
+                fallback: true
+            };
+            
+        } catch (roleError) {
+            console.error('❌ Errore nel recupero ruolo sicuro, uso fallback minimo:', roleError);
+            return null;
+        }
     }
 }
 
@@ -30,7 +64,31 @@ async function updateUserState(session) {
     if (session?.user) {
         const profile = await fetchUserProfile(session.user);
         currentUser.session = session;
-        currentUser.profile = profile || { role: 'editor' }; // Fallback di sicurezza
+        
+        // Fallback migliorato se il profilo non è disponibile
+        if (!profile) {
+            console.warn('⚠️ Profilo non disponibile, uso fallback per:', session.user.email);
+            currentUser.profile = {
+                id: session.user.id,
+                username: session.user.email?.split('@')[0] || 'utente',
+                full_name: session.user.user_metadata?.full_name || 
+                          session.user.user_metadata?.name || 
+                          session.user.email || 
+                          'Utente',
+                role: 'editor',
+                email: session.user.email,
+                fallback: true
+            };
+        } else {
+            currentUser.profile = profile;
+        }
+        
+        // Log per debug
+        if (currentUser.profile?.fallback) {
+            console.info('✅ Utente autenticato con profilo di fallback:', currentUser.profile.username);
+        } else {
+            console.info('✅ Utente autenticato:', currentUser.profile?.username || 'sconosciuto');
+        }
     } else {
         currentUser.session = null;
         currentUser.profile = null;

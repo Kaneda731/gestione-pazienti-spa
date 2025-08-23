@@ -212,10 +212,17 @@ async function handleSaveEvento() {
             return;
         }
 
-        // Aggiungi paziente ID
+        // Se non abbiamo un paziente corrente (nuovo paziente), gestisci come evento temporaneo
+        if (!currentPatientId) {
+            // Gestisci come evento temporaneo per nuovo paziente
+            handleTemporaryEvent(eventoData);
+            return;
+        }
+
+        // Aggiungi paziente ID per pazienti esistenti
         eventoData.paziente_id = currentPatientId;
 
-        // Salva evento
+        // Salva evento nel database per pazienti esistenti
         if (eventoData.id) {
             await eventiCliniciService.updateEvento(eventoData.id, eventoData);
         } else {
@@ -229,6 +236,9 @@ async function handleSaveEvento() {
         
         // Nascondi form immediatamente dopo il reload
         hideEventoForm();
+        
+        // Sincronizza i checkbox dopo il salvataggio
+        syncCheckboxesWithEvents();
         
         // Forza un refresh della visualizzazione per assicurarsi che l'evento appaia
         const eventiList = document.getElementById('eventi-list');
@@ -244,6 +254,49 @@ async function handleSaveEvento() {
     } catch (error) {
         // Error notification is already handled by eventiCliniciService.
         logger.error('Errore catturato in handleSaveEvento:', error.message);
+    }
+}
+
+/**
+ * Gestisce un evento temporaneo per un nuovo paziente
+ */
+function handleTemporaryEvent(eventoData) {
+    try {
+        // Crea un evento temporaneo con ID univoco
+        const tempEvent = {
+            ...eventoData,
+            id: `temp_manual_${Date.now()}`,
+            isTemporary: true
+        };
+
+        // Aggiungi l'evento alla lista temporanea
+        if (!currentEventi) {
+            currentEventi = [];
+        }
+        
+        // Rimuovi eventuali eventi temporanei dello stesso tipo per evitare duplicati
+        currentEventi = currentEventi.filter(evento => 
+            !evento.isTemporary || evento.tipo_evento !== eventoData.tipo_evento
+        );
+        
+        // Aggiungi il nuovo evento temporaneo
+        currentEventi.push(tempEvent);
+        
+        // Renderizza la lista aggiornata
+        renderEventiList(currentEventi);
+        
+        // Nascondi il form
+        hideEventoForm();
+        
+        // Sincronizza i checkbox
+        syncCheckboxesWithEvents();
+        
+        // Notifica successo
+        notificationService.success('Evento aggiunto temporaneamente. Verrà salvato quando salvi il paziente.');
+        
+    } catch (error) {
+        logger.error('Errore nella gestione evento temporaneo:', error.message);
+        notificationService.error('Errore nell\'aggiungere l\'evento temporaneo');
     }
 }
 
@@ -401,6 +454,7 @@ export async function loadEventiForCurrentPatient() {
         renderEventiList(eventi);
         updatePostOperativeInfo(eventi);
         syncInfectionStatusWithForm(); // Sincronizza lo stato con il form principale
+        syncCheckboxesWithEvents(); // Sincronizza i checkbox con gli eventi
     } catch (error) {
         // Error notification is already handled by eventiCliniciService.
         logger.error('Errore nel caricamento eventi clinici per il paziente:', error);
@@ -441,7 +495,15 @@ function renderEventiList(eventi) {
             statusBadge = `<span class="badge bg-success ms-2">Risolto il ${convertDateFromISO(evento.data_fine_evento)}</span>`;
         }
 
+        // Badge per eventi temporanei
+        if (evento.isTemporary) {
+            statusBadge += `<span class="badge bg-info ms-2">
+                <span class="material-icons me-1" style="font-size: 12px;">schedule</span>Da salvare
+            </span>`;
+        }
+
         const isRisolto = evento.tipo_evento === 'infezione' && evento.data_fine_evento;
+        const isTemporary = evento.isTemporary;
         
         return `
             <div class="card mb-3 evento-card" data-evento-id="${evento.id}">
@@ -463,9 +525,10 @@ function renderEventiList(eventi) {
                         </div>
                         
                         <div class="dropdown">
-                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" ${isTemporary ? 'disabled' : ''}>
                                 <span class="material-icons" style="font-size: 16px;">more_vert</span>
                             </button>
+                            ${!isTemporary ? `
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item edit-evento" href="#" data-evento-id="${evento.id}">
                                     <span class="material-icons me-2" style="font-size: 16px;">edit</span>Modifica
@@ -479,6 +542,14 @@ function renderEventiList(eventi) {
                                     <span class="material-icons me-2" style="font-size: 16px;">delete</span>Elimina
                                 </a></li>
                             </ul>
+                            ` : `
+                            <ul class="dropdown-menu">
+                                <li><span class="dropdown-item-text text-muted">
+                                    <span class="material-icons me-2" style="font-size: 16px;">info</span>
+                                    Evento temporaneo - Salva il paziente per renderlo definitivo
+                                </span></li>
+                            </ul>
+                            `}
                         </div>
                     </div>
                 </div>
@@ -608,6 +679,8 @@ async function deleteEvento(eventoId) {
         await eventiCliniciService.deleteEvento(eventoId);
         await loadEventiForCurrentPatient();
         // syncInfectionStatusWithForm() è già chiamato da loadEventiForCurrentPatient
+        // Sincronizza i checkbox dopo l'eliminazione
+        syncCheckboxesWithEvents();
         // La notifica di successo è già gestita da eventiCliniciService
     } catch (error) {
         // La notifica di errore è già gestita da eventiCliniciService.
@@ -646,11 +719,72 @@ export function isPatientCurrentlyInfected() {
 }
 
 /**
- * Chiama la funzione nel form-ui per aggiornare lo stato del checkbox 'infetto'.
+ * Chiama la funzione nel form-ui per aggiornare lo stato dei checkbox.
  */
 function syncInfectionStatusWithForm() {
     if (typeof onStatusChangeCallback === 'function') {
         onStatusChangeCallback();
+    }
+}
+
+/**
+ * Sincronizza i checkbox del form principale con gli eventi clinici
+ * Aggiorna i checkbox "infetto" e "ha_intervento" in base agli eventi presenti
+ */
+export function syncCheckboxesWithEvents() {
+    const infettoCheckbox = document.getElementById('infetto');
+    const interventoCheckbox = document.getElementById('ha_intervento');
+    
+    if (!infettoCheckbox || !interventoCheckbox) return;
+
+    // Verifica se ci sono eventi di infezione attivi
+    const hasActiveInfection = isPatientCurrentlyInfected();
+    
+    // Verifica se ci sono eventi di intervento
+    const hasIntervention = currentEventi && currentEventi.some(e => e.tipo_evento === 'intervento');
+
+    // Aggiorna checkbox infezione
+    if (hasActiveInfection) {
+        infettoCheckbox.checked = true;
+        infettoCheckbox.disabled = true;
+        
+        const helper = document.getElementById('infetto-helper-text');
+        if (helper) {
+            helper.textContent = 'Stato gestito dagli eventi di infezione attivi.';
+            helper.style.display = 'block';
+        }
+    } else {
+        infettoCheckbox.disabled = false;
+        const helper = document.getElementById('infetto-helper-text');
+        if (helper) {
+            helper.style.display = 'none';
+        }
+    }
+
+    // Aggiorna checkbox intervento
+    if (hasIntervention) {
+        interventoCheckbox.checked = true;
+        interventoCheckbox.disabled = true;
+        
+        const helper = document.getElementById('intervento-helper-text');
+        if (helper) {
+            helper.textContent = 'Stato gestito dagli eventi di intervento presenti.';
+            helper.style.display = 'block';
+        }
+    } else {
+        interventoCheckbox.disabled = false;
+        const helper = document.getElementById('intervento-helper-text');
+        if (helper) {
+            helper.style.display = 'none';
+        }
+    }
+
+    // Aggiorna gli indicatori visivi
+    if (typeof window.updateInfectionIndicator === 'function') {
+        window.updateInfectionIndicator();
+    }
+    if (typeof window.updateSurgeryIndicator === 'function') {
+        window.updateSurgeryIndicator();
     }
 }
 
@@ -664,6 +798,88 @@ export function setCurrentPatient(patientId) {
     const eventiTab = document.getElementById('eventi-clinici-tab');
     if (eventiTab && eventiTab.classList.contains('active')) {
         loadEventiForCurrentPatient();
+    }
+}
+
+/**
+ * Crea eventi temporanei basati sui dati dei checkbox del form principale
+ * Questa funzione viene chiamata quando i checkbox vengono selezionati
+ */
+export function createTemporaryEventsFromCheckboxes() {
+    // Importa i manager dei dati temporanei
+    import('../services/infectionDataManager.js').then(({ default: infectionDataManager }) => {
+        import('../services/surgeryDataManager.js').then(({ default: surgeryDataManager }) => {
+            const temporaryEvents = [];
+
+            // Crea evento temporaneo per l'infezione se presente
+            if (infectionDataManager.hasValidInfectionData()) {
+                const infectionData = infectionDataManager.getInfectionData();
+                temporaryEvents.push({
+                    id: 'temp_infection',
+                    tipo_evento: 'infezione',
+                    data_evento: infectionData.data_evento,
+                    agente_patogeno: infectionData.agente_patogeno,
+                    descrizione: infectionData.descrizione,
+                    data_fine_evento: null,
+                    isTemporary: true
+                });
+            }
+
+            // Crea evento temporaneo per l'intervento se presente
+            if (surgeryDataManager.hasValidSurgeryData()) {
+                const surgeryData = surgeryDataManager.getSurgeryData();
+                temporaryEvents.push({
+                    id: 'temp_surgery',
+                    tipo_evento: 'intervento',
+                    data_evento: surgeryData.data_evento,
+                    tipo_intervento: surgeryData.tipo_intervento,
+                    descrizione: surgeryData.descrizione,
+                    isTemporary: true
+                });
+
+                // Se l'intervento include un'infezione, aggiungila
+                if (surgeryData.has_infection && surgeryData.data_infezione) {
+                    temporaryEvents.push({
+                        id: 'temp_surgery_infection',
+                        tipo_evento: 'infezione',
+                        data_evento: surgeryData.data_infezione,
+                        agente_patogeno: surgeryData.agente_patogeno,
+                        descrizione: surgeryData.descrizione_infezione,
+                        data_fine_evento: null,
+                        isTemporary: true
+                    });
+                }
+            }
+
+            // Combina eventi esistenti con quelli temporanei
+            const allEvents = [...(currentEventi || []), ...temporaryEvents];
+            
+            // Renderizza la lista aggiornata
+            renderEventiList(allEvents);
+            updatePostOperativeInfo(allEvents);
+        });
+    });
+}
+
+/**
+ * Ottiene tutti gli eventi temporanei
+ */
+export function getTemporaryEvents() {
+    if (!currentEventi) return [];
+    return currentEventi.filter(evento => evento.isTemporary);
+}
+
+/**
+ * Rimuove gli eventi temporanei dalla visualizzazione
+ */
+export function clearTemporaryEvents() {
+    // Ricarica solo gli eventi reali dal database
+    if (currentPatientId) {
+        loadEventiForCurrentPatient();
+    } else {
+        // Se non c'è un paziente corrente, mostra lista vuota
+        renderEventiList([]);
+        updatePostOperativeInfo([]);
     }
 }
 

@@ -123,16 +123,26 @@ export class PostOperativeCalculator {
         }
 
         const days = calculation.postOperativeDays;
+        
+        // Controlla se ci sono infezioni attive
+        const hasActiveInfection = this.hasActiveInfection(eventiClinici);
+        
         let statusClass = 'success'; // Default green
         let badgeText = `PO ${days}`;
 
-        // Color coding based on post-operative days
-        if (days <= 7) {
-            statusClass = 'danger'; // Red for first week
-        } else if (days <= 30) {
-            statusClass = 'warning'; // Yellow for first month
-        } else if (days <= 90) {
-            statusClass = 'info'; // Blue for first 3 months
+        // Se c'è infezione attiva, forza il colore rosso e aggiungi indicatore
+        if (hasActiveInfection) {
+            statusClass = 'danger';
+            badgeText = `PO ${days} 🦠`;
+        } else {
+            // Color coding based on post-operative days (solo se non infetto)
+            if (days <= 7) {
+                statusClass = 'danger'; // Red for first week
+            } else if (days <= 30) {
+                statusClass = 'warning'; // Yellow for first month
+            } else if (days <= 90) {
+                statusClass = 'info'; // Blue for first 3 months
+            }
         }
 
         return {
@@ -141,8 +151,24 @@ export class PostOperativeCalculator {
             statusClass: statusClass,
             badgeText: badgeText,
             days: days,
-            lastIntervention: calculation.lastIntervention
+            lastIntervention: calculation.lastIntervention,
+            hasActiveInfection: hasActiveInfection
         };
+    }
+
+    /**
+     * Check if patient has active infections
+     * @param {Array} eventiClinici - Array of clinical events
+     * @returns {boolean} True if there are active infections
+     */
+    hasActiveInfection(eventiClinici) {
+        if (!Array.isArray(eventiClinici)) return false;
+        
+        return eventiClinici.some(evento => {
+            return evento.tipo_evento === 'infezione' && 
+                   evento.data_evento && 
+                   !evento.data_fine_evento; // Infezione attiva se non ha data fine
+        });
     }
 
     /**

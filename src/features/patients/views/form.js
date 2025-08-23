@@ -43,19 +43,63 @@ async function handleFormSubmit(event, state) {
         const { patientService } = await import('../services/patientService.js');
         await patientService.handleInfectionEventCreation(state.patientId, tempData._infectionData);
       }
+      
+      // Gestisci eventi temporanei generici dalla tab eventi clinici
+      const { getTemporaryEvents } = await import('./eventi-clinici-tab.js');
+      const temporaryEvents = getTemporaryEvents();
+      if (temporaryEvents && temporaryEvents.length > 0) {
+        const { patientService } = await import('../services/patientService.js');
+        await patientService.handleTemporaryEventsCreation(state.patientId, temporaryEvents);
+      }
     } else {
       // Modalità inserimento
-      if (tempData._hasInfectionData && tempData._infectionData) {
+      const hasInfectionData = tempData._hasInfectionData && tempData._infectionData;
+      const hasSurgeryData = tempData._hasSurgeryData && tempData._surgeryData;
+      
+      if (hasInfectionData || hasSurgeryData) {
         // Use coordinated creation method
         const { patientService } = await import('../services/patientService.js');
-        const transactionResult = await patientService.createPatientWithInfection(
-          patientData, 
-          tempData._infectionData
-        );
-        result = transactionResult.patient;
+        
+        if (hasInfectionData && hasSurgeryData) {
+          // Paziente con sia infezione che intervento chirurgico
+          const transactionResult = await patientService.createPatientWithSurgeryAndInfection(
+            patientData, 
+            tempData._surgeryData,
+            tempData._infectionData
+          );
+          result = transactionResult.patient;
+        } else if (hasSurgeryData) {
+          // Paziente con solo intervento chirurgico
+          const transactionResult = await patientService.createPatientWithSurgery(
+            patientData, 
+            tempData._surgeryData
+          );
+          result = transactionResult.patient;
+        } else if (hasInfectionData) {
+          // Paziente con solo infezione
+          const transactionResult = await patientService.createPatientWithInfection(
+            patientData, 
+            tempData._infectionData
+          );
+          result = transactionResult.patient;
+        }
       } else {
-        // Creazione normale senza infezione
-        result = await savePatient(patientData, null);
+        // Controlla se ci sono eventi temporanei generici
+        const { getTemporaryEvents } = await import('./eventi-clinici-tab.js');
+        const temporaryEvents = getTemporaryEvents();
+        
+        if (temporaryEvents && temporaryEvents.length > 0) {
+          // Creazione paziente con eventi temporanei generici
+          const { patientService } = await import('../services/patientService.js');
+          const transactionResult = await patientService.createPatientWithTemporaryEvents(
+            patientData, 
+            temporaryEvents
+          );
+          result = transactionResult.patient;
+        } else {
+          // Creazione normale senza eventi clinici
+          result = await savePatient(patientData, null);
+        }
       }
     }
 

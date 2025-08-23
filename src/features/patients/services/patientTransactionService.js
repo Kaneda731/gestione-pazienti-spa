@@ -21,6 +21,153 @@ class PatientTransactionService {
   }
 
   /**
+   * Esegue una transazione completa per creare paziente con evento di intervento chirurgico
+   * @param {Object} patientData - Dati del paziente
+   * @param {Object} surgeryData - Dati dell'evento di intervento
+   * @returns {Promise<Object>} Risultato della transazione
+   */
+  async executePatientWithSurgeryTransaction(patientData, surgeryData) {
+    const transactionId = this.generateTransactionId();
+    
+    try {
+      // Inizializza il log della transazione
+      this.initializeTransactionLog(transactionId, 'patient_with_surgery', {
+        patientData: this.sanitizeLogData(patientData),
+        surgeryData: this.sanitizeLogData(surgeryData)
+      });
+
+      stateService.setLoading(true, "Creazione paziente e evento intervento...");
+
+      // Validazione dati prima di iniziare
+      await this.validateSurgeryTransactionData(patientData, surgeryData);
+      this.logTransactionStep(transactionId, 'validation', 'completed', { message: 'Dati validati con successo' });
+
+      // Step 1: Creazione paziente (solo intervento, nessuna infezione)
+      this.logTransactionStep(transactionId, 'create_patient', 'started');
+      const patient = await this.createPatientStep(patientData, false);
+      this.logTransactionStep(transactionId, 'create_patient', 'completed', { patientId: patient.id });
+
+      // Step 2: Creazione evento clinico di intervento
+      this.logTransactionStep(transactionId, 'create_surgery_event', 'started');
+      const surgeryEvent = await this.createSurgeryEventStep(patient.id, surgeryData);
+      this.logTransactionStep(transactionId, 'create_surgery_event', 'completed', { eventId: surgeryEvent.id });
+
+      // Step 3: Creazione evento infezione se presente nell'intervento
+      let infectionEvent = null;
+      if (surgeryData.has_infection && surgeryData.data_infezione) {
+        this.logTransactionStep(transactionId, 'create_infection_event', 'started');
+        const infectionData = {
+          data_evento: surgeryData.data_infezione,
+          agente_patogeno: surgeryData.agente_patogeno,
+          descrizione: surgeryData.descrizione_infezione
+        };
+        infectionEvent = await this.createInfectionEventStep(patient.id, infectionData);
+        this.logTransactionStep(transactionId, 'create_infection_event', 'completed', { eventId: infectionEvent.id });
+      }
+
+      // Step 4: Verifica sincronizzazione stato
+      this.logTransactionStep(transactionId, 'verify_synchronization', 'started');
+      await this.verifySynchronizationStep(patient.id);
+      this.logTransactionStep(transactionId, 'verify_synchronization', 'completed');
+
+      // Transazione completata con successo
+      this.completeTransactionLog(transactionId, 'completed');
+      
+      notificationService.success("Paziente e evento intervento creati con successo!");
+      
+      return {
+        success: true,
+        transactionId,
+        patient,
+        surgeryEvent,
+        infectionEvent,
+        message: "Transazione completata con successo"
+      };
+
+    } catch (error) {
+      logger.error(`Errore nella transazione ${transactionId}:`, error);
+      
+      // Gestisci il rollback in base al punto di fallimento
+      await this.handleTransactionFailure(transactionId, error);
+      
+      throw error;
+    } finally {
+      stateService.setLoading(false);
+    }
+  }
+
+  /**
+   * Esegue una transazione completa per creare paziente con evento di intervento e infezione
+   * @param {Object} patientData - Dati del paziente
+   * @param {Object} surgeryData - Dati dell'evento di intervento
+   * @param {Object} infectionData - Dati dell'evento di infezione
+   * @returns {Promise<Object>} Risultato della transazione
+   */
+  async executePatientWithSurgeryAndInfectionTransaction(patientData, surgeryData, infectionData) {
+    const transactionId = this.generateTransactionId();
+    
+    try {
+      // Inizializza il log della transazione
+      this.initializeTransactionLog(transactionId, 'patient_with_surgery_and_infection', {
+        patientData: this.sanitizeLogData(patientData),
+        surgeryData: this.sanitizeLogData(surgeryData),
+        infectionData: this.sanitizeLogData(infectionData)
+      });
+
+      stateService.setLoading(true, "Creazione paziente, intervento e infezione...");
+
+      // Validazione dati prima di iniziare
+      await this.validateSurgeryTransactionData(patientData, surgeryData);
+      await this.validateTransactionData(patientData, infectionData);
+      this.logTransactionStep(transactionId, 'validation', 'completed', { message: 'Dati validati con successo' });
+
+      // Step 1: Creazione paziente (con infezione)
+      this.logTransactionStep(transactionId, 'create_patient', 'started');
+      const patient = await this.createPatientStep(patientData, true);
+      this.logTransactionStep(transactionId, 'create_patient', 'completed', { patientId: patient.id });
+
+      // Step 2: Creazione evento clinico di intervento
+      this.logTransactionStep(transactionId, 'create_surgery_event', 'started');
+      const surgeryEvent = await this.createSurgeryEventStep(patient.id, surgeryData);
+      this.logTransactionStep(transactionId, 'create_surgery_event', 'completed', { eventId: surgeryEvent.id });
+
+      // Step 3: Creazione evento clinico di infezione
+      this.logTransactionStep(transactionId, 'create_infection_event', 'started');
+      const infectionEvent = await this.createInfectionEventStep(patient.id, infectionData);
+      this.logTransactionStep(transactionId, 'create_infection_event', 'completed', { eventId: infectionEvent.id });
+
+      // Step 4: Verifica sincronizzazione stato
+      this.logTransactionStep(transactionId, 'verify_synchronization', 'started');
+      await this.verifySynchronizationStep(patient.id);
+      this.logTransactionStep(transactionId, 'verify_synchronization', 'completed');
+
+      // Transazione completata con successo
+      this.completeTransactionLog(transactionId, 'completed');
+      
+      notificationService.success("Paziente, intervento e infezione creati con successo!");
+      
+      return {
+        success: true,
+        transactionId,
+        patient,
+        surgeryEvent,
+        infectionEvent,
+        message: "Transazione completata con successo"
+      };
+
+    } catch (error) {
+      logger.error(`Errore nella transazione ${transactionId}:`, error);
+      
+      // Gestisci il rollback in base al punto di fallimento
+      await this.handleTransactionFailure(transactionId, error);
+      
+      throw error;
+    } finally {
+      stateService.setLoading(false);
+    }
+  }
+
+  /**
    * Esegue una transazione completa per creare paziente con evento di infezione
    * @param {Object} patientData - Dati del paziente
    * @param {Object} infectionData - Dati dell'evento di infezione
@@ -42,9 +189,9 @@ class PatientTransactionService {
       await this.validateTransactionData(patientData, infectionData);
       this.logTransactionStep(transactionId, 'validation', 'completed', { message: 'Dati validati con successo' });
 
-      // Step 1: Creazione paziente
+      // Step 1: Creazione paziente (con infezione)
       this.logTransactionStep(transactionId, 'create_patient', 'started');
-      const patient = await this.createPatientStep(patientData);
+      const patient = await this.createPatientStep(patientData, true);
       this.logTransactionStep(transactionId, 'create_patient', 'completed', { patientId: patient.id });
 
       // Step 2: Creazione evento clinico di infezione
@@ -80,6 +227,65 @@ class PatientTransactionService {
     } finally {
       stateService.setLoading(false);
     }
+  }
+
+  /**
+   * Valida i dati della transazione per intervento chirurgico prima dell'esecuzione
+   * @param {Object} patientData - Dati del paziente
+   * @param {Object} surgeryData - Dati dell'intervento
+   */
+  async validateSurgeryTransactionData(patientData, surgeryData) {
+    // Validazione dati paziente
+    if (!patientData || typeof patientData !== 'object') {
+      throw new Error("Dati paziente non validi");
+    }
+
+    const requiredPatientFields = ['nome', 'cognome', 'data_ricovero'];
+    for (const field of requiredPatientFields) {
+      if (!patientData[field] || patientData[field].toString().trim() === '') {
+        throw new Error(`Campo paziente obbligatorio mancante: ${field}`);
+      }
+    }
+
+    // Validazione dati intervento
+    if (!surgeryData || typeof surgeryData !== 'object') {
+      throw new Error("Dati intervento non validi");
+    }
+
+    const requiredSurgeryFields = ['data_evento', 'tipo_intervento'];
+    for (const field of requiredSurgeryFields) {
+      if (!surgeryData[field] || surgeryData[field].toString().trim() === '') {
+        throw new Error(`Campo intervento obbligatorio mancante: ${field}`);
+      }
+    }
+
+    // Validazione data intervento
+    const dataEvento = new Date(surgeryData.data_evento);
+    const oggi = new Date();
+    oggi.setHours(23, 59, 59, 999); // Fine della giornata corrente
+
+    if (isNaN(dataEvento.getTime())) {
+      throw new Error("Data evento intervento non valida");
+    }
+
+    if (dataEvento > oggi) {
+      throw new Error("La data dell'evento di intervento non può essere nel futuro");
+    }
+
+    // Validazione infezione associata se presente
+    if (surgeryData.has_infection && surgeryData.data_infezione) {
+      const dataInfezione = new Date(surgeryData.data_infezione);
+      
+      if (isNaN(dataInfezione.getTime())) {
+        throw new Error("Data infezione associata non valida");
+      }
+
+      if (dataInfezione < dataEvento) {
+        throw new Error("La data dell'infezione non può essere precedente all'intervento");
+      }
+    }
+
+    logger.log("Validazione dati transazione intervento completata con successo");
   }
 
   /**
@@ -131,14 +337,15 @@ class PatientTransactionService {
   /**
    * Step 1: Creazione del paziente
    * @param {Object} patientData - Dati del paziente
+   * @param {boolean} hasInfection - Se il paziente ha un'infezione
    * @returns {Promise<Object>} Paziente creato
    */
-  async createPatientStep(patientData) {
+  async createPatientStep(patientData, hasInfection = false) {
     try {
-      // Assicurati che il flag infetto sia impostato
+      // Imposta il flag infetto solo se c'è effettivamente un'infezione
       const dataToInsert = {
         ...patientData,
-        infetto: true, // Forza il flag infetto per questa transazione
+        infetto: hasInfection,
         data_infezione: null // Sarà aggiornato automaticamente dal servizio eventi clinici
       };
 
@@ -157,7 +364,38 @@ class PatientTransactionService {
   }
 
   /**
-   * Step 2: Creazione dell'evento clinico di infezione
+   * Step 2: Creazione dell'evento clinico di intervento chirurgico
+   * @param {string} patientId - ID del paziente
+   * @param {Object} surgeryData - Dati dell'intervento
+   * @returns {Promise<Object>} Evento clinico creato
+   */
+  async createSurgeryEventStep(patientId, surgeryData) {
+    try {
+      const eventoData = {
+        paziente_id: patientId,
+        tipo_evento: 'intervento',
+        data_evento: surgeryData.data_evento,
+        tipo_intervento: surgeryData.tipo_intervento,
+        descrizione: surgeryData.descrizione || null,
+        data_fine_evento: null // Intervento completato
+      };
+
+      const surgeryEvent = await eventiCliniciService.createEvento(eventoData);
+      
+      if (!surgeryEvent || !surgeryEvent.id) {
+        throw new Error("Creazione evento intervento fallita: nessun ID restituito");
+      }
+
+      logger.log(`Evento intervento creato con successo: ID ${surgeryEvent.id}`);
+      return surgeryEvent;
+    } catch (error) {
+      logger.error("Errore nella creazione evento intervento:", error);
+      throw new Error(`Fallimento creazione evento intervento: ${error.message}`);
+    }
+  }
+
+  /**
+   * Step 3: Creazione dell'evento clinico di infezione
    * @param {string} patientId - ID del paziente
    * @param {Object} infectionData - Dati dell'infezione
    * @returns {Promise<Object>} Evento clinico creato

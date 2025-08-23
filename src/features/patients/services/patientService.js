@@ -583,6 +583,153 @@ class PatientService {
   }
 
   /**
+   * Crea un paziente con evento di intervento chirurgico associato in una transazione coordinata
+   * @param {Object} patientData - Dati del paziente
+   * @param {Object} surgeryData - Dati dell'evento di intervento chirurgico
+   * @returns {Promise<Object>} Risultato della transazione
+   */
+  async createPatientWithSurgery(patientData, surgeryData) {
+    try {
+      logger.log("Avvio creazione paziente con intervento chirurgico:", { 
+        patientName: `${patientData.nome} ${patientData.cognome}`,
+        surgeryDate: surgeryData.data_evento,
+        surgeryType: surgeryData.tipo_intervento
+      });
+
+      // Validazione preliminare dei dati
+      validatePatientData(patientData);
+      
+      // Validazione dati intervento tramite SurgeryDataManager
+      const { default: surgeryDataManager } = await import('./surgeryDataManager.js');
+      surgeryDataManager.setSurgeryData(surgeryData);
+      if (!surgeryDataManager.hasValidSurgeryData()) {
+        const errors = surgeryDataManager.getValidationErrors();
+        const errorMessages = errors.map(err => err.message).join(', ');
+        throw new Error(`Dati intervento non validi: ${errorMessages}`);
+      }
+
+      // Esegui la transazione coordinata
+      const result = await patientTransactionService.executePatientWithSurgeryTransaction(
+        patientData, 
+        surgeryData
+      );
+
+      // Clear temporary data after success
+      surgeryDataManager.clearSurgeryData();
+      
+      // Invalida la cache per forzare il refresh dei dati
+      this.invalidateCache();
+
+      logger.log("Creazione paziente con intervento completata con successo:", {
+        transactionId: result.transactionId,
+        patientId: result.patient?.id,
+        surgeryEventId: result.surgeryEvent?.id
+      });
+
+      return result;
+
+    } catch (error) {
+      logger.error("Errore nella creazione paziente con intervento:", error);
+      
+      // Gestisci diversi tipi di errore con messaggi specifici
+      if (error.message.includes('Dati intervento non validi')) {
+        notificationService.error(`Errore nei dati di intervento: ${error.message}`);
+      } else if (error.message.includes('Transazione parzialmente completata')) {
+        // L'errore è già gestito dal transaction service con opzioni di recovery
+        logger.warn("Transazione parzialmente completata - recovery options presentate");
+      } else {
+        notificationService.error(`Errore nella creazione: ${error.message}`);
+      }
+      
+      throw error;
+    }
+  }
+
+  /**
+   * Crea un paziente con evento di intervento chirurgico e infezione associati in una transazione coordinata
+   * @param {Object} patientData - Dati del paziente
+   * @param {Object} surgeryData - Dati dell'evento di intervento chirurgico
+   * @param {Object} infectionData - Dati dell'evento di infezione
+   * @returns {Promise<Object>} Risultato della transazione
+   */
+  async createPatientWithSurgeryAndInfection(patientData, surgeryData, infectionData) {
+    try {
+      logger.log("Avvio creazione paziente con intervento e infezione:", { 
+        patientName: `${patientData.nome} ${patientData.cognome}`,
+        surgeryDate: surgeryData.data_evento,
+        infectionDate: infectionData.data_evento || surgeryData.data_infezione
+      });
+
+      // Validazione preliminare dei dati
+      validatePatientData(patientData);
+      
+      // Validazione dati intervento e infezione
+      const { default: surgeryDataManager } = await import('./surgeryDataManager.js');
+      surgeryDataManager.setSurgeryData(surgeryData);
+      if (!surgeryDataManager.hasValidSurgeryData()) {
+        const errors = surgeryDataManager.getValidationErrors();
+        const errorMessages = errors.map(err => err.message).join(', ');
+        throw new Error(`Dati intervento non validi: ${errorMessages}`);
+      }
+
+      // Se l'infezione non è fornita separatamente, usa quella dell'intervento
+      let finalInfectionData = infectionData;
+      if (!finalInfectionData && surgeryDataManager.hasAssociatedInfection()) {
+        finalInfectionData = surgeryDataManager.prepareInfectionEventData();
+      }
+
+      if (finalInfectionData) {
+        infectionDataManager.setInfectionData(finalInfectionData);
+        if (!infectionDataManager.hasValidInfectionData()) {
+          const errors = infectionDataManager.getValidationErrors();
+          const errorMessages = errors.map(err => err.message).join(', ');
+          throw new Error(`Dati infezione non validi: ${errorMessages}`);
+        }
+      }
+
+      // Esegui la transazione coordinata
+      const result = await patientTransactionService.executePatientWithSurgeryAndInfectionTransaction(
+        patientData, 
+        surgeryData,
+        finalInfectionData
+      );
+
+      // Clear temporary data after success
+      surgeryDataManager.clearSurgeryData();
+      if (finalInfectionData) {
+        infectionDataManager.clearInfectionData();
+      }
+      
+      // Invalida la cache per forzare il refresh dei dati
+      this.invalidateCache();
+
+      logger.log("Creazione paziente con intervento e infezione completata con successo:", {
+        transactionId: result.transactionId,
+        patientId: result.patient?.id,
+        surgeryEventId: result.surgeryEvent?.id,
+        infectionEventId: result.infectionEvent?.id
+      });
+
+      return result;
+
+    } catch (error) {
+      logger.error("Errore nella creazione paziente con intervento e infezione:", error);
+      
+      // Gestisci diversi tipi di errore con messaggi specifici
+      if (error.message.includes('non validi')) {
+        notificationService.error(`Errore nei dati: ${error.message}`);
+      } else if (error.message.includes('Transazione parzialmente completata')) {
+        // L'errore è già gestito dal transaction service con opzioni di recovery
+        logger.warn("Transazione parzialmente completata - recovery options presentate");
+      } else {
+        notificationService.error(`Errore nella creazione: ${error.message}`);
+      }
+      
+      throw error;
+    }
+  }
+
+  /**
    * Ottiene lo stato delle transazioni per debugging e monitoraggio
    * @returns {Object} Statistiche delle transazioni
    */
@@ -597,6 +744,74 @@ class PatientService {
    */
   getTransactionLog(transactionId) {
     return patientTransactionService.getTransactionLog(transactionId);
+  }
+
+  /**
+   * Gestisce la creazione di eventi temporanei per un paziente esistente
+   * @param {string} patientId - ID del paziente
+   * @param {Array} temporaryEvents - Array di eventi temporanei
+   */
+  async handleTemporaryEventsCreation(patientId, temporaryEvents) {
+    try {
+      stateService.setLoading(true, "Salvataggio eventi clinici...");
+      
+      for (const tempEvent of temporaryEvents) {
+        // Rimuovi i campi temporanei e aggiungi paziente_id
+        const eventData = { ...tempEvent };
+        delete eventData.id;
+        delete eventData.isTemporary;
+        eventData.paziente_id = patientId;
+        
+        await eventiCliniciService.createEvento(eventData);
+      }
+      
+      notificationService.success(`${temporaryEvents.length} eventi clinici salvati con successo`);
+    } catch (error) {
+      logger.error('Errore nella creazione eventi temporanei:', error);
+      notificationService.error('Errore nel salvare gli eventi clinici');
+      throw error;
+    } finally {
+      stateService.setLoading(false);
+    }
+  }
+
+  /**
+   * Crea un paziente con eventi temporanei in una transazione coordinata
+   * @param {Object} patientData - Dati del paziente
+   * @param {Array} temporaryEvents - Array di eventi temporanei
+   * @returns {Promise<Object>} Risultato della transazione
+   */
+  async createPatientWithTemporaryEvents(patientData, temporaryEvents) {
+    try {
+      stateService.setLoading(true, "Creazione paziente ed eventi clinici...");
+      
+      // Crea il paziente
+      const patient = await patientApi.createPatient(patientData);
+      
+      // Crea gli eventi clinici
+      for (const tempEvent of temporaryEvents) {
+        const eventData = { ...tempEvent };
+        delete eventData.id;
+        delete eventData.isTemporary;
+        eventData.paziente_id = patient.id;
+        
+        await eventiCliniciService.createEvento(eventData);
+      }
+      
+      notificationService.success(`Paziente e ${temporaryEvents.length} eventi clinici creati con successo`);
+      
+      return {
+        patient,
+        events: temporaryEvents,
+        success: true
+      };
+    } catch (error) {
+      logger.error('Errore nella creazione paziente con eventi temporanei:', error);
+      notificationService.error('Errore nella creazione del paziente e degli eventi');
+      throw error;
+    } finally {
+      stateService.setLoading(false);
+    }
   }
 
 

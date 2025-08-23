@@ -1,8 +1,8 @@
 /**
  * Servizio per la gestione dei codici di dimissione
  */
-import { supabase } from '../config/supabaseClient.js';
-import { loggerService } from './loggerService.js';
+import { supabase } from './supabase/supabaseClient.js';
+import { loggerService } from './logger/loggerService.js';
 
 class CodiciDimissioneService {
     /**

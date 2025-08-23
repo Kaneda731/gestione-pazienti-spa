@@ -4,7 +4,7 @@
 import { codiciDimissioneService } from './codiciDimissioneService.js';
 import { repartiService } from './repartiService.js';
 import { clinicheService } from './clinicheService.js';
-import { loggerService } from './loggerService.js';
+import { loggerService } from './logger/loggerService.js';
 
 class LookupService {
     constructor() {

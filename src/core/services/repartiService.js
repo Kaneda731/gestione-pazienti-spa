@@ -1,8 +1,8 @@
 /**
  * Servizio per la gestione dei reparti
  */
-import { supabase } from '../config/supabaseClient.js';
-import { loggerService } from './loggerService.js';
+import { supabase } from './supabase/supabaseClient.js';
+import { loggerService } from './logger/loggerService.js';
 
 class RepartiService {
     /**

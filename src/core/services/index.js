@@ -12,4 +12,4 @@ export { timezoneService } from './timezoneService.js';
 // Altri servizi esistenti
 export { logger } from './logger/loggerService.js';
 export { roleService } from './auth/roleService.js';
-export { navigationService } from './navigation/navigationService.js';
+export { initBackToMenuButtons } from './navigation/navigationService.js';

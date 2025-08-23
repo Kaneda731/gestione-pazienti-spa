@@ -6,22 +6,22 @@
 @use "modules/common/index" as *;
 
 // Stili specifici per mobile
-@import "modules/mobile/layout-mobile.scss";
-@import "modules/mobile/card-border-dark-mobile.scss";
-@import "modules/mobile/mobile-components.scss";
-@import "modules/mobile/navbar-mobile.scss";
-@import "modules/mobile/tab-bar.scss";
-@import "modules/mobile/cards-mobile.scss";
-@import "modules/mobile/forms-mobile.scss";
-@import "modules/mobile/patient-form-tabs.scss";
-@import "modules/mobile/discharge-transfer-section.scss";
-@import "modules/mobile/eventi-clinici-section.scss";
-@import "modules/mobile/mobile-buttons.scss";
-@import "modules/mobile/modals-mobile.scss";
-@import "modules/mobile/pagination-mobile.scss";
-@import "modules/mobile/tables-mobile.scss";
-@import "modules/mobile/dark-mode-mobile.scss";
-@import "modules/mobile/navigation-mobile.scss";
-@import "modules/mobile/menu-cards-mobile.scss";
-@import "modules/components/charts-mobile.scss";
+@use "modules/mobile/layout-mobile.scss";
+@use "modules/mobile/card-border-dark-mobile.scss";
+@use "modules/mobile/mobile-components.scss";
+@use "modules/mobile/navbar-mobile.scss";
+@use "modules/mobile/tab-bar.scss";
+@use "modules/mobile/cards-mobile.scss";
+@use "modules/mobile/forms-mobile.scss";
+@use "modules/mobile/patient-form-tabs.scss";
+@use "modules/mobile/discharge-transfer-section.scss";
+@use "modules/mobile/eventi-clinici-section.scss";
+@use "modules/mobile/mobile-buttons.scss";
+@use "modules/mobile/modals-mobile.scss";
+@use "modules/mobile/pagination-mobile.scss";
+@use "modules/mobile/tables-mobile.scss";
+@use "modules/mobile/dark-mode-mobile.scss";
+@use "modules/mobile/navigation-mobile.scss";
+@use "modules/mobile/menu-cards-mobile.scss";
+@use "modules/components/charts-mobile.scss";
 

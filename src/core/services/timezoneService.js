@@ -3,7 +3,7 @@
  * Sostituisce le query lente su pg_timezone_names con una tabella dedicata
  */
 
-import { supabase } from "../config/supabase.js";
+import { supabase } from "./supabase/supabaseClient.js";
 import { trackSupabaseQuery } from "../utils/performanceMonitor.js";
 
 class TimezoneService {

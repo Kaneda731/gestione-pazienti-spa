@@ -24,6 +24,39 @@ class CustomDatepicker {
                 ...this.options,
                 dateFormat: "d/m/Y",
                 disableMobile: true, // Forza il calendario Flatpickr anche su mobile
+                // Configurazione timezone ottimizzata per l'Italia
+                locale: {
+                    firstDayOfWeek: 1, // Lunedì come primo giorno
+                    weekdays: {
+                        shorthand: ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'],
+                        longhand: ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato']
+                    },
+                    months: {
+                        shorthand: ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'],
+                        longhand: ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre']
+                    }
+                },
+                // Evita query timezone impostando timezone fisso per l'Italia
+                parseDate: (datestr, format) => {
+                    // Parsing personalizzato che evita conversioni timezone
+                    if (!datestr) return null;
+                    const parts = datestr.split('/');
+                    if (parts.length === 3) {
+                        const day = parseInt(parts[0], 10);
+                        const month = parseInt(parts[1], 10) - 1; // JavaScript months are 0-indexed
+                        const year = parseInt(parts[2], 10);
+                        return new Date(year, month, day);
+                    }
+                    return null;
+                },
+                formatDate: (date, format) => {
+                    // Formatting personalizzato che evita conversioni timezone
+                    if (!date) return '';
+                    const day = date.getDate().toString().padStart(2, '0');
+                    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                    const year = date.getFullYear();
+                    return `${day}/${month}/${year}`;
+                }
             });
             
             // Associa l'istanza di flatpickr direttamente all'elemento input

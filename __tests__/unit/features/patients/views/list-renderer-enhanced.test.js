@@ -87,8 +87,10 @@ describe('Enhanced Patient List Renderer', () => {
 
         let dischargeCode = '';
         if (patient.codice_dimissione) {
-          const codeText = patient.codice_dimissione === '6'
+          const codeText = patient.codice_dimissione === '0'
             ? 'Dimissione ordinaria'
+            : patient.codice_dimissione === '6'
+            ? 'Protetta'
             : patient.codice_dimissione === '3'
             ? 'Trasferimento'
             : patient.codice_dimissione;
@@ -133,8 +135,10 @@ describe('Enhanced Patient List Renderer', () => {
 
         let dischargeCode = '';
         if (patient.codice_dimissione) {
-          const codeText = patient.codice_dimissione === '6'
+          const codeText = patient.codice_dimissione === '0'
             ? 'Dimissione ordinaria'
+            : patient.codice_dimissione === '6'
+            ? 'Protetta'
             : patient.codice_dimissione === '3'
             ? 'Trasferimento'
             : patient.codice_dimissione;
@@ -159,7 +163,7 @@ describe('Enhanced Patient List Renderer', () => {
       expect(badge).toContain('bg-warning text-dark');
       expect(badge).toContain('Trasf. Esterno');
       expect(badge).toContain('exit_to_app');
-      expect(badge).toContain('(Dimissione ordinaria)');
+      expect(badge).toContain('(Protetta)');
     });
 
     it('should generate regular discharge status badge', () => {
@@ -191,6 +195,51 @@ describe('Enhanced Patient List Renderer', () => {
       expect(badge).toContain('bg-secondary');
       expect(badge).toContain('Dimesso');
       expect(badge).toContain('home');
+    });
+
+    it('should generate discharge badge with ordinary discharge code 0', () => {
+      const getEnhancedStatusBadge = (patient) => {
+        if (!patient.data_dimissione) {
+          return `<span class="badge bg-success">Attivo</span>`;
+        }
+
+        let badgeClass = 'bg-secondary';
+        let badgeText = 'Dimesso';
+        let badgeIcon = '';
+
+        if (patient.tipo_dimissione === 'dimissione') {
+          badgeIcon = '<span class="material-icons" style="font-size: 0.8em; margin-right: 2px;">home</span>';
+        }
+
+        let dischargeCode = '';
+        if (patient.codice_dimissione) {
+          const codeText = patient.codice_dimissione === '0'
+            ? 'Dimissione ordinaria'
+            : patient.codice_dimissione === '6'
+            ? 'Protetta'
+            : patient.codice_dimissione === '3'
+            ? 'Trasferimento'
+            : patient.codice_dimissione;
+          dischargeCode = ` <small>(${codeText})</small>`;
+        }
+
+        return `<span class="badge ${badgeClass}">${badgeIcon}${badgeText}${dischargeCode}</span>`;
+      };
+
+      const ordinaryDischargePatient = {
+        id: '1',
+        nome: 'Mario',
+        cognome: 'Rossi',
+        data_dimissione: '2024-01-15',
+        tipo_dimissione: 'dimissione',
+        codice_dimissione: '0'
+      };
+
+      const badge = getEnhancedStatusBadge(ordinaryDischargePatient);
+      expect(badge).toContain('bg-secondary');
+      expect(badge).toContain('Dimesso');
+      expect(badge).toContain('home');
+      expect(badge).toContain('(Dimissione ordinaria)');
     });
   });
 

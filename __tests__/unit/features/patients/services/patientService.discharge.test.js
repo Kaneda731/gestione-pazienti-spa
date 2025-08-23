@@ -194,7 +194,7 @@ class MockPatientServiceExtended {
       throw new Error('Il codice dimissione è obbligatorio');
     }
 
-    const codiciDimissioneValidi = ['3', '6'];
+    const codiciDimissioneValidi = ['0', '3', '6'];
     if (!codiciDimissioneValidi.includes(dischargeData.codice_dimissione)) {
       throw new Error(`Codice dimissione non valido. Valori ammessi: ${codiciDimissioneValidi.join(', ')}`);
     }
@@ -432,6 +432,30 @@ describe('PatientService - Discharge/Transfer Extensions', () => {
       };
 
       expect(() => service.validateDischargeData(validExternalTransfer)).not.toThrow();
+    });
+
+    it('should handle ordinary discharge with code 0', async () => {
+      const ordinaryDischarge = {
+        data_dimissione: '2024-01-20',
+        tipo_dimissione: 'dimissione',
+        codice_dimissione: '0'
+      };
+
+      const result = await service.dischargePatientWithTransfer('p1', ordinaryDischarge);
+
+      expect(result.tipo_dimissione).toBe('dimissione');
+      expect(result.codice_dimissione).toBe('0');
+      expect(notificationService.success).toHaveBeenCalledWith('Paziente dimesso con successo!');
+    });
+
+    it('should validate new discharge code 0 as valid', () => {
+      const validOrdinaryDischarge = {
+        data_dimissione: '2024-01-20',
+        tipo_dimissione: 'dimissione',
+        codice_dimissione: '0'
+      };
+
+      expect(() => service.validateDischargeData(validOrdinaryDischarge)).not.toThrow();
     });
   });
 });

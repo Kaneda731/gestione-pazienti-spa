@@ -1,110 +1,185 @@
 <div class="view">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h3><span class="material-icons me-2">event_available</span>Dimissione Paziente</h3>
-                    <button class="btn btn-sm btn-back-menu" data-view="home">
-                        <span class="material-icons me-1" style="vertical-align: text-bottom;">arrow_back</span>Torna al Menu
-                    </button>
-                </div>
-                <div class="card-body">
-                    <div id="messaggio-container-dimissione" class="mb-3"></div>
-                    <!-- Sezione di Ricerca -->
-                    <div class="mb-4">
-                        <label for="search-paziente" class="form-label">Cerca Paziente</label>
-                        <div class="input-group">
-                            <input type="text" id="search-paziente" name="search-paziente" class="form-control" placeholder="Cerca per cognome, nome o codice RAD...">
-                            <button id="search-button" class="btn btn-outline-secondary" type="button">
-                                <span class="material-icons" style="vertical-align: middle;">search</span>
-                            </button>
-                        </div>
-                    </div>
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h3>
+        <span class="material-icons me-2">event_available</span>Dimissione
+        Paziente
+      </h3>
+      <button class="btn btn-sm btn-back-menu" data-view="home">
+        <span class="material-icons me-1" style="vertical-align: text-bottom"
+          >arrow_back</span
+        >Torna al Menu
+      </button>
+    </div>
+    <div class="card-body">
+      <div id="messaggio-container-dimissione" class="mb-3"></div>
+      <!-- Sezione di Ricerca -->
+      <div class="mb-4">
+        <label for="search-paziente" class="form-label">Cerca Paziente</label>
+        <div class="input-group">
+          <input
+            type="text"
+            id="search-paziente"
+            name="search-paziente"
+            class="form-control"
+            placeholder="Cerca per cognome, nome o codice RAD..."
+          />
+          <button
+            id="search-button"
+            class="btn btn-outline-secondary"
+            type="button"
+          >
+            <span class="material-icons" style="vertical-align: middle"
+              >search</span
+            >
+          </button>
+        </div>
+      </div>
 
-                    <!-- Risultati Ricerca -->
-                    <ul id="search-results" class="search-results-list mb-4">
-                        <!-- Esempio di risultato:
+      <!-- Risultati Ricerca -->
+      <ul id="search-results" class="search-results-list mb-4">
+        <!-- Esempio di risultato:
                         <li class="list-group-item">
                             <span class="result-icon material-icons">person</span>
                             <span class="result-title">Mario Rossi</span>
                             <span class="result-details">Ricovero: 01/07/2025</span>
                         </li>
                         -->
-                        <!-- I risultati della ricerca verranno mostrati qui -->
-                    </ul>
+        <!-- I risultati della ricerca verranno mostrati qui -->
+      </ul>
 
-                    <!-- Modulo di Dimissione (visibile dopo aver selezionato un paziente) -->
-                    <form id="form-dimissione" class="d-none">
-                        <h5 class="mb-3">Dettagli Paziente Selezionato</h5>
-                        <p><strong>Paziente:</strong> <span id="selected-paziente-nome"></span></p>
-                        <p><strong>Data Ricovero:</strong> <span id="selected-paziente-ricovero"></span></p>
-                        
-                        <div class="mb-3">
-                            <label for="data_dimissione" class="form-label">Data di Dimissione</label>
-                            <div class="input-group-icon">
-                                <input type="text" id="data_dimissione" name="data_dimissione" class="form-control" data-datepicker placeholder="gg/mm/aaaa" required>
-                                <span class="material-icons input-icon">calendar_today</span>
-                            </div>
-                        </div>
+      <!-- Modulo di Dimissione (visibile dopo aver selezionato un paziente) -->
+      <form id="form-dimissione" class="d-none">
+        <h5 class="mb-3">Dettagli Paziente Selezionato</h5>
+        <p>
+          <strong>Paziente:</strong> <span id="selected-paziente-nome"></span>
+        </p>
+        <p>
+          <strong>Data Ricovero:</strong>
+          <span id="selected-paziente-ricovero"></span>
+        </p>
 
-                        <div class="mb-3">
-                            <label for="tipo_dimissione" class="form-label">Tipo di Dimissione</label>
-                            <select id="tipo_dimissione" name="tipo_dimissione" class="form-select" data-custom="true" required>
-                                <option value="dimissione">Dimissione</option>
-                                <option value="trasferimento_interno">Trasferimento Interno</option>
-                                <option value="trasferimento_esterno">Trasferimento Esterno</option>
-                                <option value="decesso">Decesso</option>
-                            </select>
-                        </div>
-
-                        <!-- Campi per Trasferimento Interno -->
-                        <div id="internal-transfer-fields" class="d-none">
-                            <div class="mb-3">
-                                <label for="reparto_destinazione" class="form-label">Reparto di Destinazione</label>
-                                <input type="text" id="reparto_destinazione" name="reparto_destinazione" class="form-control" placeholder="Inserisci il reparto di destinazione" list="reparti_suggeriti">
-                                <datalist id="reparti_suggeriti">
-                                    <option value="Cardiologia"></option>
-                                    <option value="Neurologia"></option>
-                                    <option value="Medicina Interna"></option>
-                                    <option value="Pneumologia"></option>
-                                    <option value="Gastroenterologia"></option>
-                                    <option value="Urologia"></option>
-                                    <option value="Ginecologia"></option>
-                                    <option value="Pediatria"></option>
-                                    <option value="CR1"></option>
-                                    <option value="CR3"></option>
-                                </datalist>
-                            </div>
-                        </div>
-
-                        <!-- Campi per Trasferimento Esterno -->
-                        <div id="external-transfer-fields" class="d-none">
-                            <div class="mb-3">
-                                <label for="clinica_destinazione" class="form-label">Clinica di Destinazione</label>
-                                <input type="text" id="clinica_destinazione" name="clinica_destinazione" class="form-control" placeholder="Inserisci la clinica di destinazione">
-                            </div>
-                            <div class="mb-3">
-                                <label for="codice_clinica" class="form-label">Codice Clinica</label>
-                                <select id="codice_clinica" name="codice_clinica" class="form-select" data-custom="true">
-                                    <option value="">Seleziona codice clinica</option>
-                                    <option value="56">56 - Riabilitazione Motoria</option>
-                                    <option value="60">60 - Lunga Degenza</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="codice_dimissione" class="form-label">Codice Dimissione</label>
-                            <select id="codice_dimissione" name="codice_dimissione" class="form-select" data-custom="true" required>
-                                <option value="">Seleziona codice dimissione</option>
-                                <option value="6">6 - Dimissione ordinaria</option>
-                                <option value="3">3 - Trasferimento</option>
-                            </select>
-                        </div>
-                        
-                        <button type="submit" class="btn btn-primary">
-                            <span class="material-icons me-1" style="vertical-align: middle;">check_circle</span>
-                            Conferma Dimissione
-                        </button>
-                    </form>
-                </div>
-            </div>
+        <div class="mb-3">
+          <label for="data_dimissione" class="form-label"
+            >Data di Dimissione</label
+          >
+          <div class="input-group-icon">
+            <input
+              type="text"
+              id="data_dimissione"
+              name="data_dimissione"
+              class="form-control"
+              data-datepicker
+              placeholder="gg/mm/aaaa"
+              required
+            />
+            <span class="material-icons input-icon">calendar_today</span>
+          </div>
         </div>
+
+        <div class="mb-3">
+          <label for="tipo_dimissione" class="form-label"
+            >Tipo di Dimissione</label
+          >
+          <select
+            id="tipo_dimissione"
+            name="tipo_dimissione"
+            class="form-select"
+            data-custom="true"
+            required
+          >
+            <option value="dimissione">Dimissione</option>
+            <option value="trasferimento_interno">Trasferimento Interno</option>
+            <option value="trasferimento_esterno">Trasferimento Esterno</option>
+            <option value="decesso">Decesso</option>
+          </select>
+        </div>
+
+        <!-- Campi per Trasferimento Interno -->
+        <div id="internal-transfer-fields" class="d-none">
+          <div class="mb-3">
+            <label for="reparto_destinazione" class="form-label"
+              >Reparto di Destinazione</label
+            >
+            <select
+              id="reparto_destinazione"
+              name="reparto_destinazione"
+              class="form-select"
+              data-custom="true"
+              required
+            >
+              <option value="">Seleziona reparto di destinazione</option>
+              <option value="Cardiologia">Cardiologia</option>
+              <option value="CR1">CR1</option>
+              <option value="CR3">CR3</option>
+              <option value="Gastroenterologia">Gastroenterologia</option>
+              <option value="Ginecologia">Ginecologia</option>
+              <option value="Medicina Interna">Medicina Interna</option>
+              <option value="Neurologia">Neurologia</option>
+              <option value="Pediatria">Pediatria</option>
+              <option value="Pneumologia">Pneumologia</option>
+              <option value="UGI">UGI</option>
+              <option value="Urologia">Urologia</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Campi per Trasferimento Esterno -->
+        <div id="external-transfer-fields" class="d-none">
+          <div class="mb-3">
+            <label for="clinica_destinazione" class="form-label"
+              >Clinica di Destinazione</label
+            >
+            <input
+              type="text"
+              id="clinica_destinazione"
+              name="clinica_destinazione"
+              class="form-control"
+              placeholder="Inserisci la clinica di destinazione"
+            />
+          </div>
+          <div class="mb-3">
+            <label for="codice_clinica" class="form-label"
+              >Codice Clinica</label
+            >
+            <select
+              id="codice_clinica"
+              name="codice_clinica"
+              class="form-select"
+              data-custom="true"
+            >
+              <option value="">Seleziona codice clinica</option>
+              <option value="56">56 - Riabilitazione Motoria</option>
+              <option value="60">60 - Lunga Degenza</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="codice_dimissione" class="form-label"
+            >Codice Dimissione</label
+          >
+          <select
+            id="codice_dimissione"
+            name="codice_dimissione"
+            class="form-select"
+            data-custom="true"
+            required
+          >
+            <option value="">Seleziona codice dimissione</option>
+            <option value="0">0 - Dimissione ordinaria</option>
+            <option value="6">6 - Protetta</option>
+            <option value="3">3 - Trasferimento</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+          <span class="material-icons me-1" style="vertical-align: middle"
+            >check_circle</span
+          >
+          Conferma Dimissione
+        </button>
+      </form>
+    </div>
+  </div>
+</div>

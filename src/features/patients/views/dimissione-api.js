@@ -141,7 +141,7 @@ export function validateDischargeData(dischargeData) {
         errors.push('Tipo di dimissione non valido');
     }
     
-    const codiciDimissioneValidi = ['3', '6'];
+    const codiciDimissioneValidi = ['0', '3', '6'];
     if (dischargeData.codice_dimissione && !codiciDimissioneValidi.includes(dischargeData.codice_dimissione)) {
         errors.push('Codice dimissione non valido');
     }

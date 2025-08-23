@@ -116,7 +116,7 @@ export function validatePatientData(data) {
         if (!data.codice_dimissione) {
           throw new Error("Il codice dimissione è obbligatorio quando si specifica il tipo dimissione (escluso 'decesso')");
         }
-        const codiciDimissioneValidi = ["3", "6"];
+        const codiciDimissioneValidi = ["0", "3", "6"];
         if (!codiciDimissioneValidi.includes(data.codice_dimissione)) {
           throw new Error(`Codice dimissione non valido. Valori ammessi: ${codiciDimissioneValidi.join(", ")}`);
         }
@@ -180,7 +180,7 @@ export function validateDischargeData(dischargeData) {
       if (!dischargeData.codice_dimissione) {
         throw new Error("Il codice dimissione è obbligatorio");
       }
-      const codiciDimissioneValidi = ["3", "6"];
+      const codiciDimissioneValidi = ["0", "3", "6"];
       if (!codiciDimissioneValidi.includes(dischargeData.codice_dimissione)) {
         throw new Error(`Codice dimissione non valido. Valori ammessi: ${codiciDimissioneValidi.join(", ")}`);
       }

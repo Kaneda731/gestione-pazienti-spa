@@ -52,8 +52,10 @@ function getEnhancedStatusBadge(patient) {
   let dischargeCode = "";
   if (patient.codice_dimissione) {
     const codeText =
-      patient.codice_dimissione === "6"
+      patient.codice_dimissione === "0"
         ? "Dimissione ordinaria"
+        : patient.codice_dimissione === "6"
+        ? "Protetta"
         : patient.codice_dimissione === "3"
         ? "Trasferimento"
         : patient.codice_dimissione;

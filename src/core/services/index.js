@@ -9,6 +9,6 @@ export { clinicheService } from './clinicheService.js';
 export { lookupService } from './lookupService.js';
 
 // Altri servizi esistenti
-export { loggerService } from './logger/loggerService.js';
+export { logger } from './logger/loggerService.js';
 export { roleService } from './auth/roleService.js';
 export { navigationService } from './navigation/navigationService.js';

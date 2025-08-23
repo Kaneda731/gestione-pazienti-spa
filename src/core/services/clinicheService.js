@@ -2,7 +2,7 @@
  * Servizio per la gestione delle cliniche
  */
 import { supabase } from './supabase/supabaseClient.js';
-import { loggerService } from './logger/loggerService.js';
+import { logger } from './logger/loggerService.js';
 
 class ClinicheService {
     /**
@@ -18,13 +18,13 @@ class ClinicheService {
                 .order('codice');
 
             if (error) {
-                loggerService.error('Errore nel recupero cliniche:', error);
+                logger.error('Errore nel recupero cliniche:', error);
                 throw error;
             }
 
             return data || [];
         } catch (error) {
-            loggerService.error('Errore nel servizio cliniche:', error);
+            logger.error('Errore nel servizio cliniche:', error);
             throw error;
         }
     }
@@ -43,13 +43,13 @@ class ClinicheService {
                 .single();
 
             if (error) {
-                loggerService.error('Errore nel recupero clinica:', error);
+                logger.error('Errore nel recupero clinica:', error);
                 throw error;
             }
 
             return data;
         } catch (error) {
-            loggerService.error('Errore nel servizio clinica:', error);
+            logger.error('Errore nel servizio clinica:', error);
             throw error;
         }
     }
@@ -69,13 +69,13 @@ class ClinicheService {
                 .single();
 
             if (error) {
-                loggerService.error('Errore nel recupero clinica:', error);
+                logger.error('Errore nel recupero clinica:', error);
                 throw error;
             }
 
             return data;
         } catch (error) {
-            loggerService.error('Errore nel servizio clinica:', error);
+            logger.error('Errore nel servizio clinica:', error);
             throw error;
         }
     }

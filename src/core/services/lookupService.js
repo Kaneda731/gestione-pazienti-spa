@@ -4,7 +4,7 @@
 import { codiciDimissioneService } from './codiciDimissioneService.js';
 import { repartiService } from './repartiService.js';
 import { clinicheService } from './clinicheService.js';
-import { loggerService } from './logger/loggerService.js';
+import { logger } from './logger/loggerService.js';
 
 class LookupService {
     constructor() {
@@ -41,7 +41,7 @@ class LookupService {
                 };
             }
 
-            loggerService.info('Caricamento dati di lookup...');
+            logger.info('Caricamento dati di lookup...');
 
             const [codiciDimissione, reparti, cliniche] = await Promise.all([
                 codiciDimissioneService.getAll(),
@@ -57,7 +57,7 @@ class LookupService {
                 lastUpdate: Date.now()
             };
 
-            loggerService.info('Dati di lookup caricati con successo');
+            logger.info('Dati di lookup caricati con successo');
 
             return {
                 codiciDimissione,
@@ -65,7 +65,7 @@ class LookupService {
                 cliniche
             };
         } catch (error) {
-            loggerService.error('Errore nel caricamento dati di lookup:', error);
+            logger.error('Errore nel caricamento dati di lookup:', error);
             throw error;
         }
     }
@@ -102,7 +102,7 @@ class LookupService {
             // Trigger change event per custom select
             selectElement.dispatchEvent(new Event('change'));
         } catch (error) {
-            loggerService.error('Errore nel popolare select codici dimissione:', error);
+            logger.error('Errore nel popolare select codici dimissione:', error);
         }
     }
 
@@ -141,7 +141,7 @@ class LookupService {
             // Trigger change event per custom select
             selectElement.dispatchEvent(new Event('change'));
         } catch (error) {
-            loggerService.error('Errore nel popolare select reparti:', error);
+            logger.error('Errore nel popolare select reparti:', error);
         }
     }
 
@@ -177,7 +177,7 @@ class LookupService {
             // Trigger change event per custom select
             selectElement.dispatchEvent(new Event('change'));
         } catch (error) {
-            loggerService.error('Errore nel popolare select cliniche:', error);
+            logger.error('Errore nel popolare select cliniche:', error);
         }
     }
 

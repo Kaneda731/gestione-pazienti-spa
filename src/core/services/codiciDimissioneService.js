@@ -2,7 +2,7 @@
  * Servizio per la gestione dei codici di dimissione
  */
 import { supabase } from './supabase/supabaseClient.js';
-import { loggerService } from './logger/loggerService.js';
+import { logger } from './logger/loggerService.js';
 
 class CodiciDimissioneService {
     /**
@@ -18,13 +18,13 @@ class CodiciDimissioneService {
                 .order('codice');
 
             if (error) {
-                loggerService.error('Errore nel recupero codici dimissione:', error);
+                logger.error('Errore nel recupero codici dimissione:', error);
                 throw error;
             }
 
             return data || [];
         } catch (error) {
-            loggerService.error('Errore nel servizio codici dimissione:', error);
+            logger.error('Errore nel servizio codici dimissione:', error);
             throw error;
         }
     }
@@ -43,13 +43,13 @@ class CodiciDimissioneService {
                 .single();
 
             if (error) {
-                loggerService.error('Errore nel recupero codice dimissione:', error);
+                logger.error('Errore nel recupero codice dimissione:', error);
                 throw error;
             }
 
             return data;
         } catch (error) {
-            loggerService.error('Errore nel servizio codice dimissione:', error);
+            logger.error('Errore nel servizio codice dimissione:', error);
             throw error;
         }
     }
@@ -69,13 +69,13 @@ class CodiciDimissioneService {
                 .single();
 
             if (error) {
-                loggerService.error('Errore nel recupero codice dimissione:', error);
+                logger.error('Errore nel recupero codice dimissione:', error);
                 throw error;
             }
 
             return data;
         } catch (error) {
-            loggerService.error('Errore nel servizio codice dimissione:', error);
+            logger.error('Errore nel servizio codice dimissione:', error);
             throw error;
         }
     }

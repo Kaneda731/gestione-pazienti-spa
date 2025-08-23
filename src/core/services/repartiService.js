@@ -2,7 +2,7 @@
  * Servizio per la gestione dei reparti
  */
 import { supabase } from './supabase/supabaseClient.js';
-import { loggerService } from './logger/loggerService.js';
+import { logger } from './logger/loggerService.js';
 
 class RepartiService {
     /**
@@ -25,13 +25,13 @@ class RepartiService {
             const { data, error } = await query;
 
             if (error) {
-                loggerService.error('Errore nel recupero reparti:', error);
+                logger.error('Errore nel recupero reparti:', error);
                 throw error;
             }
 
             return data || [];
         } catch (error) {
-            loggerService.error('Errore nel servizio reparti:', error);
+            logger.error('Errore nel servizio reparti:', error);
             throw error;
         }
     }
@@ -58,13 +58,13 @@ class RepartiService {
                 .single();
 
             if (error) {
-                loggerService.error('Errore nel recupero reparto:', error);
+                logger.error('Errore nel recupero reparto:', error);
                 throw error;
             }
 
             return data;
         } catch (error) {
-            loggerService.error('Errore nel servizio reparto:', error);
+            logger.error('Errore nel servizio reparto:', error);
             throw error;
         }
     }
@@ -84,13 +84,13 @@ class RepartiService {
                 .single();
 
             if (error) {
-                loggerService.error('Errore nel recupero reparto:', error);
+                logger.error('Errore nel recupero reparto:', error);
                 throw error;
             }
 
             return data;
         } catch (error) {
-            loggerService.error('Errore nel servizio reparto:', error);
+            logger.error('Errore nel servizio reparto:', error);
             throw error;
         }
     }

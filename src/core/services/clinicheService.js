@@ -1,84 +1,84 @@
 /**
- * Servizio per la gestione delle cliniche
+ * Servizio per la gestione dei codici clinica
  */
-import { supabase } from './supabase/supabaseClient.js';
-import { logger } from './logger/loggerService.js';
+import { supabase } from "./supabase/supabaseClient.js";
+import { logger } from "./logger/loggerService.js";
 
 class ClinicheService {
-    /**
-     * Recupera tutte le cliniche attive
-     * @returns {Promise<Array>} Lista delle cliniche
-     */
-    async getAll() {
-        try {
-            const { data, error } = await supabase
-                .from('cliniche')
-                .select('*')
-                .eq('attivo', true)
-                .order('codice');
+  /**
+   * Recupera tutti i codici clinica attivi
+   * @returns {Promise<Array>} Lista dei codici clinica
+   */
+  async getAll() {
+    try {
+      const { data, error } = await supabase
+        .from("codice_clinica")
+        .select("*")
+        .eq("attivo", true)
+        .order("codice");
 
-            if (error) {
-                logger.error('Errore nel recupero cliniche:', error);
-                throw error;
-            }
+      if (error) {
+        logger.error("Errore nel recupero codici clinica:", error);
+        throw error;
+      }
 
-            return data || [];
-        } catch (error) {
-            logger.error('Errore nel servizio cliniche:', error);
-            throw error;
-        }
+      return data || [];
+    } catch (error) {
+      logger.error("Errore nel servizio codici clinica:", error);
+      throw error;
     }
+  }
 
-    /**
-     * Recupera una clinica per ID
-     * @param {number} id - ID della clinica
-     * @returns {Promise<Object|null>} Clinica
-     */
-    async getById(id) {
-        try {
-            const { data, error } = await supabase
-                .from('cliniche')
-                .select('*')
-                .eq('id', id)
-                .single();
+  /**
+   * Recupera un codice clinica per ID
+   * @param {number} id - ID del codice clinica
+   * @returns {Promise<Object|null>} Codice clinica
+   */
+  async getById(id) {
+    try {
+      const { data, error } = await supabase
+        .from("codice_clinica")
+        .select("*")
+        .eq("id", id)
+        .single();
 
-            if (error) {
-                logger.error('Errore nel recupero clinica:', error);
-                throw error;
-            }
+      if (error) {
+        logger.error("Errore nel recupero codice clinica:", error);
+        throw error;
+      }
 
-            return data;
-        } catch (error) {
-            logger.error('Errore nel servizio clinica:', error);
-            throw error;
-        }
+      return data;
+    } catch (error) {
+      logger.error("Errore nel servizio codice clinica:", error);
+      throw error;
     }
+  }
 
-    /**
-     * Recupera una clinica per codice
-     * @param {string} codice - Codice della clinica
-     * @returns {Promise<Object|null>} Clinica
-     */
-    async getByCodice(codice) {
-        try {
-            const { data, error } = await supabase
-                .from('cliniche')
-                .select('*')
-                .eq('codice', codice)
-                .eq('attivo', true)
-                .single();
+  /**
+   * Recupera un codice clinica per codice
+   * @param {string} codice - Codice della clinica
+   * @returns {Promise<Object|null>} Codice clinica
+   */
+  async getByCodice(codice) {
+    try {
+      const { data, error } = await supabase
+        .from("codice_clinica")
+        .select("*")
+        .eq("codice", codice)
+        .eq("attivo", true)
+        .single();
 
-            if (error) {
-                logger.error('Errore nel recupero clinica:', error);
-                throw error;
-            }
+      if (error) {
+        logger.error("Errore nel recupero codice clinica:", error);
+        throw error;
+      }
 
-            return data;
-        } catch (error) {
-            logger.error('Errore nel servizio clinica:', error);
-            throw error;
-        }
+      return data;
+    } catch (error) {
+      logger.error("Errore nel servizio codice clinica:", error);
+      throw error;
     }
+  }
 }
 
 export const clinicheService = new ClinicheService();

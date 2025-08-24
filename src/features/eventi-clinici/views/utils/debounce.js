@@ -27,7 +27,7 @@ export function debounce(fn, wait = 150, options = {}) {
 
   function debounced(...args) {
     lastArgs = args;
-    lastThis = this; // eslint-disable-line @typescript-eslint/no-this-alias
+    lastThis = this;
 
     if (!timer) {
       if (leading && !leadingCalled) {
@@ -72,7 +72,7 @@ export function rafDebounce(fn) {
 
   return function debouncedRaf(...args) {
     lastArgs = args;
-    lastThis = this; // eslint-disable-line @typescript-eslint/no-this-alias
+    lastThis = this;
     if (!scheduled) {
       scheduled = true;
       if (typeof requestAnimationFrame === 'function') {

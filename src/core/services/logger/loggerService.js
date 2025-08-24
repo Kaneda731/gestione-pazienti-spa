@@ -1,7 +1,7 @@
 import { isDevelopment, isTest, isProduction } from '../../../app/config/environment.js';
 
-// Esporta sia la classe che l'istanza singleton
-export class LoggerService {
+// Classe LoggerService (solo per uso interno)
+class LoggerService {
     /**
      * Sanitize arguments to avoid leaking sensitive data in production
      * - Keeps primitives as-is

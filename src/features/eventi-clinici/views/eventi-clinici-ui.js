@@ -10,41 +10,10 @@ import { populateDepartmentFilterCore } from "./filters/populateDepartmentFilter
 import { EventiTableRenderer } from "./ui/EventiTableRenderer.js";
 import { EventiTimelineRenderer } from "./ui/EventiTimelineRenderer.js";
 
-// Re-export dal nuovo modulo renderer
-export {
-  renderEventsResponsive,
-  renderEventsTimeline,
-  renderEventsTable,
-  showLoading,
-  showError,
-  showSearchingState,
-  hideSearchingState,
-  renderPatientSearchResults,
-  renderEventDetails,
-  showActiveFiltersIndicator,
-  showFilterStats,
-  showExportProgress,
-  showExportSuccess,
-  highlightSearchTerms,
-  updateSearchResultsCount
-} from './ui-modules/renderer.js';
-
-// Re-export dal nuovo modulo forms
-export {
-  populateEventForm,
-  resetEventForm,
-  showFormMessage,
-  clearFormMessages,
-  updateModalTitle,
-  toggleEventTypeFields,
-  validateEventForm,
-  getFormData,
-  setFormEnabled,
-  setFormLoading,
-  highlightFormErrors,
-  enableAutoSave,
-  disableAutoSave
-} from './ui-modules/forms.js';
+// Re-export functions from modular components  
+export * from './ui-modules/renderer.js';
+export * from './ui-modules/forms.js';
+export * from './ui-modules/filters.js';
 
 // Re-export per reset filtri dalla UI
 export { resetCurrentFiltersToDefaults } from '../api/eventi-clinici-api.js';
@@ -145,6 +114,11 @@ export function initializeDOMElements() {
     initializeForms(domElements);
   });
   
+  // Inizializza il filters manager con i DOM elements
+  import('./ui-modules/filters.js').then(({ initializeFilters }) => {
+    initializeFilters(domElements);
+  });
+  
   return domElements;
 }
 
@@ -191,96 +165,6 @@ function ensureRenderers() {
     // Riallinea i riferimenti DOM al re-ingresso
     timelineRenderer.domElements = domElements;
   }
-}
-
-// ============================================================================
-// FILTER UI FUNCTIONS
-// ============================================================================
-
-/**
- * Resetta l'interfaccia dei filtri
- */
-export function resetFiltersUI() {
-  if (!domElements) return;
-
-  // Reset dei campi filtro
-  if (domElements.filterType) domElements.filterType.value = '';
-  if (domElements.filterDateFrom) domElements.filterDateFrom.value = '';
-  if (domElements.filterDateTo) domElements.filterDateTo.value = '';
-  if (domElements.filterDepartment) domElements.filterDepartment.value = '';
-  if (domElements.filterStatus) domElements.filterStatus.value = '';
-  if (domElements.searchPatientInput) domElements.searchPatientInput.value = '';
-
-  // Reset filtri avanzati
-  if (domElements.filterPriorityFrom) domElements.filterPriorityFrom.value = '';
-  if (domElements.filterPriorityTo) domElements.filterPriorityTo.value = '';
-  if (domElements.filterCreatedBy) domElements.filterCreatedBy.value = '';
-  if (domElements.filterHasAllegati) domElements.filterHasAllegati.checked = false;
-
-  logger.log("🧹 Filtri UI resettati");
-}
-
-/**
- * Applica i filtri all'interfaccia
- */
-export function applyFiltersToUI(filters) {
-  if (!domElements || !filters) return;
-
-  if (domElements.filterType && filters.tipo_evento) {
-    domElements.filterType.value = filters.tipo_evento;
-  }
-  if (domElements.filterDateFrom && filters.data_da) {
-    domElements.filterDateFrom.value = filters.data_da;
-  }
-  if (domElements.filterDateTo && filters.data_a) {
-    domElements.filterDateTo.value = filters.data_a;
-  }
-  if (domElements.filterDepartment && filters.reparto) {
-    domElements.filterDepartment.value = filters.reparto;
-  }
-  if (domElements.filterStatus && filters.status) {
-    domElements.filterStatus.value = filters.status;
-  }
-  if (domElements.searchPatientInput && filters.paziente) {
-    domElements.searchPatientInput.value = filters.paziente;
-  }
-
-  logger.log("🎛️ Filtri applicati all'UI:", filters);
-}
-
-/**
- * Ottiene i filtri dall'interfaccia
- */
-export function getFiltersFromUI() {
-  if (!domElements) return {};
-
-  return {
-    tipo_evento: domElements.filterType?.value || '',
-    data_da: domElements.filterDateFrom?.value || '',
-    data_a: domElements.filterDateTo?.value || '',
-    reparto: domElements.filterDepartment?.value || '',
-    status: domElements.filterStatus?.value || '',
-    paziente: domElements.searchPatientInput?.value || '',
-    priorita_da: domElements.filterPriorityFrom?.value || '',
-    priorita_a: domElements.filterPriorityTo?.value || '',
-    creato_da: domElements.filterCreatedBy?.value || '',
-    ha_allegati: domElements.filterHasAllegati?.checked || false
-  };
-}
-
-/**
- * Popola il filtro reparto
- */
-export function populateDepartmentFilter(departments) {
-  return populateDepartmentFilterCore(departments, domElements.filterDepartment);
-}
-
-/**
- * Popola i filtri avanzati
- */
-export function populateAdvancedFilters(config) {
-  // Implementazione placeholder - sarà completata nelle prossime iterazioni
-  logger.log("🔧 Popolamento filtri avanzati:", config);
 }
 
 // ============================================================================

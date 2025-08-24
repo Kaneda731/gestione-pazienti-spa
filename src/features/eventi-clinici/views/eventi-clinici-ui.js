@@ -29,6 +29,23 @@ export {
   updateSearchResultsCount
 } from './ui-modules/renderer.js';
 
+// Re-export dal nuovo modulo forms
+export {
+  populateEventForm,
+  resetEventForm,
+  showFormMessage,
+  clearFormMessages,
+  updateModalTitle,
+  toggleEventTypeFields,
+  validateEventForm,
+  getFormData,
+  setFormEnabled,
+  setFormLoading,
+  highlightFormErrors,
+  enableAutoSave,
+  disableAutoSave
+} from './ui-modules/forms.js';
+
 // Re-export per reset filtri dalla UI
 export { resetCurrentFiltersToDefaults } from '../api/eventi-clinici-api.js';
 
@@ -123,6 +140,11 @@ export function initializeDOMElements() {
     initializeRenderer(domElements);
   });
   
+  // Inizializza il forms manager con i DOM elements
+  import('./ui-modules/forms.js').then(({ initializeForms }) => {
+    initializeForms(domElements);
+  });
+  
   return domElements;
 }
 
@@ -168,122 +190,6 @@ function ensureRenderers() {
   } else {
     // Riallinea i riferimenti DOM al re-ingresso
     timelineRenderer.domElements = domElements;
-  }
-}
-
-// ============================================================================
-// FORM MANAGEMENT FUNCTIONS
-// ============================================================================
-
-/**
- * Popola il form di inserimento/modifica evento
- */
-export function populateEventForm(evento) {
-  if (!evento || !domElements.eventForm) return;
-
-  // Campi base
-  if (domElements.eventTypeSelect) domElements.eventTypeSelect.value = evento.tipo_evento || '';
-  if (domElements.eventDateInput) domElements.eventDateInput.value = evento.data_evento ? evento.data_evento.split('T')[0] : '';
-  if (domElements.eventDescriptionInput) domElements.eventDescriptionInput.value = evento.descrizione || '';
-  if (domElements.eventNotesInput) domElements.eventNotesInput.value = evento.note || '';
-  if (domElements.departmentSelect) domElements.departmentSelect.value = evento.reparto || '';
-  if (domElements.prioritySelect) domElements.prioritySelect.value = evento.priorita || '';
-  if (domElements.statusSelect) domElements.statusSelect.value = evento.status || '';
-
-  // Paziente
-  if (domElements.patientNameInput) {
-    domElements.patientNameInput.value = evento.paziente_nome ? `${evento.paziente_nome} ${evento.paziente_cognome || ''}`.trim() : '';
-    if (evento.paziente_id) {
-      domElements.patientNameInput.dataset.patientId = evento.paziente_id;
-    }
-  }
-
-  // Campi specifici per tipo evento
-  toggleEventTypeFields(evento.tipo_evento);
-
-  // Campi dimissione
-  if (domElements.dischargeCodeSelect) domElements.dischargeCodeSelect.value = evento.codice_dimissione || '';
-  if (domElements.dischargeDestinationSelect) domElements.dischargeDestinationSelect.value = evento.destinazione_dimissione || '';
-
-  // Campi trasferimento
-  if (domElements.transferSourceInput) domElements.transferSourceInput.value = evento.provenienza_trasferimento || '';
-  if (domElements.transferDestinationInput) domElements.transferDestinationInput.value = evento.destinazione_trasferimento || '';
-
-  logger.log("📝 Form popolato con evento:", evento.id);
-}
-
-/**
- * Resetta il form di inserimento/modifica evento
- */
-export function resetEventForm() {
-  if (!domElements.eventForm) return;
-
-  domElements.eventForm.reset();
-  
-  // Reset dataset dei pazienti
-  if (domElements.patientNameInput) {
-    delete domElements.patientNameInput.dataset.patientId;
-  }
-
-  // Nasconde tutti i campi specifici
-  toggleEventTypeFields('');
-  
-  clearFormMessages();
-  
-  logger.log("🧹 Form evento resettato");
-}
-
-/**
- * Mostra messaggio nel form
- */
-export function showFormMessage(message, type = "danger") {
-  const messageContainer = document.getElementById('form-message-container');
-  if (!messageContainer) return;
-
-  messageContainer.innerHTML = sanitizeHtml(`
-    <div class="alert alert-${type} alert-dismissible fade show" role="alert">
-      ${sanitizeHtml(message)}
-      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-  `);
-}
-
-/**
- * Pulisce i messaggi del form
- */
-export function clearFormMessages() {
-  const messageContainer = document.getElementById('form-message-container');
-  if (messageContainer) {
-    messageContainer.innerHTML = '';
-  }
-}
-
-/**
- * Aggiorna il titolo del modal
- */
-export function updateModalTitle(title, icon = "add") {
-  const modalTitle = document.getElementById('evento-modal-title');
-  if (!modalTitle) return;
-
-  modalTitle.innerHTML = sanitizeHtml(`
-    <span class="material-icons me-2">${icon}</span>
-    ${sanitizeHtml(title)}
-  `);
-}
-
-/**
- * Mostra/nasconde campi specifici per tipo evento
- */
-export function toggleEventTypeFields(eventType) {
-  const dischargeFields = document.getElementById('discharge-fields');
-  const transferFields = document.getElementById('transfer-fields');
-
-  if (dischargeFields) {
-    dischargeFields.style.display = eventType === 'dimissione' ? 'block' : 'none';
-  }
-
-  if (transferFields) {
-    transferFields.style.display = eventType === 'trasferimento' ? 'block' : 'none';
   }
 }
 

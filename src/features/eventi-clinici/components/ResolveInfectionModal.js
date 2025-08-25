@@ -12,8 +12,8 @@ export class ResolveInfectionModal {
         this.options = {
             eventoId: null,
             title: 'Risolvi Infezione',
-            defaultDate: new Date().toISOString().split('T')[0],
-            minDate: null, // Data minima per la risoluzione (es. data inizio infezione)
+            defaultDate: new Date(), // Passa direttamente un oggetto Date invece di stringa ISO
+            minDate: options.minDate ? new Date(options.minDate) : null, // Converti minDate in oggetto Date
             ...options
         };
         this.modalId = `resolve-infection-modal-${Date.now()}`;

@@ -154,7 +154,7 @@ export async function renderView() {
         if (window.location.hash.includes('access_token=')) return;
         if (currentUser.session === undefined) return;
 
-        const hashView = window.location.hash.replace(/^#/, '');
+        const hashView = window.location.hash.replace(/^#\/?/, '');
         if (!currentUser.session && (hashView === '' || hashView === 'home' || hashView === 'list')) {
             window.location.hash = 'login-required';
             return;
@@ -167,7 +167,7 @@ export async function renderView() {
 
         viewContainer.innerHTML = sanitizeHtml('<div class="d-flex justify-content-center align-items-center" style="height: 80vh;"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>');
 
-        const hash = window.location.hash.substring(1) || 'home';
+        const hash = window.location.hash.replace(/^#\/?/, '') || 'home';
         const [requestedViewName, queryString] = hash.split('?');
         const urlParams = new URLSearchParams(queryString);
 

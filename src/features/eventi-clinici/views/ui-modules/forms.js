@@ -121,13 +121,52 @@ export function updateModalTitle(title, icon = "add") {
 export function toggleEventTypeFields(eventType) {
   const dischargeFields = document.getElementById('discharge-fields');
   const transferFields = document.getElementById('transfer-fields');
+  const interventoFields = document.getElementById('intervento-fields');
+  const infezioneFields = document.getElementById('infezione-fields');
 
+  // Reset di tutti i campi
   if (dischargeFields) {
-    dischargeFields.style.display = eventType === 'dimissione' ? 'block' : 'none';
+    dischargeFields.style.display = 'none';
+  }
+  if (transferFields) {
+    transferFields.style.display = 'none';
+  }
+  if (interventoFields) {
+    interventoFields.style.display = 'none';
+  }
+  if (infezioneFields) {
+    infezioneFields.style.display = 'none';
   }
 
-  if (transferFields) {
-    transferFields.style.display = eventType === 'trasferimento' ? 'block' : 'none';
+  // Pulisci i valori dei campi nascosti
+  const tipoInterventoSelect = document.getElementById('evento-tipo-intervento');
+  const agentePatogenoInput = document.getElementById('evento-agente-patogeno');
+  
+  if (tipoInterventoSelect) tipoInterventoSelect.value = '';
+  if (agentePatogenoInput) agentePatogenoInput.value = '';
+
+  // Mostra i campi appropriati in base al tipo di evento
+  switch (eventType) {
+    case 'dimissione':
+      if (dischargeFields) {
+        dischargeFields.style.display = 'block';
+      }
+      break;
+    case 'trasferimento':
+      if (transferFields) {
+        transferFields.style.display = 'block';
+      }
+      break;
+    case 'intervento':
+      if (interventoFields) {
+        interventoFields.style.display = 'block';
+      }
+      break;
+    case 'infezione':
+      if (infezioneFields) {
+        infezioneFields.style.display = 'block';
+      }
+      break;
   }
 }
 
@@ -191,6 +230,20 @@ export function validateEventForm() {
     }
   }
 
+  if (eventType === 'intervento') {
+    const tipoInterventoSelect = document.getElementById('evento-tipo-intervento');
+    if (!tipoInterventoSelect?.value) {
+      errors.push('Tipo intervento è obbligatorio per gli interventi');
+    }
+  }
+
+  if (eventType === 'infezione') {
+    const agentePatogenoInput = document.getElementById('evento-agente-patogeno');
+    if (!agentePatogenoInput?.value?.trim()) {
+      errors.push('Agente patogeno è obbligatorio per le infezioni');
+    }
+  }
+
   return {
     isValid: errors.length === 0,
     errors
@@ -224,6 +277,16 @@ export function getFormData() {
   if (eventType === 'trasferimento') {
     formData.provenienza_trasferimento = domElements.transferSourceInput?.value?.trim() || '';
     formData.destinazione_trasferimento = domElements.transferDestinationInput?.value?.trim() || '';
+  }
+
+  if (eventType === 'intervento') {
+    const tipoInterventoSelect = document.getElementById('evento-tipo-intervento');
+    formData.tipo_intervento = tipoInterventoSelect?.value || '';
+  }
+
+  if (eventType === 'infezione') {
+    const agentePatogenoInput = document.getElementById('evento-agente-patogeno');
+    formData.agente_patogeno = agentePatogenoInput?.value?.trim() || '';
   }
 
   return formData;

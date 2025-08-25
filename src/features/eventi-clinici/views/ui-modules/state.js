@@ -61,57 +61,51 @@ export function initializeDOMElements() {
     filterType: document.getElementById("eventi-filter-type"),
     filterDateFrom: document.getElementById("eventi-filter-date-from"),
     filterDateTo: document.getElementById("eventi-filter-date-to"),
-    filterDepartment: document.getElementById("eventi-filter-department"),
-    filterStatus: document.getElementById("eventi-filter-status"),
-    searchResultsInfo: document.getElementById("search-results-info"),
+    filterReparto: document.getElementById("eventi-filter-reparto"),
+    filterStato: document.getElementById("eventi-filter-stato"),
+    filterSortColumn: document.getElementById("eventi-sort-column"),
+    filterSortDirection: document.getElementById("eventi-sort-direction"),
 
-    // Buttons
+    // Action buttons
     addEventBtn: document.getElementById("eventi-add-btn"),
     resetFiltersBtn: document.getElementById("eventi-reset-filters-btn"),
-    exportBtn: document.getElementById("eventi-export-btn"),
     exportCsvBtn: document.getElementById("eventi-export-csv-btn"),
     exportJsonBtn: document.getElementById("eventi-export-json-btn"),
-    saveFiltersBtn: document.getElementById("eventi-save-filters-btn"),
-    loadFiltersBtn: document.getElementById("eventi-load-filters-btn"),
 
     // Pagination
     paginationControls: document.getElementById("eventi-pagination-controls"),
-    pageInfo: document.getElementById("eventi-page-info"),
     prevPageBtn: document.getElementById("eventi-prev-page-btn"),
     nextPageBtn: document.getElementById("eventi-next-page-btn"),
+    pageInfo: document.getElementById("eventi-page-info"),
 
-    // Advanced filters (if present)
-    advancedFiltersToggle: document.getElementById("eventi-advanced-filters-toggle"),
-    advancedFiltersPanel: document.getElementById("eventi-advanced-filters-panel"),
-    filterPriorityFrom: document.getElementById("eventi-filter-priority-from"),
-    filterPriorityTo: document.getElementById("eventi-filter-priority-to"),
-    filterCreatedBy: document.getElementById("eventi-filter-created-by"),
-    filterHasAllegati: document.getElementById("eventi-filter-has-allegati"),
+    // Modals
+    eventFormModal: document.getElementById("evento-form-modal"),
+    eventDetailModal: document.getElementById("evento-detail-modal"),
 
     // Modal elements
-    modal: document.getElementById("evento-modal"),
     modalTitle: document.getElementById("evento-modal-title"),
-    modalBody: document.getElementById("evento-modal-body"),
+    modalIcon: document.getElementById("evento-modal-icon"),
     saveBtn: document.getElementById("evento-save-btn"),
-    editBtn: document.getElementById("evento-edit-btn"),
-    deleteBtn: document.getElementById("evento-delete-btn"),
-    
+    detailTitle: document.getElementById("evento-detail-title"),
+    detailIcon: document.getElementById("evento-detail-icon"),
+    detailContent: document.getElementById("evento-detail-content"),
+    messageContainer: document.getElementById("evento-messaggio-container"),
+
     // Form elements
     eventForm: document.getElementById("evento-form"),
-    eventTypeSelect: document.getElementById("evento-tipo"),
-    eventDateInput: document.getElementById("evento-data"),
-    eventDescriptionInput: document.getElementById("evento-descrizione"),
-    eventNotesInput: document.getElementById("evento-note"),
-    patientNameInput: document.getElementById("paziente-nome"),
-    departmentSelect: document.getElementById("evento-reparto"),
-    prioritySelect: document.getElementById("evento-priorita"),
-    statusSelect: document.getElementById("evento-status"),
-    
-    // Additional fields for specific event types
-    dischargeCodeSelect: document.getElementById("evento-codice-dimissione"),
-    dischargeDestinationSelect: document.getElementById("evento-destinazione-dimissione"),
-    transferSourceInput: document.getElementById("evento-provenienza-trasferimento"),
-    transferDestinationInput: document.getElementById("evento-destinazione-trasferimento")
+    eventId: document.getElementById("evento-id"),
+    eventPatientInput: document.getElementById("evento-paziente"),
+    eventPatientId: document.getElementById("evento-paziente-id"),
+    eventPatientSearchResults: document.getElementById("evento-patient-search-results"),
+    eventType: document.getElementById("evento-tipo"),
+    eventDate: document.getElementById("evento-data"),
+    eventDescription: document.getElementById("evento-descrizione"),
+
+    // Type-specific fields
+    interventionFields: document.getElementById("intervento-fields"),
+    interventionType: document.getElementById("evento-tipo-intervento"),
+    infectionFields: document.getElementById("infezione-fields"),
+    infectionAgent: document.getElementById("evento-agente-patogeno")
   };
 
   // Conta elementi trovati vs elementi cercati

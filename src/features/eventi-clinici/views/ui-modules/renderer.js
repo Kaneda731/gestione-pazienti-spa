@@ -3,6 +3,7 @@
 
 import { logger } from '../../../../core/services/logger/loggerService.js';
 import { sanitizeHtml } from '../../../../shared/utils/sanitizeHtml.js';
+import { formatDate } from '../../../../shared/utils/formatting.js';
 
 // Import componenti UI esistenti
 import { updateSearchResultsCount } from '../ui/results-info/updateResultsInfo.js';
@@ -13,6 +14,28 @@ import { EventiTimelineRenderer } from '../ui/EventiTimelineRenderer.js';
 let domElements = null;
 let tableRenderer = null;
 let timelineRenderer = null;
+
+// ============================================================================
+// UTILITY FUNCTIONS
+// ============================================================================
+
+/**
+ * Rende un'icona Material coerente anche se l'API fornisce classi FA
+ */
+function renderEventIcon(iconValue, tipo, color, extraClass = '') {
+  const mapTipoToMaterial = (t) => {
+    if (t === 'intervento') return 'local_hospital';
+    if (t === 'infezione') return 'bug_report';
+    return 'event';
+  };
+  
+  const isFa = typeof iconValue === 'string' && /\bfa[srldb]?\b|fa-/.test(iconValue);
+  const material = isFa ? mapTipoToMaterial(tipo) : (iconValue || mapTipoToMaterial(tipo));
+  const colorClass = color === 'white' ? 'text-white' : (color ? `text-${color}` : '');
+  const classes = [`material-icons`, colorClass, extraClass].filter(Boolean).join(' ');
+  
+  return `<span class="${classes}">${material}</span>`;
+}
 
 /**
  * Inizializza il renderer con i DOM elements
@@ -287,57 +310,30 @@ function setupPatientSearchHandlers(container, containerId) {
 // ============================================================================
 
 /**
- * Renderizza i dettagli di un evento nel modal
+ * Renderizza i dettagli dell'evento nel modal di dettaglio
  */
 export function renderEventDetails(evento) {
-  const detailsContainer = document.getElementById('event-details-container');
-  if (!detailsContainer) return;
+  if (!domElements || !domElements.detailContent) return;
 
-  const detailsHTML = `
-    <div class="row g-3">
-      <div class="col-md-6">
-        <label class="form-label fw-bold">Tipo Evento</label>
-        <p class="form-control-plaintext">${sanitizeHtml(evento.tipo_evento || 'N/A')}</p>
-      </div>
-      <div class="col-md-6">
-        <label class="form-label fw-bold">Data Evento</label>
-        <p class="form-control-plaintext">${evento.data_evento ? new Date(evento.data_evento).toLocaleDateString('it-IT') : 'N/A'}</p>
-      </div>
-      <div class="col-md-6">
-        <label class="form-label fw-bold">Paziente</label>
-        <p class="form-control-plaintext">${sanitizeHtml(evento.paziente_nome || 'N/A')} ${sanitizeHtml(evento.paziente_cognome || '')}</p>
-      </div>
-      <div class="col-md-6">
-        <label class="form-label fw-bold">Reparto</label>
-        <p class="form-control-plaintext">${sanitizeHtml(evento.reparto || 'N/A')}</p>
-      </div>
-      <div class="col-12">
-        <label class="form-label fw-bold">Descrizione</label>
-        <p class="form-control-plaintext">${sanitizeHtml(evento.descrizione || 'Nessuna descrizione disponibile')}</p>
-      </div>
-      ${evento.note ? `
-        <div class="col-12">
-          <label class="form-label fw-bold">Note</label>
-          <p class="form-control-plaintext">${sanitizeHtml(evento.note)}</p>
-        </div>
-      ` : ''}
-      ${evento.allegati && evento.allegati.length > 0 ? `
-        <div class="col-12">
-          <label class="form-label fw-bold">Allegati</label>
-          <div class="attachments-list">
-            ${evento.allegati.map(allegato => `
-              <div class="attachment-item">
-                <span class="material-icons">attach_file</span>
-                <a href="${allegato.url}" target="_blank">${sanitizeHtml(allegato.nome)}</a>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      ` : ''}
-    </div>
-  `;
+  const detailsHTML = createEventDetailsHTML(evento);
+  domElements.detailContent.innerHTML = sanitizeHtml(detailsHTML);
 
-  detailsContainer.innerHTML = sanitizeHtml(detailsHTML);
+  // Rimuovi eventuali duplicati dei pulsanti Modifica/Elimina dal footer della modal dettagli
+  try {
+    const modalEl = domElements.eventDetailModal;
+    if (modalEl) {
+      const footer = modalEl.querySelector('.modal-footer');
+      if (footer) {
+        footer.querySelectorAll('.event-edit-btn, .event-delete-btn').forEach((btn) => btn.remove());
+        // Se il footer resta vuoto (o solo con spazi), rimuovi eventuali nodi di testo vuoti
+        if (!footer.querySelector('*') || footer.textContent.trim() === '') {
+          footer.classList.add('d-none');
+        }
+      }
+    }
+  } catch (err) {
+    logger.warn('Footer cleanup dettagli evento non riuscito:', err);
+  }
 }
 
 // ============================================================================
@@ -483,4 +479,136 @@ function applyResponsiveDesign() {
   if (typeof window !== 'undefined' && window.applyResponsiveDesign) {
     window.applyResponsiveDesign();
   }
+}
+
+// ============================================================================
+// MODAL DETAIL FUNCTIONS (MISSING FROM REFACTOR)
+// ============================================================================
+
+/**
+ * Crea l'HTML per i dettagli dell'evento
+ */
+function createEventDetailsHTML(evento) {
+  const isInfezione = evento.tipo_evento === 'infezione';
+  const isAttiva = isInfezione && !evento.data_fine_evento;
+
+  const statusSection = evento.tipo_evento === 'infezione'
+    ? `<div class="col-md-6">
+         <strong>Stato:</strong>
+         <div class="mt-1">
+           ${evento.data_fine_evento 
+             ? `<span class="badge bg-success">Risolta il ${formatDate(evento.data_fine_evento)}</span>` 
+             : `<span class="badge bg-danger">Attiva</span>`
+           }
+         </div>
+       </div>`
+    : '';
+
+  const patientSection = evento.pazienteInfo
+    ? `<div class="col-12">
+         <strong>Paziente:</strong>
+         <div class="mt-1">
+           <span class="material-icons me-1">person</span>
+           ${evento.pazienteInfo.nomeCompleto}
+           <span class="badge bg-secondary ms-2">${evento.pazienteInfo.reparto}</span>
+         </div>
+       </div>`
+    : "";
+
+  const descriptionSection = evento.descrizione
+    ? `<div class="col-12">
+         <strong>Descrizione:</strong>
+         <div class="mt-1">${evento.descrizione}</div>
+       </div>`
+    : "";
+
+  const typeSpecificSection = createTypeSpecificSection(evento);
+  const timestampSection = createTimestampSection(evento);
+
+  // Azioni nella scheda dettagli: Modifica, Elimina, e Risolvi (solo infezione attiva)
+  const resolveBtn = isAttiva
+    ? `<button class="btn btn-success btn-sm event-resolve-btn" data-evento-id="${evento.id}" title="Risolvi">
+         <span class="material-icons align-middle me-1">check_circle</span>
+         Risolvi
+       </button>`
+    : '';
+
+  const actionsToolbar = `
+    <div class="event-detail-actions d-flex flex-wrap gap-2 justify-content-end mb-3">
+      <button class="btn btn-outline-secondary btn-sm event-edit-btn" data-evento-id="${evento.id}" title="Modifica">
+        <span class="material-icons align-middle me-1">edit</span>
+        Modifica
+      </button>
+      <button class="btn btn-outline-danger btn-sm event-delete-btn" data-evento-id="${evento.id}" title="Elimina">
+        <span class="material-icons align-middle me-1">delete</span>
+        Elimina
+      </button>
+      ${resolveBtn}
+    </div>`;
+
+  return `
+    <div class="event-details">
+      ${actionsToolbar}
+      <div class="row g-3">
+        <div class="col-md-6">
+          <strong>Tipo Evento:</strong>
+          <div class="d-flex align-items-center mt-1">
+            ${renderEventIcon(evento.tipoEventoIcon, evento.tipo_evento, evento.tipoEventoColor, 'me-2')}
+            ${evento.tipoEventoLabel}
+          </div>
+        </div>
+        <div class="col-md-6">
+          <strong>Data Evento:</strong>
+          <div class="mt-1">${evento.dataEventoFormatted}</div>
+        </div>
+        ${statusSection}
+        ${patientSection}
+        ${descriptionSection}
+        ${typeSpecificSection}
+        ${timestampSection}
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * Crea la sezione specifica per tipo di evento
+ */
+function createTypeSpecificSection(evento) {
+  if (evento.tipo_evento === "intervento" && evento.tipo_intervento) {
+    return `
+      <div class="col-12">
+        <strong>Tipo Intervento:</strong>
+        <div class="mt-1">${evento.tipo_intervento}</div>
+      </div>
+    `;
+  } else if (evento.tipo_evento === "infezione" && evento.agente_patogeno) {
+    return `
+      <div class="col-12">
+        <strong>Agente Patogeno:</strong>
+        <div class="mt-1">${evento.agente_patogeno}</div>
+      </div>
+    `;
+  }
+  return "";
+}
+
+/**
+ * Crea la sezione timestamp
+ */
+function createTimestampSection(evento) {
+  const updatedSection = evento.updated_at && evento.updated_at !== evento.created_at
+    ? `<div class="col-md-6">
+         <strong>Modificato il:</strong>
+         <div class="mt-1 text-muted">${formatDate(evento.updated_at)}</div>
+       </div>`
+    : "";
+
+  return `
+    <div class="col-md-6">
+      <strong>Creato il:</strong>
+      <div class="mt-1 text-muted">${formatDate(evento.created_at)}</div>
+    </div>
+    ${updatedSection}
+  `;
 }

@@ -42,7 +42,10 @@ export function resetFiltersUI() {
   if (domElements.filterType) domElements.filterType.value = '';
   if (domElements.filterDateFrom) domElements.filterDateFrom.value = '';
   if (domElements.filterDateTo) domElements.filterDateTo.value = '';
-  if (domElements.filterDepartment) domElements.filterDepartment.value = '';
+  if (domElements.filterReparto) domElements.filterReparto.value = '';
+  if (domElements.filterStato) domElements.filterStato.value = '';
+  if (domElements.filterSortColumn) domElements.filterSortColumn.value = '';
+  if (domElements.filterSortDirection) domElements.filterSortDirection.value = 'desc';
   if (domElements.filterStatus) domElements.filterStatus.value = '';
   if (domElements.searchPatientInput) domElements.searchPatientInput.value = '';
 
@@ -80,8 +83,20 @@ export function applyFiltersToUI(filters) {
   if (domElements.filterDateTo && filters.data_a) {
     domElements.filterDateTo.value = filters.data_a;
   }
-  if (domElements.filterDepartment && filters.reparto) {
-    domElements.filterDepartment.value = filters.reparto;
+  if (domElements.filterReparto && filters.reparto) {
+    domElements.filterReparto.value = filters.reparto;
+  }
+
+  if (domElements.filterStato && filters.stato) {
+    domElements.filterStato.value = filters.stato;
+  }
+
+  if (domElements.filterSortColumn && filters.sortColumn) {
+    domElements.filterSortColumn.value = filters.sortColumn;
+  }
+
+  if (domElements.filterSortDirection && filters.sortDirection) {
+    domElements.filterSortDirection.value = filters.sortDirection;
   }
   if (domElements.filterStatus && filters.status) {
     domElements.filterStatus.value = filters.status;
@@ -118,16 +133,14 @@ export function getFiltersFromUI() {
   }
 
   const filters = {
+    paziente_search: domElements.searchPatientInput?.value || '',
     tipo_evento: domElements.filterType?.value || '',
     data_da: domElements.filterDateFrom?.value || '',
     data_a: domElements.filterDateTo?.value || '',
-    reparto: domElements.filterDepartment?.value || '',
-    status: domElements.filterStatus?.value || '',
-    paziente: domElements.searchPatientInput?.value || '',
-    priorita_da: domElements.filterPriorityFrom?.value || '',
-    priorita_a: domElements.filterPriorityTo?.value || '',
-    creato_da: domElements.filterCreatedBy?.value || '',
-    ha_allegati: domElements.filterHasAllegati?.checked || false
+    reparto: domElements.filterReparto?.value || '',
+    stato: domElements.filterStato?.value || '',
+    sortColumn: domElements.filterSortColumn?.value || '',
+    sortDirection: domElements.filterSortDirection?.value || 'desc'
   };
 
   logger.log("📊 Filtri raccolti dalla UI:", filters);
@@ -140,18 +153,17 @@ export function getFiltersFromUI() {
  * @returns {*} Risultato del popolamento filtro reparto
  */
 export function populateDepartmentFilter(departments) {
-  if (!domElements) {
+  if (!domElements.filterReparto) {
     logger.warn("⚠️ DOM elements non inizializzati per populateDepartmentFilter");
-    return null;
+    return;
   }
 
-  if (!domElements.filterDepartment) {
-    logger.warn("⚠️ Elemento filterDepartment non trovato");
-    return null;
+  if (!departments || !Array.isArray(departments)) {
+    logger.warn("⚠️ Lista departments non valida:", departments);
+    return;
   }
 
-  logger.log("🏥 Popolamento filtro reparti:", departments);
-  return populateDepartmentFilterCore(departments, domElements.filterDepartment);
+  return populateDepartmentFilterCore(departments, domElements.filterReparto);
 }
 
 /**

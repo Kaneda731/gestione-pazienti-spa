@@ -163,7 +163,7 @@ export function populateDepartmentFilter(departments) {
     return;
   }
 
-  return populateDepartmentFilterCore(departments, domElements.filterReparto);
+  return populateDepartmentFilterCore(domElements.filterReparto, departments, logger);
 }
 
 /**

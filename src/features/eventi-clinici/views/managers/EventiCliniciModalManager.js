@@ -92,6 +92,10 @@ export class EventiCliniciModalManager {
           backdrop: 'static',
           keyboard: false
         });
+        // Safety: rimuovi il focus dai discendenti prima che il modal venga nascosto
+        eventFormModalEl.addEventListener('hide.bs.modal', () => {
+          this._defocus(eventFormModalEl);
+        });
       }
 
       if (eventDetailModalEl) {

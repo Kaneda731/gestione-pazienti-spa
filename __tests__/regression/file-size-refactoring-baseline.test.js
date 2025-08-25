@@ -113,7 +113,7 @@ describe('File Size Refactoring - Baseline Tests', () => {
 
   describe('2. notificationService.js - API pubblica', () => {
     it('dovrebbe mantenere l\'interfaccia principale del servizio', async () => {
-      const module = await import('../../src/core/services/notificationService.js');
+      const module = await import('../../src/core/services/notifications/notificationService.js');
       const service = module.notificationService;
       
       // Metodi principali di notifica
@@ -150,7 +150,7 @@ describe('File Size Refactoring - Baseline Tests', () => {
     });
 
     it('dovrebbe creare notifiche di base correttamente', () => {
-      const module = require('../../src/core/services/notificationService.js');
+      const module = require('../../src/core/services/notifications/notificationService.js');
       const service = module.notificationService;
       
       const id1 = service.success('Test success');
@@ -197,7 +197,7 @@ describe('File Size Refactoring - Baseline Tests', () => {
 
   describe('4. eventi-clinici-api.js - API e operazioni', () => {
     it('dovrebbe mantenere tutte le funzioni API esportate', async () => {
-      const module = await import('../../src/features/eventi-clinici/views/eventi-clinici-api.js');
+      const module = await import('../../src/features/eventi-clinici/api/eventi-clinici-api.js');
       
       // Operazioni CRUD
       expect(typeof module.getEventiCliniciAPI).toBe('function');
@@ -217,7 +217,7 @@ describe('File Size Refactoring - Baseline Tests', () => {
     });
 
     it('dovrebbe gestire chiamate API di base senza errori', async () => {
-      const module = await import('../../src/features/eventi-clinici/views/eventi-clinici-api.js');
+      const module = await import('../../src/features/eventi-clinici/api/eventi-clinici-api.js');
       
       // Mock della risposta Supabase
       vi.mock('../../src/core/services/supabaseClient.js', () => ({
@@ -240,7 +240,7 @@ describe('File Size Refactoring - Baseline Tests', () => {
   describe('5. Interoperabilità tra moduli', () => {
     it('dovrebbe permettere l\'uso combinato di UI e API', async () => {
       const uiModule = await import('../../src/features/eventi-clinici/views/eventi-clinici-ui.js');
-      const apiModule = await import('../../src/features/eventi-clinici/views/eventi-clinici-api.js');
+      const apiModule = await import('../../src/features/eventi-clinici/api/eventi-clinici-api.js');
       
       // Test che le funzioni possano essere chiamate insieme
       uiModule.initializeDOMElements();
@@ -256,7 +256,7 @@ describe('File Size Refactoring - Baseline Tests', () => {
     });
 
     it('dovrebbe permettere l\'uso di NotificationService con UI', async () => {
-      const notificationModule = await import('../../src/core/services/notificationService.js');
+      const notificationModule = await import('../../src/core/services/notifications/notificationService.js');
       const uiModule = await import('../../src/features/eventi-clinici/views/eventi-clinici-ui.js');
       
       const service = notificationModule.notificationService;
@@ -283,7 +283,7 @@ describe('File Size Refactoring - Baseline Tests', () => {
     });
 
     it('dovrebbe gestire dati malformati nelle API', async () => {
-      const module = await import('../../src/features/eventi-clinici/views/eventi-clinici-api.js');
+      const module = await import('../../src/features/eventi-clinici/api/eventi-clinici-api.js');
       
       // Test con dati null/undefined
       expect(() => module.resetCurrentFiltersToDefaults()).not.toThrow();
@@ -301,7 +301,7 @@ describe('File Size Refactoring - Baseline Tests', () => {
 
   describe('7. Performance e memoria', () => {
     it('dovrebbe pulire risorse correttamente', () => {
-      const notificationModule = require('../../src/core/services/notificationService.js');
+      const notificationModule = require('../../src/core/services/notifications/notificationService.js');
       const service = notificationModule.notificationService;
       
       // Crea alcune notifiche

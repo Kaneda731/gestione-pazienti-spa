@@ -20,7 +20,7 @@ const stateSpies = vi.hoisted(() => ({
 }));
 
 // Mock the exact module path used in the service
-vi.mock('../../../../src/core/services/stateService.js', () => ({ stateService: stateSpies }));
+vi.mock('../../../../src/core/services/state/stateService.js', () => ({ stateService: stateSpies }));
 
 // We'll import the service after mocks are set up
 let notificationService;
@@ -33,7 +33,7 @@ describe('notificationService (characterization)', () => {
     // Reset spies
     Object.values(stateSpies).forEach((fn) => fn.mockClear && fn.mockClear());
     // Import fresh module instance
-    const mod = await import('../../../../src/core/services/notificationService.js');
+    const mod = await import('../../../../src/core/services/notifications/notificationService.js');
     notificationService = mod.notificationService;
   });
 

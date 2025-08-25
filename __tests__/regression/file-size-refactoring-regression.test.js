@@ -30,7 +30,7 @@ vi.mock('../../src/shared/utils/sanitizeHtml.js', () => ({
   sanitizeHtml: vi.fn(text => text || '')
 }));
 
-vi.mock('../../src/core/services/notificationService.js', () => ({
+vi.mock('../../src/core/services/notifications/notificationService.js', () => ({
   notificationService: {
     success: vi.fn(),
     error: vi.fn(),
@@ -316,7 +316,7 @@ describe('File Size Refactoring - Regression Tests', () => {
           searchPazientiForEvents,
           getCurrentFilters,
           resetAllFilters
-        } = await import('../../src/features/eventi-clinici/views/eventi-clinici-api.js');
+        } = await import('../../src/features/eventi-clinici/api/eventi-clinici-api.js');
 
         // Test that all main API functions exist and are callable
         expect(typeof fetchEventiClinici).toBe('function');
@@ -361,7 +361,7 @@ describe('File Size Refactoring - Regression Tests', () => {
           }
         }));
 
-        const { fetchEventiClinici } = await import('../../src/features/eventi-clinici/views/eventi-clinici-api.js');
+        const { fetchEventiClinici } = await import('../../src/features/eventi-clinici/api/eventi-clinici-api.js');
         
         const result = await fetchEventiClinici();
         const evento = result.eventi[0];
@@ -415,7 +415,7 @@ describe('File Size Refactoring - Regression Tests', () => {
           }))
         }));
 
-        const { notificationService } = await import('../../src/core/services/notificationService.js');
+        const { notificationService } = await import('../../src/core/services/notifications/notificationService.js');
         
         // Test initialization
         await notificationService.init();
@@ -460,7 +460,7 @@ describe('File Size Refactoring - Regression Tests', () => {
           }))
         }));
 
-        const { notificationService } = await import('../../src/core/services/notificationService.js');
+        const { notificationService } = await import('../../src/core/services/notifications/notificationService.js');
         
         await notificationService.init();
         
@@ -507,7 +507,7 @@ describe('File Size Refactoring - Regression Tests', () => {
           }))
         }));
 
-        const { notificationService } = await import('../../src/core/services/notificationService.js');
+        const { notificationService } = await import('../../src/core/services/notifications/notificationService.js');
         
         await notificationService.init();
         
@@ -689,7 +689,7 @@ describe('File Size Refactoring - Regression Tests', () => {
       }));
 
       const { initializeDOMElements, renderEventsTimeline } = await import('../../src/features/eventi-clinici/views/eventi-clinici-ui.js');
-      const { fetchEventiClinici } = await import('../../src/features/eventi-clinici/views/eventi-clinici-api.js');
+      const { fetchEventiClinici } = await import('../../src/features/eventi-clinici/api/eventi-clinici-api.js');
       
       // Test integration flow
       initializeDOMElements();
@@ -727,7 +727,7 @@ describe('File Size Refactoring - Regression Tests', () => {
         }))
       }));
 
-      const { notificationService } = await import('../../src/core/services/notificationService.js');
+      const { notificationService } = await import('../../src/core/services/notifications/notificationService.js');
       const { NotificationComponent } = await import('../../src/shared/components/notifications/NotificationComponent.js');
       
       await notificationService.init();
@@ -836,7 +836,7 @@ describe('File Size Refactoring - Regression Tests', () => {
         }
       }));
 
-      const { fetchEventiClinici } = await import('../../src/features/eventi-clinici/views/eventi-clinici-api.js');
+      const { fetchEventiClinici } = await import('../../src/features/eventi-clinici/api/eventi-clinici-api.js');
       
       // Should handle error gracefully
       await expect(fetchEventiClinici()).rejects.toThrow('API Error');

@@ -25,8 +25,8 @@ Object.defineProperty(window, 'performance', {
   }
 });
 
-import { notificationService } from '../../../../src/core/services/notificationService.js';
-import { stateService } from '../../../../src/core/services/stateService.js';
+import { notificationService } from '../../../../src/core/services/notifications/notificationService.js';
+import { stateService } from '../../../../src/core/services/state/stateService.js';
 
 describe('NotificationService - Integration Methods', () => {
     beforeEach(() => {

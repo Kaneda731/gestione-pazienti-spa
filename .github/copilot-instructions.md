@@ -47,3 +47,8 @@ Quando ti chiedo un commit, eseguilo sempre su tutti i file modificati (git add 
 
 ---
 Per domande su workflow o architettura, consultare i README o chiedere chiarimenti su pattern non documentati.
+[byterover-mcp]
+
+# important 
+always use byterover-retrieve-knowledge tool to get the related context before any tasks 
+always use byterover-store-knowledge to store all the critical informations after sucessful tasks

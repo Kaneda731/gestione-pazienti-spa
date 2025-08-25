@@ -107,12 +107,17 @@ export function clearFormMessages() {
  */
 export function updateModalTitle(title, icon = "add") {
   const modalTitle = document.getElementById('evento-modal-title');
+  const modalIcon = document.getElementById('evento-modal-icon');
+  
   if (!modalTitle) return;
 
-  modalTitle.innerHTML = sanitizeHtml(`
-    <span class="material-icons me-2">${icon}</span>
-    ${sanitizeHtml(title)}
-  `);
+  // Aggiorna solo il testo del titolo
+  modalTitle.textContent = title;
+  
+  // Aggiorna l'icona separatamente se l'elemento esiste
+  if (modalIcon) {
+    modalIcon.textContent = icon;
+  }
 }
 
 /**

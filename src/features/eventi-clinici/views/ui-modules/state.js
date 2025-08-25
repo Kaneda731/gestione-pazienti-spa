@@ -399,15 +399,15 @@ export function getHealthCheck() {
  */
 export function debugStateManager() {
   const health = getHealthCheck();
-  console.group("🔍 State Manager Debug");
-  console.log("Stato inizializzazione:", health.isInitialized);
-  console.log("DOM Elements:", `${health.foundElementsCount}/${health.domElementsCount}`);
-  console.log("Table Renderer:", health.hasTableRenderer ? "✅" : "❌");
-  console.log("Timeline Renderer:", health.hasTimelineRenderer ? "✅" : "❌");
+  logger.group("🔍 State Manager Debug");
+  logger.log("Stato inizializzazione:", health.isInitialized);
+  logger.log("DOM Elements:", `${health.foundElementsCount}/${health.domElementsCount}`);
+  logger.log("Table Renderer:", health.hasTableRenderer ? "✅" : "❌");
+  logger.log("Timeline Renderer:", health.hasTimelineRenderer ? "✅" : "❌");
   
   if (health.missingElements.length > 0) {
-    console.warn("Elementi DOM mancanti:", health.missingElements);
+    logger.warn("Elementi DOM mancanti:", health.missingElements);
   }
   
-  console.groupEnd();
+  logger.groupEnd();
 }
